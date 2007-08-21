@@ -39,7 +39,7 @@ class DateInputWidget(Input.StringInputWidget):
         """
         super(DateInputWidget, self).draw(path)
 
-        return '''<input name="%(name)s" id="%(id)s" value="%(value)s" />
+        return '''<input name="%(name)s" id="%(id)s" value="%(value)s" autocomplete="off" />
        <script type="text/javascript">
          Calendar.setup(
            {
