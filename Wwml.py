@@ -47,7 +47,7 @@ def loadClass(name, using = [], imp = None, globalDict = None, localDict = None,
             try:
                 name = '.'.join(prefix)
                 if debugImport: print "loadClass:         Trying %s" % name
-                mod = (imp or __import__)(name, globalDict or globals(), localDict or locals())
+                mod = (imp or __import__)(name, globalDict or module.__dict__, localDict or locals())
                 break
             except ImportError, e:
                 if debugImport: print "loadClass:             %s" % str(e)
