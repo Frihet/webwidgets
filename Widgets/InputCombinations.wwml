@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!--
+ Input combination widgets
+ Copyright (C) 2007 FreeCode AS, Egil Moeller <redhog@redhog.org>
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+-->
+<w:wwml
+ xmlns="http://www.w3.org/TR/REC-html40"
+ xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
+ xmlns:h="http://www.w3.org/TR/REC-html40"
+ >
+
+ <w:FieldgroupWidget id="AddressInputWidget"
+  using="Webwidgets"
+  bind="Webwidgets.Widgets.InputCombinationsCallbacks">
+  <w:FieldWidget id="co" label="c/o"><w:StringInputWidget id="field" fieldName="co" /></w:FieldWidget>
+  <w:FieldWidget id="street" label="Street"><w:StringInputWidget id="field" fieldName="street" /></w:FieldWidget>
+  <w:FieldWidget id="zip" label="Post-code/zip code"><w:StringInputWidget id="field" fieldName="zip" /></w:FieldWidget>
+  <w:FieldWidget id="city" label="City"><w:StringInputWidget id="field" fieldName="street" /></w:FieldWidget>
+  <w:FieldWidget id="county" label="County/State"><w:StringInputWidget id="field" fieldName="county" /></w:FieldWidget>
+  <w:FieldWidget id="country" label="Country"><w:StringInputWidget id="field" fieldName="country" /></w:FieldWidget>
+ </w:FieldgroupWidget>
+
+</w:wwml>

@@ -1,0 +1,113 @@
+Webwidgets web developement framework example file
+Copyright (C) 2006 uAnywhere, Egil Moeller <redhog@redhog.org>
+Copyright (C) 2007 FreeCode AS, Egil Moeller <redhog@redhog.org>
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+
+Introduction to programming with RedBack Webwidgets
+----------------------------------------------------
+
+Abstract
+---------
+
+A RedBack Webwidgets application session consists of an instance of a
+sublcass of the Program class (for technical reasons it has to be
+named as the file it resides in, just as any other WebWare
+application), and any number of "windows".
+
+Each window is an instance of the Window class, and is associated with
+some path and parameters that can be used to reach that window from
+the webbrowser.
+
+The windows in turn contain child-widgets that makes up the actual
+web-page content, in the same way that widgets in a Gtk application
+makes up the application windows of a desktop application.
+
+
+Creating the widget tree
+-------------------------
+
+All widgets making up the display are instances of subclasses of the
+Widget class. These instances can either be instantiated explicitly by
+you, or implicitly by the system. Here's an example of explicitly
+creating a user-interface:
+
+x = HtmlWidget(program, winId,
+     html="Please enter Blahonga: %(blahonga)s and press %(send)s..."
+     blahonga=SpanWidget(program, winId,
+			 child=PasswordInputWidget(program, winId))
+     send=ButtonInputWidget(program, winId, title="here"))
+
+This way of programming is very similar to Gtk programming, but can
+lead to quite a lot of tedious code-copying if you are subclassing to
+implement more complex widgets, which is the best way to implement
+graphical applications.
+
+The exact same result can be achived with implicit instantiation:
+
+class MyWidget(HtmlWidget):
+    html="Please enter Blahonga: %(blahonga)s and press %(send)s..."
+    class blahonga(SpanWidget):
+        class child(PasswordInputWidget): pass
+    class send(ButtonInputWidget): title='here'
+
+x = MyWidget(program, winId)
+
+Here, the classes blahonga, child and send are all instantiated
+automagically when their surrounding (parent widget) class is
+instantiated.
+
+The above code also shows how member variables and arguments to
+__init__ are used interchangably. This functionality is governed by
+two class members - __attributes__, containing a list of names for
+attributes and __children__ containing a list of children, that can be
+set using members or parameters.
+
+
+
+Handling input - the notification model
+----------------------------------------
+
+All input widgets, like PasswordInputWidget, has a member variable
+representing its current value, and a method valueChanged that gets
+called whenever this value is changed.
+
+When the system detects changes to input fields (including clicked
+buttons), it enques a so called "notification" for the corresponding
+input widgets. The notifications are then delivered in a
+first-come-first-serve manner.
+
+During the delivery of one notification, new notifications can be
+enqued, either explicitly by the method called, for any widget, or
+implicitly for the parent widget if the current widget can not handle
+the notification (either if no method with the right name exists, or
+if the method returns false). These notifications are added to the end
+of the queue, so that they are served last, after all notifications
+that where allready on the queue.
+
+One special such secondary notification sent worth noting is the
+"clicked" notification for buttons, which is processed after all
+valueChanged notifications have been processed.
+
+Example:
+
+class MyWidget(HtmlWidget):
+    html="New password: %(password)s<br />%(cave)s..."
+    password(PasswordInputWidget): pass
+    class save(ButtonInputWidget):
+        title='Save'
+        def clicked(self):
+            self.program.dbconn.setPassword(self.parent.children['password'].value)

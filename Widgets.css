@@ -1,0 +1,230 @@
+/*
+ Webwidgets web developement framework
+ Copyright (C) 2006 uAnywhere, Egil Moeller <redhog@redhog.org>
+ Copyright (C) 2007 FreeCode AS, Egil Moeller <redhog@redhog.org>
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+.Webwidgets-Widgets-GBOList-GBOList table {
+ width: 100%;
+ border: solid 1px black;
+ font-size: 8pt;
+ border-spacing: 0px;
+}
+
+.Webwidgets-Widgets-GBOList-GBOList .buttons button {
+ border: solid 1px black;
+ text-decoration: none;
+ background: #000000;
+ color: #ffffff;
+}
+.Webwidgets-Widgets-GBOList-GBOList .buttons button[disabled=true] {
+ background: #555555;
+ color: #999999;
+}
+
+.Webwidgets-Widgets-GBOList-GBOList th {
+ border-bottom: solid 2px black;
+ padding: 0px;
+}
+.Webwidgets-Widgets-GBOList-GBOList th button {
+ background: inherit;
+ border: inherit;
+ margin: 0px;
+ font: inherit;
+ width: 100%;
+ height: 100%;
+ font-variant: small-caps;
+ font-weight: normal;
+ background: #00ff00;
+}
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_order_desc button:after {
+ content: "(desc)";
+}
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_order_asc button:after {
+ content: "(asc)";
+}
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_0 button {
+ background: #ffffff;
+ font-weight: bold;
+}
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_1 button {
+ background: #eeffee;
+}
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_2 button {
+ background: #ddffdd;
+}
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_3 button {
+ background: #ccffcc;
+}
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_4 button {
+ background: #bbffbb;
+}
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_5 button {
+ background: #aaffaa;
+}
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_6 button {
+ background: #99ff99;
+}
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_7 button {
+ background: #88ff88;
+}
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_8 button {
+ background: #77ff77;
+}
+
+.Webwidgets-Widgets-GBOList-GBOList td {
+ vertical-align: top;
+}
+.Webwidgets-Widgets-GBOList-GBOList td.column_last_level_1 {
+ border-bottom: solid 8px black;
+}
+.Webwidgets-Widgets-GBOList-GBOList td.column_last_level_2 {
+ border-bottom: solid 4px black;
+}
+.Webwidgets-Widgets-GBOList-GBOList td.column_last_level_3 {
+ border-bottom: solid 2px black;
+}
+.Webwidgets-Widgets-GBOList-GBOList td.column_last_level_4 {
+ border-bottom: solid 1px black;
+}
+.Webwidgets-Widgets-GBOList-GBOList td.column_last_level_5 {
+ border-bottom: solid 1px #555555;
+}
+.Webwidgets-Widgets-GBOList-GBOList td.column_last_level_6 {
+ border-bottom: solid 1px #666666;
+}
+.Webwidgets-Widgets-GBOList-GBOList td.column_last_level_7 {
+ border-bottom: solid 1px #777777;
+}
+.Webwidgets-Widgets-GBOList-GBOList td.column_last_level_8 {
+ border-bottom: solid 1px #888888;
+}
+.Webwidgets-Widgets-GBOList-GBOList td.functions {
+ vertical-align: top;
+}
+.Webwidgets-Widgets-GBOList-GBOList td.functions button {
+ padding: 0px;
+ margin: 0px;
+ border: 0px;
+ font: inherit;
+}
+
+
+.Webwidgets-Widgets-Composite-TabbedViewWidget ul.tabs {
+ list-style-type: none;
+ padding: 0pt;
+}
+.Webwidgets-Widgets-Composite-TabbedViewWidget ul.tabs li {
+ display: inline;
+}
+.Webwidgets-Widgets-Composite-TabbedViewWidget ul.tabs li * {
+ font-size: 8pt;
+ padding: 0px;
+ margin: 0px;
+ border: none;
+}
+
+input {
+ border: solid;
+ border-width: 1px;
+ margin: 2px;
+ padding: 2px;
+ background-color: #ffffff;
+ font-size: 10pt;
+ font-family: serif;
+}
+
+button {
+ border: solid;
+ border-width: 1px;
+ margin: 2px;
+ padding: 2px;
+ background-color: #ffffff;
+ font-size: 10pt;
+ font-family: serif;
+}
+
+select {
+ border: solid;
+ border-width: 1px;
+ margin: 2px;
+// padding: 2px;
+ background-color: #ffffff;
+ font-size: 10pt;
+ font-family: serif;
+}
+
+.Webwidgets-Widgets-Input-NewPasswordInputWidget {
+ display: block;
+ width: 20%;
+ border: solid;
+ border-width: 1px;
+ margin: 2px;
+ padding: 2px;
+ background-color: #ffffff;
+}
+
+.Webwidgets-Widgets-Input-NewPasswordInputWidget input {
+ display: block;
+}
+
+.Webwidgets-Widgets-Formatting-LabelWidget .error {
+ color: #ff0000;
+}
+
+
+.TreeWidget * {
+ border-style: none;
+ padding: 0px;
+ margin: 0px;
+ font-size: 11px;
+ vertical-align: top;
+ background: none;
+ color: #555555;
+}
+
+.TreeWidget input {
+ color: #000000;
+}
+
+.dialog {
+ position: fixed;
+ overflow: auto;
+ left: 20%;
+ right: 20%;
+ top: 20%;
+ bottom: 20%;
+ padding: 10px;
+ border-top: 2px solid #666;
+ border-left: 2px solid #666;
+ border-bottom: 2px solid #333;
+ border-right: 2px solid #333;
+ position: asbolute;
+ color: #000000;
+ background-color: #eeeeee;
+}
+
+.dialog .dialog-head {
+ border-bottom: 1px solid black;
+}
+
+.dialog .dialog-body {
+}
+
+.dialog .dialog-buttons {
+ border-top: 1px solid black;
+}
