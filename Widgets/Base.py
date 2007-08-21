@@ -196,15 +196,24 @@ class Widget(object):
     def registerHeadContent(self, contentName, content):        
         self.session.windows[self.winId].headContent[contentName] = content
 
-    def registerScriptLink(self, uri):
+    def registerScriptLink(self, *uris):
+        contentName = 'script: ' + ' '.join(uris)
         self.registerHeadContent(
-            uri,
-            "<script src='%s' type='text/javascript' />" % (uri,))
+            contentName,
+            '\n'.join(["<script src='%s' type='text/javascript' ></script>" % (uri,)
+                       for uri in uris]))
         
-    def registerStyleLink(self, uri):
+    def registerStyleLink(self, *uris):
+        contentName = 'style: ' + ' '.join(uris)
         self.registerHeadContent(
-            uri,
-            "<link href='%s' rel='stylesheet' type='text/css' />" % (uri,))
+            contentName,
+            '\n'.join(["<link href='%s' rel='stylesheet' type='text/css' />" % (uri,)
+                       for uri in uris]))
+
+    def calculateUrl(self, outputOptions):
+        location, arguments = self.session.generateArguments(self.session.getWindow(self.winId))
+        return self.session.calculateUrl(self.winId, location, arguments,
+                                         outputOptions)
         
     def __add__(self, other):
         return self.getWidgetByPath(other)
@@ -464,7 +473,7 @@ class HtmlWindow(Window, StaticCompositeWidget):
         result['name'] = result['id'] = Webwidgets.Utils.pathToId(path)
         result['base'] = self.session.program.requestBase()
         
-        result['headContent'] = ' '.join(self.headContent.values())
+        result['headContent'] = '\n'.join(self.headContent.values())
         
         return ("""
 %(doctype)s

@@ -14,7 +14,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import time
+import time, os.path
 import Webwidgets.Utils
 import Input
 
@@ -30,6 +30,20 @@ class DateInputWidget(Input.StringInputWidget):
         Draw input widget.
         """
         super(DateInputWidget, self).draw(path)
+
+        widgetId = Webwidgets.Utils.pathToId(self.path())
+        self.registerStyleLink(self.calculateUrl({'widget': widgetId,
+                                                  'file': 'jscalendar/calendar-blue.css',
+                                                  'type': 'text/css'}))
+        self.registerScriptLink(self.calculateUrl({'widget': widgetId,
+                                                   'file': 'jscalendar/calendar.js',
+                                                   'type': 'text/plain'}),
+                                self.calculateUrl({'widget': widgetId,
+                                                   'file': 'jscalendar/lang/calendar-en.js',
+                                                   'type': 'text/plain'}),
+                                self.calculateUrl({'widget': widgetId,
+                                                   'file': 'jscalendar/calendar-setup.js',
+                                                   'type': 'text/plain'}))
 
         return '''<input name="%(name)s" id="%(id)s" value="%(value)s" autocomplete="off" />
        <script type="text/javascript">
@@ -71,3 +85,21 @@ class DateInputWidget(Input.StringInputWidget):
 
             if not self.value:
                 self.value = time.localtime()
+
+    def output(self, outputOptions):
+        path = outputOptions['file']
+        assert not path.startswith('/')
+        while path:
+            path, item = os.path.split(path)
+            assert item != '..'
+
+        file = open(os.path.join(os.path.dirname(__file__),
+                                 'DateInput.scripts',
+                                 outputOptions['file']))
+        try:
+            return {Webwidgets.Constants.OUTPUT: file.read(),
+                    'Content-type': outputOptions['type']
+                    }
+        finally:
+            file.close()
+    
