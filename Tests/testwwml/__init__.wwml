@@ -39,6 +39,8 @@
 
   <w:HtmlWidget id="body">
 
+   <w:DateInputWidget id="date" value=":time:1998-01-01 22:33:34" />
+
    <w:AddressInputWidget id="xzy" />
 
    <w:Tests.testwwml.foo.MyTestWidget id="bar" />

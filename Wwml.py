@@ -30,7 +30,7 @@ Webwidgets directory.
 
 import Webwidgets.Widgets.Base, Utils
 import xml.dom.minidom, pyexpat
-import os.path, sys, types, re
+import os.path, sys, types, re, time
 
 debugImport = False
 debugLoader = False
@@ -126,6 +126,7 @@ def mangleAttributeValue(value):
     elif type == 'string': return value
     elif type == 'integer': return int(value)
     elif type == 'float': return float(value)
+    elif type == 'time': return time.strptime(value, '%Y-%m-%d %H:%M:%S')
     raise Exception("Unknown type: %s for value '%s'" % (type, value))
 
 def generateValueForNode(module, node, using = [], context = []):
@@ -162,6 +163,7 @@ def generateValueForNode(module, node, using = [], context = []):
     elif node.localName == 'string': value = text
     elif node.localName == 'integer': value = int(text)
     elif node.localName == 'float': value = float(text)
+    elif node.localName == 'time': value = time.strptime(text, '%Y-%m-%d %H:%M:%S')
     elif node.localName == 'odict':
         value = Utils.OrderedDict(attributes)
         if 'classid' in value: del value['classid']

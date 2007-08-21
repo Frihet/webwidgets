@@ -22,16 +22,8 @@ class DateInputWidget(Input.StringInputWidget):
     """
     Date Selector Widget.
     """
-
-    def __init__(self, session, winId, **kw):
-        Input.StringInputWidget.__init__(self, session, winId, **kw)
-
-        # Set date formatting
-        if kw.has_key('format'):
-            self.format = kw['format']
-        else:
-            self.format = '%Y-%m-%d'
-
+    __attributes__ = Input.StringInputWidget.__attributes__ + ('format',)
+    format = '%Y-%m-%d'
 
     def draw(self, path):
         """
@@ -61,6 +53,7 @@ class DateInputWidget(Input.StringInputWidget):
         """
         Get widget value as string.
         """
+        print repr(self.value)
         return time.strftime(self.format, self.value)
 
 
