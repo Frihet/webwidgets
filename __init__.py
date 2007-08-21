@@ -50,3 +50,4 @@ from Widgets.Input import *
 from Widgets.Composite import *
 from Widgets.GBOList import *
 from Widgets.InputCombinations import *
+from widgets.DateInput import *
