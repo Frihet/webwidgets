@@ -32,42 +32,8 @@ import Webwidgets.Widgets.Base, Utils
 import xml.dom.minidom, pyexpat
 import os.path, sys, types, re, time
 
-debugImport = False
 debugLoader = False
 debugSubclass = False
-
-def loadClass(name, using = [], imp = None, globalDict = None, localDict = None, module = None):
-    if debugImport: print "loadClass: Importing %s using %s:" % (name, ' '.join(using))
-    def loadClassAbsolute(name):
-        if debugImport: print "loadClass:     Trying %s" % name
-        components = name.split('.')
-        mod = None
-        prefix = list(components)
-        while prefix:
-            try:
-                name = '.'.join(prefix)
-                if debugImport: print "loadClass:         Trying %s" % name
-                mod = (imp or __import__)(name, globalDict or module.__dict__, localDict or locals())
-                break
-            except ImportError, e:
-                if debugImport: print "loadClass:             %s" % str(e)
-            del prefix[-1]
-        if mod is None:
-            raise ImportError("Class does not exist:", name, using, module.__file__)
-        for comp in components[1:]:
-            mod = getattr(mod, comp)
-        return mod
-
-    for pkg in using:
-        try:
-            return loadClassAbsolute(pkg + '.' + name)
-        except (ImportError, AttributeError), e:
-            if debugImport: print "loadClass:         %s" % str(e)
-    try:
-        return loadClassAbsolute(name)
-    except (ImportError, AttributeError), e:
-        if debugImport: print "loadClass:         %s" % str(e)
-        raise ImportError("Class does not exist:", name, using, module.__file__)
 
 markupCleanSpaceRe = re.compile(r'[ \t\n]+')
 def generatePartsForNode(module, node, using = [], context = [], htmlContext = []):
@@ -187,10 +153,10 @@ def generateValueForNode(module, node, using = [], context = []):
         if debugSubclass:
             print "WWML: class %s(%s): pass" % (callbackName, node.localName)
             print "WWML:     using: %s" % ' '.join(using)
-        widgetCls = loadClass(node.localName, using, module = module)
+        widgetCls = Utils.loadClass(node.localName, using, module = module)
         baseCls = ()
         try:
-            baseCls += (loadClass(callbackName, using, module = module),)
+            baseCls += (Utils.loadClass(callbackName, using, module = module),)
         except ImportError, e:
             pass
         baseCls += (widgetCls,)

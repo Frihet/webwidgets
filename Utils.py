@@ -22,6 +22,8 @@ Webwidgets and in implementing new widgets and other objects.
 
 import itertools
 
+debugClassLoading = False
+
 class ImmutableDict(dict):
     '''A hashable dict.'''
 
@@ -224,3 +226,41 @@ def idToPath(id):
 def isPrefix(prefix, list):
     prefixLen = len(prefix)
     return prefixLen <= len(list) and prefix == list[:prefixLen]
+
+def loadClass(name, using = [], imp = None, globalDict = None, localDict = None, module = None):
+    if debugClassLoading: print "loadClass: Importing %s using %s:" % (name, ' '.join(using))
+
+    globalDict = globalDict or getattr(module, '__dict__', globals())
+    localDict = localDict or locals()
+    file = getattr(module, '__file__', '<Interactive>')
+    
+    def loadClassAbsolute(name):
+        if debugClassLoading: print "loadClass:     Trying %s" % name
+        components = name.split('.')
+        mod = None
+        prefix = list(components)
+        while prefix:
+            try:
+                name = '.'.join(prefix)
+                if debugClassLoading: print "loadClass:         Trying %s" % name
+                mod = (imp or __import__)(name, globalDict, localDict)
+                break
+            except ImportError, e:
+                if debugClassLoading: print "loadClass:             %s" % str(e)
+            del prefix[-1]
+        if mod is None:
+            raise ImportError("Class does not exist:", name, using, file)
+        for comp in components[1:]:
+            mod = getattr(mod, comp)
+        return mod
+
+    for pkg in using:
+        try:
+            return loadClassAbsolute(pkg + '.' + name)
+        except (ImportError, AttributeError), e:
+            if debugClassLoading: print "loadClass:         %s" % str(e)
+    try:
+        return loadClassAbsolute(name)
+    except (ImportError, AttributeError), e:
+        if debugClassLoading: print "loadClass:         %s" % str(e)
+        raise ImportError("Class does not exist:", name, using, file)

@@ -282,11 +282,20 @@ class Program(WebKit.Page.Page):
                 self.processNotifications()
 
                 if self.output is None:
-                    widget = window
-                    for name in Utils.idToPath(outputOptions.get('widget', 'root')):
-                        widget = widget[name]
+                    if 'widgetClass' in outputOptions:
+                        cls = Utils.loadClass(outputOptions['widgetClass'])
+                        assert issubclass(cls, Widgets.Base.Widget)
+                        outputFn = lambda: cls.classOutput(window, outputOptions)
+                    elif 'widget' in outputOptions:
+                        widget = window
+                        for name in Utils.idToPath(outputOptions['widget']):
+                            widget = widget[name]
+                        outputFn = lambda: widget.output(outputOptions)
+                    else:
+                        outputFn = lambda: window.output(outputOptions)
+                        
                     try:
-                        self.output = widget.output(outputOptions)
+                        self.output = outputFn()
                     except Constants.OutputGiven:
                         pass
                     else:

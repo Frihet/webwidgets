@@ -32,17 +32,16 @@ class DateInputWidget(Input.StringInputWidget):
         """
         super(DateInputWidget, self).draw(path)
 
-        widgetId = Webwidgets.Utils.pathToId(self.path())
-        self.registerStyleLink(self.calculateUrl({'widget': widgetId,
+        self.registerStyleLink(self.calculateUrl({'widgetClass': 'Webwidgets.DateInputWidget',
                                                   'file': 'jscalendar/calendar-blue.css',
                                                   'type': 'text/css'}))
-        self.registerScriptLink(self.calculateUrl({'widget': widgetId,
+        self.registerScriptLink(self.calculateUrl({'widgetClass': 'Webwidgets.DateInputWidget',
                                                    'file': 'jscalendar/calendar.js',
                                                    'type': 'text/plain'}),
-                                self.calculateUrl({'widget': widgetId,
+                                self.calculateUrl({'widgetClass': 'Webwidgets.DateInputWidget',
                                                    'file': 'jscalendar/lang/calendar-en.js',
                                                    'type': 'text/plain'}),
-                                self.calculateUrl({'widget': widgetId,
+                                self.calculateUrl({'widgetClass': 'Webwidgets.DateInputWidget',
                                                    'file': 'jscalendar/calendar-setup.js',
                                                    'type': 'text/plain'}))
 
@@ -76,7 +75,7 @@ class DateInputWidget(Input.StringInputWidget):
     def fieldOutput(self, path):
         return [time.strftime(self.format, self.value)]
 
-    def output(self, outputOptions):
+    def classOutput(cls, window, outputOptions):
         path = outputOptions['file']
         assert not path.startswith('/')
         while path:
@@ -92,4 +91,4 @@ class DateInputWidget(Input.StringInputWidget):
                     }
         finally:
             file.close()
-    
+    classOutput = classmethod(classOutput)
