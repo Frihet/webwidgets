@@ -416,6 +416,11 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
     
             headings.insert(functionPosition, '<th></th>')
 
+    def drawTable(self, headings, rows):
+        return "<table>%(headings)s%(content)s</table>" % {
+            'headings': '<tr>%s</tr>' % (' '.join(headings),),
+            'content': '\n'.join(['<tr>%s</tr>' % (''.join(row),) for row in rows])}
+            
     def draw(self, path):
         widgetId = Webwidgets.Utils.pathToId(path)
 
@@ -441,21 +446,14 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
 
         self.appendFunctions(path, renderedRows, headings)
 
-        headings = '<tr>%s</tr>' % (' '.join(headings),)
-        content = '\n'.join(['<tr>%s</tr>' % (''.join(row),) for row in renderedRows])
-
         return """
 <div id="%(id)s" class="%(classes)s">
- <table>
-  %(headings)s
-  %(content)s
- </table>
+ %(table)s
  %(pagingButtons)s
 </div>
 """ % {'id': widgetId,
        'classes': self.classesStr,
-       'headings': headings,
-       'content': content,
+       'table': self.drawTable(headings, renderedRows),
        'pagingButtons': self.drawPagingButtons(path)
        }
 
