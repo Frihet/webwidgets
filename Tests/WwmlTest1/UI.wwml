@@ -49,7 +49,7 @@
     <w:HtmlWidget id="third" title="Third">The third page</w:HtmlWidget>
    </w:TabbedViewWidget>
 
-   <w:MemoryGBOList id="ListTest" argumentNameA='test' rowsPerPage=":integer:4">
+   <w:MemoryGBOList id="ListTest" argumentName='test' rowsPerPage=":integer:4">
     <w:dict id="functions" copy="C" edit="E" delete="D" />
     <w:dict id="columns" foo="Fooish foo" bar="Barbar" fie="Fiesh fish" />
     <w:list id="rows">
@@ -77,7 +77,7 @@
    <w:AddressInputWidget id="xzy" />
 
    <div id="header">
-    <span id="search">Search: <w:StringInputWidget id="Search" argumentNameA="search" value="/foo/bar/fie"/></span>
+    <span id="search">Search: <w:StringInputWidget id="Search" argumentName="search" value="/foo/bar/fie"/></span>
     <span id="dir">
      <w:HtmlWidget id="CurrentDirectory" html="/foo/bar/fie" />
     </span>

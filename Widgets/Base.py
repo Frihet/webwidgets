@@ -210,8 +210,9 @@ class Widget(object):
             '\n'.join(["<link href='%s' rel='stylesheet' type='text/css' />" % (uri,)
                        for uri in uris]))
 
-    def calculateUrl(self, outputOptions):
-        location, arguments = self.session.generateArguments(self.session.getWindow(self.winId))
+    def calculateUrl(self, outputOptions, arguments = None):
+        location, generatedArguments = self.session.generateArguments(self.session.getWindow(self.winId))
+        if arguments is None: arguments = generatedArguments
         return self.session.calculateUrl(self.winId, location, arguments,
                                          outputOptions)
         

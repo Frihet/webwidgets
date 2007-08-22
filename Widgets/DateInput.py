@@ -34,16 +34,20 @@ class DateInputWidget(Input.StringInputWidget):
 
         self.registerStyleLink(self.calculateUrl({'widgetClass': 'Webwidgets.DateInputWidget',
                                                   'file': 'calendar-blue.css',
-                                                  'type': 'text/css'}))
+                                                  'type': 'text/css'},
+                                                 {}))
         self.registerScriptLink(self.calculateUrl({'widgetClass': 'Webwidgets.DateInputWidget',
                                                    'file': 'calendar.js',
-                                                   'type': 'text/plain'}),
+                                                   'type': 'text/plain'},
+                                                  {}),
                                 self.calculateUrl({'widgetClass': 'Webwidgets.DateInputWidget',
                                                    'file': 'lang/calendar-en.js',
-                                                   'type': 'text/plain'}),
+                                                   'type': 'text/plain'},
+                                                  {}),
                                 self.calculateUrl({'widgetClass': 'Webwidgets.DateInputWidget',
                                                    'file': 'calendar-setup.js',
-                                                   'type': 'text/plain'}))
+                                                   'type': 'text/plain'},
+                                                  {}))
 
         return '''<input name="%(name)s" id="%(id)s" value="%(value)s" autocomplete="off" />
        <script type="text/javascript">
