@@ -59,11 +59,11 @@ def filterArguments(arguments):
     resArgs = dict([(key, value)
                     for (key, value)
                     in arguments.iteritems()
-                    if not key.startswith(':')])
+                    if not key.startswith('_')])
     outputOptions = dict([(key[1:], value)
                           for (key, value)
                           in arguments.iteritems()
-                          if key.startswith(':')])
+                          if key.startswith('_')])
     return resArgs, outputOptions
 
 class Program(WebKit.Page.Page):
@@ -265,7 +265,7 @@ class Program(WebKit.Page.Page):
             # extraURLPath begins with a /, so remove the first empty item in location
             location = req.extraURLPath().split('/')[1:]            
             winId = Constants.DEFAULT_WINDOW
-            if location and location[0].startswith(':'):
+            if location and location[0].startswith('_'):
                 winId = location[0][1:]
                 location = location[1:]
             winId = (req.servletURI(), winId)
@@ -357,12 +357,12 @@ class Program(WebKit.Page.Page):
         def calculateUrl(self, winId, location, arguments, outputOptions):
             windowPath = winId[0]
             if winId[1] != Constants.DEFAULT_WINDOW:
-                windowPath += '/:' + winId[1]
+                windowPath += '/_' + winId[1]
             path = self.program.webwareBase() + windowPath
             if location:
                 path += '/' + '/'.join(location)
             return path + '?' + urllib.urlencode(arguments.items() +
-                                                 [(':' + key, value)
+                                                 [('_' + key, value)
                                                   for (key, value)
                                                   in outputOptions.items()])
 
