@@ -24,6 +24,7 @@ class DateInputWidget(Input.StringInputWidget):
     """
     __attributes__ = Input.StringInputWidget.__attributes__ + ('format',)
     format = '%Y-%m-%d'
+    value = time.localtime()
 
     def draw(self, path):
         """
@@ -58,33 +59,22 @@ class DateInputWidget(Input.StringInputWidget):
          );
        </script>''' % {
             'name': Webwidgets.Utils.pathToId(path),
-            'value': self.getValue(path), 'format': self.format,
+            'value': self.fieldOutput(path)[0], 'format': self.format,
             'disabled': ['', 'disabled="true"'][not self.getActive(path)],
             'id': Webwidgets.Utils.pathToId(path)}
 
 
-    def getValue(self, path):
-        """
-        Get widget value as string.
-        """
-        print repr(self.value)
-        return time.strftime(self.format, self.value)
-
-
-    def valueChanged(self, path, value):
-        """
-        Convert string value to widget internal representation.
-        """
+    def fieldInput(self, path, stringValue):
         try:
-            self.value = time.strptime(value, self.format)
-            self.error = None
-
+            self.value = time.strptime(stringValue, self.format)
+            self.notify('valueChanged', self.value)
         except ValueError:
             self.error = 'Invalid date format, expected %s got %s' \
-                % (self.format, value)
-
-            if not self.value:
-                self.value = time.localtime()
+                % (self.format, stringValue)
+            self.notify('errorChanged', self.error)
+                
+    def fieldOutput(self, path):
+        return [time.strftime(self.format, self.value)]
 
     def output(self, outputOptions):
         path = outputOptions['file']

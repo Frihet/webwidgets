@@ -62,7 +62,11 @@ class HtmlWidget(Base.StaticCompositeWidget):
         for key in self.__attributes__:
             res['attr_' + key] = getattr(self, key)
         res['id'] =  Webwidgets.Utils.pathToId(path)
-        return self.html % res
+        try:
+            return self.html % res
+        except KeyError, e:
+            e.args = (self, self.path(),) + e.args
+            raise e
 
 class DivWidget(HtmlWidget):
     """Adds a single div with the widget id as id around the single

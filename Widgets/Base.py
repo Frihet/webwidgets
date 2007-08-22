@@ -386,6 +386,12 @@ class InputWidget(Widget):
             if argumentName:
                 self.session.windows[self.winId].arguments[argumentName] = {'widget':self, 'path': path}
         return active
+
+    def fieldInput(self, path, *stringValues):
+        raise NotImplementedError(self, "fieldInput")
+    
+    def fieldOutput(self, path):
+        raise NotImplementedError(self, "fieldOutput")
     
     def draw(self, path):
         self.registerInput(path, self.argumentName)
@@ -407,6 +413,14 @@ class ValueInputWidget(InputWidget):
     
     __attributes__ = InputWidget.__attributes__ + ('value',)
     value = ''
+
+    def fieldInput(self, path, stringValue):
+        self.value = stringValue
+        self.notify('valueChanged', self.value)
+
+    def fieldOutput(self, path):
+        return [unicode(self.value)]
+
     def getValue(self, path):
         return self.value
 
@@ -416,7 +430,6 @@ class ValueInputWidget(InputWidget):
         make sure to call the base class implementation, as the value
         will be reset otherwise."""
         if path != self.path(): return
-        self.value = value
         self.error = None
 
 class Window(Widget):

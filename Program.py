@@ -202,12 +202,11 @@ class Program(WebKit.Page.Page):
                 # should'nt ever be there if it isn't but some
                 # sloppy widget hacker migt have forgotten to
                 # not to add it...
-                if (    oldArgument['widget'].getActive(oldArgument['path'])
-                    and argument != oldArgument['widget'].getValue(oldArgument['path'])):
-                    self.notify(oldArgument['widget'],
-                                'valueChanged',
-                                (argument,),
-                                path = oldArgument['path'])
+                if oldArgument['widget'].getActive(oldArgument['path']):
+                    if not isinstance(argument, types.ListType):
+                        argument = [argument]
+                    if oldArgument['widget'].fieldOutput(oldArgument['path']) != argument:
+                        oldArgument['widget'].fieldInput(oldArgument['path'], *argument)
 
         def generateArguments(self, window):
             """Return a tuple of the location and arguments (query
@@ -218,21 +217,12 @@ class Program(WebKit.Page.Page):
             newLocation = []
             newArguments = {}
             for argumentname, argument in window.arguments.iteritems():
-                value = argument['widget'].getValue(argument['path'])
+                value = argument['widget'].fieldOutput(argument['path'])
                 if argumentname == '__extra__':
-                    for extraname, extravalue in value:
-                        if isinstance(extravalue, types.ListType):
-                            extravalue = [unicode(item) for item in extravalue]
-                        else:
-                            extravalue = unicode(extravalue)
-                    newArguments[extraname] = extravalue
+                    newArguments.update(value)
                 elif argumentname == '__location__':
                     newLocation = value
                 else:
-                    if isinstance(value, types.ListType):
-                        value = [unicode(item) for item in value]
-                    else:
-                        value = unicode(value)
                     newArguments[argumentname] = value
             return newLocation, newArguments
 
@@ -242,7 +232,7 @@ class Program(WebKit.Page.Page):
             
             if self.debugFields:
                 print "Fields:", fields
-                print "Original:", dict([(name, value.getValue(Utils.idToPath(name)))
+                print "Original:", dict([(name, value.fieldOutput(Utils.idToPath(name)))
                                          for (name, value)
                                          in window.fields.iteritems()])
             
@@ -253,13 +243,12 @@ class Program(WebKit.Page.Page):
                 # should'nt ever be there if it isn't but some
                 # sloppy widget hacker migt have forgotten to
                 # not to add it...
-                if (    field.getActive(path)
-                    and (   fieldname not in fields
-                         or fields[fieldname] != field.getValue(path))):
-                    self.notify(field,
-                                'valueChanged',
-                                (fields.get(fieldname, ''),),
-                                path = path)
+                if field.getActive(path):
+                    value = fields.get(fieldname, '')
+                    if not isinstance(value, types.ListType):
+                        value = [value]
+                    if field.fieldOutput(path) != value:
+                        field.fieldInput(path, *value)
 
         def writeHTML(self):
             """Main processing method, called by WebWare. This method will

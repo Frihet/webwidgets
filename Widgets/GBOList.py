@@ -189,18 +189,47 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
                     fields.update(child.getWidgetsByAttribute(attribute))
         return fields
 
-    def getValue(self, path):
+    def fieldInput(self, path, stringValue):
+        widgetPath = self.path()
+        try:
+            subWidget = self.pathToSubwidgetPath(path)
+        except Webwidgets.Constants.NotASubwidgetException:
+            return
+        
+        if subWidget == ['sort']:
+            if stringValue != '':
+                self.sort = stringToSort(stringValue)
+                self.notify('sortChanged', self.sort)
+        elif subWidget == ['page']:
+            if stringValue != '':
+                self.page = int(stringValue)
+                self.notify('repaged', self.page)
+        elif subWidget[0] == 'function':
+            if stringValue != '':
+                self.notify('function', subWidget[1], int(stringValue))
+    
+    def fieldOutput(self, path):
         widgetPath = self.path()
         subWidget = self.pathToSubwidgetPath(path)
         
         if subWidget == ['sort']:
-            return sortToString(self.sort)
+            return [sortToString(self.sort)]
         elif subWidget == ['page']:
-            return self.page
+            return [unicode(self.page)]
         elif subWidget[0] == 'function':
-            return None
+            return []
         else:
             raise Exception('Unknown sub-widget %s in %s' %(subWidget, widgetPath))
+
+    def resorted(self, path, sort):
+        """Notification that the list sort order has changed."""
+        if path != self.path(): return
+        self.reread()
+
+    def repaged(self, path, page):
+        """Notification that the user has changed page."""
+        if path != self.path(): return
+        self.reread()
 
     def getActive(self, path):
         """@return: Whether the widget is allowing input from the user
@@ -227,23 +256,6 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
         return Webwidgets.Utils.OrderedDict([(name, description) for (name, description) in self.columns.iteritems()
                                   if self.session.AccessManager(Webwidgets.Constants.VIEW, self.winId,
                                                                 path + ['_', 'column', name])])
-
-    def valueChanged(self, path, value):
-        widgetPath = self.path()
-        try:
-            subWidget = self.pathToSubwidgetPath(path)
-        except Webwidgets.Constants.NotASubwidgetException:
-            return
-        
-        # Don't handle this, it's a stray value resulting from another
-        # button.
-        if value is '': return
-        if subWidget == ['sort']:
-            self.notify('resorted', stringToSort(value))
-        elif subWidget == ['page']:
-            self.notify('repaged', int(value))
-        elif subWidget[0] == 'function':
-            self.notify('function', subWidget[1], int(value))
 
     def resorted(self, path, sort):
         """Notification that the list sort order has changed."""

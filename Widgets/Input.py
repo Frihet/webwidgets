@@ -72,7 +72,6 @@ class NewPasswordInputWidget(Formatting.HtmlWidget, Base.InputWidget):
     value = ''
     html = """
     <span class="%(attr_classesStr)s" id="%(id)s">
-     %(Message)s
      %(input1)s
      %(input2)s
     </span>
@@ -88,28 +87,23 @@ class NewPasswordInputWidget(Formatting.HtmlWidget, Base.InputWidget):
         __explicit_load__ = True
         
         def valueChanged(self, path, value):
-            self.value = value
             if self.parent['input1'].value == self.parent['input2'].value:
+                self.parent.value = value
                 self.parent.notify('valueChanged', value)
             else:
-                self.parent.notify('valueError', self.parent['input1'].value, self.parent['input2'].value)
+                self.parent.error = "Passwords don't match!"
+                self.parent.notify('errorChanged', self.parent.error)
             return True
 
         def getActive(self, path):
             return self.parent.getActive(path[:-1])
 
-    class Message(Formatting.Message): pass
-
     def valueChanged(self, path, value):
         if path != self.path(): return
         # If we get this from anywhere else that input1 and input2, we
         # must set their values too...
-        self['input1'].value = self['input2'].value = self.value = value
-        self['Message']['message'] = ""
+        self['input1'].value = self['input2'].value = self.value
         self.error = None
-        
-    def valueError(self, path, value1, value2):
-        self['Message']['message'] = "Passwords don't match!"
 
 class ButtonInputWidget(Base.InputWidget):
     """Button widget - throws a "clicked" notification when clicked"""
@@ -124,34 +118,27 @@ class ButtonInputWidget(Base.InputWidget):
             'disabled': ['', 'disabled="true"'][not self.getActive(path)],
             'id': Webwidgets.Utils.pathToId(path)}
 
-    def getValue(self, path):
-        return self.title + 'unselected' # Make sure this never match :)
+    def fieldInput(self, path, stringValue):
+        if stringValue != '':
+            self.notify('clicked')
 
-    def valueChanged(self, path, value):
-        if path != self.path():
-            return
-        if value is '': return
-        self.notify('clicked')
+    def fieldOutput(self, path):
+        return []
 
-class RadioButtonGroup(Base.Widget):
+    def clicked(self, path):
+        if path != self.path(): return
+        return
+
+class RadioButtonGroup(Base.ValueInputWidget):
     """Group of radio buttons must be joined together. This is
     performed by setting the 'group' attribute on each of the
     L{RadioInputWidget} in the group to the same instance of this class."""
     
-    def __init__(self, program):
-        self.session = session
+    def __init__(self, session, winId, *arg, **kw):
+        Base.ValueInputWidget.__init__(self, session, winId, *arg, **kw)
         self.members = {}
-        self.path = None
-        self.value = None
 
-    def getValue(self, path):
-        return self.value
-
-    def valueChanged(self, path, value):
-        if path != self.path(): return
-        self.members[value].notify('valueChanged', id, value)
-
-class RadioInputWidget(Base.StaticCompositeWidget):
+class RadioInputWidget(Base.InputWidget, Base.StaticCompositeWidget):
     """A radio button (selection list item). You must create a
     L{RadioButtonGroup} instance and set the 'group' attribute to that
     instance so that all radio buttons in the group knows about each
@@ -159,20 +146,27 @@ class RadioInputWidget(Base.StaticCompositeWidget):
     __attributes__ = Base.StaticCompositeWidget.__attributes__ + ('group', 'title', 'value', 'default')
     def __init__(self, session, winId, **attrs):
         Base.StaticCompositeWidget.__init__(self, session, winId, **attrs)
-        self.group.members[value] = self
+        self.group.members[self.value] = self
         if self.default:
-            self.group.value = self.getValue(path)
+            self.group.value = self.value
+
+    def fieldInput(self, path, stringValue):
+        value = Utils.idToPath(stringValue)
+        if value == path:
+            self.group.value = self.value
+            self.group.notify('valueChanged', self.group.value)
+
+    def fieldOutput(self, path):
+        return [Utils.pathToId(self.group.members[self.group.value].path())]
 
     def draw(self, path):
-        if self.group.path is None:
-            self.group.path = path
         self.registerInput(self.group.path, self.argumentName)
         result = self.drawChildren(path)
-        result['name'] = Webwidgets.Utils.pathToId(self.group.path)
-        result['value'] = self.getValue(path)
+        result['id'] = Webwidgets.Utils.pathToId(path)
+        result['name'] = Webwidgets.Utils.pathToId(self.group.path())
+        result['value'] = result['id']
         result['checked'] = ['', 'checked'][self.getValue(path) == self.group.value]
         result['disabled'] = ['', 'disabled="true"'][not self.getActive(path)],
-        result['id'] = Webwidgets.Utils.pathToId(path)
         return """<input
                    type="radio"
                    name="%(name)s"
@@ -182,25 +176,24 @@ class RadioInputWidget(Base.StaticCompositeWidget):
                    id="%(id)s"
                   >%(title)s</input>""" % result
 
-    def getValue(self, path):
-        return self.value
-
-    def valueChanged(self, path, value):
-        if path != self.path(): return
-        self.group.value = value
-        return True
-
 class CheckboxInputWidget(Base.ValueInputWidget):
     """Boolean input widget - it's value can either be true or false."""
-    value = None
+    value = False
     def draw(self, path):
         super(CheckboxInputWidget, self).draw(path)
-        checked = ['', 'checked'][not not self.getValue(path)]
-        return '<input type="checkbox" name="%(name)s" value="1" %(checked)s %(disabled)s id="%(id)s" />' % {
+        checked = ["", "checked='true'"][not not self.value]
+        return '<input type="checkbox" name="%(name)s" value="checked" %(checked)s %(disabled)s id="%(id)s" />' % {
             'name': Webwidgets.Utils.pathToId(path),
             'checked': checked,
             'disabled': ['', 'disabled="true"'][not self.getActive(path)],
             'id': Webwidgets.Utils.pathToId(path)}
+
+    def fieldInput(self, path, stringValue):
+        self.value = (stringValue == "checked")
+        self.notify('valueChanged', self.value)
+
+    def fieldOutput(self, path):
+        return [['', 'checked'][not not self.value]]
 
 class ListInputWidget(Base.ValueInputWidget, Base.StaticCompositeWidget):
     """Scrollable list of selectable items. The list can optionally
@@ -248,17 +241,22 @@ class FileInputWidget(Base.ValueInputWidget, Base.StaticCompositeWidget):
     """File upload box"""
     value = None
     
-    class preview(Formatting.MediaWidget):
-        def getContent(self, path):
-            return self.parent.getValue(path)
-
-    def valueChanged(self, path, value):
+    def fieldInput(self, path, stringValue):
         if path == self.path():
             if value != '':
                 self.value = value
+                self.notify('valueChanged', self.value)
         elif path == self.path() + ['_', 'clear']:
             if value != '':
                 self.value = None
+                self.notify('valueChanged', self.value)
+                
+    def fieldOutput(self, path):
+        return [self.value]
+
+    class preview(Formatting.MediaWidget):
+        def getContent(self, path):
+            return self.parent.getValue(path)
         
     def output(self, outputOptions):
         value = self.getValue(self.path())
