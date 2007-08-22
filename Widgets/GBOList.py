@@ -73,11 +73,6 @@ def reverseDependency(dependentColumns):
             res[dependentColumn] = main
     return res
 
-def getValue(obj, path):
-    if hasattr(obj, 'getValue'):
-        return obj.getValue(path)
-    return obj
-
 class ChildNodeCells(Base.ChildNodes):
     def __init__(self, node, row, *arg, **kw):
         self.row = row
@@ -288,7 +283,7 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
         # name = "combine widgets"
         # description = """Maybe combine widgets to using
         #  childPath = path + [nameofchild]
-        #  getValue(node['children'][-1]['value'], childPath) != getValue(row[column], childPath)
+        #  node['children'][-1]['value'].balue != row[column].value
         # but that requires any valueChanged signal to be
         # distributed over the "combined" widgets..."""
         #### end ####

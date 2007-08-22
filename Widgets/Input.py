@@ -49,7 +49,7 @@ class StringInputWidget(Base.ValueInputWidget):
         super(StringInputWidget, self).draw(path)
         return '<input type="text" name="%(name)s" value="%(value)s" %(disabled)s id="%(id)s" />' % {
             'name': Webwidgets.Utils.pathToId(path),
-            'value': self.getValue(path),
+            'value': self.fieldOutput(path)[0],
             'disabled': ['', 'disabled="true"'][not self.getActive(path)],
             'id': Webwidgets.Utils.pathToId(path)}
 
@@ -59,7 +59,7 @@ class PasswordInputWidget(Base.ValueInputWidget):
         super(PasswordInputWidget, self).draw(path)
         return '<input type="password" name="%(name)s" value="%(value)s" %(disabled)s id="%(id)s" />' % {
             'name': Webwidgets.Utils.pathToId(path),
-            'value': self.getValue(path),
+            'value': self.fieldOutput(path)[0],
             'disabled': ['', 'disabled="true"'][not self.getActive(path)],
             'id': Webwidgets.Utils.pathToId(path)}
 
@@ -165,7 +165,7 @@ class RadioInputWidget(Base.InputWidget, Base.StaticCompositeWidget):
         result['id'] = Webwidgets.Utils.pathToId(path)
         result['name'] = Webwidgets.Utils.pathToId(self.group.path())
         result['value'] = result['id']
-        result['checked'] = ['', 'checked'][self.getValue(path) == self.group.value]
+        result['checked'] = ['', 'checked'][self.value == self.group.value]
         result['disabled'] = ['', 'disabled="true"'][not self.getActive(path)],
         return """<input
                    type="radio"
@@ -241,13 +241,13 @@ class FileInputWidget(Base.ValueInputWidget, Base.StaticCompositeWidget):
     """File upload box"""
     value = None
     
-    def fieldInput(self, path, stringValue):
+    def fieldInput(self, path, fieldValue):
         if path == self.path():
-            if value != '':
-                self.value = value
+            if fieldValue != '':
+                self.value = fieldValue
                 self.notify('valueChanged', self.value)
         elif path == self.path() + ['_', 'clear']:
-            if value != '':
+            if fieldValue != '':
                 self.value = None
                 self.notify('valueChanged', self.value)
                 
@@ -256,11 +256,10 @@ class FileInputWidget(Base.ValueInputWidget, Base.StaticCompositeWidget):
 
     class preview(Formatting.MediaWidget):
         def getContent(self, path):
-            return self.parent.getValue(path)
+            return self.parent.value
         
     def output(self, outputOptions):
-        value = self.getValue(self.path())
-        res = {Webwidgets.Constants.OUTPUT: value.file.read(),
+        res = {Webwidgets.Constants.OUTPUT: self.value.file.read(),
                'Content-type': value.type
                }
         value.file.seek(0)
@@ -268,10 +267,9 @@ class FileInputWidget(Base.ValueInputWidget, Base.StaticCompositeWidget):
 
     def draw(self, path):
         super(FileInputWidget, self).draw(path)
-        value = self.getValue(path)
         if self.getActive(path):
             self.registerInput(path, self.argumentName)
-            if value is not None:
+            if self.value is not None:
                 argumentName = self.argumentName
                 if argumentName: argumentName = argumentName + '_clear'
                 self.registerInput(path + ['_', 'clear'], argumentName)
@@ -283,6 +281,6 @@ class FileInputWidget(Base.ValueInputWidget, Base.StaticCompositeWidget):
             'classes': self.classesStr,
             'current': self.drawChild('preview', self['preview'], path, True),
             'disabled': ['', 'disabled="true"'][not self.getActive(path)],
-            'clearable': ['', 'disabled="true"'][not self.getActive(path) or value is not None],
+            'clearable': ['', 'disabled="true"'][not self.getActive(path) or self.value is None],
             'id': Webwidgets.Utils.pathToId(path),
             'clearId': Webwidgets.Utils.pathToId(path + ['_', 'clear'])}

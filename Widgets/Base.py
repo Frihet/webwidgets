@@ -397,9 +397,6 @@ class InputWidget(Widget):
         self.registerInput(path, self.argumentName)
         return ''
 
-    def getValue(self, path):
-        raise NotImplementedError
-
     def getActive(self, path):
         """@return: Whether the widget is allowing input from the user
         or not.
@@ -420,9 +417,6 @@ class ValueInputWidget(InputWidget):
 
     def fieldOutput(self, path):
         return [unicode(self.value)]
-
-    def getValue(self, path):
-        return self.value
 
     def valueChanged(self, path, value):
         """This notification is sent to notify the widget that its value,

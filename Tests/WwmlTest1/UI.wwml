@@ -41,7 +41,13 @@
 
    <w:DateInputWidget id="date" value=":time:1998-01-01 22:33:34" />
 
-   <w:AddressInputWidget id="xzy" />
+   <w:FileInputWidget id="file" />
+
+   <w:TabbedViewWidget id="tabs" page="first">
+    <w:HtmlWidget id="first" title="First">The first page</w:HtmlWidget>
+    <w:HtmlWidget id="second" title="Second">The second page</w:HtmlWidget>
+    <w:HtmlWidget id="third" title="Third">The third page</w:HtmlWidget>
+   </w:TabbedViewWidget>
 
    <w:MemoryGBOList id="ListTest" argumentNameA='test' rowsPerPage=":integer:4">
     <w:dict id="functions" copy="C" edit="E" delete="D" />
@@ -68,23 +74,7 @@
     </w:list>
    </w:MemoryGBOList>
 
-   <w:MemoryGBOList id="ListTest2" argumentNameA='test' rowsPerPage=":integer:4">
-    <w:dict id="columns" foo="Fooish foo" bar="Barbar" />
-    <w:list id="rows">
-     <w:dict id="row1">
-      <w:StringInputWidget id="foo" value="Mumum xxx" />
-      <w:StringInputWidget id="bar" value="nana" />
-     </w:dict>
-     <w:dict id="row2">
-      <w:StringInputWidget id="foo" value="Mumum xxx" />
-      <w:StringInputWidget id="bar" value="nana" />
-     </w:dict>
-     <w:dict id="row3">
-      <w:StringInputWidget id="foo" value="Sara" />
-      <w:StringInputWidget id="bar" value="Snara" />
-     </w:dict>
-    </w:list>
-   </w:MemoryGBOList>
+   <w:AddressInputWidget id="xzy" />
 
    <div id="header">
     <span id="search">Search: <w:StringInputWidget id="Search" argumentNameA="search" value="/foo/bar/fie"/></span>

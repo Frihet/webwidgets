@@ -145,10 +145,11 @@ class MediaWidget(Base.Widget):
 
         if content is None:
             return self.empty
-        
+
+        location = self.calculateUrl({'widget': Webwidgets.Utils.pathToId(self.path())})
         if content.type in ('image/png', 'image/jpeg', 'image/gif'):
             preview = """<img src="%(location)s" alt="%(name)s" width="%(width)s" height="%(height)s" />""" % {
-                'location': self.calculateUrl({'widget': Webwidgets.Utils.pathToId(self.path())}),
+                'location': location,
                 'name': content.filename,
                 'width': self.width,
                 'height': self.height

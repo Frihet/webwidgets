@@ -228,9 +228,6 @@ class TreeWidget(Base.InputWidget):
             Webwidgets.Utils.pathToId(path),
             self.tree.renderTree(renderEntry, '    '))
 
-    def getValue(self, path):
-        return Webwidgets.Utils.pathToId(path) + 'unselected'
-
     def valueChanged(self, path, value):
         if path != self.path(): return
         if value is '': return
@@ -253,13 +250,13 @@ class TabbedViewWidget(Base.InputWidget, Base.StaticCompositeWidget):
     argumentName = None
     page = None
 
-    def getValue(self, path):
-        return self.page
+    def fieldInput(self, path, stringValue):
+        if stringValue != '':
+            self.page = stringValue
+            self.notify('pageChanged', self.page)
 
-    def valueChanged(self, path, value):
-        if path != self.path(): return
-        if value is '': return
-        self.notify('repaged', value)
+    def fieldOutput(self, path):
+        return [unicode(self.page)]
 
     def getActive(self, path):
         """@return: Whether the widget is allowing input from the user
@@ -267,10 +264,9 @@ class TabbedViewWidget(Base.InputWidget, Base.StaticCompositeWidget):
         """
         return self.active and self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.winId, path)
 
-    def repaged(self, path, page):
+    def pageChanged(self, path, page):
         """Notification that the user has changed page."""
         if path != self.path(): return
-        self.page = page
 
     def draw(self, path):
         active = self.registerInput(path, self.argumentName)
