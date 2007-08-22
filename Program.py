@@ -30,11 +30,6 @@ import WebKit.Page
 import cgi, urllib, types
 import Utils, Widgets, AccessManager, Constants
 
-debugSendNotification = False
-debugReceiveNotification = False
-debugArguments = False
-debugFields = False
-
 def decodeField(value):
     if isinstance(value, types.StringType):
         return value.decode('utf-8')
@@ -112,12 +107,19 @@ class Program(WebKit.Page.Page):
         implement the L{Webwidgets.Program.Program.Session.newWindow}
         method.
         """
+        
+        debugArguments = False
+        debugFields = False
+        debugSendNotification = False
+        debugReceiveNotification = False
+
         def __init__(self):
             self.windows = Widgets.Base.ChildNodes(self)
             self.notifications = []
             self.output = None
             self.program = None
             self.AccessManager = self.AccessManager(self)
+            self.session = self
 
         AccessManager = AccessManager.AccessManager
 
@@ -137,7 +139,7 @@ class Program(WebKit.Page.Page):
                 return type(self)(self.widget.parent, self.message, self.args, self.kw, self.path)
 
             def process(self):
-                if debugReceiveNotification:
+                if self.widget.session.debugReceiveNotification:
                     print "Notifying %s" % self
                 if hasattr(self.widget, self.message):
                     # Run the notification handler!
@@ -192,7 +194,7 @@ class Program(WebKit.Page.Page):
             if '__extra__' in window.arguments:
                 arguments['__extra__'] = extra
 
-            if debugArguments: print "Arguments:", arguments
+            if self.debugArguments: print "Arguments:", arguments
             for argumentname, argument in arguments.iteritems():
                 oldArgument = window.arguments[argumentname]
                 # Check an extra time that the widget is
@@ -238,7 +240,7 @@ class Program(WebKit.Page.Page):
             """Process fields (POST field values) and generate
             notifications for those that have changed."""
             
-            if debugFields:
+            if self.debugFields:
                 print "Fields:", fields
                 print "Original:", dict([(name, value.getValue(Utils.idToPath(name)))
                                          for (name, value)
@@ -303,7 +305,7 @@ class Program(WebKit.Page.Page):
                             (newLocation, newArguments) = self.generateArguments(window)
                             newArguments = normalizeFields(newArguments)
                             if newLocation != location or newArguments != arguments:
-                                if debugArguments:
+                                if self.debugArguments:
                                     print "Old: %s: %s" %(location, arguments)
                                     print "New: %s: %s" % (newLocation, newArguments)
                                 self.redirect(winId, newLocation, newArguments, outputOptions)
@@ -344,7 +346,7 @@ class Program(WebKit.Page.Page):
             self.addNotification(self.Notification(*arg, **kw))
 
         def addNotification(self, notification):
-            if debugSendNotification: print "Add notification:", notification
+            if self.debugSendNotification: print "Add notification:", notification
             self.notifications.append(notification)
 
         def processNotifications(self):

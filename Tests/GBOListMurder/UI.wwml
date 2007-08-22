@@ -31,63 +31,17 @@ USA
   id="MyWindow"
   title="GreenCycle">
 
-  <w:dict
-   id="headers"
-   Content-Type="text/html; charset=UTF-8"
-   Status="202 Page loaded" />
-
-  <w:StyleLink id="head" style="/static/css/greencycle.css" />
-
   <w:HtmlWidget id="body">
-	
-   <div class="header">
-    <img src="/static/images/logo.gif" />
-    <div class="logininfo">Logged in as: Somebody</div>
-    <div class="dateruler">Today</div>
 
-    <div class="actionsruler">
-     <w:ButtonInputWidget id="home" title="home"/>
-     <w:ButtonInputWidget id="help" title="help" />
-     <w:ButtonInputWidget id="settings" title="settings" />
-     <w:ButtonInputWidget id="logout" title="logout" />
-    </div>
-
-   </div>
-
-   <div class="break"></div>
-   <div class="mainmenu"> 
-    <w:ButtonInputWidget id="contracts" title="Contracts" />
-    <w:ButtonInputWidget id="reference" title="Reference data" />
-    <w:ButtonInputWidget id="reporting" title="Reporting" />
-    <w:ButtonInputWidget id="users" title="Users" />
-   </div>
-
-   
-   <div class="submainmenu">
-    <w:ButtonInputWidget id="jonkoping" title="Jønkøping" />
-   </div>
-
-   <div class="break"></div>
-
-
-   <h1>Existing currency references</h1>
-
-   <w:MemoryGBOList id="GreencycleList" argumentName='greencycleList'
-rowsPerPage=":integer:8">
-    <w:dict id="functions" delete="-" />
+   <w:MemoryGBOList id="GreencycleList" rowsPerPage=":integer:8">
     <w:odict id="columns">
+     <w:string id="idd">ID</w:string>
      <w:string id="currency">Currency</w:string>
      <w:string id="name">Name</w:string>
-     <w:string id="value">Value/USD</w:string>
-     <w:string id="last">Last updated</w:string>
-     <w:string id="until">Valid until</w:string>
     </w:odict>
    </w:MemoryGBOList>
    <w:ButtonInputWidget id="Add" title="+" />
 
-   <div id="footer">
-<div class="footer">Elkjøp ASA C 2007</div>
-   </div>
   </w:HtmlWidget>
  </w:HtmlWindow>
 </w:wwml>

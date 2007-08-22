@@ -100,7 +100,7 @@ class ChildNodeRows(list):
     
     def __ensure__(self):
         for index in xrange(0, len(self)):
-            if not isinstance(self[index], ChildNodeCells):
+            if not isinstance(self[index], ChildNodeCells) or self[index].row != index:
                 self[index] = ChildNodeCells(self.node, index, self[index])
 
     def __setitem__(self, *arg, **kw):
@@ -123,6 +123,13 @@ class ChildNodeRows(list):
         super(ChildNodeRows, self).insert(*arg, **kw)
         self.__ensure__()
 
+    def reverse(self, *arg, **kw):
+        super(ChildNodeRows, self).reverse(*arg, **kw)
+        self.__ensure__()
+    
+    def sort(self, *arg, **kw):
+        super(ChildNodeRows, self).sort(*arg, **kw)
+        self.__ensure__()
   
 class GBOList(Base.InputWidget, Base.CompositeWidget):
     """Group By Ordering List is a special kind of table view that

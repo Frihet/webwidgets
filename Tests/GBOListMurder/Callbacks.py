@@ -1,14 +1,14 @@
 import Webwidgets
-
 import datetime
+
+Webwidgets.Program.Session.debugFields = False
+Webwidgets.Program.Session.debugSendNotification = False
 
 class MyWindow(object):
     class body(object):
 
         class GreencycleList(object):
-            def function(self, path, function, row):
-                if function == 'delete':
-                    del self.rows[row]
+            nextId = 0
 
             def getPages(self):
                 return 1
@@ -17,32 +17,17 @@ class MyWindow(object):
                 return self.rows
 
             def valueChanged(self, path, value):
-                print "Change %s: %s" % (path, value)
+                #print "Change %s: %s" % (path, repr(value))
                 self.changed = True
                 Webwidgets.MemoryGBOList.valueChanged(self, path, value)
             
         class Add(object):
             def clicked(self, path):
-                print "XXXX"
                 kg=Webwidgets.HtmlWidget(self.session, self.winId, html="kg")
                 count=Webwidgets.HtmlWidget(self.session, self.winId, html="count")
-                
-                newRow = {"id": None,
+
+                self.parent['GreencycleList'].nextId += 1
+                newRow = {"idd": self.parent['GreencycleList'].nextId,
                           "currency" : Webwidgets.StringInputWidget(self.session, self.winId, value=""),
-                          "name": Webwidgets.StringInputWidget(self.session, self.winId, value=""),
-                          "value": Webwidgets.StringInputWidget(self.session,
-                                                                self.winId,
-                                                                value="1"),
-                          "last": "Mon 12 February, 2007",
-                          "until": Webwidgets.ButtonInputWidget(self.session,
-                                                                self.winId,
-                                                                title="Next week")}
-
-
-#                                                    "value": Webwidgets.ListInputWidget(self.session,
-#                                                             self.winId,
-#                                                             value="kg",
-#                                                             kg=kg,
-#                                                             count=count)}
-
+                          "name": Webwidgets.StringInputWidget(self.session, self.winId, value="")}
                 self.parent['GreencycleList'].rows.append(newRow)
