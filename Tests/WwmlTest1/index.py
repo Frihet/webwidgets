@@ -16,9 +16,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import Webwidgets, testwwml
+import Webwidgets
 
-class wwmltest(Webwidgets.Program):
+Webwidgets.Program.Session.debugFields = False
+Webwidgets.Program.Session.debugSendNotification = False
+Webwidgets.Wwml.debugImport = True
+
+import UI
+
+class index(Webwidgets.Program):
     class Session(Webwidgets.Program.Session):
         def newWindow(self, winId):
-            return testwwml.MyWindow(self, winId)
+            return UI.MyWindow(self, winId)

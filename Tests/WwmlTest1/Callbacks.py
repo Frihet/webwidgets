@@ -19,6 +19,10 @@
 import Webwidgets
 
 class MyWindow(object):
+    def __init__(self, session, winId, *arg, **kw):
+        Webwidgets.HtmlWindow.__init__(self, session, winId, *arg, **kw)
+        print "XXYZZY"
+
 #    class location(object):
 #        def valueChanged(self, path, value):
 #            Webwidgets.ArgumentInputWidget.valueChanged(self, path, value)
@@ -29,6 +33,8 @@ class MyWindow(object):
 #            print "Extra arguments changed", path, value
             
     class body(object):
+
+            
         class pwdclear(object):
             def clicked(self, path):
                 self.parent['newpwd'].notify('valueChanged', path, '')
@@ -54,6 +60,7 @@ class MyWindow(object):
 
         class ShowDialog(object):
             def clicked(self, path):
+                print "SHOW DIALOG CLICKED"
                 self.parent['SomeDialog'].visible = True
 
         class Dirlisting(object):

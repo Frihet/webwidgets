@@ -25,7 +25,7 @@
  >
  <w:HtmlWindow
   using="Webwidgets"
-  bind="Tests.testwwmlcallbacks.MyWindow"
+  bind="Callbacks.MyWindow"
 
   id="MyWindow"
   title="RedBack WebWidgets demo application">
@@ -43,9 +43,7 @@
 
    <w:AddressInputWidget id="xzy" />
 
-   <w:Tests.testwwml.foo.MyTestWidget id="bar" />
-
-   <w:MemoryGBOList id="ListTest" argumentName='test' rowsPerPage=":integer:4">
+   <w:MemoryGBOList id="ListTest" argumentNameA='test' rowsPerPage=":integer:4">
     <w:dict id="functions" copy="C" edit="E" delete="D" />
     <w:dict id="columns" foo="Fooish foo" bar="Barbar" fie="Fiesh fish" />
     <w:list id="rows">
@@ -70,7 +68,7 @@
     </w:list>
    </w:MemoryGBOList>
 
-   <w:MemoryGBOList id="ListTest2" argumentName='test' rowsPerPage=":integer:4">
+   <w:MemoryGBOList id="ListTest2" argumentNameA='test' rowsPerPage=":integer:4">
     <w:dict id="columns" foo="Fooish foo" bar="Barbar" />
     <w:list id="rows">
      <w:dict id="row1">
@@ -89,7 +87,7 @@
    </w:MemoryGBOList>
 
    <div id="header">
-    <span id="search">Search: <w:StringInputWidget id="Search" argumentName="search" value="/foo/bar/fie"/></span>
+    <span id="search">Search: <w:StringInputWidget id="Search" argumentNameA="search" value="/foo/bar/fie"/></span>
     <span id="dir">
      <w:HtmlWidget id="CurrentDirectory" html="/foo/bar/fie" />
     </span>
@@ -127,7 +125,7 @@
       <tr><th>Type</th><th>Filename</th><th>Dates</th><th>Actions</th></tr>
       <w:ListWidget id="Listing">
 
-       <w:HtmlWidget id="Entry">
+       <w:HtmlWidget classid="Entry">
 	<tr>
 	 <td>
 	  <w:variable id="type" />
