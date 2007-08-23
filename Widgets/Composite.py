@@ -183,7 +183,6 @@ class TabbedViewWidget(Base.InputWidget, Base.StaticCompositeWidget):
     def fieldInput(self, path, stringValue):
         if stringValue != '':
             self.page = stringValue
-            self.notify('pageChanged', self.page)
 
     def fieldOutput(self, path):
         return [unicode(self.page)]

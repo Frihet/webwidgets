@@ -89,10 +89,8 @@ class NewPasswordInputWidget(Formatting.HtmlWidget, Base.InputWidget):
         def valueChanged(self, path, value):
             if self.parent['input1'].value == self.parent['input2'].value:
                 self.parent.value = value
-                self.parent.notify('valueChanged', value)
             else:
                 self.parent.error = "Passwords don't match!"
-                self.parent.notify('errorChanged', self.parent.error)
             return True
 
         def getActive(self, path):
@@ -154,7 +152,6 @@ class RadioInputWidget(Base.InputWidget, Base.StaticCompositeWidget):
         value = Utils.idToPath(stringValue)
         if value == path:
             self.group.value = self.value
-            self.group.notify('valueChanged', self.group.value)
 
     def fieldOutput(self, path):
         return [Utils.pathToId(self.group.members[self.group.value].path())]
@@ -189,7 +186,6 @@ class CheckboxInputWidget(Base.ValueInputWidget):
 
     def fieldInput(self, path, stringValue):
         self.value = (stringValue == "checked")
-        self.notify('valueChanged', self.value)
 
     def fieldOutput(self, path):
         return [['', 'checked'][not not self.value]]
@@ -244,11 +240,9 @@ class FileInputWidget(Base.ValueInputWidget, Base.StaticCompositeWidget):
         if path == self.path():
             if fieldValue != '':
                 self.value = fieldValue
-                self.notify('valueChanged', self.value)
         elif path == self.path() + ['_', 'clear']:
             if fieldValue != '':
                 self.value = None
-                self.notify('valueChanged', self.value)
                 
     def fieldOutput(self, path):
         return [self.value]

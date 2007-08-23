@@ -71,11 +71,9 @@ class DateInputWidget(Input.StringInputWidget):
     def fieldInput(self, path, stringValue):
         try:
             self.value = time.strptime(stringValue, self.format)
-            self.notify('valueChanged', self.value)
         except ValueError:
             self.error = 'Invalid date format, expected %s got %s' \
                 % (self.format, stringValue)
-            self.notify('errorChanged', self.error)
                 
     def fieldOutput(self, path):
         return [time.strftime(self.format, self.value)]

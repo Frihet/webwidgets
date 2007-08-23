@@ -64,7 +64,7 @@ def generatePartsForNode(module, node, using = [], context = [], htmlContext = [
                     using,
                     context,
                     htmlContext = htmlContext + [childAttributesValues.get('id', child.localName)])
-                childAttributesValues['id'] = "%(id)s_" + "-".join(htmlContext + [childAttributesValues.get('id', child.localName)])
+                childAttributesValues['id'] = "%(attr_html_id)s_" + "-".join(htmlContext + [childAttributesValues.get('id', child.localName)])
                 texts.extend(["<",
                               child.localName,
                               " ",

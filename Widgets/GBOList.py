@@ -194,11 +194,9 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
         if subWidget == ['sort']:
             if stringValue != '':
                 self.sort = stringToSort(stringValue)
-                self.notify('sortChanged', self.sort)
         elif subWidget == ['page']:
             if stringValue != '':
                 self.page = int(stringValue)
-                self.notify('repaged', self.page)
         elif subWidget[0] == 'function':
             if stringValue != '':
                 self.notify('function', subWidget[1], int(stringValue))
@@ -216,12 +214,12 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
         else:
             raise Exception('Unknown sub-widget %s in %s' %(subWidget, widgetPath))
 
-    def resorted(self, path, sort):
+    def sortChanged(self, path, sort):
         """Notification that the list sort order has changed."""
         if path != self.path(): return
         self.reread()
 
-    def repaged(self, path, page):
+    def pageChanged(self, path, page):
         """Notification that the user has changed page."""
         if path != self.path(): return
         self.reread()

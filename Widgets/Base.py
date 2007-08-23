@@ -148,8 +148,7 @@ class Widget(object):
         def __get__(self, instance, owner):
             if not hasattr(instance, 'parent'):
                 return None
-            return instance.drawHtmlAttributes(instance.path())
-            
+            return instance.drawHtmlAttributes(instance.path())            
     htmlAttributes = htmlAttributes()
 
     def getVisible(self, path):
@@ -243,6 +242,14 @@ class Widget(object):
         
     def __add__(self, other):
         return self.getWidgetByPath(other)
+
+    def __setattr__(self, name, value):
+        # We can't fire notifications unless we have a parent set (can calculate our path)
+        if (    hasattr(self, 'parent')
+            and name in self.__attributes__
+            and value != getattr(self, name)):
+            self.notify('%sChanged' % name, value)
+        object.__setattr__(self, name, value)    
 
 class ChildNodes(dict):
     """Dictionary of child widgets to a widget; any widgets inserted
@@ -446,7 +453,6 @@ class ValueInputWidget(InputWidget):
 
     def fieldInput(self, path, stringValue):
         self.value = stringValue
-        self.notify('valueChanged', self.value)
 
     def fieldOutput(self, path):
         return [unicode(self.value)]
