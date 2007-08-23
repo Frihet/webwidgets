@@ -60,7 +60,7 @@ class Widget(object):
     """List of all attributes that can be set for the widget using
     either class members or arguments to __init__"""
 
-    __htmlAttributes__ = ('class',)
+    __htmlAttributes__ = ('id', 'class',)
 
     classes = ("Webwidgets.Widget",)
     """Read-only attribute containing a list of the names of all
@@ -137,6 +137,13 @@ class Widget(object):
             if not hasattr(self, attr):
                 raise TypeError('Required attribute not set:', type(self).__name__, attr)
 
+    class html_id(object):
+        def __get__(self, instance, owner):
+            if not hasattr(instance, 'parent'):
+                return None
+            return Webwidgets.Utils.pathToId(instance.path())
+    html_id = html_id()
+
     def getVisible(self, path):
         return self.visible and self.session.AccessManager(Webwidgets.Constants.VIEW, self.winId, path)
 
@@ -186,8 +193,6 @@ class Widget(object):
     def drawHtmlAttributes(self, path):
         attributes = [(name, getattr(self, 'html_' + name))
                       for name in self.__htmlAttributes__]
-        attributes.append(('id', Webwidgets.Utils.pathToId(path)))
-        
         return ' '.join(['%s=%s' % (name, xml.sax.saxutils.quoteattr(value))
                          for (name, value)
                          in attributes
@@ -304,7 +309,6 @@ class CompositeWidget(Widget):
         if includeAttributes:
             for key in self.__attributes__:
                 res['attr_' + key] = getattr(self, key)
-            res['attr_htmlAttributes'] = self.drawHtmlAttributes(path)
             res['attr_fullHtmlAttributes'] = self.drawHtmlAttributes(path)
             res['id'] =  Webwidgets.Utils.pathToId(path)
         return res
