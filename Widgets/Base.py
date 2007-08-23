@@ -24,7 +24,7 @@ generic base classes that can be used when implementing more elaborate
 widgets.
 """
 
-import types
+import types, xml.sax.saxutils
 import Webwidgets.Utils, Webwidgets.Constants
 
 debugNotifications = False
@@ -56,7 +56,7 @@ class Widget(object):
     """Controls wether the widget class is automatically instantiated
     when the parent widget is instantiated."""
 
-    __attributes__ = ('visible', 'classes', 'classesStr', 'title')
+    __attributes__ = ('visible', 'classes', 'classesStr', 'title', 'htmlAttributes')
     """List of all attributes that can be set for the widget using
     either class members or arguments to __init__"""
 
@@ -80,6 +80,8 @@ class Widget(object):
     title = None
     """The (human readable) title for the widget, used for pages,
     items in lists etc. If None, the widget path is used."""
+
+    htmlAttributes = ()
 
     class __metaclass__(type):
         def __new__(cls, name, bases, members):
@@ -181,6 +183,18 @@ class Widget(object):
             self.notify(*arg, **kw)
         return  True
 
+    def drawHtmlAttributes(self, path, full = False):
+        attributes = [(name, getattr(self, name))
+                      for name in self.htmlAttributes]
+        if full:
+            attributes.append(('id', Webwidgets.Utils.pathToId(path)))
+            attributes.append(('class', self.classesStr))
+        
+        return ' '.join(['%s=%s' % (name, xml.sax.saxutils.quoteattr(value))
+                         for (name, value)
+                         in attributes
+                         if value])
+
     def draw(self, path):
         """Renders the widget to HTML. Path is where the full path to
         the widget to render, that is what might go into the id-field
@@ -273,7 +287,7 @@ class CompositeWidget(Widget):
                 return invisible
             return unicode(child)
 
-    def drawChildren(self, path, invisibleAsEmpty = False):
+    def drawChildren(self, path, invisibleAsEmpty = False, includeAttributes = False):
         """Renders all child widgets to HTML using their draw methods.
         Also handles visibility of the children - invisible children
         are not included in the output.
@@ -282,10 +296,20 @@ class CompositeWidget(Widget):
                  children.
         """
         
-        return dict([(name, child)
-                     for name, child in [(name, self.drawChild(name, child, path, invisibleAsEmpty))
-                                         for name, child in self.getChildren()]
-                     if child is not None])
+        res = {}
+
+        for name, child in self.getChildren():
+            child = self.drawChild(name, child, path, invisibleAsEmpty)
+            if child is not None:
+                res[name] = child
+
+        if includeAttributes:
+            for key in self.__attributes__:
+                res['attr_' + key] = getattr(self, key)
+            res['attr_htmlAttributes'] = self.drawHtmlAttributes(path)
+            res['attr_fullHtmlAttributes'] = self.drawHtmlAttributes(path, True)
+            res['id'] =  Webwidgets.Utils.pathToId(path)
+        return res
 
     def getChildren(self):
         """@return: a dictionary of child widget names and their
@@ -473,7 +497,10 @@ class HtmlWindow(Window, StaticCompositeWidget):
         Window.draw(self, path)
         self.headContent = {}
 
-        result = self.drawChildren(path)
+        result = self.drawChildren(
+            path,
+            invisibleAsEmpty = True,
+            includeAttributes = True)
 
         result['title'] = '<title>' + self.getTitle(path) + '</title>'
         result['doctype'] = self.doctype
@@ -485,7 +512,7 @@ class HtmlWindow(Window, StaticCompositeWidget):
         
         return ("""
 %(doctype)s
-<html id="%(id)s">
+<html %(attr_fullHtmlAttributes)s>
  <head>
   <base href='%(base)s'>
   %(headContent)s

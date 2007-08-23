@@ -58,12 +58,11 @@ class HtmlWidget(Base.StaticCompositeWidget):
     __attributes__ = Base.StaticCompositeWidget.__attributes__ + ('html',)
     html = ''
     def draw(self, path):
-        res = self.drawChildren(path, invisibleAsEmpty = True)
-        for key in self.__attributes__:
-            res['attr_' + key] = getattr(self, key)
-        res['id'] =  Webwidgets.Utils.pathToId(path)
         try:
-            return self.html % res
+            return self.html % self.drawChildren(
+                path,
+                invisibleAsEmpty = True,
+                includeAttributes = True)
         except KeyError, e:
             e.args = (self, self.path(),) + e.args
             raise e
@@ -75,7 +74,7 @@ class DivWidget(HtmlWidget):
     __no_classes_name__ = True
     __wwml_html_override__ = False
     __children__ = HtmlWidget.__children__ + ('child',)
-    html = "<div id='%(id)s' class='%(attr_classesStr)s'>%(child)s</div>"
+    html = """<div %(attr_fullHtmlAttributes)s>%(child)s</div>"""
 
 class SpanWidget(HtmlWidget):
     """Adds a single span with the widget id as id around the single
@@ -84,29 +83,26 @@ class SpanWidget(HtmlWidget):
     __no_classes_name__ = True
     __wwml_html_override__ = False
     __children__ = HtmlWidget.__children__ + ('child',)
-    html = "<span id='%(id)s' class='%(attr_classesStr)s'>%(child)s</span>"
+    html = """<span %(attr_fullHtmlAttributes)s>%(child)s</span>"""
 
-class Style(Base.Widget):
-    """Includes the css style from the attribute "style"
+class Style(HtmlWidget):
+    """Includes the css style from the child "style"
     """
-    __attributes__ = Base.Widget.__attributes__ + ('style',)
+    __children__ = HtmlWidget.__children__ + ('style',)
+    __wwml_html_override__ = False
     style = ''
-    def draw(self, path):
-        return '<style id="%(id)s" type="text/css">%(style)s</style>' % {'style': self.style,
-                                                                         'id': Webwidgets.Utils.pathToId(path)}
-class StyleLink(Base.Widget):
+    html = """<style %(attr_fullHtmlAttributes)s type='text/css'>%(style)s</style>"""
+    
+class StyleLink(HtmlWidget):
     """Includes the css style from the URL specified with the
     attribute "style"
     """
     __attributes__ = Base.Widget.__attributes__ + ('style', 'title')
+    __wwml_html_override__ = False
     style = ''
     """URI to the stylesheet to include."""
-    title = None
-    def draw(self, path):
-        return '<link href="%(style)s" %(title)s rel="stylesheet" type="text/css" />' % {
-            'style': self.style,
-            'title': self.title is not None and 'title="%s"' % title or '',
-            'id': Webwidgets.Utils.pathToId(path)}
+    title = ''
+    html = """<link %(attr_fullHtmlAttributes)s href="%(attr_style)s" title="%(attr_title)s" rel="stylesheet" type="text/css" />"""
 
 class Message(HtmlWidget):
     """Informative message display. If no message is set, this widget
@@ -116,7 +112,7 @@ class Message(HtmlWidget):
     message = ''
     def draw(self, path):
         if self.children['message']:
-            self.html = '<div id="%(id)s">%(message)s</div>'
+            self.html = '<div %(attr_fullHtmlAttributes)s>%(message)s</div>'
         else:
             self.html = ''
         return HtmlWidget.draw(self, path)
@@ -156,8 +152,8 @@ class MediaWidget(Base.Widget):
                 }
         else:
             preview = content.filename
-        return """<a class="%(classesStr)s" href="%(location)s">%(preview)s</a>""" % {
-            'classesStr': self.classesStr,
+        return """<a %(attr_fullHtmlAttributes)s href="%(location)s">%(preview)s</a>""" % {
+            'attr_fullHtmlAttributes': self.drawHtmlAttributes(path, True),
             'location': location,
             'preview': preview
             }
@@ -182,14 +178,12 @@ class LabelWidget(Base.StaticCompositeWidget):
         else:
             target = self + self.target
         targetPath = target.path()
-        res = self.drawChildren(path)
+        res = self.drawChildren(path, includeAttributes = True)
         res['error'] = ''
         if target.error is not None:
            res['error'] = """<span class="error">(%s)</span>""" % (target.error,)
-        res['id'] = Webwidgets.Utils.pathToId(path)
-        res['attr_classesStr'] = self.classesStr
         res['target'] = Webwidgets.Utils.pathToId(targetPath)
-        return """<label class="%(attr_classesStr)s" for="%(target)s">
+        return """<label %(attr_fullHtmlAttributes)s for="%(target)s">
         %(label)s
         %(error)s
         </label>""" % res
@@ -205,14 +199,14 @@ class FieldWidget(LabelWidget):
         else:
             target = self + ['field'] + self.target
         targetPath = target.path()
-        res = self.drawChildren(path)
+        res = self.drawChildren(path, includeAttributes = True)
         res['error'] = ''
         if target.error is not None:
            res['error'] = """<span class="error">(%s)</span>""" % (target.error,)
         res['id'] = Webwidgets.Utils.pathToId(path)
         res['attr_classesStr'] = self.classesStr
         res['target'] = Webwidgets.Utils.pathToId(targetPath)
-        return """<div id='%(id)s' class='%(attr_classesStr)s'>
+        return """<div %(attr_fullHtmlAttributes)s>
                    <label for="%(target)s">
                     %(label)s%(error)s:
                    </label>
@@ -225,9 +219,9 @@ class FieldWidget(LabelWidget):
 class FieldgroupWidget(ListWidget):
     class pre(Base.Widget):
         def draw(self, path):
-            return """<div id="%(id)s" classes="%(attr_classesStr)s">""" % {
-                'id': Webwidgets.Utils.pathToId(self.parent.path()),
-                'attr_classesStr': self.parent.classesStr}
+            return """<div %(attr_fullHtmlAttributes)s>""" % {
+                'attr_fullHtmlAttributes': self.parent.drawHtmlAttributes(self.parent.path(), True),
+                }
     post = "</div>\n"
 
 class TableWidget(Base.StaticCompositeWidget, Table.Table):
@@ -261,7 +255,7 @@ class TableWidget(Base.StaticCompositeWidget, Table.Table):
     
     def draw(self, path):
         children = self.drawChildren(path)
-        result = '<table border="1" id="%s">\n' % Webwidgets.Utils.pathToId(path)
+        result = '<table border="1" %s>\n' % self.drawHtmlAttributes(path, True)
         for y in xrange(0, self.h):
             if y not in self.rowWidths or self.rowWidths[y] > 0:
                 result += '<tr>\n'
