@@ -201,7 +201,7 @@ select {
  color: #000000;
 }
 
-.dialog {
+.Webwidgets-Widgets-Composite-DialogWidget {
  position: fixed;
  overflow: auto;
  left: 20%;
@@ -218,13 +218,13 @@ select {
  background-color: #eeeeee;
 }
 
-.dialog .dialog-head {
+.Webwidgets-Widgets-Composite-DialogWidget .dialog-head {
  border-bottom: 1px solid black;
 }
 
-.dialog .dialog-body {
+.Webwidgets-Widgets-Composite-DialogWidget .dialog-body {
 }
 
-.dialog .dialog-buttons {
+.Webwidgets-Widgets-Composite-DialogWidget .dialog-buttons {
  border-top: 1px solid black;
 }

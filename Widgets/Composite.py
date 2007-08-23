@@ -24,76 +24,6 @@ import Webwidgets.Utils, Webwidgets.Constants
 import Base, Input, Formatting
 
 
-
-class LabelWidget(Base.StaticCompositeWidget):
-    """Renders a label for an input field. The input field can be
-    specified either as the widget itself, or a
-    L{Webwidgets.Utils.RelativePath} to the widget"""
-    
-    __attributes__ = Base.StaticCompositeWidget.__attributes__ + ('target',)
-    __children__ = ('label',)
-
-    target = []
-    """The widget this widget is a label for. This is either the
-    actual widget, or a L{Webwidgets.Utils.RelativePath} referencing
-    the widget.
-    """
-
-    def draw(self, path):
-        if isinstance(self.target, Base.Widget):
-            target = self.target
-        else:
-            target = self + self.target
-        targetPath = target.path()
-        res = self.drawChildren(path)
-        res['error'] = ''
-        if target.error is not None:
-           res['error'] = """<span class="error">(%s)</span>""" % (target.error,)
-        res['id'] = Webwidgets.Utils.pathToId(path)
-        res['attr_classesStr'] = self.classesStr
-        res['target'] = Webwidgets.Utils.pathToId(targetPath)
-        return """<label class="%(attr_classesStr)s" for="%(target)s">
-        %(label)s
-        %(error)s
-        </label>""" % res
-
-class FieldWidget(LabelWidget):
-    __no_classes_name__ = True
-    __wwml_html_override__ = False
-    __children__ = LabelWidget.__children__ + ('field',)
-    
-    def draw(self, path):
-        if isinstance(self.target, Base.Widget):
-            target = self.target
-        else:
-            target = self + ['field'] + self.target
-        targetPath = target.path()
-        res = self.drawChildren(path)
-        res['error'] = ''
-        if target.error is not None:
-           res['error'] = """<span class="error">(%s)</span>""" % (target.error,)
-        res['id'] = Webwidgets.Utils.pathToId(path)
-        res['attr_classesStr'] = self.classesStr
-        res['target'] = Webwidgets.Utils.pathToId(targetPath)
-        return """<div id='%(id)s' class='%(attr_classesStr)s'>
-                   <label for="%(target)s">
-                    %(label)s%(error)s:
-                   </label>
-                   <span class="field">
-                    %(field)s
-                   </span>
-                  </div>
-                  """ % res
-
-class FieldgroupWidget(Formatting.ListWidget):
-    class pre(Base.Widget):
-        def draw(self, path):
-            return """<div id="%(id)s" classes="%(attr_classesStr)s">""" % {
-                'id': Webwidgets.Utils.pathToId(self.parent.path()),
-                'attr_classesStr': self.parent.classesStr}
-    post = "</div>\n"
-
-
 class DialogWidget(Formatting.HtmlWidget):
     """Dialogs provides an easy way to let the user select one of a
     few different options, while providing the user with some longer
@@ -104,7 +34,7 @@ class DialogWidget(Formatting.HtmlWidget):
     __children__ = Formatting.HtmlWidget.__children__ + ('head', 'body')
     buttons = {'Cancel': '0', 'Ok': '1'}
     html = """
-    <div class="dialog" id="%(id)s">
+    <div %(attr_fullHtmlAttributes)s>
      <div class="dialog-head" id="%(id)s-head">
       %(head)s
      </div>
@@ -291,7 +221,7 @@ class TabbedViewWidget(Base.InputWidget, Base.StaticCompositeWidget):
                           #### end ####
                           if child.getVisible(child.path())])
         return """
-               <div id="%(id)s" class="%(classes)s">
+               <div %(attr_fullHtmlAttributes)s>
                 <ul class="tabs">
                  %(tabs)s
                 </ul>
@@ -299,7 +229,6 @@ class TabbedViewWidget(Base.InputWidget, Base.StaticCompositeWidget):
                  %(page)s
                 </div>
                </div>
-               """ % {'id': widgetId,
-                      'classes': self.classesStr,
+               """ % {'attr_fullHtmlAttributes': self.drawHtmlAttributes(path, True),
                       'page': self.drawChild(self.page, self.getChild(self.page), path, True),
                       'tabs': tabs}
