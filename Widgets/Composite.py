@@ -35,13 +35,13 @@ class DialogWidget(Formatting.HtmlWidget):
     buttons = {'Cancel': '0', 'Ok': '1'}
     html = """
     <div %(attr_fullHtmlAttributes)s>
-     <div class="dialog-head" id="%(id)s-head">
+     <div class="dialog-head" id="%(attr_html_id)s-head">
       %(head)s
      </div>
-     <div class="dialog-body" id="%(id)s-body">
+     <div class="dialog-body" id="%(attr_html_id)s-body">
       %(body)s
      </div>
-     <div class="dialog-buttons" id="%(id)s-buttons">
+     <div class="dialog-buttons" id="%(attr_html_id)s-buttons">
       %(buttons)s
      </div>
     </div>
@@ -115,13 +115,13 @@ class TreeWidget(Base.InputWidget):
                                                            ][sibling == siblings - 1]
             expandParams = {'src': self.pictUrl + self.pictPattern % {'name':expanderImg},
                             'alt': expanderAlt,
-                            'id': Webwidgets.Utils.pathToId(nodePath + ['expand']),
+                            'attr_html_id': Webwidgets.Utils.pathToId(nodePath + ['expand']),
                             'path': nodePath + ['expand']}
             if subNodes or not node.updated:
                 self.registerInput(expandParams[path])
-                res += '<input type="image" name="%(id)s" value="%(id)s" src="%(src)s" alt="%(alt)s" id="%(id)s" />' % expandParams
+                res += '<input type="image" name="%(attr_html_id)s" value="%(attr_html_id)s" src="%(src)s" alt="%(alt)s" id="%(attr_html_id)s" />' % expandParams
             else:
-                res += '<img src="%(src)s" alt="%(alt)s" id="%(id)s" />' % expandParams
+                res += '<img src="%(src)s" alt="%(alt)s" id="%(attr_html_id)s" />' % expandParams
 
             selectImg, selectAlt = self.pictIcon[subNodes > 0][node.expanded]
             selectParams = {'imgPath': nodePath + ['selectImg'],
@@ -206,11 +206,11 @@ class TabbedViewWidget(Base.InputWidget, Base.StaticCompositeWidget):
                           <li><button
                                type="submit"
                                %(disabled)s
-                               id="%(id)s_%(page)s"
-                               name="%(id)s"
+                               id="%(attr_html_id)s_%(page)s"
+                               name="%(attr_html_id)s"
                                value="%(page)s" />%(caption)s</button></li>
                           """ % {'disabled': ['', 'disabled="true"'][page == self.page or not active],
-                                 'id': widgetId,
+                                 'attr_html_id': widgetId,
                                  'page':page,
                                  'caption':child.getTitle(path + [page])}
                           for page, child in self.getChildren()

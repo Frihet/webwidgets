@@ -349,18 +349,18 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
         return """
 <div class="buttons">
  <span class="left">
-  <button type="submit" %(backActive)s id="%(id)s_first" name="%(id)s" value="%(first)s" />&lt;&lt;</button>
-  <button type="submit" %(backActive)s id="%(id)s_previous" name="%(id)s" value="%(previous)s" />&lt;</button>
+  <button type="submit" %(backActive)s id="%(attr_html_id)s_first" name="%(attr_html_id)s" value="%(first)s" />&lt;&lt;</button>
+  <button type="submit" %(backActive)s id="%(attr_html_id)s_previous" name="%(attr_html_id)s" value="%(previous)s" />&lt;</button>
  </span>
  <span class="center">
   %(page)s/%(pages)s
  </span>
  <span class="right">
-  <button type="submit" %(forwardActive)s id="%(id)s_next" name="%(id)s" value="%(next)s" />&gt;</button>
-  <button type="submit" %(forwardActive)s id="%(id)s_last" name="%(id)s" value="%(last)s" />&gt;&gt;</button>
+  <button type="submit" %(forwardActive)s id="%(attr_html_id)s_next" name="%(attr_html_id)s" value="%(next)s" />&gt;</button>
+  <button type="submit" %(forwardActive)s id="%(attr_html_id)s_last" name="%(attr_html_id)s" value="%(last)s" />&gt;&gt;</button>
  </span>
 </div>
-""" % {'id': pageId,
+""" % {'attr_html_id': pageId,
        'first': 1,
        'previous': self.page - 1,
        'page': self.page,
@@ -384,10 +384,10 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
         for column, title in visibleColumns.iteritems():
             headings.append("""
 <th class="column %(classes)s">
- <button type="submit" id="%(id)s_%(column)s" %(disabled)s name="%(id)s" value="%(sort)s" />%(caption)s</button>
+ <button type="submit" id="%(attr_html_id)s_%(column)s" %(disabled)s name="%(attr_html_id)s" value="%(sort)s" />%(caption)s</button>
 </th>
 """ %
-                            {'id': inputId,
+                            {'attr_html_id': inputId,
                              'column': column,
                              'disabled': ['disabled="true"', ''][sortActive],
                              'caption': title,
@@ -413,8 +413,8 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
                     self.session.windows[self.winId].fields[Webwidgets.Utils.pathToId(path + ['_', 'function', function])] = self
             for rowNum in xrange(0, len(rows)):
                 functions = '<td class="functions">%s</td>' % ''.join([
-                    """<button type="submit" id="%(id)s" %(disabled)s name="%(id)s" value="%(row)s" />%(title)s</button>""" % {
-                        'id': Webwidgets.Utils.pathToId(path + ['_', 'function', function]),
+                    """<button type="submit" id="%(attr_html_id)s" %(disabled)s name="%(attr_html_id)s" value="%(row)s" />%(title)s</button>""" % {
+                        'attr_html_id': Webwidgets.Utils.pathToId(path + ['_', 'function', function]),
                         'disabled': ['disabled="true"', ''][functionActive[function]],
                         'title': title,
                         'row':rowNum}

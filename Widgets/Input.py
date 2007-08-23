@@ -274,12 +274,12 @@ class FileInputWidget(Base.ValueInputWidget, Base.StaticCompositeWidget):
                 self.registerInput(path + ['_', 'clear'], argumentName)
         return """<span %(attr_fullHtmlAttributes)s>
                    %(current)s
-                   <input type="file" name="%(id)s" %(disabled)s id="%(id)s" />
+                   <input type="file" name="%(attr_html_id)s" %(disabled)s id="%(attr_html_id)s" />
                    <input type='submit' name="%(clearId)s" %(clearable)s id="%(clearId)s" value="Clear" />
                   </span>""" % {
                        'attr_fullHtmlAttributes': self.drawHtmlAttributes(path),
                        'current': self.drawChild('preview', self['preview'], path, True),
                        'disabled': ['', 'disabled="true"'][not self.getActive(path)],
                        'clearable': ['', 'disabled="true"'][not self.getActive(path) or self.value is None],
-                       'id': Webwidgets.Utils.pathToId(path),
+                       'attr_html_id': Webwidgets.Utils.pathToId(path),
                        'clearId': Webwidgets.Utils.pathToId(path + ['_', 'clear'])}

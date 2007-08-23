@@ -53,11 +53,11 @@ class DateInputWidget(Input.StringInputWidget):
        <script type="text/javascript">
          Calendar.setup(
            {
-             inputField  : "%(id)s",
-             displayArea : "%(id)s",
+             inputField  : "%(attr_html_id)s",
+             displayArea : "%(attr_html_id)s",
              ifFormat    : "%(format)s",
              daFormat    : "%(format)s",
-             button      : "%(id)s"
+             button      : "%(attr_html_id)s"
            }
          );
        </script>''' % {
@@ -65,7 +65,7 @@ class DateInputWidget(Input.StringInputWidget):
             'name': Webwidgets.Utils.pathToId(path),
             'value': self.fieldOutput(path)[0], 'format': self.format,
             'disabled': ['', 'disabled="true"'][not self.getActive(path)],
-            'id': Webwidgets.Utils.pathToId(path)}
+            'attr_html_id': Webwidgets.Utils.pathToId(path)}
 
 
     def fieldInput(self, path, stringValue):

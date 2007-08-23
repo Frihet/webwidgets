@@ -521,8 +521,8 @@ class HtmlWindow(Window, StaticCompositeWidget):
   %(title)s
   %(head)s
  </head>
- <body id="%(id)s-_-body">
-  <form name="%(name)s" method='post' enctype='multipart/form-data' action='%(uri)s' id="%(id)s-_-body-form">
+ <body id="%(attr_html_id)s-_-body">
+  <form name="%(name)s" method='post' enctype='multipart/form-data' action='%(uri)s' id="%(attr_html_id)s-_-body-form">
    %(body)s
   </form>
  </body>
