@@ -48,7 +48,7 @@ class StringInputWidget(Base.ValueInputWidget):
     def draw(self, path):
         super(StringInputWidget, self).draw(path)
         return '<input %(attr_fullHtmlAttributes)s type="text" name="%(name)s" value="%(value)s" %(disabled)s />' % {
-            'attr_fullHtmlAttributes': self.drawHtmlAttributes(path, True),
+            'attr_fullHtmlAttributes': self.drawHtmlAttributes(path),
             'name': Webwidgets.Utils.pathToId(path),
             'value': self.fieldOutput(path)[0],
             'disabled': ['', 'disabled="true"'][not self.getActive(path)]}
@@ -58,7 +58,7 @@ class PasswordInputWidget(Base.ValueInputWidget):
     def draw(self, path):
         super(PasswordInputWidget, self).draw(path)
         return '<input %(attr_fullHtmlAttributes)s type="password" name="%(name)s" value="%(value)s" %(disabled)s />' % {
-            'attr_fullHtmlAttributes': self.drawHtmlAttributes(path, True),
+            'attr_fullHtmlAttributes': self.drawHtmlAttributes(path),
             'name': Webwidgets.Utils.pathToId(path),
             'value': self.fieldOutput(path)[0],
             'disabled': ['', 'disabled="true"'][not self.getActive(path)]}
@@ -113,7 +113,7 @@ class ButtonInputWidget(Base.InputWidget):
     def draw(self, path):
         super(ButtonInputWidget, self).draw(path)
         return '<input %(attr_fullHtmlAttributes)s type="submit" %(disabled)s name="%(name)s" value="%(title)s" />' % {
-            'attr_fullHtmlAttributes': self.drawHtmlAttributes(path, True),
+            'attr_fullHtmlAttributes': self.drawHtmlAttributes(path),
             'name': Webwidgets.Utils.pathToId(path),
             'title': self.title,
             'disabled': ['', 'disabled="true"'][not self.getActive(path)]}
@@ -182,7 +182,7 @@ class CheckboxInputWidget(Base.ValueInputWidget):
         super(CheckboxInputWidget, self).draw(path)
         checked = ["", "checked='true'"][not not self.value]
         return '<input %(attr_fullHtmlAttributes)s type="checkbox" name="%(name)s" value="checked" %(checked)s %(disabled)s />' % {
-            'attr_fullHtmlAttributes': self.drawHtmlAttributes(path, True),
+            'attr_fullHtmlAttributes': self.drawHtmlAttributes(path),
             'name': Webwidgets.Utils.pathToId(path),
             'checked': checked,
             'disabled': ['', 'disabled="true"'][not self.getActive(path)]}
@@ -227,7 +227,7 @@ class ListInputWidget(Base.ValueInputWidget, Base.StaticCompositeWidget):
         return """<select %(attr_fullHtmlAttributes)s %(multiple)s %(size)s name="%(name)s" %(disabled)s">
          %(options)s
          </select>""" % {
-            'attr_fullHtmlAttributes': self.drawHtmlAttributes(path, True),
+            'attr_fullHtmlAttributes': self.drawHtmlAttributes(path),
             'multiple': self.multiple and 'multiple' or '',
             'size': self.size != 0 and 'size="%s"' % self.size or '',
             'name': Webwidgets.Utils.pathToId(path),
@@ -277,7 +277,7 @@ class FileInputWidget(Base.ValueInputWidget, Base.StaticCompositeWidget):
                    <input type="file" name="%(id)s" %(disabled)s id="%(id)s" />
                    <input type='submit' name="%(clearId)s" %(clearable)s id="%(clearId)s" value="Clear" />
                   </span>""" % {
-                       'attr_fullHtmlAttributes': self.drawHtmlAttributes(path, True),
+                       'attr_fullHtmlAttributes': self.drawHtmlAttributes(path),
                        'current': self.drawChild('preview', self['preview'], path, True),
                        'disabled': ['', 'disabled="true"'][not self.getActive(path)],
                        'clearable': ['', 'disabled="true"'][not self.getActive(path) or self.value is None],

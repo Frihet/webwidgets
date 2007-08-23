@@ -458,7 +458,7 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
  %(table)s
  %(pagingButtons)s
 </div>
-""" % {'attr_fullHtmlAttributes': self.drawHtmlAttributes(path, True),
+""" % {'attr_fullHtmlAttributes': self.drawHtmlAttributes(path),
        'table': self.drawTable(headings, renderedRows),
        'pagingButtons': self.drawPagingButtons(path)
        }

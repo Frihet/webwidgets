@@ -56,16 +56,18 @@ class Widget(object):
     """Controls wether the widget class is automatically instantiated
     when the parent widget is instantiated."""
 
-    __attributes__ = ('visible', 'classes', 'classesStr', 'title', 'htmlAttributes')
+    __attributes__ = ('visible', 'classes', 'title')
     """List of all attributes that can be set for the widget using
     either class members or arguments to __init__"""
+
+    __htmlAttributes__ = ('class',)
 
     classes = ("Webwidgets.Widget",)
     """Read-only attribute containing a list of the names of all
     inherited classes except ones with L{__no_classes_name__} set to
     True. This is mainly usefull for automatic CSS class generation."""
 
-    classesStr = 'Webwidgets-Widget'
+    html_class = 'Webwidgets-Widget'
     """Read-only attribute containing the information in L{classes}
     but in a format suitable for inclusion in the 'class' attribute in
     HTML."""
@@ -81,8 +83,6 @@ class Widget(object):
     """The (human readable) title for the widget, used for pages,
     items in lists etc. If None, the widget path is used."""
 
-    htmlAttributes = ()
-
     class __metaclass__(type):
         def __new__(cls, name, bases, members):
             members = dict(members)
@@ -95,7 +95,7 @@ class Widget(object):
                 if hasattr(base, 'classes'):
                     classes.extend(base.classes)
             members['classes'] = tuple(classes)
-            members['classesStr'] = ' '.join([c.replace('.', '-')
+            members['html_class'] = ' '.join([c.replace('.', '-')
                                               for c in classes])
             return type.__new__(cls, name, bases, members)
 
@@ -131,9 +131,9 @@ class Widget(object):
             item = getattr(self, name)
             if isinstance(item, type) and issubclass(item, Widget) and not item.__explicit_load__:
                 setattr(self, name, item(session, winId))
-        __attributes__ = attrs.get('__attributes__', self.__attributes__)
         self.__dict__.update(attrs)
-        for attr in __attributes__:
+        self.__attributes__ += tuple(['html_' + name for name in self.__htmlAttributes__])
+        for attr in self.__attributes__:
             if not hasattr(self, attr):
                 raise TypeError('Required attribute not set:', type(self).__name__, attr)
 
@@ -183,12 +183,10 @@ class Widget(object):
             self.notify(*arg, **kw)
         return  True
 
-    def drawHtmlAttributes(self, path, full = False):
-        attributes = [(name, getattr(self, name))
-                      for name in self.htmlAttributes]
-        if full:
-            attributes.append(('id', Webwidgets.Utils.pathToId(path)))
-            attributes.append(('class', self.classesStr))
+    def drawHtmlAttributes(self, path):
+        attributes = [(name, getattr(self, 'html_' + name))
+                      for name in self.__htmlAttributes__]
+        attributes.append(('id', Webwidgets.Utils.pathToId(path)))
         
         return ' '.join(['%s=%s' % (name, xml.sax.saxutils.quoteattr(value))
                          for (name, value)
@@ -307,7 +305,7 @@ class CompositeWidget(Widget):
             for key in self.__attributes__:
                 res['attr_' + key] = getattr(self, key)
             res['attr_htmlAttributes'] = self.drawHtmlAttributes(path)
-            res['attr_fullHtmlAttributes'] = self.drawHtmlAttributes(path, True)
+            res['attr_fullHtmlAttributes'] = self.drawHtmlAttributes(path)
             res['id'] =  Webwidgets.Utils.pathToId(path)
         return res
 

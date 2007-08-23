@@ -58,11 +58,12 @@ class HtmlWidget(Base.StaticCompositeWidget):
     __attributes__ = Base.StaticCompositeWidget.__attributes__ + ('html',)
     html = ''
     def draw(self, path):
+        children = self.drawChildren(
+            path,
+            invisibleAsEmpty = True,
+            includeAttributes = True)
         try:
-            return self.html % self.drawChildren(
-                path,
-                invisibleAsEmpty = True,
-                includeAttributes = True)
+            return self.html % children
         except KeyError, e:
             e.args = (self, self.path(),) + e.args
             raise e
@@ -153,7 +154,7 @@ class MediaWidget(Base.Widget):
         else:
             preview = content.filename
         return """<a %(attr_fullHtmlAttributes)s href="%(location)s">%(preview)s</a>""" % {
-            'attr_fullHtmlAttributes': self.drawHtmlAttributes(path, True),
+            'attr_fullHtmlAttributes': self.drawHtmlAttributes(path),
             'location': location,
             'preview': preview
             }
@@ -203,8 +204,6 @@ class FieldWidget(LabelWidget):
         res['error'] = ''
         if target.error is not None:
            res['error'] = """<span class="error">(%s)</span>""" % (target.error,)
-        res['id'] = Webwidgets.Utils.pathToId(path)
-        res['attr_classesStr'] = self.classesStr
         res['target'] = Webwidgets.Utils.pathToId(targetPath)
         return """<div %(attr_fullHtmlAttributes)s>
                    <label for="%(target)s">
@@ -220,7 +219,7 @@ class FieldgroupWidget(ListWidget):
     class pre(Base.Widget):
         def draw(self, path):
             return """<div %(attr_fullHtmlAttributes)s>""" % {
-                'attr_fullHtmlAttributes': self.parent.drawHtmlAttributes(self.parent.path(), True),
+                'attr_fullHtmlAttributes': self.parent.drawHtmlAttributes(self.parent.path()),
                 }
     post = "</div>\n"
 
@@ -255,7 +254,7 @@ class TableWidget(Base.StaticCompositeWidget, Table.Table):
     
     def draw(self, path):
         children = self.drawChildren(path)
-        result = '<table border="1" %s>\n' % self.drawHtmlAttributes(path, True)
+        result = '<table border="1" %s>\n' % self.drawHtmlAttributes(path)
         for y in xrange(0, self.h):
             if y not in self.rowWidths or self.rowWidths[y] > 0:
                 result += '<tr>\n'

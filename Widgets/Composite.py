@@ -229,6 +229,6 @@ class TabbedViewWidget(Base.InputWidget, Base.StaticCompositeWidget):
                  %(page)s
                 </div>
                </div>
-               """ % {'attr_fullHtmlAttributes': self.drawHtmlAttributes(path, True),
+               """ % {'attr_fullHtmlAttributes': self.drawHtmlAttributes(path),
                       'page': self.drawChild(self.page, self.getChild(self.page), path, True),
                       'tabs': tabs}

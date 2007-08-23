@@ -61,7 +61,7 @@ class DateInputWidget(Input.StringInputWidget):
            }
          );
        </script>''' % {
-            'attr_fullHtmlAttributes': self.drawHtmlAttributes(path, True),
+            'attr_fullHtmlAttributes': self.drawHtmlAttributes(path),
             'name': Webwidgets.Utils.pathToId(path),
             'value': self.fieldOutput(path)[0], 'format': self.format,
             'disabled': ['', 'disabled="true"'][not self.getActive(path)],
