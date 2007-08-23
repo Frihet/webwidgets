@@ -34,7 +34,7 @@ class DialogWidget(Formatting.HtmlWidget):
     __children__ = Formatting.HtmlWidget.__children__ + ('head', 'body')
     buttons = {'Cancel': '0', 'Ok': '1'}
     html = """
-    <div %(attr_fullHtmlAttributes)s>
+    <div %(attr_htmlAttributes)s>
      <div class="dialog-head" id="%(attr_html_id)s-head">
       %(head)s
      </div>
@@ -221,7 +221,7 @@ class TabbedViewWidget(Base.InputWidget, Base.StaticCompositeWidget):
                           #### end ####
                           if child.getVisible(child.path())])
         return """
-               <div %(attr_fullHtmlAttributes)s>
+               <div %(attr_htmlAttributes)s>
                 <ul class="tabs">
                  %(tabs)s
                 </ul>
@@ -229,6 +229,6 @@ class TabbedViewWidget(Base.InputWidget, Base.StaticCompositeWidget):
                  %(page)s
                 </div>
                </div>
-               """ % {'attr_fullHtmlAttributes': self.drawHtmlAttributes(path),
+               """ % {'attr_htmlAttributes': self.drawHtmlAttributes(path),
                       'page': self.drawChild(self.page, self.getChild(self.page), path, True),
                       'tabs': tabs}

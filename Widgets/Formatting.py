@@ -65,7 +65,7 @@ class HtmlWidget(Base.StaticCompositeWidget):
         try:
             return self.html % children
         except KeyError, e:
-            e.args = (self, self.path(),) + e.args
+            e.args = (self, self.path()) + e.args + (self.html,)
             raise e
 
 class DivWidget(HtmlWidget):
@@ -75,7 +75,7 @@ class DivWidget(HtmlWidget):
     __no_classes_name__ = True
     __wwml_html_override__ = False
     __children__ = HtmlWidget.__children__ + ('child',)
-    html = """<div %(attr_fullHtmlAttributes)s>%(child)s</div>"""
+    html = """<div %(attr_htmlAttributes)s>%(child)s</div>"""
 
 class SpanWidget(HtmlWidget):
     """Adds a single span with the widget id as id around the single
@@ -84,7 +84,7 @@ class SpanWidget(HtmlWidget):
     __no_classes_name__ = True
     __wwml_html_override__ = False
     __children__ = HtmlWidget.__children__ + ('child',)
-    html = """<span %(attr_fullHtmlAttributes)s>%(child)s</span>"""
+    html = """<span %(attr_htmlAttributes)s>%(child)s</span>"""
 
 class Style(HtmlWidget):
     """Includes the css style from the child "style"
@@ -92,7 +92,7 @@ class Style(HtmlWidget):
     __children__ = HtmlWidget.__children__ + ('style',)
     __wwml_html_override__ = False
     style = ''
-    html = """<style %(attr_fullHtmlAttributes)s type='text/css'>%(style)s</style>"""
+    html = """<style %(attr_htmlAttributes)s type='text/css'>%(style)s</style>"""
     
 class StyleLink(HtmlWidget):
     """Includes the css style from the URL specified with the
@@ -103,7 +103,7 @@ class StyleLink(HtmlWidget):
     style = ''
     """URI to the stylesheet to include."""
     title = ''
-    html = """<link %(attr_fullHtmlAttributes)s href="%(attr_style)s" title="%(attr_title)s" rel="stylesheet" type="text/css" />"""
+    html = """<link %(attr_htmlAttributes)s href="%(attr_style)s" title="%(attr_title)s" rel="stylesheet" type="text/css" />"""
 
 class Message(HtmlWidget):
     """Informative message display. If no message is set, this widget
@@ -113,7 +113,7 @@ class Message(HtmlWidget):
     message = ''
     def draw(self, path):
         if self.children['message']:
-            self.html = '<div %(attr_fullHtmlAttributes)s>%(message)s</div>'
+            self.html = '<div %(attr_htmlAttributes)s>%(message)s</div>'
         else:
             self.html = ''
         return HtmlWidget.draw(self, path)
@@ -153,8 +153,8 @@ class MediaWidget(Base.Widget):
                 }
         else:
             preview = content.filename
-        return """<a %(attr_fullHtmlAttributes)s href="%(location)s">%(preview)s</a>""" % {
-            'attr_fullHtmlAttributes': self.drawHtmlAttributes(path),
+        return """<a %(attr_htmlAttributes)s href="%(location)s">%(preview)s</a>""" % {
+            'attr_htmlAttributes': self.drawHtmlAttributes(path),
             'location': location,
             'preview': preview
             }
@@ -184,7 +184,7 @@ class LabelWidget(Base.StaticCompositeWidget):
         if target.error is not None:
            res['error'] = """<span class="error">(%s)</span>""" % (target.error,)
         res['target'] = Webwidgets.Utils.pathToId(targetPath)
-        return """<label %(attr_fullHtmlAttributes)s for="%(target)s">
+        return """<label %(attr_htmlAttributes)s for="%(target)s">
         %(label)s
         %(error)s
         </label>""" % res
@@ -205,7 +205,7 @@ class FieldWidget(LabelWidget):
         if target.error is not None:
            res['error'] = """<span class="error">(%s)</span>""" % (target.error,)
         res['target'] = Webwidgets.Utils.pathToId(targetPath)
-        return """<div %(attr_fullHtmlAttributes)s>
+        return """<div %(attr_htmlAttributes)s>
                    <label for="%(target)s">
                     %(label)s%(error)s:
                    </label>
@@ -218,8 +218,8 @@ class FieldWidget(LabelWidget):
 class FieldgroupWidget(ListWidget):
     class pre(Base.Widget):
         def draw(self, path):
-            return """<div %(attr_fullHtmlAttributes)s>""" % {
-                'attr_fullHtmlAttributes': self.parent.drawHtmlAttributes(self.parent.path()),
+            return """<div %(attr_htmlAttributes)s>""" % {
+                'attr_htmlAttributes': self.parent.drawHtmlAttributes(self.parent.path()),
                 }
     post = "</div>\n"
 

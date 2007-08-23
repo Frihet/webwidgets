@@ -56,7 +56,7 @@ class Widget(object):
     """Controls wether the widget class is automatically instantiated
     when the parent widget is instantiated."""
 
-    __attributes__ = ('visible', 'classes', 'title')
+    __attributes__ = ('visible', 'classes', 'title', 'htmlAttributes')
     """List of all attributes that can be set for the widget using
     either class members or arguments to __init__"""
 
@@ -143,6 +143,14 @@ class Widget(object):
                 return None
             return Webwidgets.Utils.pathToId(instance.path())
     html_id = html_id()
+
+    class htmlAttributes(object):
+        def __get__(self, instance, owner):
+            if not hasattr(instance, 'parent'):
+                return None
+            return instance.drawHtmlAttributes(instance.path())
+            
+    htmlAttributes = htmlAttributes()
 
     def getVisible(self, path):
         return self.visible and self.session.AccessManager(Webwidgets.Constants.VIEW, self.winId, path)
@@ -309,8 +317,6 @@ class CompositeWidget(Widget):
         if includeAttributes:
             for key in self.__attributes__:
                 res['attr_' + key] = getattr(self, key)
-            res['attr_fullHtmlAttributes'] = self.drawHtmlAttributes(path)
-            res['id'] =  Webwidgets.Utils.pathToId(path)
         return res
 
     def getChildren(self):
@@ -514,7 +520,7 @@ class HtmlWindow(Window, StaticCompositeWidget):
         
         return ("""
 %(doctype)s
-<html %(attr_fullHtmlAttributes)s>
+<html %(attr_htmlAttributes)s>
  <head>
   <base href='%(base)s'>
   %(headContent)s

@@ -49,7 +49,7 @@ class DateInputWidget(Input.StringInputWidget):
                                                    'type': 'text/plain'},
                                                   {}))
 
-        return '''<input %(attr_fullHtmlAttributes)s name="%(name)s" value="%(value)s" autocomplete="off" />
+        return '''<input %(attr_htmlAttributes)s name="%(name)s" value="%(value)s" autocomplete="off" />
        <script type="text/javascript">
          Calendar.setup(
            {
@@ -61,7 +61,7 @@ class DateInputWidget(Input.StringInputWidget):
            }
          );
        </script>''' % {
-            'attr_fullHtmlAttributes': self.drawHtmlAttributes(path),
+            'attr_htmlAttributes': self.drawHtmlAttributes(path),
             'name': Webwidgets.Utils.pathToId(path),
             'value': self.fieldOutput(path)[0], 'format': self.format,
             'disabled': ['', 'disabled="true"'][not self.getActive(path)],

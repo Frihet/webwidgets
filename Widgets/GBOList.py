@@ -454,11 +454,11 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
         self.appendFunctions(path, renderedRows, headings)
 
         return """
-<div %(attr_fullHtmlAttributes)s>
+<div %(attr_htmlAttributes)s>
  %(table)s
  %(pagingButtons)s
 </div>
-""" % {'attr_fullHtmlAttributes': self.drawHtmlAttributes(path),
+""" % {'attr_htmlAttributes': self.drawHtmlAttributes(path),
        'table': self.drawTable(headings, renderedRows),
        'pagingButtons': self.drawPagingButtons(path)
        }
