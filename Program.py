@@ -269,7 +269,6 @@ class Program(WebKit.Page.Page):
             if location and location[0].startswith('_'):
                 winId = location[0][1:]
                 location = location[1:]
-            winId = (req.servletURI(), winId)
 
             window = self.getWindow(winId)
             if window:
@@ -356,9 +355,9 @@ class Program(WebKit.Page.Page):
                 notification.process()
 
         def calculateUrl(self, winId, location, arguments, outputOptions):
-            windowPath = winId[0]
-            if winId[1] != Constants.DEFAULT_WINDOW:
-                windowPath += '/_' + winId[1]
+            windowPath = self.program.request().servletURI()
+            if winId != Constants.DEFAULT_WINDOW:
+                windowPath += '/_' + winId
             path = self.program.webwareBase() + windowPath
             if location:
                 path += '/' + '/'.join(location)

@@ -24,7 +24,7 @@ class ListAccessManager(AccessManager):
             print "AccessManager: %s: %s" % (result, '.'.join([str(item) for item in opPath]))
 
     def __call__(self, op, winId, path):
-        return self.callPath((op,) + winId + tuple(path))
+        return self.callPath((op, winId) + tuple(path))
 
     def callPath(self, opPath):
         lst = self.getAccessList()
