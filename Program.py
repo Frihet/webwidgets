@@ -81,10 +81,11 @@ class Program(WebKit.Page.Page):
     def writeHTML(self):
         """Main processing method, called by WebWare."""
         session = self.session()
-        if not session.hasValue('session'):
-            session['session'] = self.Session()
-        session['session'].program = self
-        return session['session'].writeHTML()
+        servlet = self.request().servletURI()
+        if not session.hasValue(servlet):
+            session[servlet] = self.Session()
+        session[servlet].program = self
+        return session[servlet].writeHTML()
 
     def webwareBase(self):
         """@return: A URL to where the Webware installation is serving
