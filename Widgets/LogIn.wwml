@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<!--
+ Input combination widgets
+ Copyright (C) 2007 FreeCode AS, Egil Moeller <redhog@redhog.org>
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+-->
+<w:wwml
+ xmlns="http://www.w3.org/TR/REC-html40"
+ xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
+ xmlns:h="http://www.w3.org/TR/REC-html40"
+ >
+
+ <w:HtmlWidget id="LogIn"
+  using="Webwidgets"
+  bind="LogInCallbacks.LogIn"
+  >
+  <w:DialogWidget
+   id="logIn"
+   head="Please log in:"
+   >
+   <w:HtmlWidget id="body">
+    <w:Message id="message" />
+    <w:FieldgroupWidget id="credentialsGroup">
+     <w:FieldWidget id="username" label="Username">
+      <w:StringInputWidget id="field" fieldName="username" />
+     </w:FieldWidget>
+     <w:FieldWidget id="password" label="Password">
+      <w:PasswordInputWidget id="field" fieldName="password" />
+     </w:FieldWidget>
+    </w:FieldgroupWidget>
+   </w:HtmlWidget>
+   <w:dict id="buttons" login="login" />
+  </w:DialogWidget>
+  <w:HtmlWidget id="application" />
+ </w:HtmlWidget>
+
+</w:wwml>

@@ -51,3 +51,4 @@ from Widgets.Composite import *
 from Widgets.GBOList import *
 from Widgets.InputCombinations import *
 from Widgets.DateInput import *
+from Widgets.LogIn import *
