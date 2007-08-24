@@ -149,7 +149,8 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
     __attributes__ = Base.CompositeWidget.__attributes__ + (
         'dependentColumns', 'columns', 'dependentColumns',
         'functions', 'disabledFunctions', 'functionPosition',
-        'sort', 'rows', 'page', 'pages', 'rowsPerPage', 'nonMemoryStorage', 'mergeWidgets')
+        'sort', 'rows', 'page', 'pages', 'rowsPerPage',
+        'nonMemoryStorage', 'dontMergeWidgets', 'dontMergeColumns')
     columns = {}
     argumentName = None
     dependentColumns = {}
@@ -161,7 +162,8 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
     page = 1
     pages = 1
     nonMemoryStorage = False
-    mergeWidgets = False
+    dontMergeWidgets = True
+    dontMergeColumns = ()
     oldSort = []
     rowsPerPage = 10
     """This attribute is not used internally by the widget, but is
@@ -296,8 +298,9 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
             node = tree
             node['rows'] += 1
             for column in groupOrder:
-                merge = (    node['children']
-                         and (   self.mergeWidgets
+                merge = (    column not in self.dontMergeColumns
+                         and node['children']
+                         and (   not self.dontMergeWidgets
                               or (    not isinstance(node['children'][-1]['value'], Base.Widget)
                                   and not isinstance(row[column], Base.Widget)))
                          and node['children'][-1]['value'] == row[column])
