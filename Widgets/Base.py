@@ -465,6 +465,9 @@ class ValueInputWidget(InputWidget):
         if path != self.path(): return
         self.error = None
 
+    def __cmp__(self, other):
+        return cmp(self.value, other)
+
 class Window(Widget):
     """Window is the main widget and should allways be the top-level
     widget of any application. It has an attribute for the HTTP

@@ -149,18 +149,19 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
     __attributes__ = Base.CompositeWidget.__attributes__ + (
         'dependentColumns', 'columns', 'dependentColumns',
         'functions', 'disabledFunctions', 'functionPosition',
-        'sort', 'rows', 'page', 'pages', 'rowsPerPage', 'nonMemoryStorage')
+        'sort', 'rows', 'page', 'pages', 'rowsPerPage', 'nonMemoryStorage', 'mergeWidgets')
     columns = {}
     argumentName = None
     dependentColumns = {}
     functions = {}
     disabledFunctions = []
     functionPosition = 0
-    sort = ''
+    sort =[]
     rows = []
     page = 1
     pages = 1
     nonMemoryStorage = False
+    mergeWidgets = False
     oldSort = []
     rowsPerPage = 10
     """This attribute is not used internally by the widget, but is
@@ -287,14 +288,6 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
                                                                 path + ['_', 'column', name])])
 
     def rowsToTree(self, rows, groupOrder):
-        #### fixme ####
-        # name = "combine widgets"
-        # description = """Maybe combine widgets to using
-        #  childPath = path + [nameofchild]
-        #  node['children'][-1]['value'].balue != row[column].value
-        # but that requires any valueChanged signal to be
-        # distributed over the "combined" widgets..."""
-        #### end ####
         tree = {'level': 0,
                 'rows': 0,
                 'children':[]}
@@ -303,7 +296,12 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
             node = tree
             node['rows'] += 1
             for column in groupOrder:
-                if not node['children'] or node['children'][-1]['value'] != row[column]:
+                merge = (    node['children']
+                         and (   self.mergeWidgets
+                              or (    not isinstance(node['children'][-1]['value'], Base.Widget)
+                                  and not isinstance(row[column], Base.Widget)))
+                         and node['children'][-1]['value'] == row[column])
+                if not merge:
                     node['children'].append({'level': node['level'] + 1,
                                              'top': rowNum,
                                              'rows': 0,
