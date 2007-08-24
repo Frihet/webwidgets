@@ -146,7 +146,10 @@ class RelativePath(object):
             if '/' in path:
                 levels, path = path.split('/')
                 levels = int(levels)
-            path = path.split('-')
+            if path:
+                path = path.split('-')
+            else:
+                path = []
         elif isinstance(path, RelativePath):
             levels = path.levels
             path = path.path

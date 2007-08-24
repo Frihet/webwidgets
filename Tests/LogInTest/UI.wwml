@@ -42,6 +42,7 @@
    <w:LogIn id="main">
     <w:HtmlWidget classid="Application">
      Some application data
+     <w:LogOut id="logOut" />
     </w:HtmlWidget>
    </w:LogIn>
 

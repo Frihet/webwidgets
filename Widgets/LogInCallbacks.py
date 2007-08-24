@@ -1,6 +1,10 @@
 import Webwidgets
 
 class LogIn(object):
+    __attributes__ = Webwidgets.HtmlWidget.__attributes__ + ('globalSession', 'userInfo')
+    globalSession = True
+    userInfo = None
+    
     class logIn(object):
         debug = True
 
@@ -19,12 +23,30 @@ class LogIn(object):
             else:
                 if self.debug: print "User logged in:", self.parent.userInfo
                 
-                Webwidgets.DialogWidget.selected(self, path, value)                
-                self.parent['application'] = self.parent.Application(self.session, self.winId)
-                
     def authenticate(self, username, password):
         raise Exception("You must override the authenticate() method of this widget!")
 
     def userInfoChanged(self, path, value):
-        self.session.userInfo = self.userInfo
+        if self.globalSession:
+            self.session.logIn = self
+        if self.userInfo is None:
+            self['application'] = Webwidgets.HtmlWidget(self.session, self.winId)
+            self['logIn'].visible = True
+        else:
+            self['application'] = self.Application(self.session, self.winId)
+            self['logIn'].visible = False
+
+class LogOut(object):
+    debug = True
+    __attributes__ = Webwidgets.DialogWidget.__attributes__ + ('logIn',)
+    logIn = None
+    
+    def selected(self, path, value):
+        if self.logIn is None:
+            logIn = self.session.logIn
+        elif isinstance(self.logIn, Webwidgets.Widget):
+            logIn = self.logIn
+        else:
+            logIn = self + self.logIn
+        logIn.userInfo = None
             

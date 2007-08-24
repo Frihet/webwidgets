@@ -47,4 +47,16 @@
   <w:HtmlWidget id="application" />
  </w:HtmlWidget>
 
+ <w:DialogWidget
+  using="Webwidgets"
+  bind="LogInCallbacks.LogOut"
+  id="LogOut"
+  head="Really log out?"
+  >
+  <w:HtmlWidget id="body" />
+  <w:dict id="buttons">
+   <w:string id="Log out">logout</w:string>
+  </w:dict>
+ </w:DialogWidget>
+
 </w:wwml>
