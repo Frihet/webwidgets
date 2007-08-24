@@ -127,14 +127,22 @@ class Program(WebKit.Page.Page):
         class Notification(object):
             def __init__(self, widget, message, args = (), kw = {}, path = None):
                 self.widget = widget
-                if path is None:
-                    path = widget.path()
-                elif isinstance(path, Utils.RelativePath):
-                    path = list(widget.path() + path)
-                self.path = path
+                self._path = path
                 self.message = message
                 self.args = args
                 self.kw = kw
+
+            class path(object):
+                def __get__(self, instance, owner):
+                    path = instance._path
+                    if path is None:
+                        path = instance.widget.path()
+                    elif isinstance(path, Utils.RelativePath):
+                        path = list(instance.widget.path() + path)
+                    return path
+                def __set__(self, instance, value):
+                    instance._path = value
+            path = path()
 
             def parent(self):
                 return type(self)(self.widget.parent, self.message, self.args, self.kw, self.path)

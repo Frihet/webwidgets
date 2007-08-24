@@ -251,7 +251,7 @@ class Widget(object):
             self.notify('%sChanged' % name, value)
         object.__setattr__(self, name, value)    
 
-class ChildNodes(dict):
+class ChildNodes(Webwidgets.Utils.OrderedDict):
     """Dictionary of child widgets to a widget; any widgets inserted
     in the dictionary will automatically have their name and parentn
     member variables set correctly."""
@@ -314,7 +314,7 @@ class CompositeWidget(Widget):
                  children.
         """
         
-        res = {}
+        res = Webwidgets.Utils.OrderedDict()
 
         for name, child in self.getChildren():
             child = self.drawChild(name, child, path, invisibleAsEmpty)

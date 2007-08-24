@@ -139,10 +139,8 @@ def generateValueForNode(module, node, using = [], context = []):
         if 'classid' in value: del value['classid']
         if 'id' in value: del value['id']
     elif node.localName == 'list':
-        value = dict(attributes)
-        if 'classid' in value: del value['classid']
-        if 'id' in value: del value['id']
-        value = value.values()
+        value = [item for item in attributes.values()
+                 if item not in ('classid', 'id')]
     elif node.localName == 'wwml':
         value = module
         for k, v in attributes.iteritems():
@@ -163,6 +161,17 @@ def generateValueForNode(module, node, using = [], context = []):
 
         if 'html' not in attributes and hasattr(widgetCls, '__wwml_html_override__') and widgetCls.__wwml_html_override__:
             attributes['html'] = text
+        if getattr(widgetCls, '__args_children__', False):
+            __children__ = ()
+            for cls in baseCls:
+                __children__ = getattr(cls, '__children__', __children__)
+            __children__ = attributes.get('__children__', __children__)
+            __children__ = list(__children__)
+            for name, value in attributes.iteritems():
+                if isinstance(value, type) and issubclass(value, Webwidgets.Widgets.Base.Widget):
+                    if name not in __children__:
+                        __children__.append(name)
+            attributes['__children__'] = tuple(__children__)
         if 'id' not in attributes:
             attributes['__explicit_load__'] = True
         if '__wwml_html_override__' not in attributes:
