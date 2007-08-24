@@ -19,7 +19,7 @@ class MyWindow(object):
             def valueChanged(self, path, value):
                 #print "Change %s: %s" % (path, repr(value))
                 self.changed = True
-                Webwidgets.MemoryGBOList.valueChanged(self, path, value)
+                Webwidgets.GBOList.valueChanged(self, path, value)
             
         class Add(object):
             def clicked(self, path):

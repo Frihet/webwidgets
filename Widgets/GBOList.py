@@ -148,7 +148,8 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
     
     __attributes__ = Base.CompositeWidget.__attributes__ + (
         'dependentColumns', 'columns', 'dependentColumns',
-        'functions', 'disabledFunctions', 'functionPosition', 'sort', 'rows', 'page', 'pages', 'rowsPerPage')
+        'functions', 'disabledFunctions', 'functionPosition',
+        'sort', 'rows', 'page', 'pages', 'rowsPerPage', 'nonMemoryStorage')
     columns = {}
     argumentName = None
     dependentColumns = {}
@@ -159,6 +160,8 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
     rows = []
     page = 1
     pages = 1
+    nonMemoryStorage = False
+    oldSort = []
     rowsPerPage = 10
     """This attribute is not used internally by the widget, but is
     intended to be used by the user-provide reread() method."""
@@ -167,6 +170,49 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
         Base.CompositeWidget.__init__(self, session, winId, **attrs)
         self.rows = ChildNodeRows(self, self.rows)
         self.reread()
+
+    def function(self, path, function, row):
+        raise Exception('%s: Function %s not implemented (called for row %s)' % (Webwidgets.Utils.pathToId(path), function, row))
+
+    def reread(self):
+        """Reload the list after a repaging/resorting here. This is
+        not a notification to allow for it to be called from __init__.
+
+        If you set nonMemoryStorage to True, you _must_ override this
+        method with your own sorter/loader function.
+        """
+        def rowCmp(row1, row2):
+            for col, order in self.sort:
+                diff = cmp(row1[col], row2[col])
+                if diff:
+                    if order == 'desc': diff *= -1
+                return diff
+            return 0
+        
+        if self.sort != self.oldSort:
+            self.rows.sort(rowCmp)
+            self.oldSort = self.sort
+
+    def sortChanged(self, path, sort):
+        """Notification that the list sort order has changed."""
+        if path != self.path(): return
+        self.reread()
+
+    def pageChanged(self, path, page):
+        """Notification that the user has changed page."""
+        if path != self.path(): return
+        self.reread()
+
+    def getRows(self):
+        if self.nonMemoryStorage:
+            return self.rows
+        return self.rows[(self.page - 1) * self.rowsPerPage:
+                         self.page * self.rowsPerPage]
+
+    def getPages(self):
+        if self.nonMemoryStorage:
+            return self.pages        
+        return int(math.ceil(float(len(self.rows)) / self.rowsPerPage))
 
     def getChildren(self):
         raise NotImplemented
@@ -214,16 +260,6 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
         else:
             raise Exception('Unknown sub-widget %s in %s' %(subWidget, widgetPath))
 
-    def sortChanged(self, path, sort):
-        """Notification that the list sort order has changed."""
-        if path != self.path(): return
-        self.reread()
-
-    def pageChanged(self, path, page):
-        """Notification that the user has changed page."""
-        if path != self.path(): return
-        self.reread()
-
     def getActive(self, path):
         """@return: Whether the widget is allowing input from the user
         or not.
@@ -249,32 +285,6 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
         return Webwidgets.Utils.OrderedDict([(name, description) for (name, description) in self.columns.iteritems()
                                   if self.session.AccessManager(Webwidgets.Constants.VIEW, self.winId,
                                                                 path + ['_', 'column', name])])
-
-    def resorted(self, path, sort):
-        """Notification that the list sort order has changed."""
-        if path != self.path(): return
-        self.sort = sort
-        self.reread()
-
-    def repaged(self, path, page):
-        """Notification that the user has changed page."""
-        if path != self.path(): return
-        self.page = page
-        self.reread()
-
-    def function(self, path, function, row):
-        raise Exception('%s: Function %s not implemented (called for row %s)' % (Webwidgets.Utils.pathToId(path), function, row))
-
-    def reread(self):
-        """Reload the list after a repaging/resorting here. This is
-        not a notification to allow for it to be called from __init__."""
-        pass
-
-    def getRows(self):
-        return self.rows
-
-    def getPages(self):
-        return self.pages
 
     def rowsToTree(self, rows, groupOrder):
         #### fixme ####
@@ -460,25 +470,3 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
        'table': self.drawTable(headings, renderedRows),
        'pagingButtons': self.drawPagingButtons(path)
        }
-
-class MemoryGBOList(GBOList):    
-    oldSort = []
-    def getRows(self):
-        return GBOList.getRows(self)[(self.page - 1) * self.rowsPerPage:
-                                     self.page * self.rowsPerPage]
-
-    def getPages(self):
-        return int(math.ceil(float(len(self.rows)) / self.rowsPerPage))
-
-    def reread(self):
-        def rowCmp(row1, row2):
-            for col, order in self.sort:
-                diff = cmp(row1[col], row2[col])
-                if diff:
-                    if order == 'desc': diff *= -1
-                return diff
-            return 0
-        
-        if self.sort != self.oldSort:
-            self.rows.sort(rowCmp)
-            self.oldSort = self.sort

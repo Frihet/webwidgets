@@ -33,13 +33,13 @@ USA
 
   <w:HtmlWidget id="body">
 
-   <w:MemoryGBOList id="GreencycleList" rowsPerPage=":integer:8">
+   <w:GBOList id="GreencycleList" rowsPerPage=":integer:8">
     <w:odict id="columns">
      <w:string id="idd">ID</w:string>
      <w:string id="currency">Currency</w:string>
      <w:string id="name">Name</w:string>
     </w:odict>
-   </w:MemoryGBOList>
+   </w:GBOList>
    <w:ButtonInputWidget id="Add" title="+" />
 
   </w:HtmlWidget>
