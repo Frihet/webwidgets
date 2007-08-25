@@ -261,8 +261,8 @@ class ChildNodes(Webwidgets.Utils.OrderedDict):
         @param arg: Sent to L{dict.__init__}
         @param kw: Sent to L{dict.__init__}
         """
-        super(ChildNodes, self).__init__(*arg, **kw)
         self.node = node
+        super(ChildNodes, self).__init__(*arg, **kw)
         self.__ensure__()
 
     def __ensure__(self):
