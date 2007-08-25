@@ -214,7 +214,7 @@ class ListInputWidget(Base.ValueInputWidget, Base.StaticCompositeWidget):
         options = '\n'.join([
             """<option %(selected)s value="%(value)s">
              %(description)s
-            </value>""" % {'selected': childname in values and 'selected' or '',
+            </option>""" % {'selected': childname in values and 'selected' or '',
                            'value': childname,
                            'description': children[childname]}
             for childname
