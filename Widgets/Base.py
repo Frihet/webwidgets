@@ -198,9 +198,6 @@ class Widget(object):
         return  True
 
     def drawHtmlAttributes(self, path):
-        
-        self.html_id = Webwidgets.Utils.pathToId(path)
-
         attributes = [(name, getattr(self, 'html_' + name))
                       for name in self.__htmlAttributes__]
         return ' '.join(['%s=%s' % (name, xml.sax.saxutils.quoteattr(value))

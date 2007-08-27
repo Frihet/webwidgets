@@ -102,6 +102,10 @@ class ChildNodeRows(list):
         super(ChildNodeRows, self).__setitem__(*arg, **kw)
         self.__ensure__()
 
+    def __delitem__(self, *arg, **kw):
+        super(ChildNodeRows, self).__delitem__(*arg, **kw)
+        self.__ensure__()
+
     def __setslice__(self, *arg, **kw):
         super(ChildNodeRows, self).__setslice__(*arg, **kw)
         self.__ensure__()
