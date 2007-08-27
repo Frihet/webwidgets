@@ -95,8 +95,6 @@ class Widget(object):
                 if hasattr(base, 'classes'):
                     classes.extend(base.classes)
             members['classes'] = tuple(classes)
-            members['html_class'] = ' '.join([c.replace('.', '-')
-                                              for c in classes])
             return type.__new__(cls, name, bases, members)
 
     def __init__(self, session, winId, **attrs):
@@ -137,12 +135,21 @@ class Widget(object):
             if not hasattr(self, attr):
                 raise TypeError('Required attribute not set:', type(self).__name__, attr)
 
-    class html_id(object):
+    class htmlId(object):
         def __get__(self, instance, owner):
             if not hasattr(instance, 'parent'):
                 return None
             return Webwidgets.Utils.pathToId(instance.path())
-    html_id = html_id()
+    html_id = htmlId()
+
+    class htmlClass(object):
+        def __get__(self, instance, owner):
+            classes = owner.classes
+            if instance:
+                classes = instance.classes
+            return ' '.join([c.replace('.', '-')
+                             for c in classes])
+    html_class = htmlClass()
 
     class htmlAttributes(object):
         def __get__(self, instance, owner):
