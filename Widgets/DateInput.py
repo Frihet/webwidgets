@@ -18,11 +18,11 @@ import time, os.path
 import Webwidgets.Utils
 import Input
 
-class DateInputWidget(Input.StringInputWidget):
+class DateInput(Input.StringInput):
     """
     Date Selector Widget.
     """
-    __attributes__ = Input.StringInputWidget.__attributes__ + ('format',)
+    __attributes__ = Input.StringInput.__attributes__ + ('format',)
     format = '%Y-%m-%d'
     value = time.localtime()
 
@@ -30,21 +30,21 @@ class DateInputWidget(Input.StringInputWidget):
         """
         Draw input widget.
         """
-        super(DateInputWidget, self).draw(path)
+        super(DateInput, self).draw(path)
 
-        self.registerStyleLink(self.calculateUrl({'widgetClass': 'Webwidgets.DateInputWidget',
+        self.registerStyleLink(self.calculateUrl({'widgetClass': 'Webwidgets.DateInput',
                                                   'file': 'calendar-blue.css',
                                                   'type': 'text/css'},
                                                  {}))
-        self.registerScriptLink(self.calculateUrl({'widgetClass': 'Webwidgets.DateInputWidget',
+        self.registerScriptLink(self.calculateUrl({'widgetClass': 'Webwidgets.DateInput',
                                                    'file': 'calendar.js',
                                                    'type': 'text/plain'},
                                                   {}),
-                                self.calculateUrl({'widgetClass': 'Webwidgets.DateInputWidget',
+                                self.calculateUrl({'widgetClass': 'Webwidgets.DateInput',
                                                    'file': 'lang/calendar-en.js',
                                                    'type': 'text/plain'},
                                                   {}),
-                                self.calculateUrl({'widgetClass': 'Webwidgets.DateInputWidget',
+                                self.calculateUrl({'widgetClass': 'Webwidgets.DateInput',
                                                    'file': 'calendar-setup.js',
                                                    'type': 'text/plain'},
                                                   {}))

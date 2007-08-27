@@ -31,7 +31,7 @@ USA
   id="MyWindow"
   title="GreenCycle">
 
-  <w:HtmlWidget id="body">
+  <w:Html id="body">
 
    <w:GBOList id="GreencycleList" rowsPerPage=":integer:8">
     <w:odict id="columns">
@@ -40,8 +40,8 @@ USA
      <w:string id="name">Name</w:string>
     </w:odict>
    </w:GBOList>
-   <w:ButtonInputWidget id="Add" title="+" />
+   <w:Button id="Add" title="+" />
 
-  </w:HtmlWidget>
+  </w:Html>
  </w:HtmlWindow>
 </w:wwml>

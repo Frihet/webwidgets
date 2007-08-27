@@ -53,7 +53,7 @@ class pytest(Webwidgets.Program):
                 """Any content that should go """
                 style = '../../Widgets.css'
 
-            class body(Webwidgets.HtmlWidget):
+            class body(Webwidgets.Html):
                 html = """<div id="%(id)s-header">
                            Upload: %(upload)s
                            <span id="%(id)s-header-search">Search: %(Search)s</span>
@@ -80,38 +80,38 @@ class pytest(Webwidgets.Program):
                           </div>
                           """
                           
-                class upload(Webwidgets.FileInputWidget): pass
+                class upload(Webwidgets.FileInput): pass
 
-                class table(Webwidgets.TableWidget):
+                class table(Webwidgets.Table):
                     hiddenCols = set((1,))
-                    class cell_0_0_1_1(Webwidgets.HtmlWidget): html='Foo'
-                    class cell_1_0_1_1(Webwidgets.HtmlWidget): html='Bar'
-                    class cell_0_1_2_1(Webwidgets.HtmlWidget): html='Fie'
-                    class cell_0_2_1_1(Webwidgets.HtmlWidget): html='Ma'
-                    class cell_1_2_1_1(Webwidgets.HtmlWidget): html='Ba'
-                    class cell_2_0_1_3(Webwidgets.HtmlWidget): html='Foo'
+                    class cell_0_0_1_1(Webwidgets.Html): html='Foo'
+                    class cell_1_0_1_1(Webwidgets.Html): html='Bar'
+                    class cell_0_1_2_1(Webwidgets.Html): html='Fie'
+                    class cell_0_2_1_1(Webwidgets.Html): html='Ma'
+                    class cell_1_2_1_1(Webwidgets.Html): html='Ba'
+                    class cell_2_0_1_3(Webwidgets.Html): html='Foo'
 
-                class lastpwd(Webwidgets.HtmlWidget):
+                class lastpwd(Webwidgets.Html):
                     html = ''
 
-                class newpwd(Webwidgets.NewPasswordInputWidget):
+                class newpwd(Webwidgets.NewPasswordInput):
                     value = 'foo'
 
-                class pwdclear(Webwidgets.ButtonInputWidget):
+                class pwdclear(Webwidgets.Button):
                     title = 'Clear new password'
                     def clicked(self, path):
                         self.parent.children['newpwd'].notify('valueChanged', '')
 
-                class pwdset(Webwidgets.ButtonInputWidget):
+                class pwdset(Webwidgets.Button):
                     title = 'Set new password'
                     def clicked(self, path):
                         self.parent.children['lastpwd'].html = self.parent.children['newpwd'].value
 
-                class CurrentDirectory(Webwidgets.HtmlWidget): html = '/foo/bar/fie'
-                class Search(Webwidgets.StringInputWidget): value = '/foo/bar/fie'
-                class SelectDate(Webwidgets.ListInputWidget):
+                class CurrentDirectory(Webwidgets.Html): html = '/foo/bar/fie'
+                class Search(Webwidgets.StringInput): value = '/foo/bar/fie'
+                class SelectDate(Webwidgets.ListInput):
                     def __init__(self, session, winId):
-                        Webwidgets.ListInputWidget.__init__(
+                        Webwidgets.ListInput.__init__(
                             self, session, winId,
                             one='2006-06-20 10:11:12 +10',
                             two='2006-06-15 10:11:12 +10',
@@ -121,29 +121,29 @@ class pytest(Webwidgets.Program):
                             six='2006-04-13 12:00:00 +10',
                             )
                     def valueChanged(self, path, value):
-                        Webwidgets.ListInputWidget.valueChanged(self, path, value)
+                        Webwidgets.ListInput.valueChanged(self, path, value)
                         print "List input changed", value
 
-                class Filter(Webwidgets.ButtonInputWidget): title = 'Filter'
-                class ShowDialog(Webwidgets.ButtonInputWidget):
+                class Filter(Webwidgets.Button): title = 'Filter'
+                class ShowDialog(Webwidgets.Button):
                     title = 'Show dialog'
                     def clicked(self, path):
                         self.parent.children['SomeDialog'].visible = True
 
-                class SomeDialog(Webwidgets.DialogWidget):
+                class SomeDialog(Webwidgets.Dialog):
                     visible = False
                     head = 'My dialog'
                     body = 'Click ok or cancel, please'
 
-                class Dirlisting(Webwidgets.HtmlWidget):
+                class Dirlisting(Webwidgets.Html):
                     html = """<table id="%(id)s">
                      <tr><th>Type</th><th>Filename</th><th>Dates</th><th>Actions</th></tr>
                      %(Listing)s
                     </table>"""
 
-                    class Listing(Webwidgets.ListWidget):
+                    class Listing(Webwidgets.List):
                         __explicit_load__ = True
-                        class Entry(Webwidgets.HtmlWidget):
+                        class Entry(Webwidgets.Html):
                             __explicit_load__ = True
                             html = """
                             <tr>
@@ -160,33 +160,33 @@ class pytest(Webwidgets.Program):
                               %(actions)s
                              </td>
                             </tr>"""
-                            class actions(Webwidgets.HtmlWidget):
+                            class actions(Webwidgets.Html):
                                 html = "%(check)s%(label)s"
-                                class label(Webwidgets.LabelWidget):
-                                    class label(Webwidgets.HtmlWidget): html = 'Restore'
+                                class label(Webwidgets.Label):
+                                    class label(Webwidgets.Html): html = 'Restore'
                                     target = '1/check'
-                                class check(Webwidgets.CheckboxInputWidget):
+                                class check(Webwidgets.Checkbox):
                                     value = 1
                                     def valueChanged(self, path, value):
-                                        Webwidgets.CheckboxInputWidget.valueChanged(self, path, value)
+                                        Webwidgets.Checkbox.valueChanged(self, path, value)
                                         if value:
                                             self.error = "XXXXXX"
                                 
                             def __init__(self, session, winId, type, name, dates):
-                                Webwidgets.HtmlWidget.__init__(
+                                Webwidgets.Html.__init__(
                                     self,
                                     session, winId, type=type, name=name,
-                                    dates = Webwidgets.ListInputWidget(session, winId, **dict([(str(nr), date)
+                                    dates = Webwidgets.ListInput(session, winId, **dict([(str(nr), date)
                                                                                                for nr, date in enumerate(dates)])))
                         def __init__(self, session, winId, files):
-                            Webwidgets.ListWidget.__init__(
+                            Webwidgets.List.__init__(
                                 self, session, winId,
                                 pre='', sep='\n', post='',
                                 **dict([(str(nr), self.Entry(session, winId, *file))
                                         for nr, file in enumerate(files)]))
 
                     def __init__(self, session, winId):
-                        Webwidgets.HtmlWidget.__init__(self, session, winId, Listing = self.Listing(
+                        Webwidgets.Html.__init__(self, session, winId, Listing = self.Listing(
                             session, winId, [('doc', 'foo', ('2006-06-20 10:11:12 +10','2006-06-20 10:11:12 +10')),
                                              ('gif', 'bar', ('2006-06-20 10:11:12 +10',)),
                                              ('jpg', 'muahehe', ('2006-06-20 10:11:12 +10','2006-06-20 10:11:12 +10','2006-06-20 10:11:12 +10')),

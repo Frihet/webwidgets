@@ -23,11 +23,11 @@ class MyWindow(object):
             
         class Add(object):
             def clicked(self, path):
-                kg=Webwidgets.HtmlWidget(self.session, self.winId, html="kg")
-                count=Webwidgets.HtmlWidget(self.session, self.winId, html="count")
+                kg=Webwidgets.Html(self.session, self.winId, html="kg")
+                count=Webwidgets.Html(self.session, self.winId, html="count")
 
                 self.parent['GreencycleList'].nextId += 1
                 newRow = {"idd": self.parent['GreencycleList'].nextId,
-                          "currency" : Webwidgets.StringInputWidget(self.session, self.winId, value=""),
-                          "name": Webwidgets.StringInputWidget(self.session, self.winId, value="")}
+                          "currency" : Webwidgets.StringInput(self.session, self.winId, value=""),
+                          "name": Webwidgets.StringInput(self.session, self.winId, value="")}
                 self.parent['GreencycleList'].rows.append(newRow)

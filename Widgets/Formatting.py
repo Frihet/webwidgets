@@ -21,9 +21,9 @@
 
 import types
 import Webwidgets.Utils, Webwidgets.Constants
-import Base, Table
+import Base, TableModel
 
-class ListWidget(Base.StaticCompositeWidget):
+class List(Base.StaticComposite):
     """Concatenates all children in name order, drawing the "sep"
     child inbetween each and the "pre" and "post" children before and
     after the whole list, respectively. Note: sep should not be an
@@ -37,7 +37,7 @@ class ListWidget(Base.StaticCompositeWidget):
                                                        for name, child in children.iteritems()
                                                        if name not in ('pre', 'sep', 'post')]) + children['post']
 
-class HtmlWidget(Base.StaticCompositeWidget):
+class Html(Base.StaticComposite):
     """This widget is the base widget for most output widgets and the
     main method of concatenating and grouping widgets. It provides a
     way to "format" together other widgets with some custom HTML
@@ -53,7 +53,7 @@ class HtmlWidget(Base.StaticCompositeWidget):
     """Don't include the classname of this class in L{classes}."""
     __wwml_html_override__ = True
     """Let Wwml-defined subclasses override the html attribute"""
-    __attributes__ = Base.StaticCompositeWidget.__attributes__ + ('html',)
+    __attributes__ = Base.StaticComposite.__attributes__ + ('html',)
     html = ''
     def draw(self, path):
         children = self.drawChildren(
@@ -66,33 +66,33 @@ class HtmlWidget(Base.StaticCompositeWidget):
             e.args = (self, self.path()) + e.args + (self.html,)
             raise e
 
-class DivWidget(HtmlWidget):
+class Div(Html):
     """Adds a single div with the widget id as id around the single
     child "child"
     """
     __no_classes_name__ = True
     __wwml_html_override__ = False
-    __children__ = HtmlWidget.__children__ + ('child',)
+    __children__ = Html.__children__ + ('child',)
     html = """<div %(attr_htmlAttributes)s>%(child)s</div>"""
 
-class SpanWidget(HtmlWidget):
+class Span(Html):
     """Adds a single span with the widget id as id around the single
     child "child"
     """
     __no_classes_name__ = True
     __wwml_html_override__ = False
-    __children__ = HtmlWidget.__children__ + ('child',)
+    __children__ = Html.__children__ + ('child',)
     html = """<span %(attr_htmlAttributes)s>%(child)s</span>"""
 
-class Style(HtmlWidget):
+class Style(Html):
     """Includes the css style from the child "style"
     """
-    __children__ = HtmlWidget.__children__ + ('style',)
+    __children__ = Html.__children__ + ('style',)
     __wwml_html_override__ = False
     style = ''
     html = """<style %(attr_htmlAttributes)s type='text/css'>%(style)s</style>"""
     
-class StyleLink(HtmlWidget):
+class StyleLink(Html):
     """Includes the css style from the URL specified with the
     attribute "style"
     """
@@ -103,20 +103,20 @@ class StyleLink(HtmlWidget):
     title = ''
     html = """<link %(attr_htmlAttributes)s href="%(attr_style)s" title="%(attr_title)s" rel="stylesheet" type="text/css" />"""
 
-class Message(HtmlWidget):
+class Message(Html):
     """Informative message display. If no message is set, this widget
     is invisible."""
     __wwml_html_override__ = False
-    __children__ = HtmlWidget.__children__ + ('message',)
+    __children__ = Html.__children__ + ('message',)
     message = ''
     def draw(self, path):
         if self.children['message']:
             self.html = '<div %(attr_htmlAttributes)s>%(message)s</div>'
         else:
             self.html = ''
-        return HtmlWidget.draw(self, path)
+        return Html.draw(self, path)
 
-class MediaWidget(Base.Widget):
+class Media(Base.Widget):
     """Media (file) viewing widget"""
     __attributes__ = ('content', 'empty', 'width', 'height')
     content = None
@@ -157,12 +157,12 @@ class MediaWidget(Base.Widget):
             'preview': preview
             }
 
-class LabelWidget(Base.StaticCompositeWidget):
+class Label(Base.StaticComposite):
     """Renders a label for an input field. The input field can be
     specified either as the widget itself, or a
     L{Webwidgets.Utils.RelativePath} to the widget"""
     
-    __attributes__ = Base.StaticCompositeWidget.__attributes__ + ('target',)
+    __attributes__ = Base.StaticComposite.__attributes__ + ('target',)
     __children__ = ('label',)
 
     target = []
@@ -187,10 +187,10 @@ class LabelWidget(Base.StaticCompositeWidget):
         %(error)s
         </label>""" % res
 
-class FieldWidget(LabelWidget):
+class Field(Label):
     __no_classes_name__ = True
     __wwml_html_override__ = False
-    __children__ = LabelWidget.__children__ + ('field',)
+    __children__ = Label.__children__ + ('field',)
     
     def draw(self, path):
         if isinstance(self.target, Base.Widget):
@@ -213,7 +213,7 @@ class FieldWidget(LabelWidget):
                   </div>
                   """ % res
 
-class FieldgroupWidget(ListWidget):
+class Fieldgroup(List):
     class pre(Base.Widget):
         def draw(self, path):
             return """<div %(attr_htmlAttributes)s>""" % {
@@ -221,33 +221,33 @@ class FieldgroupWidget(ListWidget):
                 }
     post = "</div>\n"
 
-class TableWidget(Base.StaticCompositeWidget, Table.Table):
+class Table(Base.StaticComposite, TableModel.Table):
     """Table that works similar to a GtkTable in Gtk - child widgets
     are attatched to cells by coordinates."""
-    __attributes__ = Base.StaticCompositeWidget.__attributes__ + ('rowWidths', 'colWidths')
+    __attributes__ = Base.StaticComposite.__attributes__ + ('rowWidths', 'colWidths')
 
-    class Cell(Table.Table.Cell):
+    class Cell(TableModel.Table.Cell):
         def name(self):
             return 'cell_' + str(self.x) + '_' + str(self.y) + '_' + str(self.w) + '_' + str(self.h)
 
     def __init__(self, session, winId, **attrs):
-        Table.Table.__init__(self)
-        Base.StaticCompositeWidget.__init__(self, session, winId, **attrs)
+        TableModel.Table.__init__(self)
+        Base.StaticComposite.__init__(self, session, winId, **attrs)
         for name, child in self.children.iteritems():
             if name.startswith('cell_'):
                 x, y, w, h = self.childName2Coord(name)
-                Table.Table.insert(self, child, x, y, w, h)
+                TableModel.Table.insert(self, child, x, y, w, h)
                 
     def childName2Coord(self, name):
         dummy, x, y, w, h = name.split('_')
         return (int(x), int(y), int(w), int(h))
     
     def insert(self, content, x, y, w = 1, h = 1):
-        cell = Table.Table.insert(self, content, x, y, w, h)
+        cell = TableModel.Table.insert(self, content, x, y, w, h)
         self.children[cell.name()] = content
         
     def remove(self, x, y):
-        cell = Table.Table.remove(self, x, y)
+        cell = TableModel.Table.remove(self, x, y)
         if cell: del self.children[cell.name()]
     
     def draw(self, path):

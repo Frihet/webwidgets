@@ -1,7 +1,7 @@
 import Webwidgets
 
 class LogIn(object):
-    __attributes__ = Webwidgets.HtmlWidget.__attributes__ + ('globalSession', 'userInfo')
+    __attributes__ = Webwidgets.Html.__attributes__ + ('globalSession', 'userInfo')
     globalSession = True
     userInfo = None
     
@@ -30,7 +30,7 @@ class LogIn(object):
         if self.globalSession:
             self.session.logIn = self
         if self.userInfo is None:
-            self['application'] = Webwidgets.HtmlWidget(self.session, self.winId)
+            self['application'] = Webwidgets.Html(self.session, self.winId)
             self['logIn'].visible = True
         else:
             self['application'] = self.Application(self.session, self.winId)
@@ -38,7 +38,7 @@ class LogIn(object):
 
 class LogOut(object):
     debug = True
-    __attributes__ = Webwidgets.DialogWidget.__attributes__ + ('logIn',)
+    __attributes__ = Webwidgets.Dialog.__attributes__ + ('logIn',)
     logIn = None
     
     def selected(self, path, value):

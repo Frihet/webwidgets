@@ -124,14 +124,14 @@
 }
 
 
-.Webwidgets-Widgets-Composite-TabbedViewWidget ul.tabs {
+.Webwidgets-Widgets-Composite-TabbedView ul.tabs {
  list-style-type: none;
  padding: 0pt;
 }
-.Webwidgets-Widgets-Composite-TabbedViewWidget ul.tabs li {
+.Webwidgets-Widgets-Composite-TabbedView ul.tabs li {
  display: inline;
 }
-.Webwidgets-Widgets-Composite-TabbedViewWidget ul.tabs li * {
+.Webwidgets-Widgets-Composite-TabbedView ul.tabs li * {
  font-size: 8pt;
  padding: 0px;
  margin: 0px;
@@ -168,7 +168,7 @@ select {
  font-family: serif;
 }
 
-.Webwidgets-Widgets-Input-NewPasswordInputWidget {
+.Webwidgets-Widgets-Input-NewPasswordInput {
  display: block;
  width: 20%;
  border: solid;
@@ -178,16 +178,16 @@ select {
  background-color: #ffffff;
 }
 
-.Webwidgets-Widgets-Input-NewPasswordInputWidget input {
+.Webwidgets-Widgets-Input-NewPasswordInput input {
  display: block;
 }
 
-.Webwidgets-Widgets-Formatting-LabelWidget .error {
+.Webwidgets-Widgets-Formatting-Label .error {
  color: #ff0000;
 }
 
 
-.TreeWidget * {
+.Tree * {
  border-style: none;
  padding: 0px;
  margin: 0px;
@@ -197,11 +197,11 @@ select {
  color: #555555;
 }
 
-.TreeWidget input {
+.Tree input {
  color: #000000;
 }
 
-.Webwidgets-Widgets-Composite-DialogWidget {
+.Webwidgets-Widgets-Composite-Dialog {
  position: fixed;
  overflow: auto;
  left: 20%;
@@ -218,13 +218,13 @@ select {
  background-color: #eeeeee;
 }
 
-.Webwidgets-Widgets-Composite-DialogWidget .dialog-head {
+.Webwidgets-Widgets-Composite-Dialog .dialog-head {
  border-bottom: 1px solid black;
 }
 
-.Webwidgets-Widgets-Composite-DialogWidget .dialog-body {
+.Webwidgets-Widgets-Composite-Dialog .dialog-body {
 }
 
-.Webwidgets-Widgets-Composite-DialogWidget .dialog-buttons {
+.Webwidgets-Widgets-Composite-Dialog .dialog-buttons {
  border-top: 1px solid black;
 }

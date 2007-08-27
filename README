@@ -45,11 +45,11 @@ Widget class. These instances can either be instantiated explicitly by
 you, or implicitly by the system. Here's an example of explicitly
 creating a user-interface:
 
-x = HtmlWidget(program, winId,
+x = Html(program, winId,
      html="Please enter Blahonga: %(blahonga)s and press %(send)s..."
-     blahonga=SpanWidget(program, winId,
-			 child=PasswordInputWidget(program, winId))
-     send=ButtonInputWidget(program, winId, title="here"))
+     blahonga=Span(program, winId,
+		   child=PasswordInput(program, winId))
+     send=ButtonInput(program, winId, title="here"))
 
 This way of programming is very similar to Gtk programming, but can
 lead to quite a lot of tedious code-copying if you are subclassing to
@@ -58,11 +58,11 @@ graphical applications.
 
 The exact same result can be achived with implicit instantiation:
 
-class MyWidget(HtmlWidget):
+class MyWidget(Html):
     html="Please enter Blahonga: %(blahonga)s and press %(send)s..."
-    class blahonga(SpanWidget):
-        class child(PasswordInputWidget): pass
-    class send(ButtonInputWidget): title='here'
+    class blahonga(Span):
+        class child(PasswordInput): pass
+    class send(ButtonInput): title='here'
 
 x = MyWidget(program, winId)
 
@@ -81,7 +81,7 @@ set using members or parameters.
 Handling input - the notification model
 ----------------------------------------
 
-All input widgets, like PasswordInputWidget, has a member variable
+All input widgets, like PasswordInput, has a member variable
 representing its current value, and a method valueChanged that gets
 called whenever this value is changed.
 
@@ -104,10 +104,10 @@ valueChanged notifications have been processed.
 
 Example:
 
-class MyWidget(HtmlWidget):
+class MyWidget(Html):
     html="New password: %(password)s<br />%(cave)s..."
-    password(PasswordInputWidget): pass
-    class save(ButtonInputWidget):
+    password(PasswordInput): pass
+    class save(ButtonInput):
         title='Save'
         def clicked(self):
             self.program.dbconn.setPassword(self.parent.children['password'].value)

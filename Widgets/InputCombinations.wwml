@@ -23,15 +23,15 @@
  xmlns:h="http://www.w3.org/TR/REC-html40"
  >
 
- <w:FieldgroupWidget id="AddressInputWidget"
+ <w:Fieldgroup id="AddressInput"
   using="Webwidgets"
   bind="Webwidgets.Widgets.InputCombinationsCallbacks">
-  <w:FieldWidget id="co" label="c/o"><w:StringInputWidget id="field" fieldName="co" /></w:FieldWidget>
-  <w:FieldWidget id="street" label="Street"><w:StringInputWidget id="field" fieldName="street" /></w:FieldWidget>
-  <w:FieldWidget id="zip" label="Post-code/zip code"><w:StringInputWidget id="field" fieldName="zip" /></w:FieldWidget>
-  <w:FieldWidget id="city" label="City"><w:StringInputWidget id="field" fieldName="street" /></w:FieldWidget>
-  <w:FieldWidget id="county" label="County/State"><w:StringInputWidget id="field" fieldName="county" /></w:FieldWidget>
-  <w:FieldWidget id="country" label="Country"><w:StringInputWidget id="field" fieldName="country" /></w:FieldWidget>
- </w:FieldgroupWidget>
+  <w:Field id="co" label="c/o"><w:StringInput id="field" fieldName="co" /></w:Field>
+  <w:Field id="street" label="Street"><w:StringInput id="field" fieldName="street" /></w:Field>
+  <w:Field id="zip" label="Post-code/zip code"><w:StringInput id="field" fieldName="zip" /></w:Field>
+  <w:Field id="city" label="City"><w:StringInput id="field" fieldName="street" /></w:Field>
+  <w:Field id="county" label="County/State"><w:StringInput id="field" fieldName="county" /></w:Field>
+  <w:Field id="country" label="Country"><w:StringInput id="field" fieldName="country" /></w:Field>
+ </w:Fieldgroup>
 
 </w:wwml>

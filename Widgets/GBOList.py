@@ -130,7 +130,7 @@ class ChildNodeRows(list):
         super(ChildNodeRows, self).sort(*arg, **kw)
         self.__ensure__()
   
-class GBOList(Base.InputWidget, Base.CompositeWidget):
+class GBOList(Base.Input, Base.Composite):
     """Group By Ordering List is a special kind of table view that
     allows the user to sort the rows and simultaneously group the rows
     according to their content and the sorting.
@@ -150,7 +150,7 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
     be done by e.g a database back-end.
     """
     
-    __attributes__ = Base.CompositeWidget.__attributes__ + (
+    __attributes__ = Base.Composite.__attributes__ + (
         'dependentColumns', 'columns', 'dependentColumns',
         'functions', 'disabledFunctions', 'functionPosition',
         'sort', 'rows', 'page', 'pages', 'rowsPerPage',
@@ -174,7 +174,7 @@ class GBOList(Base.InputWidget, Base.CompositeWidget):
     intended to be used by the user-provide reread() method."""
 
     def __init__(self, session, winId, **attrs):
-        Base.CompositeWidget.__init__(self, session, winId, **attrs)
+        Base.Composite.__init__(self, session, winId, **attrs)
         self.rows = ChildNodeRows(self, self.rows)
         self.reread()
 

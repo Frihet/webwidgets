@@ -290,12 +290,12 @@ class ChildNodes(Webwidgets.Utils.OrderedDict):
         super(ChildNodes, self).setdefault(*arg, **kw)
         self.__ensure__()
 
-class CompositeWidget(Widget):
+class Composite(Widget):
     """Base class for all composite widgets, handling the drawing of
     children and the visibility attribute of children."""
     __no_classes_name__ = True
     def __init__(self, session, winId, **attrs):
-        super(CompositeWidget, self).__init__(
+        super(Composite, self).__init__(
             session, winId, **attrs)
 
     def drawChild(self, name, child, path, invisibleAsEmpty = False):
@@ -357,7 +357,7 @@ class CompositeWidget(Widget):
     def __iter__(self):
         return self.getChildren()
         
-class StaticCompositeWidget(CompositeWidget):
+class StaticComposite(Composite):
     """Base class for all composite widgets, handling children
     instantiation of children classes explicitly named in __children__
     (or all if __widget_children__ is true). Children instantiated (or
@@ -371,7 +371,7 @@ class StaticCompositeWidget(CompositeWidget):
     def __init__(self, session, winId, **attrs):
         __attributes__ = '__attributes__' in attrs and attrs['__attributes__'] or self.__attributes__
         __children__ = '__children__' in attrs and attrs['__children__'] or self.__children__
-        super(StaticCompositeWidget, self).__init__(
+        super(StaticComposite, self).__init__(
             session, winId,
             __attributes__ = __attributes__ + __children__,
             **attrs)
@@ -402,7 +402,7 @@ class StaticCompositeWidget(CompositeWidget):
         """Deletes a child widget"""
         del self.children[name]
 
-class InputWidget(Widget):
+class Input(Widget):
     """Base class for all input widgets, providing input field registration"""
     __attributes__ = Widget.__attributes__ + ('active', 'argumentName', 'error')
 
@@ -421,7 +421,7 @@ class InputWidget(Widget):
     """
 
     error = None
-    """Displayed by a corresponding L{LabelWidget} if set to non-None.
+    """Displayed by a corresponding L{Label} if set to non-None.
     See that widget for further information."""
 
     def registerInput(self, path = None, argumentName = None, field = True):
@@ -450,12 +450,12 @@ class InputWidget(Widget):
         """
         return self.active and self.session.AccessManager(Webwidgets.Constants.EDIT, self.winId, path)
 
-class ValueInputWidget(InputWidget):
+class ValueInput(Input):
     """Base class for all input widgets that holds some kind of value
     (e.g. all butt buttons). It defines a notification for changing
     the value hold by the widget."""
     
-    __attributes__ = InputWidget.__attributes__ + ('value',)
+    __attributes__ = Input.__attributes__ + ('value',)
     value = ''
 
     def fieldInput(self, path, stringValue):
@@ -500,11 +500,11 @@ class Window(Widget):
         self.arguments = {}
         return ''
 
-class HtmlWindow(Window, StaticCompositeWidget):
+class HtmlWindow(Window, StaticComposite):
     """HtmlWindow is the main widget for any normal application window
     displaying HTML. It has two children - head and body aswell as
     attributes for title, encoding and doctype"""
-    __attributes__ = StaticCompositeWidget.__attributes__ + ('headers', 'encoding', 'doctype')
+    __attributes__ = StaticComposite.__attributes__ + ('headers', 'encoding', 'doctype')
     __children__ = ('head', 'body')
     title = 'Page not available'
     body = 'Page not available'

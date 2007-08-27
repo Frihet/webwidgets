@@ -25,11 +25,11 @@ class MyWindow(object):
 
 #    class location(object):
 #        def valueChanged(self, path, value):
-#            Webwidgets.ArgumentInputWidget.valueChanged(self, path, value)
+#            Webwidgets.ArgumentInput.valueChanged(self, path, value)
 #            print "Location changed", path, value
 #    class extra(object):
 #        def valueChanged(self, path, value):
-#            Webwidgets.ArgumentInputWidget.valueChanged(self, path, value)
+#            Webwidgets.ArgumentInput.valueChanged(self, path, value)
 #            print "Extra arguments changed", path, value
             
     class body(object):
@@ -45,7 +45,7 @@ class MyWindow(object):
 
         class SelectDate(object):
             def __init__(self, session, winId):
-                Webwidgets.ListInputWidget.__init__(
+                Webwidgets.ListInput.__init__(
                     self, session, winId,
                     one='2006-06-20 10:11:12 +10',
                     two='2006-06-15 10:11:12 +10',
@@ -55,7 +55,7 @@ class MyWindow(object):
                     six='2006-04-13 12:00:00 +10',
                     )
             def valueChanged(self, path, value):
-                Webwidgets.ListInputWidget.valueChanged(self, path, value)
+                Webwidgets.ListInput.valueChanged(self, path, value)
                 print "XXX", value
 
         class ShowDialog(object):
@@ -69,21 +69,21 @@ class MyWindow(object):
                 class Entry(object):
                     __explicit_load__ = True
                     def __init__(self, session, winId, type, name, dates):
-                        Webwidgets.HtmlWidget.__init__(
+                        Webwidgets.Html.__init__(
                             self,
                             session, winId, type=type, name=name,
-                            dates = Webwidgets.ListInputWidget(session, winId, **dict([(str(nr), date)
+                            dates = Webwidgets.ListInput(session, winId, **dict([(str(nr), date)
                                                                                        for nr, date in enumerate(dates)])))
 
                     class actions(object):
                          class check(object):
                              def valueChanged(self, path, value):
-                                 Webwidgets.CheckboxInputWidget.valueChanged(self, path, value)
+                                 Webwidgets.Checkbox.valueChanged(self, path, value)
                                  print "FOO", value
 
 
                 def __init__(self, session, winId, files):
-                    Webwidgets.ListWidget.__init__(
+                    Webwidgets.List.__init__(
                         self, session, winId,
                         pre='', sep='\n', post='',
                         **dict([(str(nr), self.Entry(session, winId, *file))
@@ -96,7 +96,7 @@ class MyWindow(object):
                     self.parent['Listing'][time.strftime('%s')] = self.parent.Listing.Entry(self.session, self.winId, 'bar', 'foo', ('2007', '2008'))
 
             def __init__(self, session, winId):
-                Webwidgets.HtmlWidget.__init__(self, session, winId, Listing = self.Listing(
+                Webwidgets.Html.__init__(self, session, winId, Listing = self.Listing(
                     session, winId, [('doc', 'foo', ('2006-06-20 10:11:12 +10','2006-06-20 10:11:12 +10')),
                                      ('gif', 'bar', ('2006-06-20 10:11:12 +10',)),
                                      ('jpg', 'muahehe', ('2006-06-20 10:11:12 +10','2006-06-20 10:11:12 +10','2006-06-20 10:11:12 +10')),

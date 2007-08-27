@@ -37,15 +37,15 @@
 
   <w:StyleLink id="head" style="../../Widgets.css" />
 
-  <w:HtmlWidget id="body">
+  <w:Html id="body">
 
    <w:LogIn id="main">
-    <w:HtmlWidget classid="Application">
+    <w:Html classid="Application">
      Some application data
      <w:LogOut id="logOut" />
-    </w:HtmlWidget>
+    </w:Html>
    </w:LogIn>
 
-  </w:HtmlWidget>
+  </w:Html>
  </w:HtmlWindow>
 </w:wwml>

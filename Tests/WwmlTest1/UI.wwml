@@ -30,17 +30,17 @@
 
   <w:StyleLink id="head" style="../../Widgets.css" />
 
-  <w:HtmlWidget id="body">
+  <w:Html id="body">
 
-   <w:DateInputWidget id="date" value=":time:1998-01-01 22:33:34" />
+   <w:DateInput id="date" value=":time:1998-01-01 22:33:34" />
 
-   <w:FileInputWidget id="file" />
+   <w:FileInput id="file" />
 
-   <w:TabbedViewWidget id="tabs" page="first">
-    <w:HtmlWidget id="first" title="First">The first page</w:HtmlWidget>
-    <w:HtmlWidget id="second" title="Second">The second page</w:HtmlWidget>
-    <w:HtmlWidget id="third" title="Third">The third page</w:HtmlWidget>
-   </w:TabbedViewWidget>
+   <w:TabbedView id="tabs" page="first">
+    <w:Html id="first" title="First">The first page</w:Html>
+    <w:Html id="second" title="Second">The second page</w:Html>
+    <w:Html id="third" title="Third">The third page</w:Html>
+   </w:TabbedView>
 
    <w:GBOList id="ListTest" argumentName='test' rowsPerPage=":integer:20">
     <w:dict id="functions" copy="C" edit="E" delete="D" />
@@ -56,60 +56,60 @@
      <w:dict id="row7" foo="48" bar="11" fie="52" />
      <w:dict id="row8" foo="Bertil" bar="Bengtsson" fie="57" />
      <w:dict id="row9">
-      <w:StringInputWidget id="foo" value="Anders" />
-      <w:StringInputWidget id="bar" value="And" />
-      <w:StringInputWidget id="fie" value="Mumum xxx" />
+      <w:StringInput id="foo" value="Anders" />
+      <w:StringInput id="bar" value="And" />
+      <w:StringInput id="fie" value="Mumum xxx" />
      </w:dict>
      <w:dict id="row10">
-      <w:StringInputWidget id="foo" value="Cesar" />
-      <w:StringInputWidget id="bar" value="And" />
-      <w:StringInputWidget id="fie" value="Mumum xxx" />
+      <w:StringInput id="foo" value="Cesar" />
+      <w:StringInput id="bar" value="And" />
+      <w:StringInput id="fie" value="Mumum xxx" />
      </w:dict>
     </w:list>
    </w:GBOList>
 
-   <w:AddressInputWidget id="xzy" />
+   <w:AddressInput id="xzy" />
 
    <div id="header">
-    <span id="search">Search: <w:StringInputWidget id="Search" argumentName="search" value="/foo/bar/fie"/></span>
+    <span id="search">Search: <w:StringInput id="Search" argumentName="search" value="/foo/bar/fie"/></span>
     <span id="dir">
-     <w:HtmlWidget id="CurrentDirectory" html="/foo/bar/fie" />
+     <w:Html id="CurrentDirectory" html="/foo/bar/fie" />
     </span>
     <span id="right">
-     <span id="date">Date: <w:ListInputWidget id="SelectDate" /></span>
-     <w:ButtonInputWidget id="Filter" bind="w:testwwml.FilterButton" title="Filter" />
+     <span id="date">Date: <w:ListInput id="SelectDate" /></span>
+     <w:Button id="Filter" bind="w:testwwml.FilterButton" title="Filter" />
     </span>
    </div>
 
    <div id="body">
-    <w:ButtonInputWidget id="ShowDialog" title="Show dialog" /><br />
-    <w:DialogWidget id="SomeDialog" visible=":false">
-     <w:HtmlWidget id="head" html="My dialog" />
-     <w:HtmlWidget id="body" html="Click ok or cancel, please" />
-    </w:DialogWidget>
+    <w:Button id="ShowDialog" title="Show dialog" /><br />
+    <w:Dialog id="SomeDialog" visible=":false">
+     <w:Html id="head" html="My dialog" />
+     <w:Html id="body" html="Click ok or cancel, please" />
+    </w:Dialog>
     <br />
 
-    <w:TableWidget id="table">
-     <w:HtmlWidget id="cell_0_0_1_1" html="Foo" />
-     <w:HtmlWidget id="cell_1_0_1_1" html="Bar" />
-     <w:HtmlWidget id="cell_0_1_2_1" html="Fie" />
-     <w:HtmlWidget id="cell_0_2_1_1" html="Ma" />
-     <w:HtmlWidget id="cell_1_2_1_1" html="Ba" />
-     <w:HtmlWidget id="cell_2_0_1_3" html="Foo" />
-    </w:TableWidget>
+    <w:Table id="table">
+     <w:Html id="cell_0_0_1_1" html="Foo" />
+     <w:Html id="cell_1_0_1_1" html="Bar" />
+     <w:Html id="cell_0_1_2_1" html="Fie" />
+     <w:Html id="cell_0_2_1_1" html="Ma" />
+     <w:Html id="cell_1_2_1_1" html="Ba" />
+     <w:Html id="cell_2_0_1_3" html="Foo" />
+    </w:Table>
     <br />
 
-    Last password: <w:HtmlWidget id="lastpwd" /><br />
-    <w:NewPasswordInputWidget id="newpwd" value="foo" /><br />
-    <w:ButtonInputWidget id="pwdclear" title="Clear new password" />
-    <w:ButtonInputWidget id="pwdset" title="Set new password" /><br />
+    Last password: <w:Html id="lastpwd" /><br />
+    <w:NewPasswordInput id="newpwd" value="foo" /><br />
+    <w:Button id="pwdclear" title="Clear new password" />
+    <w:Button id="pwdset" title="Set new password" /><br />
 
-    <w:HtmlWidget id="Dirlisting">
+    <w:Html id="Dirlisting">
      <table>
       <tr><th>Type</th><th>Filename</th><th>Dates</th><th>Actions</th></tr>
-      <w:ListWidget id="Listing">
+      <w:List id="Listing">
 
-       <w:HtmlWidget classid="Entry">
+       <w:Html classid="Entry">
 	<tr>
 	 <td>
 	  <w:variable id="type" />
@@ -121,25 +121,25 @@
 	  <w:variable id="dates" />
 	 </td>
 	 <td>
-	  <w:HtmlWidget id="actions">
-	   <w:CheckboxInputWidget id="check" value="1" />
-	   <w:LabelWidget id="label" target="1/check">
-	    <w:HtmlWidget id="label">Restore</w:HtmlWidget>
-	   </w:LabelWidget>
-	  </w:HtmlWidget>
+	  <w:Html id="actions">
+	   <w:Checkbox id="check" value="1" />
+	   <w:Label id="label" target="1/check">
+	    <w:Html id="label">Restore</w:Html>
+	   </w:Label>
+	  </w:Html>
 	 </td>
 	</tr>
-       </w:HtmlWidget>
+       </w:Html>
 
-      </w:ListWidget>
+      </w:List>
      </table>
-     <w:ButtonInputWidget id="UpdateFiles" title="Update Files" /><br />
-    </w:HtmlWidget>
+     <w:Button id="UpdateFiles" title="Update Files" /><br />
+    </w:Html>
    </div>
 
    <div id="footer">
    xxx
    </div>
-  </w:HtmlWidget>
+  </w:Html>
  </w:HtmlWindow>
 </w:wwml>

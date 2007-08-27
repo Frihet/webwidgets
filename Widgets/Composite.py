@@ -24,14 +24,14 @@ import Webwidgets.Utils, Webwidgets.Constants
 import Base, Input, Formatting
 
 
-class DialogWidget(Formatting.HtmlWidget):
+class Dialog(Formatting.Html):
     """Dialogs provides an easy way to let the user select one of a
     few different options, while providing the user with some longer
     explanation/description of the options. Options are described
     using a dictionary of description-value pairs."""
     __wwml_html_override__ = False
-    __attributes__ = Formatting.HtmlWidget.__attributes__ + ('buttons',)
-    __children__ = Formatting.HtmlWidget.__children__ + ('head', 'body')
+    __attributes__ = Formatting.Html.__attributes__ + ('buttons',)
+    __children__ = Formatting.Html.__children__ + ('head', 'body')
     buttons = {'Cancel': '0', 'Ok': '1'}
     html = """
     <div %(attr_htmlAttributes)s>
@@ -47,24 +47,24 @@ class DialogWidget(Formatting.HtmlWidget):
     </div>
     """
 
-    class Buttons(Formatting.ListWidget):
+    class Buttons(Formatting.List):
         __explicit_load__ = True
 
-        class Button(Input.ButtonInputWidget):
+        class Button(Input.Button):
             __explicit_load__ = True
-            __attributes__ = Input.ButtonInputWidget.__attributes__ + ('value',)
+            __attributes__ = Input.Button.__attributes__ + ('value',)
             def clicked(self, path):
                 self.parent.parent.notify('selected', self.value)
                 return True
             
         def __init__(self, session, winId, buttons):
-            super(DialogWidget.Buttons, self).__init__(
+            super(Dialog.Buttons, self).__init__(
                 session, winId,
-                **dict([(str(value), DialogWidget.Buttons.Button(session, winId, title=title, value=value))
+                **dict([(str(value), Dialog.Buttons.Button(session, winId, title=title, value=value))
                         for title, value in buttons.iteritems()]))
         
     def __init__(self, session, winId, **attrs):
-        super(Formatting.HtmlWidget, self).__init__(
+        super(Formatting.Html, self).__init__(
             session, winId,
             buttons=self.Buttons(session, winId, self.buttons),
             **attrs)
@@ -73,11 +73,11 @@ class DialogWidget(Formatting.HtmlWidget):
         if path != self.path(): return
         self.visible = False
 
-class TreeWidget(Base.InputWidget):
+class Tree(Base.Input):
     """Expandable tree widget similar to the tree-view in Nautilus or
     Windows Explorer. The tree must support the renderTree() protocol."""
     
-    __attributes__ = Base.StaticCompositeWidget.__attributes__ + ('tree', 'pictIcon', 'pictExpander', 'pictIndent')
+    __attributes__ = Base.StaticComposite.__attributes__ + ('tree', 'pictIcon', 'pictExpander', 'pictIndent')
     def __init__(self, session, winId, **attrs):
         Base.Widget.__init__(self, session, winId, **attrs)
 
@@ -105,8 +105,8 @@ class TreeWidget(Base.InputWidget):
             siblings = node.parent and len(node.parent.subNodes) or 1
             subNodes = len(node.subNodes)
 
-            res = (res or '') + '<div class="TreeWidget-Row">' + indent
-            res += '<span class="%s">' % ['TreeWidget-ShadedNode', 'TreeWidget-Node'][node.leaf]
+            res = (res or '') + '<div class="Tree-Row">' + indent
+            res += '<span class="%s">' % ['Tree-ShadedNode', 'Tree-Node'][node.leaf]
 
             nodePath = path + ['node'] + node.path
             
@@ -154,7 +154,7 @@ class TreeWidget(Base.InputWidget):
 
             return (res, (subIndent,), {})
 
-        return '<div class="TreeWidget" id="%s">%s\n</div>\n' % (
+        return '<div class="Tree" id="%s">%s\n</div>\n' % (
             Webwidgets.Utils.pathToId(path),
             self.tree.renderTree(renderEntry, '    '))
 
@@ -172,11 +172,11 @@ class TreeWidget(Base.InputWidget):
     def selected(self, path, item):
         print '%s.selected(%s, %s)' % ('.'.join([str(x) for x in self.path()]), '.'.join(path), '.'.join(item))
 
-class TabbedViewWidget(Base.InputWidget, Base.StaticCompositeWidget):
+class TabbedView(Base.Input, Base.StaticComposite):
     """Provides a set of overlapping 'pages' with tabs, each tab
     holding some other widget, through wich a user can browse using
     the tabs."""
-    __attributes__ = Base.StaticCompositeWidget.__attributes__ + ('page', 'argumentName')
+    __attributes__ = Base.StaticComposite.__attributes__ + ('page', 'argumentName')
     argumentName = None
     page = None
 

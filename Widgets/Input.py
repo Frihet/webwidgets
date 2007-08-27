@@ -23,7 +23,7 @@ import types
 import Webwidgets.Utils, Webwidgets.Constants
 import Base, Formatting
 
-class ArgumentInputWidget(Base.ValueInputWidget):
+class ArgumentInput(Base.ValueInput):
     """This input widget does not actually renders into any HTML but
     instead represents a parameter in the URL. L{argumentName} is
     mandatory for this widget to be usefull.
@@ -43,32 +43,32 @@ class ArgumentInputWidget(Base.ValueInputWidget):
         self.registerInput(path, self.argumentName, False)
         return ''
 
-class StringInputWidget(Base.ValueInputWidget):
+class StringInput(Base.ValueInput):
     """Text input box"""
     def draw(self, path):
-        super(StringInputWidget, self).draw(path)
+        super(StringInput, self).draw(path)
         return '<input %(attr_htmlAttributes)s type="text" name="%(name)s" value="%(value)s" %(disabled)s />' % {
             'attr_htmlAttributes': self.drawHtmlAttributes(path),
             'name': Webwidgets.Utils.pathToId(path),
             'value': self.fieldOutput(path)[0],
             'disabled': ['', 'disabled="true"'][not self.getActive(path)]}
 
-class PasswordInputWidget(Base.ValueInputWidget):
-    """Like StringInputWidget, but hides the user input"""
+class PasswordInput(Base.ValueInput):
+    """Like StringInput, but hides the user input"""
     def draw(self, path):
-        super(PasswordInputWidget, self).draw(path)
+        super(PasswordInput, self).draw(path)
         return '<input %(attr_htmlAttributes)s type="password" name="%(name)s" value="%(value)s" %(disabled)s />' % {
             'attr_htmlAttributes': self.drawHtmlAttributes(path),
             'name': Webwidgets.Utils.pathToId(path),
             'value': self.fieldOutput(path)[0],
             'disabled': ['', 'disabled="true"'][not self.getActive(path)]}
 
-class NewPasswordInputWidget(Formatting.HtmlWidget, Base.InputWidget):
+class NewPasswordInput(Formatting.Html, Base.Input):
     """Used for entering new passwords - the password has to be
     repeated twice and the two values entered are compared. A
     valueChanged is only propagated if the two values matches"""
     __wwml_html_override__ = False
-    __attributes__ = Formatting.HtmlWidget.__attributes__ + ('value',)
+    __attributes__ = Formatting.Html.__attributes__ + ('value',)
     value = ''
     html = """
     <span %(attr_htmlAttributes)s>
@@ -77,13 +77,13 @@ class NewPasswordInputWidget(Formatting.HtmlWidget, Base.InputWidget):
     </span>
     """
     def __init__(self, session, winId, **attrs):
-        Formatting.HtmlWidget.__init__(
+        Formatting.Html.__init__(
             self, session, winId,
             **attrs)
         self.children['input1'] = self.Input(session, winId, value=self.value)
         self.children['input2'] = self.Input(session, winId, value=self.value)
 
-    class Input(PasswordInputWidget):
+    class Input(PasswordInput):
         __explicit_load__ = True
         
         def valueChanged(self, path, value):
@@ -103,13 +103,13 @@ class NewPasswordInputWidget(Formatting.HtmlWidget, Base.InputWidget):
         self['input1'].value = self['input2'].value = self.value
         self.error = None
 
-class ButtonInputWidget(Base.InputWidget):
+class Button(Base.Input):
     """Button widget - throws a "clicked" notification when clicked"""
-    __attributes__ = Base.InputWidget.__attributes__ + ('title',)
+    __attributes__ = Base.Input.__attributes__ + ('title',)
     title = ''
 
     def draw(self, path):
-        super(ButtonInputWidget, self).draw(path)
+        super(Button, self).draw(path)
         return '<input %(attr_htmlAttributes)s type="submit" %(disabled)s name="%(name)s" value="%(title)s" />' % {
             'attr_htmlAttributes': self.drawHtmlAttributes(path),
             'name': Webwidgets.Utils.pathToId(path),
@@ -127,23 +127,23 @@ class ButtonInputWidget(Base.InputWidget):
         if path != self.path(): return
         return
 
-class RadioButtonGroup(Base.ValueInputWidget):
+class RadioButtonGroup(Base.ValueInput):
     """Group of radio buttons must be joined together. This is
     performed by setting the 'group' attribute on each of the
-    L{RadioInputWidget} in the group to the same instance of this class."""
+    L{RadioInput} in the group to the same instance of this class."""
     
     def __init__(self, session, winId, *arg, **kw):
-        Base.ValueInputWidget.__init__(self, session, winId, *arg, **kw)
+        Base.ValueInput.__init__(self, session, winId, *arg, **kw)
         self.members = {}
 
-class RadioInputWidget(Base.InputWidget, Base.StaticCompositeWidget):
+class RadioInput(Base.Input, Base.StaticComposite):
     """A radio button (selection list item). You must create a
     L{RadioButtonGroup} instance and set the 'group' attribute to that
     instance so that all radio buttons in the group knows about each
     other."""
-    __attributes__ = Base.StaticCompositeWidget.__attributes__ + ('group', 'title', 'value', 'default')
+    __attributes__ = Base.StaticComposite.__attributes__ + ('group', 'title', 'value', 'default')
     def __init__(self, session, winId, **attrs):
-        Base.StaticCompositeWidget.__init__(self, session, winId, **attrs)
+        Base.StaticComposite.__init__(self, session, winId, **attrs)
         self.group.members[self.value] = self
         if self.default:
             self.group.value = self.value
@@ -172,11 +172,11 @@ class RadioInputWidget(Base.InputWidget, Base.StaticCompositeWidget):
                    %(disabled)s
                   >%(title)s</input>""" % result
 
-class CheckboxInputWidget(Base.ValueInputWidget):
+class Checkbox(Base.ValueInput):
     """Boolean input widget - it's value can either be true or false."""
     value = False
     def draw(self, path):
-        super(CheckboxInputWidget, self).draw(path)
+        super(Checkbox, self).draw(path)
         checked = ["", "checked='true'"][not not self.value]
         return '<input %(attr_htmlAttributes)s type="checkbox" name="%(name)s" value="checked" %(checked)s %(disabled)s />' % {
             'attr_htmlAttributes': self.drawHtmlAttributes(path),
@@ -190,11 +190,11 @@ class CheckboxInputWidget(Base.ValueInputWidget):
     def fieldOutput(self, path):
         return [['', 'checked'][not not self.value]]
 
-class ListInputWidget(Base.ValueInputWidget, Base.StaticCompositeWidget):
+class ListInput(Base.ValueInput, Base.StaticComposite):
     """Scrollable list of selectable items. The list can optionally
     allow the user to select multiple items."""
     
-    __attributes__ = Base.ValueInputWidget.__attributes__ + ('multiple', 'size')
+    __attributes__ = Base.ValueInput.__attributes__ + ('multiple', 'size')
     multiple = False
     """Allow the user to select multiple items."""
     
@@ -204,7 +204,7 @@ class ListInputWidget(Base.ValueInputWidget, Base.StaticCompositeWidget):
     value = []
 
     def draw(self, path):
-        Base.ValueInputWidget.draw(self, path)
+        Base.ValueInput.draw(self, path)
         children = self.drawChildren(path)
         childnames = children.keys()
         childnames.sort()
@@ -232,7 +232,7 @@ class ListInputWidget(Base.ValueInputWidget, Base.StaticCompositeWidget):
             }
 
 
-class FileInputWidget(Base.ValueInputWidget, Base.StaticCompositeWidget):
+class FileInput(Base.ValueInput, Base.StaticComposite):
     """File upload box"""
     value = None
     
@@ -247,7 +247,7 @@ class FileInputWidget(Base.ValueInputWidget, Base.StaticCompositeWidget):
     def fieldOutput(self, path):
         return [self.value]
 
-    class preview(Formatting.MediaWidget):
+    class preview(Formatting.Media):
         def getContent(self, path):
             return self.parent.value
         
@@ -259,7 +259,7 @@ class FileInputWidget(Base.ValueInputWidget, Base.StaticCompositeWidget):
         return res
 
     def draw(self, path):
-        super(FileInputWidget, self).draw(path)
+        super(FileInput, self).draw(path)
         if self.getActive(path):
             self.registerInput(path, self.argumentName)
             if self.value is not None:
