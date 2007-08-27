@@ -22,18 +22,11 @@
  xmlns="http://www.w3.org/TR/REC-html40"
  xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
  xmlns:html="http://www.w3.org/TR/REC-html40"
+ bind="Callbacks"
  >
-<!-- bind="Callbacks.MyWindow" -->
  <w:HtmlWindow
-  using="Webwidgets"
-
   id="MyWindow"
   title="RedBack WebWidgets demo application">
-
-  <w:dict
-   id="headers"
-   Content-Type="text/html; charset=UTF-8"
-   Status="202 Page loaded" />
 
   <w:StyleLink id="head" style="../../Widgets.css" />
 

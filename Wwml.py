@@ -114,11 +114,10 @@ def generateValueForNode(module, node, using = [], context = []):
     if 'using' in attributes:
         using = attributes['using'].split(' ') + using
 
-    if node.localName not in ('wwml', 'widgets'):
-        if 'bind' in attributes:
-            context = attributes['bind'].split('.')
-        else:
-            context = context + [attributes.get('classid', '__unknown__')]
+    if 'bind' in attributes:
+        context = attributes['bind'].split('.')
+    else:
+        context = context + [attributes.get('classid', '__unknown__')]
 
     children, text = generatePartsForNode(module, node, using, context)
     attributes.update(children)
@@ -216,7 +215,7 @@ def generateWidgetsFromFile(modulename, filename, file, path = None, context = '
     return generateValueForNode(
         module,
         domNode,
-        [], context)[2]
+        ['Webwidgets'], context)[2]
 
 import imp, ihooks
 
