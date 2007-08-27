@@ -33,10 +33,8 @@ class ListWidget(Base.StaticCompositeWidget):
     pre = sep = post = ''
     def draw(self, path):
         children = self.drawChildren(path)
-        names = children.keys()
-        names.sort()
-        return children['pre'] + children['sep'].join([children[name]
-                                                       for name in names
+        return children['pre'] + children['sep'].join([child
+                                                       for name, child in children.iteritems()
                                                        if name not in ('pre', 'sep', 'post')]) + children['post']
 
 class HtmlWidget(Base.StaticCompositeWidget):
