@@ -139,8 +139,8 @@ def generateValueForNode(module, node, using = [], context = []):
         if 'classid' in value: del value['classid']
         if 'id' in value: del value['id']
     elif node.localName == 'list':
-        value = [item for item in attributes.values()
-                 if item not in ('classid', 'id')]
+        value = [value for name, value in attributes.iteritems()
+                 if name not in ('classid', 'id')]
     elif node.localName == 'wwml':
         value = module
         for k, v in attributes.iteritems():
