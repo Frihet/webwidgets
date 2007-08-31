@@ -63,7 +63,7 @@ class Html(Base.StaticComposite):
         try:
             return self.html % children
         except KeyError, e:
-            e.args = (self, self.path()) + e.args + (self.html,)
+            e.args = (self, self.path) + e.args + (self.html,)
             raise e
 
 class Div(Html):
@@ -128,7 +128,7 @@ class Media(Base.Widget):
         return self.content
     
     def output(self, outputOptions):
-        content = self.getContent(self.path())
+        content = self.getContent(self.path)
         res = {Webwidgets.Constants.OUTPUT: content.file.read(),
                'Content-type': content.type
                }
@@ -136,12 +136,12 @@ class Media(Base.Widget):
         return res
 
     def draw(self, outputOptions):
-        content = self.getContent(self.path())
+        content = self.getContent(self.path)
 
         if content is None:
             return self.empty
 
-        location = self.calculateUrl({'widget': Webwidgets.Utils.pathToId(self.path())})
+        location = self.calculateUrl({'widget': Webwidgets.Utils.pathToId(self.path)})
         if content.type in ('image/png', 'image/jpeg', 'image/gif'):
             preview = """<img src="%(location)s" alt="%(name)s" width="%(width)s" height="%(height)s" />""" % {
                 'location': location,
@@ -152,7 +152,7 @@ class Media(Base.Widget):
         else:
             preview = content.filename
         return """<a %(attr_htmlAttributes)s href="%(location)s">%(preview)s</a>""" % {
-            'attr_htmlAttributes': self.drawHtmlAttributes(self.path()),
+            'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
             'location': location,
             'preview': preview
             }
@@ -176,7 +176,7 @@ class Label(Base.StaticComposite):
             target = self.target
         else:
             target = self + self.target
-        targetPath = target.path()
+        targetPath = target.path
         res = self.drawChildren(outputOptions, includeAttributes = True)
         res['error'] = ''
         if target.error is not None:
@@ -197,7 +197,7 @@ class Field(Label):
             target = self.target
         else:
             target = self + ['field'] + self.target
-        targetPath = target.path()
+        targetPath = target.path
         res = self.drawChildren(outputOptions, includeAttributes = True)
         res['error'] = ''
         if target.error is not None:
@@ -217,7 +217,7 @@ class Fieldgroup(List):
     class pre(Base.Widget):
         def draw(self, outputOptions):
             return """<div %(attr_htmlAttributes)s>""" % {
-                'attr_htmlAttributes': self.parent.drawHtmlAttributes(self.parent.path()),
+                'attr_htmlAttributes': self.parent.drawHtmlAttributes(self.parent.path),
                 }
     post = "</div>\n"
 
@@ -252,7 +252,7 @@ class Table(Base.StaticComposite, TableModel.Table):
     
     def draw(self, outputOptions):
         children = self.drawChildren(outputOptions)
-        result = '<table border="1" %s>\n' % self.drawHtmlAttributes(self.path())
+        result = '<table border="1" %s>\n' % self.drawHtmlAttributes(self.path)
         for y in xrange(0, self.h):
             if y not in self.rowWidths or self.rowWidths[y] > 0:
                 result += '<tr>\n'

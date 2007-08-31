@@ -132,17 +132,17 @@ class Program(WebKit.Page.Page):
                 self.args = args
                 self.kw = kw
 
-            class path(object):
+            class Path(object):
                 def __get__(self, instance, owner):
                     path = instance._path
                     if path is None:
-                        path = instance.widget.path()
+                        path = instance.widget.path
                     elif isinstance(path, Utils.RelativePath):
-                        path = list(instance.widget.path() + path)
+                        path = list(instance.widget.path + path)
                     return path
                 def __set__(self, instance, value):
                     instance._path = value
-            path = path()
+            path = Path()
 
             def parent(self):
                 return type(self)(self.widget.parent, self.message, self.args, self.kw, self.path)

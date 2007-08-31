@@ -139,32 +139,35 @@ class Widget(object):
         def __get__(self, instance, owner):
             if not hasattr(instance, 'parent'):
                 return None
-            return Webwidgets.Utils.pathToId(instance.path())
+            return Webwidgets.Utils.pathToId(instance.path)
     html_id = htmlId()
 
-    class htmlClass(object):
+    class HtmlClass(object):
         def __get__(self, instance, owner):
             classes = owner.classes
             if instance:
                 classes = instance.classes
             return ' '.join([c.replace('.', '-')
                              for c in classes])
-    html_class = htmlClass()
+    html_class = HtmlClass()
 
-    class htmlAttributes(object):
+    class HtmlAttributes(object):
         def __get__(self, instance, owner):
             if not hasattr(instance, 'parent'):
                 return None
-            return instance.drawHtmlAttributes(instance.path())            
-    htmlAttributes = htmlAttributes()
+            return instance.drawHtmlAttributes(instance.path)            
+    htmlAttributes = HtmlAttributes()
 
+    class Path(object):
+        def __get__(self, instance, owner):
+            """Returns the path of the widget within the widget tree."""
+            if not hasattr(instance, 'parent'):
+                return None
+            return instance.parent.path + [instance.name]
+    path = Path()
+    
     def getVisible(self, path):
         return self.visible and self.session.AccessManager(Webwidgets.Constants.VIEW, self.winId, path)
-
-    def path(self):
-        """Returns the (static) path of the widget within the widget
-        tree."""
-        return self.parent.path() + [self.name]
 
     def getWidgetByPath(self, path):
         path = Webwidgets.Utils.RelativePath(path)
@@ -181,7 +184,7 @@ class Widget(object):
         return {}
 
     def pathToSubwidgetPath(self, path):
-        widgetPath = self.path()
+        widgetPath = self.path
         if not Webwidgets.Utils.isPrefix(widgetPath + ['_'], path):
             raise Webwidgets.Constants.NotASubwidgetException('Not a subwidget path %s' % (path,))
         return path[len(widgetPath) + 1:]
@@ -324,7 +327,7 @@ class Composite(Widget):
         res = Webwidgets.Utils.OrderedDict()
 
         for name, child in self.getChildren():
-            child = self.drawChild(self.path() + [name], child, outputOptions, invisibleAsEmpty)
+            child = self.drawChild(self.path + [name], child, outputOptions, invisibleAsEmpty)
             if child is not None:
                 res[name] = child
 
@@ -425,7 +428,7 @@ class Input(Widget):
     See that widget for further information."""
 
     def registerInput(self, path = None, argumentName = None, field = True):
-        if path is None: path = self.path()
+        if path is None: path = self.path
         active = self.getActive(path)
         if active:
             if field:
@@ -441,7 +444,7 @@ class Input(Widget):
         raise NotImplementedError(self, "fieldOutput")
     
     def draw(self, outputOptions):
-        self.registerInput(self.path(), self.argumentName)
+        self.registerInput(self.path, self.argumentName)
         return ''
 
     def getActive(self, path):
@@ -469,7 +472,7 @@ class ValueInput(Input):
         as entered by the user, has changed. If you override this,
         make sure to call the base class implementation, as the value
         will be reset otherwise."""
-        if path != self.path(): return
+        if path != self.path: return
         self.error = None
 
     def __cmp__(self, other):
@@ -487,8 +490,7 @@ class Window(Widget):
         self.fields = {}
         self.arguments = {}
 
-    def path(self):
-        return []
+    path = []
 
     def output(self, outputOptions):
         result = {Webwidgets.Constants.OUTPUT: self.draw([])}
@@ -526,10 +528,10 @@ class HtmlWindow(Window, StaticComposite):
             invisibleAsEmpty = True,
             includeAttributes = True)
 
-        result['title'] = '<title>' + self.getTitle(self.path()) + '</title>'
+        result['title'] = '<title>' + self.getTitle(self.path) + '</title>'
         result['doctype'] = self.doctype
         result['uri'] = self.session.program.request()._environ['REQUEST_URI']
-        result['name'] = result['id'] = Webwidgets.Utils.pathToId(self.path())
+        result['name'] = result['id'] = Webwidgets.Utils.pathToId(self.path)
         result['base'] = self.session.program.requestBase()
         
         result['headContent'] = '\n'.join(self.headContent.values())

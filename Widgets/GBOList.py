@@ -202,12 +202,12 @@ class GBOList(Base.Input, Base.Composite):
 
     def sortChanged(self, path, sort):
         """Notification that the list sort order has changed."""
-        if path != self.path(): return
+        if path != self.path: return
         self.reread()
 
     def pageChanged(self, path, page):
         """Notification that the user has changed page."""
-        if path != self.path(): return
+        if path != self.path: return
         self.reread()
 
     def getRows(self):
@@ -238,7 +238,7 @@ class GBOList(Base.Input, Base.Composite):
         return fields
 
     def fieldInput(self, path, stringValue):
-        widgetPath = self.path()
+        widgetPath = self.path
         try:
             subWidget = self.pathToSubwidgetPath(path)
         except Webwidgets.Constants.NotASubwidgetException:
@@ -255,7 +255,7 @@ class GBOList(Base.Input, Base.Composite):
                 self.notify('function', subWidget[1], int(stringValue))
     
     def fieldOutput(self, path):
-        widgetPath = self.path()
+        widgetPath = self.path
         subWidget = self.pathToSubwidgetPath(path)
         
         if subWidget == ['sort']:
@@ -271,7 +271,7 @@ class GBOList(Base.Input, Base.Composite):
         """@return: Whether the widget is allowing input from the user
         or not.
         """
-        widgetPath = self.path()
+        widgetPath = self.path
         subWidget = self.pathToSubwidgetPath(path)
 
         if not self.active: return False
@@ -287,7 +287,7 @@ class GBOList(Base.Input, Base.Composite):
             raise Exception('Unknown sub-widget %s in %s' %(subWidget, widgetPath))
 
     def visibleColumns(self):
-        path = self.path()
+        path = self.path
         # Optimisation: we could have used getActive and constructed a path...
         return Webwidgets.Utils.OrderedDict([(name, description) for (name, description) in self.columns.iteritems()
                                   if self.session.AccessManager(Webwidgets.Constants.VIEW, self.winId,
@@ -445,7 +445,7 @@ class GBOList(Base.Input, Base.Composite):
             'content': '\n'.join(['<tr>%s</tr>' % (''.join(row),) for row in rows])}
             
     def draw(self, outputOptions):
-        widgetId = Webwidgets.Utils.pathToId(self.path())
+        widgetId = Webwidgets.Utils.pathToId(self.path)
 
         reverseDependentColumns = reverseDependency(self.dependentColumns)
         visibleColumns = self.visibleColumns()
@@ -457,25 +457,25 @@ class GBOList(Base.Input, Base.Composite):
                       if column in visibleColumns] + [column for column in visibleColumns
                                                      if column not in groupOrder]
 
-        headings = self.drawHeadings(self.path(), visibleColumns, reverseDependentColumns)
+        headings = self.drawHeadings(self.path, visibleColumns, reverseDependentColumns)
         # Why we need this test here: rowsToTree would create an empty
         # top-node for an empty set of rows, which drawTree would
         # render into a single row...
         if self.getRows():
             renderedRows = self.drawTree(self.rowsToTree(self.getRows(), groupOrder),
-                                         self.path(), outputOptions,
+                                         self.path, outputOptions,
                                          groupOrder, visibleColumns)
         else:
             renderedRows = []
 
-        self.appendFunctions(self.path(), renderedRows, headings)
+        self.appendFunctions(self.path, renderedRows, headings)
 
         return """
 <div %(attr_htmlAttributes)s>
  %(table)s
  %(pagingButtons)s
 </div>
-""" % {'attr_htmlAttributes': self.drawHtmlAttributes(self.path()),
+""" % {'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
        'table': self.drawTable(headings, renderedRows),
-       'pagingButtons': self.drawPagingButtons(self.path())
+       'pagingButtons': self.drawPagingButtons(self.path)
        }

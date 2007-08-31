@@ -70,7 +70,7 @@ class Dialog(Formatting.Html):
             **attrs)
 
     def selected(self, path, value):
-        if path != self.path(): return
+        if path != self.path: return
         self.visible = False
 
 class Tree(Base.Input):
@@ -101,7 +101,7 @@ class Tree(Base.Input):
                   ('empty', '&nbsp;&nbsp;&nbsp;'))
 
     def draw(self, outputOptions):
-        path = self.path()
+        path = self.path
         
         def renderEntry(node, sibling, res, indent=''):
             siblings = node.parent and len(node.parent.subNodes) or 1
@@ -161,7 +161,7 @@ class Tree(Base.Input):
             self.tree.renderTree(renderEntry, '    '))
 
     def valueChanged(self, path, value):
-        if path != self.path(): return
+        if path != self.path: return
         if value is '': return
         subPath = path[path.index('node')+1:-1]
         action = path[-1]
@@ -172,7 +172,7 @@ class Tree(Base.Input):
             self.notify('selected', subPath)
 
     def selected(self, path, item):
-        print '%s.selected(%s, %s)' % ('.'.join([str(x) for x in self.path()]), '.'.join(path), '.'.join(item))
+        print '%s.selected(%s, %s)' % ('.'.join([str(x) for x in self.path]), '.'.join(path), '.'.join(item))
 
 class TabbedView(Base.Input, Base.StaticComposite):
     """Provides a set of overlapping 'pages' with tabs, each tab
@@ -197,12 +197,12 @@ class TabbedView(Base.Input, Base.StaticComposite):
 
     def pageChanged(self, path, page):
         """Notification that the user has changed page."""
-        if path != self.path(): return
+        if path != self.path: return
 
     def draw(self, outputOptions):
-        active = self.registerInput(self.path(), self.argumentName)
+        active = self.registerInput(self.path, self.argumentName)
 
-        widgetId = Webwidgets.Utils.pathToId(self.path())
+        widgetId = Webwidgets.Utils.pathToId(self.path)
         tabs = '\n'.join(["""
                           <li><button
                                type="submit"
@@ -213,14 +213,14 @@ class TabbedView(Base.Input, Base.StaticComposite):
                           """ % {'disabled': ['', 'disabled="true"'][page == self.page or not active],
                                  'attr_html_id': widgetId,
                                  'page':page,
-                                 'caption':child.getTitle(self.path() + [page])}
+                                 'caption':child.getTitle(self.path + [page])}
                           for page, child in self.getChildren()
                           #### fixme ####
                           # name = "Child must be widget"
                           # description = """If child is not a widget
                           # but a string, this fails..."""
                           #### end ####
-                          if child.getVisible(child.path())])
+                          if child.getVisible(child.path)])
         return """
                <div %(attr_htmlAttributes)s>
                 <ul class="tabs">
@@ -230,6 +230,6 @@ class TabbedView(Base.Input, Base.StaticComposite):
                  %(page)s
                 </div>
                </div>
-               """ % {'attr_htmlAttributes': self.drawHtmlAttributes(self.path()),
-                      'page': self.drawChild(self.path() + [self.page], self.getChild(self.page), outputOptions, True),
+               """ % {'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
+                      'page': self.drawChild(self.path + [self.page], self.getChild(self.page), outputOptions, True),
                       'tabs': tabs}
