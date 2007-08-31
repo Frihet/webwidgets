@@ -31,8 +31,8 @@ class List(Base.StaticComposite):
     __no_classes_name__ = True
     __children__ = ('pre', 'sep', 'post')
     pre = sep = post = ''
-    def draw(self, path):
-        children = self.drawChildren(path)
+    def draw(self, outputOptions):
+        children = self.drawChildren(outputOptions)
         return children['pre'] + children['sep'].join([child
                                                        for name, child in children.iteritems()
                                                        if name not in ('pre', 'sep', 'post')]) + children['post']
@@ -55,9 +55,9 @@ class Html(Base.StaticComposite):
     """Let Wwml-defined subclasses override the html attribute"""
     __attributes__ = Base.StaticComposite.__attributes__ + ('html',)
     html = ''
-    def draw(self, path):
+    def draw(self, outputOptions):
         children = self.drawChildren(
-            path,
+            outputOptions,
             invisibleAsEmpty = True,
             includeAttributes = True)
         try:
@@ -109,12 +109,12 @@ class Message(Html):
     __wwml_html_override__ = False
     __children__ = Html.__children__ + ('message',)
     message = ''
-    def draw(self, path):
+    def draw(self, outputOptions):
         if self.children['message']:
             self.html = '<div %(attr_htmlAttributes)s>%(message)s</div>'
         else:
             self.html = ''
-        return Html.draw(self, path)
+        return Html.draw(self, outputOptions)
 
 class Media(Base.Widget):
     """Media (file) viewing widget"""
@@ -135,8 +135,8 @@ class Media(Base.Widget):
         content.file.seek(0)
         return res
 
-    def draw(self, path):
-        content = self.getContent(path)
+    def draw(self, outputOptions):
+        content = self.getContent(self.path())
 
         if content is None:
             return self.empty
@@ -152,7 +152,7 @@ class Media(Base.Widget):
         else:
             preview = content.filename
         return """<a %(attr_htmlAttributes)s href="%(location)s">%(preview)s</a>""" % {
-            'attr_htmlAttributes': self.drawHtmlAttributes(path),
+            'attr_htmlAttributes': self.drawHtmlAttributes(self.path()),
             'location': location,
             'preview': preview
             }
@@ -171,13 +171,13 @@ class Label(Base.StaticComposite):
     the widget.
     """
 
-    def draw(self, path):
+    def draw(self, outputOptions):
         if isinstance(self.target, Base.Widget):
             target = self.target
         else:
             target = self + self.target
         targetPath = target.path()
-        res = self.drawChildren(path, includeAttributes = True)
+        res = self.drawChildren(outputOptions, includeAttributes = True)
         res['error'] = ''
         if target.error is not None:
            res['error'] = """<span class="error">(%s)</span>""" % (target.error,)
@@ -192,13 +192,13 @@ class Field(Label):
     __wwml_html_override__ = False
     __children__ = Label.__children__ + ('field',)
     
-    def draw(self, path):
+    def draw(self, outputOptions):
         if isinstance(self.target, Base.Widget):
             target = self.target
         else:
             target = self + ['field'] + self.target
         targetPath = target.path()
-        res = self.drawChildren(path, includeAttributes = True)
+        res = self.drawChildren(outputOptions, includeAttributes = True)
         res['error'] = ''
         if target.error is not None:
            res['error'] = """<span class="error">(%s)</span>""" % (target.error,)
@@ -215,7 +215,7 @@ class Field(Label):
 
 class Fieldgroup(List):
     class pre(Base.Widget):
-        def draw(self, path):
+        def draw(self, outputOptions):
             return """<div %(attr_htmlAttributes)s>""" % {
                 'attr_htmlAttributes': self.parent.drawHtmlAttributes(self.parent.path()),
                 }
@@ -250,9 +250,9 @@ class Table(Base.StaticComposite, TableModel.Table):
         cell = TableModel.Table.remove(self, x, y)
         if cell: del self.children[cell.name()]
     
-    def draw(self, path):
-        children = self.drawChildren(path)
-        result = '<table border="1" %s>\n' % self.drawHtmlAttributes(path)
+    def draw(self, outputOptions):
+        children = self.drawChildren(outputOptions)
+        result = '<table border="1" %s>\n' % self.drawHtmlAttributes(self.path())
         for y in xrange(0, self.h):
             if y not in self.rowWidths or self.rowWidths[y] > 0:
                 result += '<tr>\n'

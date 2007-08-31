@@ -100,7 +100,9 @@ class Tree(Base.Input):
     pictIndent = (('vertical', '|&nbsp;&nbsp;'),
                   ('empty', '&nbsp;&nbsp;&nbsp;'))
 
-    def draw(self, path):
+    def draw(self, outputOptions):
+        path = self.path()
+        
         def renderEntry(node, sibling, res, indent=''):
             siblings = node.parent and len(node.parent.subNodes) or 1
             subNodes = len(node.subNodes)
@@ -197,10 +199,10 @@ class TabbedView(Base.Input, Base.StaticComposite):
         """Notification that the user has changed page."""
         if path != self.path(): return
 
-    def draw(self, path):
-        active = self.registerInput(path, self.argumentName)
+    def draw(self, outputOptions):
+        active = self.registerInput(self.path(), self.argumentName)
 
-        widgetId = Webwidgets.Utils.pathToId(path)
+        widgetId = Webwidgets.Utils.pathToId(self.path())
         tabs = '\n'.join(["""
                           <li><button
                                type="submit"
@@ -211,7 +213,7 @@ class TabbedView(Base.Input, Base.StaticComposite):
                           """ % {'disabled': ['', 'disabled="true"'][page == self.page or not active],
                                  'attr_html_id': widgetId,
                                  'page':page,
-                                 'caption':child.getTitle(path + [page])}
+                                 'caption':child.getTitle(self.path() + [page])}
                           for page, child in self.getChildren()
                           #### fixme ####
                           # name = "Child must be widget"
@@ -228,6 +230,6 @@ class TabbedView(Base.Input, Base.StaticComposite):
                  %(page)s
                 </div>
                </div>
-               """ % {'attr_htmlAttributes': self.drawHtmlAttributes(path),
-                      'page': self.drawChild(self.page, self.getChild(self.page), path, True),
+               """ % {'attr_htmlAttributes': self.drawHtmlAttributes(self.path()),
+                      'page': self.drawChild(self.path() + [self.page], self.getChild(self.page), outputOptions, True),
                       'tabs': tabs}

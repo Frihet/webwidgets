@@ -212,7 +212,7 @@ class Widget(object):
                          in attributes
                          if value])
 
-    def draw(self, path):
+    def draw(self, outputOptions):
         """Renders the widget to HTML. Path is where the full path to
         the widget to render, that is what might go into the id-field
         of an HTML-tag for the widget. Use
@@ -298,7 +298,7 @@ class Composite(Widget):
         super(Composite, self).__init__(
             session, winId, **attrs)
 
-    def drawChild(self, name, child, path, invisibleAsEmpty = False):
+    def drawChild(self, path, child, outputOptions, invisibleAsEmpty = False):
         """Renders a child widget to HTML using its draw() method.
         Also handles visibility of the child: if invisibleAsEmpty is
         False, rendering an invisible child will yeild None, otherwize
@@ -306,13 +306,13 @@ class Composite(Widget):
         invisible = [None, ''][invisibleAsEmpty]
         if isinstance(child, Widget):
             if not child.getVisible(path): return invisible
-            return child.draw(path + [name])
+            return child.draw(outputOptions)
         else:
             if not self.session.AccessManager(Webwidgets.Constants.VIEW, self.winId, path):
                 return invisible
             return unicode(child)
 
-    def drawChildren(self, path, invisibleAsEmpty = False, includeAttributes = False):
+    def drawChildren(self, outputOptions, invisibleAsEmpty = False, includeAttributes = False):
         """Renders all child widgets to HTML using their draw methods.
         Also handles visibility of the children - invisible children
         are not included in the output.
@@ -324,7 +324,7 @@ class Composite(Widget):
         res = Webwidgets.Utils.OrderedDict()
 
         for name, child in self.getChildren():
-            child = self.drawChild(name, child, path, invisibleAsEmpty)
+            child = self.drawChild(self.path() + [name], child, outputOptions, invisibleAsEmpty)
             if child is not None:
                 res[name] = child
 
@@ -440,8 +440,8 @@ class Input(Widget):
     def fieldOutput(self, path):
         raise NotImplementedError(self, "fieldOutput")
     
-    def draw(self, path):
-        self.registerInput(path, self.argumentName)
+    def draw(self, outputOptions):
+        self.registerInput(self.path(), self.argumentName)
         return ''
 
     def getActive(self, path):
@@ -495,7 +495,7 @@ class Window(Widget):
         result.update(self.headers)
         return result
 
-    def draw(self, path):
+    def draw(self, outputOptions):
         self.fields = {}
         self.arguments = {}
         return ''
@@ -517,19 +517,19 @@ class HtmlWindow(Window, StaticComposite):
         result['Content-Type'] = 'text/html; charset=%(encoding)s' % {'encoding': self.encoding}
         return result
 
-    def draw(self, path):
-        Window.draw(self, path)
+    def draw(self, outputOptions):
+        Window.draw(self, outputOptions)
         self.headContent = {}
 
         result = self.drawChildren(
-            path,
+            outputOptions,
             invisibleAsEmpty = True,
             includeAttributes = True)
 
-        result['title'] = '<title>' + self.getTitle(path) + '</title>'
+        result['title'] = '<title>' + self.getTitle(self.path()) + '</title>'
         result['doctype'] = self.doctype
         result['uri'] = self.session.program.request()._environ['REQUEST_URI']
-        result['name'] = result['id'] = Webwidgets.Utils.pathToId(path)
+        result['name'] = result['id'] = Webwidgets.Utils.pathToId(self.path())
         result['base'] = self.session.program.requestBase()
         
         result['headContent'] = '\n'.join(self.headContent.values())

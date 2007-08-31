@@ -318,7 +318,7 @@ class GBOList(Base.Input, Base.Composite):
                 node['rows'] += 1
         return tree
 
-    def drawTree(self, node, path, groupOrder, visibleColumns, firstLevel = 0, lastLevel = 0):
+    def drawTree(self, node, path, outputOptions, groupOrder, visibleColumns, firstLevel = 0, lastLevel = 0):
         if node['children']:
             rows = []
             children = len(node['children'])
@@ -329,7 +329,10 @@ class GBOList(Base.Input, Base.Composite):
                     subFirst += 1
                 if child != children - 1:
                     subLast += 1
-                rows.extend(self.drawTree(node['children'][child], path, groupOrder, visibleColumns, subFirst, subLast))
+                rows.extend(self.drawTree(node['children'][child],
+                                          path, outputOptions,
+                                          groupOrder, visibleColumns,
+                                          subFirst, subLast))
         else:
             rows = []
             for row in xrange(0, node['rows']):
@@ -337,18 +340,18 @@ class GBOList(Base.Input, Base.Composite):
         if 'value' in node:
             column = groupOrder[node['level'] - 1]
             rows[0][visibleColumns.keys().index(column)
-                    ] = self.drawNode(path, node, column, firstLevel, lastLevel)
+                    ] = self.drawNode(path, outputOptions, node, column, firstLevel, lastLevel)
         return rows
 
-    def drawNode(self, path, node, column, firstLevel, lastLevel):
-        return self.drawCell(path, node['value'], node['top'], column, node['rows'], firstLevel, lastLevel)
+    def drawNode(self, path, outputOptions, node, column, firstLevel, lastLevel):
+        return self.drawCell(path, outputOptions, node['value'], node['top'], column, node['rows'], firstLevel, lastLevel)
         
-    def drawCell(self, path, value, row, column, rowspan, firstLevel, lastLevel):
+    def drawCell(self, path, outputOptions, value, row, column, rowspan, firstLevel, lastLevel):
         return '<td rowspan="%(rowspan)s" class="%(class)s">%(content)s</td>' % {
             'rowspan': rowspan,
             'class': 'column_first_level_%s column_last_level_%s' % (firstLevel, lastLevel),
-            'content': self.drawChild("cell_%s_%s" % (row, column),
-                                      value, path, True)}
+            'content': self.drawChild(path + ["cell_%s_%s" % (row, column)],
+                                      value, outputOptions, True)}
 
     def drawPagingButtons(self, path):
         if self.argumentName:
@@ -441,8 +444,8 @@ class GBOList(Base.Input, Base.Composite):
             'headings': '<tr>%s</tr>' % (' '.join(headings),),
             'content': '\n'.join(['<tr>%s</tr>' % (''.join(row),) for row in rows])}
             
-    def draw(self, path):
-        widgetId = Webwidgets.Utils.pathToId(path)
+    def draw(self, outputOptions):
+        widgetId = Webwidgets.Utils.pathToId(self.path())
 
         reverseDependentColumns = reverseDependency(self.dependentColumns)
         visibleColumns = self.visibleColumns()
@@ -454,24 +457,25 @@ class GBOList(Base.Input, Base.Composite):
                       if column in visibleColumns] + [column for column in visibleColumns
                                                      if column not in groupOrder]
 
-        headings = self.drawHeadings(path, visibleColumns, reverseDependentColumns)
+        headings = self.drawHeadings(self.path(), visibleColumns, reverseDependentColumns)
         # Why we need this test here: rowsToTree would create an empty
         # top-node for an empty set of rows, which drawTree would
         # render into a single row...
         if self.getRows():
             renderedRows = self.drawTree(self.rowsToTree(self.getRows(), groupOrder),
-                                         path, groupOrder, visibleColumns)
+                                         self.path(), outputOptions,
+                                         groupOrder, visibleColumns)
         else:
             renderedRows = []
 
-        self.appendFunctions(path, renderedRows, headings)
+        self.appendFunctions(self.path(), renderedRows, headings)
 
         return """
 <div %(attr_htmlAttributes)s>
  %(table)s
  %(pagingButtons)s
 </div>
-""" % {'attr_htmlAttributes': self.drawHtmlAttributes(path),
+""" % {'attr_htmlAttributes': self.drawHtmlAttributes(self.path()),
        'table': self.drawTable(headings, renderedRows),
-       'pagingButtons': self.drawPagingButtons(path)
+       'pagingButtons': self.drawPagingButtons(self.path())
        }

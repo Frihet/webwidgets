@@ -26,11 +26,11 @@ class DateInput(Input.StringInput):
     format = '%Y-%m-%d'
     value = time.localtime()
 
-    def draw(self, path):
+    def draw(self, outputOptions):
         """
         Draw input widget.
         """
-        super(DateInput, self).draw(path)
+        super(DateInput, self).draw(outputOptions)
 
         self.registerStyleLink(self.calculateUrl({'widgetClass': 'Webwidgets.DateInput',
                                                   'file': 'calendar-blue.css',
@@ -61,11 +61,11 @@ class DateInput(Input.StringInput):
            }
          );
        </script>''' % {
-            'attr_htmlAttributes': self.drawHtmlAttributes(path),
-            'name': Webwidgets.Utils.pathToId(path),
-            'value': self.fieldOutput(path)[0], 'format': self.format,
-            'disabled': ['', 'disabled="true"'][not self.getActive(path)],
-            'attr_html_id': Webwidgets.Utils.pathToId(path)}
+            'attr_htmlAttributes': self.drawHtmlAttributes(self.path()),
+            'name': Webwidgets.Utils.pathToId(self.path()),
+            'value': self.fieldOutput(self.path())[0], 'format': self.format,
+            'disabled': ['', 'disabled="true"'][not self.getActive(self.path())],
+            'attr_html_id': Webwidgets.Utils.pathToId(self.path())}
 
 
     def fieldInput(self, path, stringValue):
