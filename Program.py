@@ -109,7 +109,7 @@ class Program(WebKit.Page.Page):
         method.
         """
         
-        debugArguments = True
+        debugArguments = False
         debugFields = False
         debugReceiveNotification = False
 

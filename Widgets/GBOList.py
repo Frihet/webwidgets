@@ -161,7 +161,7 @@ class GBOList(Base.Input, Base.Composite):
     functions = {}
     disabledFunctions = []
     functionPosition = 0
-    sort =[]
+    sort = []
     rows = []
     page = 1
     pages = 1

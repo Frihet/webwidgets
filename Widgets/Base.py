@@ -163,6 +163,8 @@ class Widget(object):
             """Returns the path of the widget within the widget tree."""
             if not hasattr(instance, 'parent'):
                 return None
+            if instance.parent.path is None:
+                return None
             return instance.parent.path + [instance.name]
     path = Path()
 
@@ -271,7 +273,7 @@ class Widget(object):
         return self.getWidgetByPath(other)
 
     def __setattr__(self, name, value):
-        if not hasattr(self, name) or value != getattr(self, name):
+        if not hasattr(self, name) or value is not getattr(self, name):
             object.__setattr__(self, name, value)    
             if name in self.__attributes__:
                 self.notify('%sChanged' % name, value)
