@@ -111,7 +111,6 @@ class Program(WebKit.Page.Page):
         
         debugArguments = False
         debugFields = False
-        debugSendNotification = False
         debugReceiveNotification = False
 
         def __init__(self):
@@ -136,33 +135,48 @@ class Program(WebKit.Page.Page):
             class Path(object):
                 def __get__(self, instance, owner):
                     path = instance._path
+                    if isinstance(path, list):
+                        return path
+                    widgetPath = instance.widget.path
                     if path is None:
-                        path = instance.widget.path
-                    elif isinstance(path, Utils.RelativePath):
-                        path = list(instance.widget.path + path)
-                    return path
+                        return widgetPath
+                    if widgetPath is None:
+                        return None
+                    return list(widgetPath + path)
+
                 def __set__(self, instance, value):
                     instance._path = value
             path = Path()
 
             def parent(self):
+                if not hasattr(self.widget, 'parent'):
+                    raise StopIteration()
                 return type(self)(self.widget.parent, self.message, self.args, self.kw, self.path)
 
             def process(self):
                 if self.widget.session.debugReceiveNotification:
                     print "Notifying %s" % self
-                if hasattr(self.widget, self.message):
-                    # Run the notification handler!
-                    if getattr(self.widget, self.message
-                               )(self.path, *self.args, **self.kw):
-                        # Notification consumed
-                        return
-                if hasattr(self.widget, 'parent'):
-                    self.widget.session.addNotification(self.parent())
+                try:
+                    if hasattr(self.widget, self.message):
+                        # Run the notification handler!
+                        if getattr(self.widget, self.message
+                                   )(self.path, *self.args, **self.kw):
+                            # FIXME: Workaround to support the old API!
+                            raise StopIteration()
+                    return self.parent().process()
+                except StopIteration:
+                    # Notification consumed
+                    pass
 
-            def __str__(self):
+            def __repr__(self):
+                return "Notification(%s)" % (unicode(self),)
+            
+            def __unicode__(self):
                 return "%s/%s <- %s(%s, %s)" % (
                     self.widget, self.path, self.message, self.args, self.kw)
+
+            def __str__(self):
+                return str(unicode(self))
 
         def getWindow(self, winId):
             """Retrieves a window by its ID; either an existing window
@@ -288,8 +302,6 @@ class Program(WebKit.Page.Page):
                     self.processFields(window,
                                        decodeFields(normalizeFields(req.fields())))
 
-                self.processNotifications()
-
                 if self.output is None:
                     if 'widgetClass' in outputOptions:
                         cls = Utils.loadClass(outputOptions['widgetClass'])
@@ -316,8 +328,6 @@ class Program(WebKit.Page.Page):
                                     print "Old: %s: %s" %(location, arguments)
                                     print "New: %s: %s" % (newLocation, newArguments)
                                 self.redirect(winId, newLocation, newArguments, outputOptions)
-            else:
-                self.processNotifications()
 
             if self.output is not None:
                 for key, value in self.output.iteritems():
@@ -350,18 +360,7 @@ class Program(WebKit.Page.Page):
             widgets as a result of their values being changed, gets
             processed.
             """
-            self.addNotification(self.Notification(*arg, **kw))
-
-        def addNotification(self, notification):
-            if self.debugSendNotification: print "Add notification:", notification
-            self.notifications.append(notification)
-
-        def processNotifications(self):
-            """Processes any pending notifications. Mainly used internally by writeHTML."""
-            while self.notifications:
-                notification = self.notifications[0]
-                del self.notifications[0]
-                notification.process()
+            self.Notification(*arg, **kw).process()
 
         def calculateUrl(self, winId, location, arguments, outputOptions):
             windowPath = self.program.request().servletURI()

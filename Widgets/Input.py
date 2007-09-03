@@ -88,8 +88,10 @@ class NewPasswordInput(Formatting.Html, Base.Input):
         
         def valueChanged(self, path, value):
             if self.parent['input1'].value == self.parent['input2'].value:
+                print "Passwords matches", self.parent['input1'].value, self.parent['input2'].value
                 self.parent.value = value
             else:
+                self.parent.value = None
                 self.parent.error = "Passwords don't match!"
             return True
 
@@ -98,7 +100,8 @@ class NewPasswordInput(Formatting.Html, Base.Input):
 
     def valueChanged(self, path, value):
         if path != self.path: return
-        # If we get this from anywhere else that input1 and input2, we
+        if value is None: return
+        # If we get this from anywhere else than input1 and input2, we
         # must set their values too...
         self['input1'].value = self['input2'].value = self.value
         self.error = None

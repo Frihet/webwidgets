@@ -32,6 +32,11 @@
 
   <w:Html id="body">
 
+   Last password: <w:Html id="lastpwd" /><br />
+   <w:Field id='newpwd' label='New password'><w:NewPasswordInput id="field" value="foo" /></w:Field>
+   <w:Button id="pwdclear" title="Clear new password" />
+   <w:Button id="pwdset" title="Set new password" /><br />
+
    <div><w:Widget id="language" /></div>
    <div><w:LanguageSelector id="sel" /></div>
 
@@ -101,11 +106,6 @@
      <w:Html id="cell_2_0_1_3" html="Foo" />
     </w:Table>
     <br />
-
-    Last password: <w:Html id="lastpwd" /><br />
-    <w:NewPasswordInput id="newpwd" value="foo" /><br />
-    <w:Button id="pwdclear" title="Clear new password" />
-    <w:Button id="pwdset" title="Set new password" /><br />
 
     <w:Html id="Dirlisting">
      <table>

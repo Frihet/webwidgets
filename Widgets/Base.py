@@ -207,13 +207,6 @@ class Widget(object):
         information on the message passing mechanism."""        
         self.session.notify(self, message, args, kw, path)
 
-    def delayedNotification(self, path, level, *arg, **kw):
-        if level > 1:
-            self.notify('delayedNotification', level - 1, *arg, **kw)
-        else:
-            self.notify(*arg, **kw)
-        return  True
-
     def drawHtmlAttributes(self, path):
         attributes = [(name, getattr(self, 'html_' + name))
                       for name in self.__htmlAttributes__]
@@ -261,24 +254,27 @@ class Widget(object):
         def parseLanguages(languages):
             return [item.split(';')[0]
                     for item in languages.split(',')]
+        
         if 'languages' in outputOptions:
             return parseLanguages(outputOptions['languages'])
-        elif self.window.languages is not None:
-            return self.window.languages
-        elif self.session.languages is not None:
-            return self.session.languages
-        return parseLanguages(self.session.program.request().environ()['HTTP_ACCEPT_LANGUAGE'])
+        if self.window is not None:
+            if self.window.languages is not None:
+                return self.window.languages
+        if hasattr(self, 'session'):
+            if self.session.languages is not None:
+                return self.session.languages
+            return parseLanguages(self.session.program.request().environ()['HTTP_ACCEPT_LANGUAGE'])
+
+        return []
 
     def __add__(self, other):
         return self.getWidgetByPath(other)
 
     def __setattr__(self, name, value):
-        # We can't fire notifications unless we have a parent set (can calculate our path)
-        if (    hasattr(self, 'parent')
-            and name in self.__attributes__
-            and value != getattr(self, name)):
-            self.notify('%sChanged' % name, value)
-        object.__setattr__(self, name, value)    
+        if not hasattr(self, name) or value != getattr(self, name):
+            object.__setattr__(self, name, value)    
+            if name in self.__attributes__:
+                self.notify('%sChanged' % name, value)
 
 class ChildNodes(Webwidgets.Utils.OrderedDict):
     """Dictionary of child widgets to a widget; any widgets inserted

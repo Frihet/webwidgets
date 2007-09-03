@@ -36,7 +36,7 @@ class LanguageSelector(LanguageInput):
             if not hasattr(instance, 'session'):
                 return None
             if instance.session.languages is None:
-                instance.getLanguages({})[0]
+                return instance.getLanguages({})[0]
             return instance.session.languages[0]
         def __set__(self, instance, value):
             instance.session.languages = [value]

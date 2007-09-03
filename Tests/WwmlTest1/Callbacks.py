@@ -40,11 +40,12 @@ class MyWindow(object):
             
         class pwdclear(object):
             def clicked(self, path):
-                self.parent['newpwd'].notify('valueChanged', path, '')
+                self.parent['newpwd']['field'].value = ''
 
         class pwdset(object):
             def clicked(self, path):
-                self.parent['lastpwd'].html = self.parent['newpwd'].value
+                if self.parent['newpwd']['field'].value is not None:
+                    self.parent['lastpwd'].html = self.parent['newpwd']['field'].value
 
         class SelectDate(object):
             def __init__(self, session, winId):
