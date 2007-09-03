@@ -63,7 +63,7 @@ class PasswordInput(Base.ValueInput):
             'value': self.fieldOutput(self.path)[0],
             'disabled': ['', 'disabled="true"'][not self.getActive(self.path)]}
 
-class NewPasswordInput(Formatting.Html, Base.Input):
+class NewPasswordInput(Formatting.Html, Base.ValueInput):
     """Used for entering new passwords - the password has to be
     repeated twice and the two values entered are compared. A
     valueChanged is only propagated if the two values matches"""
@@ -106,9 +106,9 @@ class NewPasswordInput(Formatting.Html, Base.Input):
         self['input1'].value = self['input2'].value = self.value
         self.error = None
 
-class Button(Base.Input):
+class Button(Base.ActionInput):
     """Button widget - throws a "clicked" notification when clicked"""
-    __attributes__ = Base.Input.__attributes__ + ('title',)
+    __attributes__ = Base.ActionInput.__attributes__ + ('title',)
     title = ''
 
     def draw(self, outputOptions):
@@ -119,17 +119,6 @@ class Button(Base.Input):
             'title': self.title,
             'disabled': ['', 'disabled="true"'][not self.getActive(self.path)]}
 
-    def fieldInput(self, path, stringValue):
-        if stringValue != '':
-            self.notify('clicked')
-
-    def fieldOutput(self, path):
-        return []
-
-    def clicked(self, path):
-        if path != self.path: return
-        return
-
 class RadioButtonGroup(Base.ValueInput):
     """Group of radio buttons must be joined together. This is
     performed by setting the 'group' attribute on each of the
@@ -139,7 +128,7 @@ class RadioButtonGroup(Base.ValueInput):
         Base.ValueInput.__init__(self, session, winId, *arg, **kw)
         self.members = {}
 
-class RadioInput(Base.Input, Base.StaticComposite):
+class RadioInput(Base.ValueInput, Base.StaticComposite):
     """A radio button (selection list item). You must create a
     L{RadioButtonGroup} instance and set the 'group' attribute to that
     instance so that all radio buttons in the group knows about each

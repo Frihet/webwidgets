@@ -219,18 +219,25 @@ class Program(WebKit.Page.Page):
                 arguments['__extra__'] = extra
 
             if self.debugArguments: print "Arguments:", arguments
-            for argumentname, argument in arguments.iteritems():
-                oldArgument = window.arguments[argumentname]
+
+            sortedArguments = window.arguments.items()
+            sortedArguments.sort(lambda (name1, argument1), (name2, argument2):
+                                 argument1['widget'].inputOrder(argument2['widget']))
+
+            for argumentname, argument in sortedArguments:
+                path = argument['path']
+                argument = argument['widget']
                 # Check an extra time that the widget is
-                # active, just for added paranoia :) The field
+                # active, just for added paranoia :) The argument
                 # should'nt ever be there if it isn't but some
                 # sloppy widget hacker migt have forgotten to
                 # not to add it...
-                if oldArgument['widget'].getActive(oldArgument['path']):
-                    if not isinstance(argument, types.ListType):
-                        argument = [argument]
-                    if oldArgument['widget'].fieldOutput(oldArgument['path']) != argument:
-                        oldArgument['widget'].fieldInput(oldArgument['path'], *argument)
+                if argument.getActive(path):
+                    value = arguments.get(argumentname, '')
+                    if not isinstance(value, types.ListType):
+                        value = [value]
+                    if argument.fieldOutput(path) != value:
+                        argument.fieldInput(path, *value)
 
         def generateArguments(self, window):
             """Return a tuple of the location and arguments (query
@@ -259,8 +266,12 @@ class Program(WebKit.Page.Page):
                 print "Original:", dict([(name, value.fieldOutput(Utils.idToPath(name)))
                                          for (name, value)
                                          in window.fields.iteritems()])
-            
-            for fieldname, field in window.fields.iteritems():
+
+            sortedFields = window.fields.items()
+            sortedFields.sort(lambda (name1, field1), (name2, field2):
+                              field1.inputOrder(field2))
+                
+            for fieldname, field in sortedFields:
                 path = Utils.idToPath(fieldname)
                 # Check an extra time that the widget is
                 # active, just for added paranoia :) The field

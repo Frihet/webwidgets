@@ -422,7 +422,48 @@ class StaticComposite(Composite):
 
 class Input(Widget):
     """Base class for all input widgets, providing input field registration"""
-    __attributes__ = Widget.__attributes__ + ('active', 'argumentName', 'error')
+    class __metaclass__(Widget.__metaclass__):
+        debugInputOrder = False
+        
+        def __new__(cls, name, bases, members):
+            subordinates = set()
+            dominants = set()
+            if '__inputSubordinates__' in members:
+                subordinates = subordinates.union(set(members['__inputSubordinates__']))
+            if '__inputDominants__' in members:
+                dominants = dominants.union(set(members['__inputDominants__']))
+            for base in bases:
+                if hasattr(base, '__inputSubordinates__'):
+                    subordinates = subordinates.union(base.__inputSubordinates__)
+                if hasattr(base, '__inputDominants__'):
+                    dominants = dominants.union(base.__inputDominants__)
+            members['_inputLevel'] = max([0] + [sub._inputLevel
+                                                for sub in subordinates]) + 1
+            def raiseDominants(dominants, inputLevel):
+                for dom in dominants:
+                    if dom._inputLevel <= inputLevel:
+                        dom._inputLevel = inputLevel + 1
+                        raiseDominants(dom.__inputDominants__, dom._inputLevel)
+            raiseDominants(dominants, members['_inputLevel'])
+            members['__inputSubordinates__'] = subordinates
+            members['__inputDominants__'] = dominants
+
+            if cls.debugInputOrder:
+                print "Registering input widget:", name
+                print "    Subordinates:", ', '.join([sub.__name__ for sub in subordinates])
+                print "    Dominants:", ', '.join([sub.__name__ for sub in dominants])
+                print "    Level:", members['_inputLevel']
+            
+            return Widget.__metaclass__.__new__(cls, name, bases, members)
+
+    def inputOrder(cls, other):
+        if isinstance(other, Input):
+            other = type(other)
+        return cmp(cls._inputLevel, other._inputLevel) or cmp(cls, other) or cmp(id(cls), id(other))
+    inputOrder = classmethod(inputOrder)
+
+    __attributes__ = Widget.__attributes__ + ('active', 'argumentName', 'error',
+                                              '__inputSubordinates__', '__inputDominants__')
 
     active = True
     """Enables the user to actually use this input field."""
@@ -441,6 +482,14 @@ class Input(Widget):
     error = None
     """Displayed by a corresponding L{Label} if set to non-None.
     See that widget for further information."""
+
+    __inputSubordinates__ = ()
+    """Other input widgets that should handle simultaneous input from
+    the user _before_ this widget."""    
+
+    __inputDominants__ = ()
+    """Other input widgets that should handle simultaneous input from
+    the user _after_ this widget."""    
 
     def registerInput(self, path = None, argumentName = None, field = True):
         if path is None: path = self.path
@@ -492,6 +541,23 @@ class ValueInput(Input):
 
     def __cmp__(self, other):
         return cmp(self.value, other)
+
+class ActionInput(Input):
+    """Base class for all input widgets that only fires some
+    notification and don't hold a value of some kind."""
+
+    __inputSubordinates__ = (ValueInput,)
+
+    def fieldInput(self, path, stringValue):
+        if stringValue != '':
+            self.notify('clicked')
+
+    def fieldOutput(self, path):
+        return []
+
+    def clicked(self, path):
+        if path != self.path: return
+        return
 
 class Window(Widget):
     """Window is the main widget and should allways be the top-level
