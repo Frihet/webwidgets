@@ -269,6 +269,18 @@ class Widget(object):
 
         return []
 
+    def __unicode__(self):
+        return "<%(module)s.%(name)s/%(path)s at %(id)s>" % {'module': type(self).__module__,
+                                                             'name': type(self).__name__,
+                                                             'path': self.path,
+                                                             'id': id(self)}
+
+    def __str__(self):
+        return str(unicode(self))
+
+    def __repr__(self):
+        return str(self)
+
     def __add__(self, other):
         return self.getWidgetByPath(other)
 

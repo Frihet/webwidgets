@@ -167,7 +167,7 @@ def generateValueForNode(module, node, using = [], context = []):
             __children__ = attributes.get('__children__', __children__)
             __children__ = list(__children__)
             for name, value in attributes.iteritems():
-                if isinstance(value, type) and issubclass(value, Webwidgets.Widgets.Base.Widget):
+                if isinstance(value, type) and issubclass(value, Webwidgets.Widgets.Base.Widget) and not value.__explicit_load__:
                     if name not in __children__:
                         __children__.append(name)
             attributes['__children__'] = tuple(__children__)
