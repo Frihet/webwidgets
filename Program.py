@@ -27,7 +27,7 @@ application.
 """
 
 import WebKit.Page
-import cgi, urllib, types
+import cgi, urllib, types, os
 import Utils, Widgets, AccessManager, Constants
 
 def decodeField(value):
@@ -121,6 +121,7 @@ class Program(WebKit.Page.Page):
             self.program = None
             self.AccessManager = self.AccessManager(self)
             self.session = self
+            self.languages = None
 
         AccessManager = AccessManager.AccessManager
 
@@ -180,7 +181,7 @@ class Program(WebKit.Page.Page):
                         # have to wait for the next reload. This is
                         # especially important for arguments as they can
                         # be bookmarked.
-                        window.draw([])
+                        window.draw({})
                     return window
                 except Constants.OutputGiven:
                     return None
@@ -382,4 +383,3 @@ class Program(WebKit.Page.Page):
             """You should override this to return a Window instance in
             your own application."""
             raise Constants.OutputGiven
-

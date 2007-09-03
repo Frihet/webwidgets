@@ -165,6 +165,13 @@ class Widget(object):
                 return None
             return instance.parent.path + [instance.name]
     path = Path()
+
+    class Window(object):
+        def __get__(self, instance, owner):
+            if not hasattr(instance, 'session'):
+                return None
+            return instance.session.windows.get(instance.winId, None)
+    window = Window()
     
     def getVisible(self, path):
         return self.visible and self.session.AccessManager(Webwidgets.Constants.VIEW, self.winId, path)
@@ -250,6 +257,18 @@ class Widget(object):
         return self.session.calculateUrl(self.winId, location, arguments,
                                          outputOptions)
         
+    def getLanguages(self, outputOptions):
+        def parseLanguages(languages):
+            return [item.split(';')[0]
+                    for item in languages.split(',')]
+        if 'languages' in outputOptions:
+            return parseLanguages(outputOptions['languages'])
+        elif self.window.languages is not None:
+            return self.window.languages
+        elif self.session.languages is not None:
+            return self.session.languages
+        return parseLanguages(self.session.program.request().environ()['HTTP_ACCEPT_LANGUAGE'])
+
     def __add__(self, other):
         return self.getWidgetByPath(other)
 
@@ -482,8 +501,9 @@ class Window(Widget):
     """Window is the main widget and should allways be the top-level
     widget of any application. It has an attribute for the HTTP
     headers and handles form submission values and URL arguments."""
-    __attributes__ = ('headers',)
+    __attributes__ = ('headers', 'languages')
     headers = {'Status': '404 Page not implemented'}
+    languages = None
 
     def __init__(self, session, winId, **attrs):
         super(Window, self).__init__(session, winId, **attrs)
@@ -493,7 +513,7 @@ class Window(Widget):
     path = []
 
     def output(self, outputOptions):
-        result = {Webwidgets.Constants.OUTPUT: self.draw([])}
+        result = {Webwidgets.Constants.OUTPUT: self.draw(outputOptions)}
         result.update(self.headers)
         return result
 

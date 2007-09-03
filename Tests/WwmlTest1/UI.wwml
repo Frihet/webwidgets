@@ -32,6 +32,9 @@
 
   <w:Html id="body">
 
+   <div><w:Widget id="language" /></div>
+   <div><w:LanguageSelector id="sel" /></div>
+
    <w:DateInput id="date" value=":time:1998-01-01 22:33:34" />
 
    <w:FileInput id="file" />

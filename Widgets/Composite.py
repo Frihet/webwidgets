@@ -23,6 +23,24 @@ import types
 import Webwidgets.Utils, Webwidgets.Constants
 import Base, Input, Formatting
 
+class LanguageInput(Input.ListInput):
+    __attributes__ = Input.ListInput.__attributes__ + ('languages',)
+    languages = {'en':u'English', 'sv':u'Svenska', 'no':u'Norsk'}
+    
+    def getChildren(self):
+        return self.languages.iteritems()
+
+class LanguageSelector(LanguageInput):
+    class Value(object):
+        def __get__(self, instance, owner):
+            if not hasattr(instance, 'session'):
+                return None
+            if instance.session.languages is None:
+                instance.getLanguages({})[0]
+            return instance.session.languages[0]
+        def __set__(self, instance, value):
+            instance.session.languages = [value]
+    value = Value()
 
 class Dialog(Formatting.Html):
     """Dialogs provides an easy way to let the user select one of a

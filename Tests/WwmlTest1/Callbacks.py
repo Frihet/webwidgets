@@ -34,6 +34,9 @@ class MyWindow(object):
             
     class body(object):
 
+        class language(object):
+            def draw(self, outputOptions):
+                return ', '.join(self.getLanguages(outputOptions))
             
         class pwdclear(object):
             def clicked(self, path):
