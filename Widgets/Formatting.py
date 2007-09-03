@@ -129,7 +129,7 @@ class Media(Base.Widget):
     
     def output(self, outputOptions):
         content = self.getContent(self.path)
-        res = {Webwidgets.Constants.FINAL_OUTPUT: content.file.read(),
+        res = {Webwidgets.Constants.OUTPUT: content.file.read(),
                'Content-type': content.type
                }
         content.file.seek(0)
