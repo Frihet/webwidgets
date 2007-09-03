@@ -1,3 +1,7 @@
+#! /bin/env python
+# -*- coding: UTF-8 -*-
+# vim: set fileencoding=UTF-8 :
+
 # Group By Ordering List for the Webwidgets web developement framework
 # A list widget with intuitive grouping and sorting controls
 # 

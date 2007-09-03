@@ -1,3 +1,7 @@
+#! /bin/env python
+# -*- coding: UTF-8 -*-
+# vim: set fileencoding=UTF-8 :
+
 # Webwidgets web developement framework
 # Copyright (C) 2006 uAnywhere, Egil Moeller <redhog@redhog.org>
 # Copyright (C) 2007 FreeCode AS, Egil Moeller <redhog@redhog.org>
