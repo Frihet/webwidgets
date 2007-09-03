@@ -30,6 +30,7 @@ class Singleton(object):
 DEFAULT_WINDOW = 'default'
 
 class OUTPUT(Singleton): pass
+class FINAL_OUTPUT(OUTPUT): pass
 
 class OutputGiven(Exception): pass        
 

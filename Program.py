@@ -109,7 +109,7 @@ class Program(WebKit.Page.Page):
         method.
         """
         
-        debugArguments = False
+        debugArguments = True
         debugFields = False
         debugReceiveNotification = False
 
@@ -331,7 +331,7 @@ class Program(WebKit.Page.Page):
                     except Constants.OutputGiven:
                         pass
                     else:
-                        if not self.output or 'Location' not in self.output:
+                        if not self.output or ('Location' not in self.output and Constants.FINAL_OUTPUT not in self.output):
                             (newLocation, newArguments) = self.generateArguments(window)
                             newArguments = normalizeFields(newArguments)
                             if newLocation != location or newArguments != arguments:
@@ -342,15 +342,18 @@ class Program(WebKit.Page.Page):
 
             if self.output is not None:
                 for key, value in self.output.iteritems():
-                    if key is not Constants.OUTPUT:
+                    if key not in (Constants.OUTPUT, Constants.FINAL_OUTPUT):
                         response.setHeader(key.encode('utf-8'), value.encode('utf-8'))
+                content = None
                 if Constants.OUTPUT in self.output:
                     content = self.output[Constants.OUTPUT]
-                    if isinstance(content, types.StringType):
-                        self.program.write(content)
-                    else:
-                        for item in content:
-                            self.program.write(item)
+                if Constants.FINAL_OUTPUT in self.output:
+                    content = self.output[Constants.FINAL_OUTPUT]
+                if isinstance(content, types.StringType):
+                    self.program.write(content)
+                elif content is not None:
+                    for item in content:
+                        self.program.write(item)
             else:
                 response.setHeader('Status', '404 No such window')
                 response.setHeader('Content-Type', 'text/plain')

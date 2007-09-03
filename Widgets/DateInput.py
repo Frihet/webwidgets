@@ -89,7 +89,7 @@ class DateInput(Input.StringInput):
                                  'DateInput.scripts',
                                  outputOptions['file']))
         try:
-            return {Webwidgets.Constants.OUTPUT: file.read(),
+            return {Webwidgets.Constants.FINAL_OUTPUT: file.read(),
                     'Content-type': outputOptions['type']
                     }
         finally:
