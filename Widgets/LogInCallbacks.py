@@ -1,27 +1,28 @@
-import Webwidgets
+import Webwidgets, traceback
 
 class LogIn(object):
     __attributes__ = Webwidgets.Html.__attributes__ + ('globalSession', 'userInfo')
     globalSession = True
     userInfo = None
+    debugLogIn = False
+    debugErrors = False
     
     class logIn(object):
-        debug = True
-
         def selected(self, path, value):
             fields = self.getWidgetsByAttribute('fieldName')
 
-            if self.debug: print "Log in attempt:", fields['username'].value, fields['password'].value
+            if self.parent.debugLogIn: print "Log in attempt:", fields['username'].value, fields['password'].value
 
             try:
                 self.parent.userInfo = self.parent.authenticate(
                     fields['username'].value,
                     fields['password'].value)
             except Exception, e:
+                if self.parent.debugErrors: traceback.print_exc()
                 fields['username'].error = unicode(e)
                 
             else:
-                if self.debug: print "User logged in:", self.parent.userInfo
+                if self.parent.debugLogIn: print "User logged in:", self.parent.userInfo
                 
     def authenticate(self, username, password):
         raise Exception("You must override the authenticate() method of this widget!")
