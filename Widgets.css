@@ -45,7 +45,8 @@
  border: inherit;
  margin: 0px;
  font: inherit;
- width: 100%;
+ min-width: 100%;
+ max-width: inherit;
  height: 100%;
  font-variant: small-caps;
  font-weight: normal;
