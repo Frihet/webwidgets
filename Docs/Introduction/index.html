@@ -132,10 +132,10 @@ class MyWindow(object):
  &gt;
    </pre></blockquote>
 
-   This "binds" the python module HelloWeb.Callbacks to the widgets in
-   the interface definition, so that the callback function (clicked)
-   defined in there will be called when the button in the UI is
-   clicked.
+   This <a href="../Wwml/index.html#callback-binding">binds</a> the
+   python module HelloWeb.Callbacks to the widgets in the interface
+   definition, so that the callback function (clicked) defined in
+   there will be called when the button in the UI is clicked.
 
    <blockquote><pre>
  &lt;w:HtmlWindow
@@ -147,7 +147,9 @@ class MyWindow(object):
    name of an existing widget, either defined in some other Wwml-file
    in the aplication, or one of the predefined ones from the
    Webwidgets package. The id tag is required, and gives the name of
-   the widget that gets created.
+   the widget that gets created. More information on the tag syntax is
+   available on the <a
+   href="../Wwml/index.html#basic-tag-structure">Wwml manual</a>.
 
    <blockquote><pre>
   &lt;w:StyleLink id="head" style="../../Widgets.css" /&gt;
@@ -173,17 +175,19 @@ class MyWindow(object):
 &lt;/w:wwml&gt;
    </pre></blockquote>
   
-  Html code can freely be mixed in with the Wwml inside a w:Html tag.
+  Html code can <a
+  href="../Wwml/index.html#html-format-strings">freely be mixed</a> in
+  with the Wwml inside a w:Html tag.
   </p>
  
   <p>The callbacks file defines what actually happens when the user
   does something, e.g. clicks on the "go" button. When this happen, a
   callback function is called in this file. This callback can modify
   the user interface "live" - there is no explicit session handling as
-  in e.g. PHP or JavaBeans, but it works much the same as Gtk - the UI
-  stays the same until explicitly modified, and changes are seen by
-  the user more or less directly (as soon as the webpage finnishes
-  loading :).</p>
+  in e.g. PHP or JavaBeans, but it works much the same as <a
+  href="http://gtk.org/">Gtk</a> - the UI stays the same until
+  explicitly modified, and changes are seen by the user more or less
+  directly (as soon as the webpage finnishes loading :).</p>
 
 
   <blockquote><pre>
@@ -212,16 +216,17 @@ class MyWindow(object):
   <p>There are several callbacks that can be defined, and the
   available callbacks varies from widget to widget. Every callback
   takes a different set of parameters, but they all share the first
-  parameter - path, which is the path through the widget tree to the
-  widget who's callback is called.</p>
+  parameter - <tt>path</tt>, which is the path through the widget tree
+  to the widget who's callback is called.</p>
 
   <blockquote><pre>
 		self.parent['res'].html = self.parent['str'].value
   </pre></blockquote>
 
-  <p>This sets the HTML code of the 'res' child widget of the parent
-  widget of the Button widget to the string the user has entered in
-  the 'str' child input widget of the parent widget.</p>
+  <p>This sets the HTML code of the <tt>res</tt> child widget of the
+  parent widget of the <tt>Button</tt> widget to the string the user
+  has entered in the <tt>str</tt> child input widget of the parent
+  widget.</p>
 
   <p>So, if you have managed to read this far, and have a working
   first application, it's time to read up on what widgets there are in

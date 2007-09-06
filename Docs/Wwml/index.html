@@ -11,6 +11,7 @@
   Wwml file is loaded.</p>
 
 
+  <a name="the-module-system" />
   <h2>The module system</h2>
   <p>Wwml integrates with Python and its module system, and Wwml files
   appear as normal Python modules to a Python program, and can be
@@ -23,6 +24,7 @@
   to widgets, Wwml uses Python module paths, e.g.
   <tt>Module.SubModule.SomeClass.SomeClassWithinTheFirstClass</tt>.</p>
 
+  <a name="xml-syntax" />
   <h2>XML syntax</h2>
   <p>Wwml is an XML application, and uses XML namespaces to separate
   embedded HTMl code from Wwml code. Wwml tags live in the namespace
@@ -40,6 +42,7 @@
  &gt;
   </pre></blockquote>
 
+  <a name="basic-tag-structure" />
   <h2>Basic tag structure</h2>
   <p>Each tag, except for the top-level <tt>wwml</tt> tag, defines a
   widget class. It consists of a tag name, an id attribute, any number
@@ -71,6 +74,7 @@ class MyFirstWidget(MyModule.MyWidget):
         pass
   </pre></blockquote>
 
+  <a name="special-tags-and-attribute-types" />
   <h2>Special tags and attribute types</h2>
   <p>Wwml allows for attributes to hold values of different types,
   e.g. strings, integers, booleans... By default an attribute value is
@@ -90,6 +94,7 @@ class MyFirstWidget(MyModule.MyWidget):
   </pre></blockquote>
 
 
+  <a name="html-format-strings" />
   <h2>HTML format strings</h2>
   <p>Wwml is intended to assist in writing complicated user interfaces
   that mixes widgets and static HTML content. To help with this, Wwml
@@ -129,7 +134,14 @@ class MySearchBox(Html):
         title = "Search"
   </pre></blockquote>
 
+  <p>This is the foundation for using the <tt>Html</tt> widget, which
+  uses this format string to merge the rendering of its child widgets.
+  This widget is usefull for implementing fancy layouts, extra CSS
+  hooks and intermingle widgets with static text (e.g. labels,
+  descriptions, help-texts etc).</p>
 
+
+  <a name="callback-binding" />
   <h2>Callback binding</h2>
   <p>A user interface is nothing without interactivity, and in
   Webwidgets this is provided by callback functions. Callback
@@ -177,6 +189,7 @@ class MyFirstWidget(MyCallBacks.MyCallbackClass, html):
   </pre></blockquote>
 
 
+  <a name="search-paths-for-widgets" />
   <h2>Search paths for widgets</h2>
   <p>As already stated tag names are module paths to existing widget
   classes. But these paths need not be complete - they are looked up
