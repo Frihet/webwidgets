@@ -55,11 +55,11 @@ def sortToClasses(sort, column):
             break
     return ' '.join(classes)
 
-def sortToOrderBy(sort):
+def sortToOrderBy(sort, quote = "`"):
     order = []
     for key, dir in sort:
         assert column_allowed_name_re.match(key) is not None
-        order.append(key + ' ' + ['desc', 'asc'][dir == 'asc'])
+        order.append(quote + key + quote + ' ' + ['desc', 'asc'][dir == 'asc'])
     if order:
         return 'order by ' + ', '.join(order)
     return ''
@@ -433,8 +433,9 @@ class GBOList(Base.Input, Base.Composite):
                     self.session.windows[self.winId].fields[Webwidgets.Utils.pathToId(path + ['_', 'function', function])] = self
             for rowNum in xrange(0, len(rows)):
                 functions = '<td class="functions">%s</td>' % ''.join([
-                    """<button type="submit" id="%(attr_html_id)s" %(disabled)s name="%(attr_html_id)s" value="%(row)s" />%(title)s</button>""" % {
+                    """<button type="submit" class="%(attr_html_class)s" %(disabled)s name="%(attr_html_id)s" value="%(row)s" />%(title)s</button>""" % {
                         'attr_html_id': Webwidgets.Utils.pathToId(path + ['_', 'function', function]),
+                        'attr_html_class': function,
                         'disabled': ['disabled="true"', ''][functionActive[function]],
                         'title': title,
                         'row':rowNum}
