@@ -383,10 +383,18 @@ class Program(WebKit.Page.Page):
             path = self.program.webwareBase() + windowPath
             if location:
                 path += '/' + '/'.join(location)
-            return path + '?' + urllib.urlencode(arguments.items() +
-                                                 [('_' + key, value)
-                                                  for (key, value)
-                                                  in outputOptions.items()])
+
+            urlArgList = []
+            for key, value in arguments.iteritems():
+                if not isinstance(value, list): value = [value]
+                for valuePart in value:
+                    urlArgList.append((key, valuePart))
+            for key, value in outputOptions.iteritems():
+                if not isinstance(value, list): value = [value]
+                for valuePart in value:
+                    urlArgList.append(('_' + key, valuePart))
+
+            return path + '?' + urllib.urlencode(urlArgList)
 
         def redirect(self, winId, location, arguments, outputOptions):
             self.output = {'Status': '303 See Other',
