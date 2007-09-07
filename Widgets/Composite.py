@@ -202,6 +202,7 @@ class TabbedView(Base.Input, Base.StaticComposite):
     the tabs."""
     __attributes__ = Base.StaticComposite.__attributes__ + ('page', 'argumentName')
     argumentName = None
+    oldPage = None
     page = None
 
     def fieldInput(self, path, stringValue):
@@ -220,6 +221,11 @@ class TabbedView(Base.Input, Base.StaticComposite):
     def pageChanged(self, path, page):
         """Notification that the user has changed page."""
         if path != self.path: return
+        if self.oldPage is not None:
+            self[self.oldPage].notify('tabBlur')
+        if self.page is not None:
+            self[self.page].notify('tabFocus')
+        self.oldPage = self.page
 
     def draw(self, outputOptions):
         active = self.registerInput(self.path, self.argumentName)
