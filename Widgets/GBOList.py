@@ -214,6 +214,9 @@ class GBOList(Base.Input, Base.Composite):
         if path != self.path: return
         self.reread()
 
+    def getAllRows(self):
+        return self.rows
+    
     def getRows(self):
         if self.nonMemoryStorage:
             return self.rows
@@ -291,11 +294,10 @@ class GBOList(Base.Input, Base.Composite):
             raise Exception('Unknown sub-widget %s in %s' %(subWidget, widgetPath))
 
     def visibleColumns(self):
-        path = self.path
         # Optimisation: we could have used getActive and constructed a path...
         return Webwidgets.Utils.OrderedDict([(name, description) for (name, description) in self.columns.iteritems()
                                   if self.session.AccessManager(Webwidgets.Constants.VIEW, self.winId,
-                                                                path + ['_', 'column', name])])
+                                                                self.path + ['_', 'column', name])])
 
     def rowsToTree(self, rows, groupOrder):
         tree = {'level': 0,
@@ -322,7 +324,7 @@ class GBOList(Base.Input, Base.Composite):
                 node['rows'] += 1
         return tree
 
-    def drawTree(self, node, path, outputOptions, groupOrder, visibleColumns, firstLevel = 0, lastLevel = 0):
+    def drawTree(self, node, outputOptions, groupOrder, visibleColumns, firstLevel = 0, lastLevel = 0):
         if node['children']:
             rows = []
             children = len(node['children'])
@@ -334,7 +336,7 @@ class GBOList(Base.Input, Base.Composite):
                 if child != children - 1:
                     subLast += 1
                 rows.extend(self.drawTree(node['children'][child],
-                                          path, outputOptions,
+                                          outputOptions,
                                           groupOrder, visibleColumns,
                                           subFirst, subLast))
         else:
@@ -344,42 +346,40 @@ class GBOList(Base.Input, Base.Composite):
         if 'value' in node:
             column = groupOrder[node['level'] - 1]
             rows[0][visibleColumns.keys().index(column)
-                    ] = self.drawNode(path, outputOptions, node, column, firstLevel, lastLevel)
+                    ] = self.drawNode(outputOptions, node, column, firstLevel, lastLevel)
         return rows
 
-    def drawNode(self, path, outputOptions, node, column, firstLevel, lastLevel):
-        return self.drawCell(path, outputOptions, node['value'], node['top'], column, node['rows'], firstLevel, lastLevel)
+    def drawNode(self, outputOptions, node, column, firstLevel, lastLevel):
+        return self.drawCell(outputOptions, node['value'], node['top'], column, node['rows'], firstLevel, lastLevel)
         
-    def drawCell(self, path, outputOptions, value, row, column, rowspan, firstLevel, lastLevel):
+    def drawCell(self, outputOptions, value, row, column, rowspan, firstLevel, lastLevel):
         return '<td rowspan="%(rowspan)s" class="%(class)s">%(content)s</td>' % {
             'rowspan': rowspan,
             'class': 'column_first_level_%s column_last_level_%s' % (firstLevel, lastLevel),
-            'content': self.drawChild(path + ["cell_%s_%s" % (row, column)],
+            'content': self.drawChild(self.path + ["cell_%s_%s" % (row, column)],
                                       value, outputOptions, True)}
 
-    def drawPagingButtons(self, path):
+    def drawPagingButtons(self, outputOptions):
         if self.argumentName:
             self.session.windows[self.winId].arguments[self.argumentName + '_page'] = {
-                'widget':self, 'path': path + ['_', 'page']}
+                'widget':self, 'path': self.path + ['_', 'page']}
 
-        pageId = Webwidgets.Utils.pathToId(path + ['_', 'page'])
-        pageActive = self.getActive(path + ['_', 'page'])
+        pageId = Webwidgets.Utils.pathToId(self.path + ['_', 'page'])
+        pageActive = self.getActive(self.path + ['_', 'page'])
         if pageActive:
             self.session.windows[self.winId].fields[pageId] = self
         return """
-<div class="buttons">
- <span class="left">
-  <button type="submit" %(backActive)s id="%(attr_html_id)s_first" name="%(attr_html_id)s" value="%(first)s" />&lt;&lt;</button>
-  <button type="submit" %(backActive)s id="%(attr_html_id)s_previous" name="%(attr_html_id)s" value="%(previous)s" />&lt;</button>
- </span>
- <span class="center">
-  %(page)s/%(pages)s
- </span>
- <span class="right">
-  <button type="submit" %(forwardActive)s id="%(attr_html_id)s_next" name="%(attr_html_id)s" value="%(next)s" />&gt;</button>
-  <button type="submit" %(forwardActive)s id="%(attr_html_id)s_last" name="%(attr_html_id)s" value="%(last)s" />&gt;&gt;</button>
- </span>
-</div>
+<span class="left">
+ <button type="submit" %(backActive)s id="%(attr_html_id)s_first" name="%(attr_html_id)s" value="%(first)s" />&lt;&lt;</button>
+ <button type="submit" %(backActive)s id="%(attr_html_id)s_previous" name="%(attr_html_id)s" value="%(previous)s" />&lt;</button>
+</span>
+<span class="center">
+ %(page)s/%(pages)s
+</span>
+<span class="right">
+ <button type="submit" %(forwardActive)s id="%(attr_html_id)s_next" name="%(attr_html_id)s" value="%(next)s" />&gt;</button>
+ <button type="submit" %(forwardActive)s id="%(attr_html_id)s_last" name="%(attr_html_id)s" value="%(last)s" />&gt;&gt;</button>
+</span>
 """ % {'attr_html_id': pageId,
        'first': 1,
        'previous': self.page - 1,
@@ -391,33 +391,58 @@ class GBOList(Base.Input, Base.Composite):
        'forwardActive': ['', 'disabled="true"'][not pageActive or self.page >= self.getPages()],
        }
 
-    def drawHeadings(self, path, visibleColumns, reverseDependentColumns):
+    def drawPrintableLink(self, outputOptions):
+        location = self.calculateUrl({'widget': Webwidgets.Utils.pathToId(self.path),
+                                      'printableVersion': 'yes'})
+        return """<a class="printable" href="%(location)s">Printable version</a>""" % {
+            'location': location,
+            }
+
+    def drawButtons(self, outputOptions):
+        if 'printableVersion' in outputOptions:
+            return ''
+        return """
+<div class="buttons">
+ %(pagingButtons)s
+ %(printableLink)s 
+</div>
+""" % {'pagingButtons': self.drawPagingButtons(outputOptions),
+       'printableLink': self.drawPrintableLink(outputOptions)}
+
+    def drawHeadings(self, visibleColumns, reverseDependentColumns, outputOptions):
         if self.argumentName:
             self.session.windows[self.winId].arguments[self.argumentName + '_sort'] = {
-                'widget':self, 'path': path + ['_', 'sort']}
+                'widget':self, 'path': self.path + ['_', 'sort']}
 
-        sortActive = self.getActive(path + ['_', 'sort'])
+        sortActive = self.getActive(self.path + ['_', 'sort'])
         headings = []
-        inputId = Webwidgets.Utils.pathToId(path + ['_', 'sort'])
+        inputId = Webwidgets.Utils.pathToId(self.path + ['_', 'sort'])
         if sortActive:
             self.session.windows[self.winId].fields[inputId] = self
         for column, title in visibleColumns.iteritems():
-            headings.append("""
+            info = {'attr_html_id': inputId,
+                    'column': column,
+                    'disabled': ['disabled="true"', ''][sortActive],
+                    'caption': title,
+                    'classes': sortToClasses(self.sort, reverseDependentColumns.get(column, column)),
+                    'sort': sortToString(setSort(self.sort, reverseDependentColumns.get(column, column)))
+                    }
+            if 'printableVersion' in outputOptions:
+                headings.append("""
+<th class="column %(classes)s">
+ %(caption)s
+</th>
+""" % info)
+            else:
+                headings.append("""
 <th class="column %(classes)s">
  <button type="submit" id="%(attr_html_id)s_%(column)s" %(disabled)s name="%(attr_html_id)s" value="%(sort)s" />%(caption)s</button>
 </th>
-""" %
-                            {'attr_html_id': inputId,
-                             'column': column,
-                             'disabled': ['disabled="true"', ''][sortActive],
-                             'caption': title,
-                             'classes': sortToClasses(self.sort, reverseDependentColumns.get(column, column)),
-                             'sort': sortToString(setSort(self.sort, reverseDependentColumns.get(column, column)))
-                             })
+""" % info)
         return headings
 
-    def appendFunctions(self, path, rows, headings):
-        if self.functions:
+    def appendFunctions(self, rows, headings, outputOptions):
+        if 'printableVersion' not in outputOptions and self.functions:
             functionPosition = self.functionPosition
             if functionPosition < 0:
                 functionPosition += 1
@@ -426,15 +451,15 @@ class GBOList(Base.Input, Base.Composite):
             
             functionActive = {}
             for function in self.functions:
-                functionActive[function] = self.getActive(path + ['_', 'function', function])
+                functionActive[function] = self.getActive(self.path + ['_', 'function', function])
 
             for function in self.functions:
                 if functionActive[function]:
-                    self.session.windows[self.winId].fields[Webwidgets.Utils.pathToId(path + ['_', 'function', function])] = self
+                    self.session.windows[self.winId].fields[Webwidgets.Utils.pathToId(self.path + ['_', 'function', function])] = self
             for rowNum in xrange(0, len(rows)):
                 functions = '<td class="functions">%s</td>' % ''.join([
                     """<button type="submit" class="%(attr_html_class)s" %(disabled)s name="%(attr_html_id)s" value="%(row)s" />%(title)s</button>""" % {
-                        'attr_html_id': Webwidgets.Utils.pathToId(path + ['_', 'function', function]),
+                        'attr_html_id': Webwidgets.Utils.pathToId(self.path + ['_', 'function', function]),
                         'attr_html_class': function,
                         'disabled': ['disabled="true"', ''][functionActive[function]],
                         'title': title,
@@ -444,7 +469,7 @@ class GBOList(Base.Input, Base.Composite):
     
             headings.insert(functionPosition, '<th></th>')
 
-    def drawTable(self, headings, rows):
+    def drawTable(self, headings, rows, outputOptions):
         return "<table>%(headings)s%(content)s</table>" % {
             'headings': '<tr>%s</tr>' % (' '.join(headings),),
             'content': '\n'.join(['<tr>%s</tr>' % (''.join(row),) for row in rows])}
@@ -462,25 +487,43 @@ class GBOList(Base.Input, Base.Composite):
                       if column in visibleColumns] + [column for column in visibleColumns
                                                      if column not in groupOrder]
 
-        headings = self.drawHeadings(self.path, visibleColumns, reverseDependentColumns)
+        headings = self.drawHeadings(visibleColumns, reverseDependentColumns, outputOptions)
         # Why we need this test here: rowsToTree would create an empty
         # top-node for an empty set of rows, which drawTree would
         # render into a single row...
-        if self.getRows():
-            renderedRows = self.drawTree(self.rowsToTree(self.getRows(), groupOrder),
-                                         self.path, outputOptions,
+        if 'printableVersion' in outputOptions:
+            rows = self.getAllRows()
+        else:
+            rows = self.getRows()
+        if rows:
+            renderedRows = self.drawTree(self.rowsToTree(rows, groupOrder),
+                                         outputOptions,
                                          groupOrder, visibleColumns)
         else:
             renderedRows = []
 
-        self.appendFunctions(self.path, renderedRows, headings)
+        self.appendFunctions(renderedRows, headings, outputOptions)
 
         return """
 <div %(attr_htmlAttributes)s>
  %(table)s
- %(pagingButtons)s
+ %(buttons)s
 </div>
 """ % {'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
-       'table': self.drawTable(headings, renderedRows),
-       'pagingButtons': self.drawPagingButtons(self.path)
+       'table': self.drawTable(headings, renderedRows, outputOptions),
+       'buttons': self.drawButtons(outputOptions)
        }
+
+    def output(self, outputOptions):
+        return {Webwidgets.Constants.OUTPUT: self.drawPrintableversion(outputOptions),
+               'Content-type': 'text/html'
+               }
+
+    def drawPrintableversion(self, outputOptions):
+        return """
+<html>
+ <body>
+  %s
+ </body>
+</html>
+""" % (self.draw(outputOptions),)
