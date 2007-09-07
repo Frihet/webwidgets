@@ -520,10 +520,6 @@ class GBOList(Base.Input, Base.Composite):
                }
 
     def drawPrintableversion(self, outputOptions):
-        return """
-<html>
- <body>
-  %s
- </body>
-</html>
-""" % (self.draw(outputOptions),)
+        return self.session.windows[self.winId].draw(outputOptions,
+                                                     body = self.draw(outputOptions),
+                                                     title = self.title)

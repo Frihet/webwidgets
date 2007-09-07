@@ -619,7 +619,7 @@ class HtmlWindow(Window, StaticComposite):
         result['Content-Type'] = 'text/html; charset=%(encoding)s' % {'encoding': self.encoding}
         return result
 
-    def draw(self, outputOptions):
+    def draw(self, outputOptions, body = None, title = None):
         Window.draw(self, outputOptions)
         self.headContent = {}
 
@@ -628,7 +628,10 @@ class HtmlWindow(Window, StaticComposite):
             invisibleAsEmpty = True,
             includeAttributes = True)
 
-        result['title'] = '<title>' + self.getTitle(self.path) + '</title>'
+        if body is not None:
+            result['body'] = body
+        if title is None: title = self.getTitle(self.path)
+        result['title'] = '<title>' + title + '</title>'
         result['doctype'] = self.doctype
         result['uri'] = self.session.program.request()._environ['REQUEST_URI']
         result['name'] = result['id'] = Webwidgets.Utils.pathToId(self.path)
