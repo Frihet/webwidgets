@@ -430,7 +430,7 @@ class GBOList(Base.Input, Base.Composite):
             if 'printableVersion' in outputOptions:
                 headings.append("""
 <th class="column %(classes)s">
- %(caption)s
+ <span id="%(attr_html_id)s_%(column)s">%(caption)s</span>
 </th>
 """ % info)
             else:

@@ -54,7 +54,8 @@
  border-bottom: solid 2px black;
  padding: 0px;
 }
-.Webwidgets-Widgets-GBOList-GBOList th button {
+.Webwidgets-Widgets-GBOList-GBOList th * {
+ display: block;
  background: inherit;
  border: inherit;
  margin: 0px;
@@ -66,38 +67,38 @@
  font-weight: normal;
  background: #00ff00;
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_order_desc button:after {
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_order_desc *:after {
  content: "(desc)";
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_order_asc button:after {
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_order_asc *:after {
  content: "(asc)";
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_0 button {
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_0 * {
  background: #ffffff;
  font-weight: bold;
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_1 button {
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_1 * {
  background: #eeffee;
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_2 button {
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_2 * {
  background: #ddffdd;
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_3 button {
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_3 * {
  background: #ccffcc;
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_4 button {
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_4 * {
  background: #bbffbb;
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_5 button {
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_5 * {
  background: #aaffaa;
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_6 button {
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_6 * {
  background: #99ff99;
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_7 button {
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_7 * {
  background: #88ff88;
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_8 button {
+.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_8 * {
  background: #77ff77;
 }
 
