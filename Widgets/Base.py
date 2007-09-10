@@ -509,6 +509,14 @@ class Input(Widget):
     """Other input widgets that should handle simultaneous input from
     the user _after_ this widget."""    
 
+    class HtmlClass(Widget.HtmlClass):
+        def __get__(self, instance, owner):
+            err = ''
+            if instance.error:
+                err = ' error'
+            return Widget.HtmlClass.__get__(self, instance, owner) + err
+    html_class = HtmlClass()
+
     def registerInput(self, path = None, argumentName = None, field = True):
         if path is None: path = self.path
         active = self.getActive(path)

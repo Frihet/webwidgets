@@ -197,8 +197,12 @@ select {
  display: block;
 }
 
-.Webwidgets-Widgets-Formatting-Label .error {
+div.error {
  color: #ff0000;
+}
+
+input.error {
+ border-color: #ff0000;
 }
 
 
