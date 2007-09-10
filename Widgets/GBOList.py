@@ -234,7 +234,7 @@ class GBOList(Base.Input, Base.Composite):
     def getChild(self, name):
         dummy, row, column = name.split('_')
         row = int(row)
-        return self.getRows()[row][column]
+        return self.rows[row][column]
     
     def getWidgetsByAttribute(self, attribute = '__name__'):
         fields = Base.Widget.getWidgetsByAttribute(self, attribute)
