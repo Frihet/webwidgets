@@ -417,10 +417,12 @@ class GBOList(Base.Input, Base.Composite):
         sortActive = self.getActive(self.path + ['_', 'sort'])
         headings = []
         inputId = Webwidgets.Utils.pathToId(self.path + ['_', 'sort'])
+        widgetId = Webwidgets.Utils.pathToId(self.path)
         if sortActive:
             self.session.windows[self.winId].fields[inputId] = self
         for column, title in visibleColumns.iteritems():
-            info = {'attr_html_id': inputId,
+            info = {'inputId': inputId,
+                    'attr_html_id': widgetId,
                     'column': column,
                     'disabled': ['disabled="true"', ''][sortActive],
                     'caption': title,
@@ -429,14 +431,14 @@ class GBOList(Base.Input, Base.Composite):
                     }
             if 'printableVersion' in outputOptions:
                 headings.append("""
-<th class="column %(classes)s">
- <span id="%(attr_html_id)s_%(column)s">%(caption)s</span>
+<th id="%(attr_html_id)s-_-head-%(column)s" class="column %(classes)s">
+ <span id="%(attr_html_id)s-_-sort-%(column)s">%(caption)s</span>
 </th>
 """ % info)
             else:
                 headings.append("""
-<th class="column %(classes)s">
- <button type="submit" id="%(attr_html_id)s_%(column)s" %(disabled)s name="%(attr_html_id)s" value="%(sort)s" />%(caption)s</button>
+<th id="%(attr_html_id)s-_-head-%(column)s" class="column %(classes)s">
+ <button type="submit" id="%(attr_html_id)s-_-sort-%(column)s" %(disabled)s name="%(attr_html_id)s-_-sort" value="%(sort)s" />%(caption)s</button>
 </th>
 """ % info)
         return headings
