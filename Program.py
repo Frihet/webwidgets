@@ -96,7 +96,13 @@ class Program(WebKit.Page.Page):
         # is braindead and doesn't provide that info _at_all_!"""
         #### end ####
         req = self.request()
-        return 'http://' + req._environ['SERVER_NAME'] + req.adapterName() + '/'
+
+        # Work-around empty adapter name
+        adapter = req.adapterName()
+        if adapter:
+            adapter += '/'
+        
+        return 'http://' + req._environ['HTTP_HOST'] + adapter
 
     def requestBase(self):
         """@return: A URL to this Webwidgets application."""
