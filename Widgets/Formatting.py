@@ -127,6 +127,12 @@ class Media(Base.Widget):
     empty = '&lt;No file&gt;'
     width = 100
     height = 100
+    inline = ('image/png', 'image/jpeg', 'image/gif')
+    #inline = ('image/png', 'image/jpeg', 'image/gif', 'text/css', 'text/html')
+    #inline = True
+    invisible = False
+    """Do not display the link, onlly inlined CSS and JavaScript will
+    do anything."""
 
     def getContent(self, path):
         return self.content
@@ -139,6 +145,25 @@ class Media(Base.Widget):
         content.file.seek(0)
         return res
 
+    def draw_inline_default(self, location, outputOptions):
+        return self.getContent(self.path).filename
+    
+    def draw_inline_image(self, location, outputOptions):
+        return """<img src="%(location)s" alt="%(name)s" width="%(width)s" height="%(height)s" />""" % {
+            'location': location,
+            'name': self.draw_inline_default(location, outputOptions),
+            'width': self.width,
+            'height': self.height
+            }
+    
+    draw_inline_image_png = draw_inline_image
+    draw_inline_image_jpeg = draw_inline_image
+    draw_inline_image_gif = draw_inline_image
+    
+    def draw_inline_text_css(self, location, outputOptions):
+        self.registerStyleLink(location)
+        return self.draw_inline_default(location, outputOptions)
+
     def draw(self, outputOptions):
         content = self.getContent(self.path)
 
@@ -146,15 +171,16 @@ class Media(Base.Widget):
             return self.empty
 
         location = self.calculateUrl({'widget': Webwidgets.Utils.pathToId(self.path)})
-        if content.type in ('image/png', 'image/jpeg', 'image/gif'):
-            preview = """<img src="%(location)s" alt="%(name)s" width="%(width)s" height="%(height)s" />""" % {
-                'location': location,
-                'name': content.filename,
-                'width': self.width,
-                'height': self.height
-                }
+
+        if (    (self.inline is True or content.type in self.inline)
+            and (hasattr(self, "draw_inline_" + content.type.replace("/", "_")))):
+            preview = getattr(self, "draw_inline_" + content.type.replace("/", "_")
+                              )(location, outputOptions)
         else:
-            preview = content.filename
+            preview = self.draw_inline_default(location, outputOptions)
+
+        if self.invisible: return ''
+        
         return """<a %(attr_htmlAttributes)s href="%(location)s">%(preview)s</a>""" % {
             'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
             'location': location,
@@ -235,8 +261,8 @@ class Table(Base.StaticComposite, TableModel.Table):
             return 'cell_' + str(self.x) + '_' + str(self.y) + '_' + str(self.w) + '_' + str(self.h)
 
     def __init__(self, session, winId, **attrs):
-        TableModel.Table.__init__(self)
         Base.StaticComposite.__init__(self, session, winId, **attrs)
+        TableModel.Table.__init__(self)
         for name, child in self.children.iteritems():
             if name.startswith('cell_'):
                 x, y, w, h = self.childName2Coord(name)
