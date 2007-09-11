@@ -239,7 +239,6 @@ class Widget(object):
             for base in bases:
                 registerClassStyles(base)
             if cls.__dict__.get('widgetStyle', None):
-                print "REGISTER", cls.__module__ + '.' + cls.__name__
                 self.registerStyleLink(self.calculateUrl({'widgetClass': cls.__module__ + '.' + cls.__name__,
                                                           'aspect': 'style'},
                                                          {}))
@@ -670,8 +669,6 @@ class HtmlWindow(Window, StaticComposite):
         self.headContent = Webwidgets.Utils.OrderedDict()
 
         self.registerStyles(outputOptions)
-
-        print "XXX", repr(self.headContent)
 
         result = self.drawChildren(
             outputOptions,
