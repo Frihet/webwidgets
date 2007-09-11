@@ -233,19 +233,21 @@ class Widget(object):
 
     def registerStyles(self, outputOptions):
         cls = type(self)
+        def registerClassStyles(cls):
+            bases = list(cls.__bases__)
+            bases.reverse()
+            for base in bases:
+                registerClassStyles(base)
+            if cls.__dict__.get('widgetStyle', None):
+                print "REGISTER", cls.__module__ + '.' + cls.__name__
+                self.registerStyleLink(self.calculateUrl({'widgetClass': cls.__module__ + '.' + cls.__name__,
+                                                          'aspect': 'style'},
+                                                         {}))
+        registerClassStyles(cls)
         if self.__dict__.get('widgetStyle', None):
             self.registerStyleLink(self.calculateUrl({'widget': Webwidgets.Utils.pathToId(self.path),
                                                       'aspect': 'style'},
                                                      {}))
-        def registerClassStyles(cls):
-            if cls.__dict__.get('widgetStyle', None):
-                self.registerStyleLink(self.calculateUrl({'widgetClass': cls.__module__ + '.' + cls.__name__,
-                                                          'aspect': 'style'},
-                                                         {}))
-            for base in cls.__bases__:
-                if hasattr(base, 'registerStyles'):
-                    registerClassStyles(base)
-        registerClassStyles(cls)
 
     def classOutput_style(cls, window, outputOptions):
         return {Webwidgets.Constants.FINAL_OUTPUT: cls.widgetStyle,
@@ -665,9 +667,11 @@ class HtmlWindow(Window, StaticComposite):
 
     def draw(self, outputOptions, body = None, title = None):
         Window.draw(self, outputOptions)
-        self.headContent = {}
+        self.headContent = Webwidgets.Utils.OrderedDict()
 
         self.registerStyles(outputOptions)
+
+        print "XXX", repr(self.headContent)
 
         result = self.drawChildren(
             outputOptions,
