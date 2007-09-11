@@ -321,19 +321,23 @@ class Program(WebKit.Page.Page):
 
                 if self.output is None:
                     if 'widgetClass' in outputOptions:
-                        cls = Utils.loadClass(outputOptions['widgetClass'])
-                        assert issubclass(cls, Widgets.Base.Widget)
-                        outputFn = lambda: cls.classOutput(window, outputOptions)
-                    elif 'widget' in outputOptions:
-                        widget = window
-                        for name in Utils.idToPath(outputOptions['widget']):
-                            widget = widget[name]
-                        outputFn = lambda: widget.output(outputOptions)
+                        obj = Utils.loadClass(outputOptions['widgetClass'])
+                        assert issubclass(obj, Widgets.Base.Widget)
+                        fnName = 'classOutput'
+                        args = (window, outputOptions)
                     else:
-                        outputFn = lambda: window.output(outputOptions)
-                        
+                        obj = window
+                        fnName = 'output'
+                        args = (outputOptions,)
+                        if 'widget' in outputOptions:
+                            for name in Utils.idToPath(outputOptions['widget']):
+                                obj = obj[name]
+                    if 'aspect' in outputOptions:
+                        fnName += '_' + outputOptions['aspect']
+                    outputFn = getattr(obj, fnName)
+
                     try:
-                        self.output = outputFn()
+                        self.output = outputFn(*args)
                     except Constants.OutputGiven:
                         pass
                     else:

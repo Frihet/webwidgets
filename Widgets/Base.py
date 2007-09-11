@@ -28,7 +28,7 @@ generic base classes that can be used when implementing more elaborate
 widgets.
 """
 
-import types, xml.sax.saxutils
+import types, xml.sax.saxutils, os.path
 import Webwidgets.Utils, Webwidgets.Constants
 
 debugNotifications = False
@@ -228,7 +228,35 @@ class Widget(object):
         L{Webwidgets.Utils.pathToId} for this purpose. Any extra
         sub-widget id:s should be constructed by appending an
         underscore followed by any string."""
+        self.registerStyles(outputOptions)
         return ''
+
+    def registerStyles(self, outputOptions):
+        cls = type(self)
+        if self.__dict__.get('widgetStyle', None):
+            self.registerStyleLink(self.calculateUrl({'widget': Webwidgets.Utils.pathToId(self.path),
+                                                      'aspect': 'style'},
+                                                     {}))
+        def registerClassStyles(cls):
+            if cls.__dict__.get('widgetStyle', None):
+                self.registerStyleLink(self.calculateUrl({'widgetClass': cls.__module__ + '.' + cls.__name__,
+                                                          'aspect': 'style'},
+                                                         {}))
+            for base in cls.__bases__:
+                if hasattr(base, 'registerStyles'):
+                    registerClassStyles(base)
+        registerClassStyles(cls)
+
+    def classOutput_style(cls, window, outputOptions):
+        return {Webwidgets.Constants.FINAL_OUTPUT: cls.widgetStyle,
+                'Content-type': 'text/css'
+                }
+    classOutput_style = classmethod(classOutput_style)
+
+    def output_style(self, outputOptions):
+        return {Webwidgets.Constants.FINAL_OUTPUT: self.widgetStyle,
+                'Content-type': 'text/css'
+                }
 
     def getTitle(self, path):
         return self.title or Webwidgets.Utils.pathToId(path)
@@ -610,6 +638,12 @@ class Window(Widget):
         self.arguments = {}
         return ''
 
+
+file = open(os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                         'Widgets.css'))
+genericStyle = file.read()
+file.close()
+
 class HtmlWindow(Window, StaticComposite):
     """HtmlWindow is the main widget for any normal application window
     displaying HTML. It has two children - head and body aswell as
@@ -622,6 +656,8 @@ class HtmlWindow(Window, StaticComposite):
     encoding = 'UTF-8'
     doctype = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">'
 
+    widgetStyle = genericStyle
+
     def output(self, outputOptions):
         result = Window.output(self, outputOptions)
         result['Content-Type'] = 'text/html; charset=%(encoding)s' % {'encoding': self.encoding}
@@ -630,6 +666,8 @@ class HtmlWindow(Window, StaticComposite):
     def draw(self, outputOptions, body = None, title = None):
         Window.draw(self, outputOptions)
         self.headContent = {}
+
+        self.registerStyles(outputOptions)
 
         result = self.drawChildren(
             outputOptions,
