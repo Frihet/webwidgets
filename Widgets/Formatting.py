@@ -156,14 +156,32 @@ class Media(Base.Widget):
             'height': self.height
             }
     
-    draw_inline_image_png = draw_inline_image
-    draw_inline_image_jpeg = draw_inline_image
-    draw_inline_image_gif = draw_inline_image
+    draw_inline_image__png = draw_inline_image
+    draw_inline_image__jpeg = draw_inline_image
+    draw_inline_image__gif = draw_inline_image
     
-    def draw_inline_text_css(self, location, outputOptions):
+    def draw_inline_text__css(self, location, outputOptions):
         self.registerStyleLink(location)
         return self.draw_inline_default(location, outputOptions)
 
+    def draw_inline_application__x_javascript(self, location, outputOptions):
+        self.registerScriptLink(location)
+        return self.draw_inline_default(location, outputOptions)
+
+    def draw_inline_text(self, location, outputOptions):
+        return """<iframe src="%(location)s" title="%(name)s" width="%(width)s" height="%(height)s" />
+                  %(name)s""" % {
+            'location': location,
+            'name': self.draw_inline_default(location, outputOptions),
+            'width': self.width,
+            'height': self.height
+            }
+
+    draw_inline_text__plain = draw_inline_text
+    draw_inline_text__html = draw_inline_text
+    draw_inline_text__xml = draw_inline_text
+    
+    
     def draw(self, outputOptions):
         content = self.getContent(self.path)
 
@@ -172,9 +190,10 @@ class Media(Base.Widget):
 
         location = self.calculateUrl({'widget': Webwidgets.Utils.pathToId(self.path)})
 
+        inlineFnName = "draw_inline_" + content.type.replace("/", "__").replace("-", "_")
         if (    (self.inline is True or content.type in self.inline)
-            and (hasattr(self, "draw_inline_" + content.type.replace("/", "_")))):
-            preview = getattr(self, "draw_inline_" + content.type.replace("/", "_")
+            and (hasattr(self, inlineFnName))):
+            preview = getattr(self, inlineFnName
                               )(location, outputOptions)
         else:
             preview = self.draw_inline_default(location, outputOptions)
