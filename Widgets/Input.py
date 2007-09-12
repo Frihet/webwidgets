@@ -47,6 +47,17 @@ class ArgumentInput(Base.ValueInput):
         self.registerInput(self.path, self.argumentName, False)
         return ''
 
+class HiddenInput(Base.ValueInput):
+    """Hidden input box. Note that this is only usefull to communicate
+    with some JavaScript."""
+    def draw(self, outputOptions):
+        super(HiddenInput, self).draw(outputOptions)
+        return '<input %(attr_htmlAttributes)s type="hidden" name="%(name)s" value="%(value)s" %(disabled)s />' % {
+            'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
+            'name': Webwidgets.Utils.pathToId(self.path),
+            'value': self.fieldOutput(self.path)[0],
+            'disabled': ['', 'disabled="true"'][not self.getActive(self.path)]}
+
 class StringInput(Base.ValueInput):
     """Text input box"""
     def draw(self, outputOptions):
