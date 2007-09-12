@@ -99,8 +99,6 @@ class Program(WebKit.Page.Page):
 
         # Work-around empty adapter name
         adapter = req.adapterName()
-        if adapter:
-            adapter += '/'
         
         return 'http://' + req._environ['HTTP_HOST'] + adapter
 
@@ -387,10 +385,9 @@ class Program(WebKit.Page.Page):
             self.Notification(*arg, **kw).process()
 
         def calculateUrl(self, winId, location, arguments, outputOptions):
-            windowPath = self.program.request().servletURI()
+            path = self.program.requestBase()
             if winId != Constants.DEFAULT_WINDOW:
-                windowPath += '/_' + winId
-            path = self.program.webwareBase() + windowPath
+                path += '/_' + winId
             if location:
                 path += '/' + '/'.join(location)
 

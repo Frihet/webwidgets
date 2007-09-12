@@ -250,7 +250,9 @@ class Widget(object):
 
     def classOutput_style(cls, window, outputOptions):
         return {Webwidgets.Constants.FINAL_OUTPUT: cls.widgetStyle,
-                'Content-type': 'text/css'
+                'Content-type': 'text/css',
+                'Cache-Control': 'public; max-age=3600'
+                
                 }
     classOutput_style = classmethod(classOutput_style)
 
