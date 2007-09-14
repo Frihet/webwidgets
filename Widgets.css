@@ -164,6 +164,16 @@ input {
  font-family: serif;
 }
 
+textarea {
+ border: solid;
+ border-width: 1px;
+ margin: 2px;
+ padding: 2px;
+ background-color: #ffffff;
+ font-size: 10pt;
+ font-family: serif;
+}
+
 button {
  border: solid 1px black;
  margin: 0;
