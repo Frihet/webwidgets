@@ -60,13 +60,24 @@ class HiddenInput(Base.ValueInput):
 
 class StringInput(Base.ValueInput):
     """Text input box"""
+    __attributes__ = Base.ValueInput.__attributes__ + ('rows', 'cols')
+    rows = 1
+    cols = None
+
     def draw(self, outputOptions):
         super(StringInput, self).draw(outputOptions)
-        return '<input %(attr_htmlAttributes)s type="text" name="%(name)s" value="%(value)s" %(disabled)s />' % {
-            'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
-            'name': Webwidgets.Utils.pathToId(self.path),
-            'value': self.fieldOutput(self.path)[0],
-            'disabled': ['', 'disabled="true"'][not self.getActive(self.path)]}
+	info = {'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
+                'name': Webwidgets.Utils.pathToId(self.path),
+                'value': self.fieldOutput(self.path)[0],
+                'disabled': ['', 'disabled="true"'][not self.getActive(self.path)],
+                'rows': self.rows,
+                'cols': ['', 'cols="%s"' % self.cols][self.cols is not None],
+                'size': ['', 'size="%s"' % self.cols][self.cols is not None]}
+
+        if self.rows > 1:
+            return '<textarea %(attr_htmlAttributes)s rows="%(rows)s" %(cols)s name="%(name)s" %(disabled)s>%(value)s</textarea>' % info
+        else:
+            return '<input %(attr_htmlAttributes)s %(size)s type="text" name="%(name)s" value="%(value)s" %(disabled)s />' % info
 
 class PasswordInput(Base.ValueInput):
     """Like StringInput, but hides the user input"""

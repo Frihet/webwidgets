@@ -29,7 +29,13 @@
   title="RedBack WebWidgets demo application">
 
   <w:Html id="body">
-
+   <w:StringInput id="longtext" cols=":integer:20" rows=":integer:10">
+    <w:string id="value">
+Hej allla barn,
+nu är det branprogram!
+Titta här skall ni få se vad farbror frej tar fram!
+    </w:string>
+   </w:StringInput>
    Last password: <w:Html id="lastpwd" /><br />
    <w:Field id='newpwd' label='New password'><w:NewPasswordInput id="field" value="foo" /></w:Field>
    <w:Button id="pwdclear" title="Clear new password" />
