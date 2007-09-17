@@ -68,7 +68,7 @@ class DateInput(Input.StringInput):
             'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
             'name': Webwidgets.Utils.pathToId(self.path),
             'value': self.fieldOutput(self.path)[0], 'format': self.format,
-            'disabled': ['', 'disabled="true"'][not self.getActive(self.path)],
+            'disabled': ['', 'disabled="disabled"'][not self.getActive(self.path)],
             'attr_html_id': Webwidgets.Utils.pathToId(self.path)}
 
 

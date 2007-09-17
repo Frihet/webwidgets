@@ -68,16 +68,29 @@ def generatePartsForNode(module, node, using = [], context = [], htmlContext = [
                     using,
                     context,
                     htmlContext = htmlContext + [childAttributesValues.get('id', child.localName)])
-                childAttributesValues['id'] = "%(attr_html_id)s_" + "-".join(htmlContext + [childAttributesValues.get('id', child.localName)])
-                texts.extend(["<",
-                              child.localName,
-                              " ",
-                              " ".join(["%s='%s'" % item
-                                        for item
-                                        in childAttributesValues.iteritems()]),
-                              ">\n",
-                              childTexts,
-                              "</", child.localName, ">\n"])
+                if 'id' in childAttributesValues:
+                    childAttributesValues['id'] = "%(attr_html_id)s_" + "-".join(htmlContext + [childAttributesValues['id']])
+                if child.localName in ('br', ):
+                    texts.append("<")
+                    texts.append(child.localName)
+                    texts.append(" ")
+                    texts.extend(["%s='%s'" % item
+                                  for item
+                                  in childAttributesValues.iteritems()])
+                    texts.append(" />\n")
+                    
+                else:
+                    texts.append("<")
+                    texts.append(child.localName)
+                    texts.append(" ")
+                    texts.extend(["%s='%s'" % item
+                                  for item
+                                  in childAttributesValues.iteritems()])
+                    texts.append(">\n")
+                    texts.append(childTexts)
+                    texts.append("</")
+                    texts.append(child.localName)
+                    texts.append(">\n")
                 attributes.extend(childAttributes)
     return attributes, ''.join(texts)
 

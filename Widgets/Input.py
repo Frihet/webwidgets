@@ -56,7 +56,7 @@ class HiddenInput(Base.ValueInput):
             'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
             'name': Webwidgets.Utils.pathToId(self.path),
             'value': self.fieldOutput(self.path)[0],
-            'disabled': ['', 'disabled="true"'][not self.getActive(self.path)]}
+            'disabled': ['', 'disabled="disabled"'][not self.getActive(self.path)]}
 
 class StringInput(Base.ValueInput):
     """Text input box"""
@@ -69,7 +69,7 @@ class StringInput(Base.ValueInput):
 	info = {'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
                 'name': Webwidgets.Utils.pathToId(self.path),
                 'value': self.fieldOutput(self.path)[0],
-                'disabled': ['', 'disabled="true"'][not self.getActive(self.path)],
+                'disabled': ['', 'disabled="disabled"'][not self.getActive(self.path)],
                 'rows': self.rows,
                 'cols': ['', 'cols="%s"' % self.cols][self.cols is not None],
                 'size': ['', 'size="%s"' % self.cols][self.cols is not None]}
@@ -87,7 +87,7 @@ class PasswordInput(Base.ValueInput):
             'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
             'name': Webwidgets.Utils.pathToId(self.path),
             'value': self.fieldOutput(self.path)[0],
-            'disabled': ['', 'disabled="true"'][not self.getActive(self.path)]}
+            'disabled': ['', 'disabled="disabled"'][not self.getActive(self.path)]}
 
 class NewPasswordInput(Formatting.Html, Base.ValueInput):
     """Used for entering new passwords - the password has to be
@@ -143,7 +143,7 @@ class Button(Base.ActionInput):
             'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
             'name': Webwidgets.Utils.pathToId(self.path),
             'title': self.title,
-            'disabled': ['', 'disabled="true"'][not self.getActive(self.path)]}
+            'disabled': ['', 'disabled="disabled"'][not self.getActive(self.path)]}
 
 class RadioButtonGroup(Base.ValueInput):
     """Group of radio buttons must be joined together. This is
@@ -180,7 +180,7 @@ class RadioInput(Base.ValueInput, Base.StaticComposite):
         result['name'] = Webwidgets.Utils.pathToId(self.group.path)
         result['value'] = result['id']
         result['checked'] = ['', 'checked'][self.value == self.group.value]
-        result['disabled'] = ['', 'disabled="true"'][not self.getActive(self.path)],
+        result['disabled'] = ['', 'disabled="disabled"'][not self.getActive(self.path)],
         return """<input
                    %(attr_htmlAttributes)s
                    type="radio"
@@ -195,12 +195,12 @@ class Checkbox(Base.ValueInput):
     value = False
     def draw(self, outputOptions):
         super(Checkbox, self).draw(outputOptions)
-        checked = ["", "checked='true'"][not not self.value]
+        checked = ["", 'checked="checked"'][not not self.value]
         return '<input %(attr_htmlAttributes)s type="checkbox" name="%(name)s" value="checked" %(checked)s %(disabled)s />' % {
             'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
             'name': Webwidgets.Utils.pathToId(self.path),
             'checked': checked,
-            'disabled': ['', 'disabled="true"'][not self.getActive(self.path)]}
+            'disabled': ['', 'disabled="disabled"'][not self.getActive(self.path)]}
 
     def fieldInput(self, path, stringValue):
         self.value = (stringValue == "checked")
@@ -232,20 +232,20 @@ class ListInput(Base.ValueInput, Base.StaticComposite):
         options = '\n'.join([
             """<option %(selected)s value="%(value)s">
              %(description)s
-            </option>""" % {'selected': childname in values and 'selected' or '',
+            </option>""" % {'selected': childname in values and 'selected="selected"' or '',
                            'value': childname,
                            'description': children[childname]}
             for childname
             in childnames])
 
-        return """<select %(attr_htmlAttributes)s %(multiple)s %(size)s name="%(name)s" %(disabled)s">
+        return """<select %(attr_htmlAttributes)s %(multiple)s %(size)s name="%(name)s" %(disabled)s>
          %(options)s
          </select>""" % {
             'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
             'multiple': self.multiple and 'multiple' or '',
             'size': self.size != 0 and 'size="%s"' % self.size or '',
             'name': Webwidgets.Utils.pathToId(self.path),
-            'disabled': ['', 'disabled="true"'][not self.getActive(self.path)],
+            'disabled': ['', 'disabled="disabled"'][not self.getActive(self.path)],
             'options': options
             }
 
@@ -290,12 +290,11 @@ class FileInput(Base.ValueInput, Base.StaticComposite):
                 self.registerInput(self.path + ['_', 'clear'], argumentName)
         return """<span %(attr_htmlAttributes)s>
                    %(current)s
-                   <input type="file" name="%(attr_html_id)s" %(disabled)s id="%(attr_html_id)s" />
-                   <input type='submit' name="%(clearId)s" %(clearable)s id="%(clearId)s" value="Clear" />
+                   <input type="file" name="%(attr_html_id)s" %(disabled)s id="%(attr_html_id)s_input" />
+                   <input type='submit' name="%(attr_html_id)s_clear" %(clearable)s id="%(attr_html_id)s_clear" value="Clear" />
                   </span>""" % {
                        'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
                        'current': self.drawChild(self.path + ['preview'], self['preview'], outputOptions, True),
-                       'disabled': ['', 'disabled="true"'][not self.getActive(self.path)],
-                       'clearable': ['', 'disabled="true"'][not self.getActive(self.path) or self.value is None],
-                       'attr_html_id': Webwidgets.Utils.pathToId(self.path),
-                       'clearId': Webwidgets.Utils.pathToId(self.path + ['_', 'clear'])}
+                       'disabled': ['', 'disabled="disabled"'][not self.getActive(self.path)],
+                       'clearable': ['', 'disabled="disabled"'][not self.getActive(self.path) or self.value is None],
+                       'attr_html_id': Webwidgets.Utils.pathToId(self.path)}

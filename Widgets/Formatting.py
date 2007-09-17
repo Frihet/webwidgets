@@ -23,7 +23,7 @@
 """Output formatting widgets.
 """
 
-import types, StringIO
+import types, StringIO, cgi
 import Webwidgets.Utils, Webwidgets.Constants
 import Base, TableModel
 
@@ -214,7 +214,7 @@ class Media(Base.Widget):
 
         return """<a %(attr_htmlAttributes)s href="%(location)s">%(inline)s</a>""" % {
             'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
-            'location': self.calculateOutputUrl(),
+            'location': cgi.escape(self.calculateOutputUrl()),
             'inline': inline
             }
 
@@ -222,12 +222,12 @@ class Media(Base.Widget):
         return getattr(self.content, 'filename', self.getOption('empty'))
 
     def base_include_default(self, outputOptions):
-        return {'content': self.calculateOutputUrl()}
+        return {'content': cgi.escape(self.calculateOutputUrl())}
 
 
     def draw_inline_image(self, outputOptions):
         return """<img src="%(location)s" alt="%(name)s" %(width)s %(height)s />""" % {
-            'location': self.calculateOutputUrl(),
+            'location': cgi.escape(self.calculateOutputUrl()),
             'name': self.draw_inline_default(outputOptions),
             'width': self.getHtmlOption('width'),
             'height': self.getHtmlOption('height')
@@ -244,13 +244,13 @@ class Media(Base.Widget):
         else:
             return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>
                   %(name)s""" % {
-            'location': self.calculateOutputUrl('base'),
+            'location': cgi.escape(self.calculateOutputUrl('base')),
             'name': self.draw_inline_default(outputOptions),
             'width': self.getHtmlOption('width'),
             'height': self.getHtmlOption('height')
             }
     def base_include_text__css(self, outputOptions):
-        return {'content':"<link href='%s' rel='stylesheet' type='text/css' />" % (self.calculateOutputUrl(),)}
+        return {'content':"<link href='%s' rel='stylesheet' type='text/css' />" % (cgi.escape(self.calculateOutputUrl()),)}
 
     def draw_inline_application__x_javascript(self, outputOptions):
         if self.getOption('merge'):
@@ -259,19 +259,19 @@ class Media(Base.Widget):
         else:
             return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>
                   %(name)s""" % {
-            'location': self.calculateOutputUrl('base'),
+            'location': cgi.escape(self.calculateOutputUrl('base')),
             'name': self.draw_inline_default(outputOptions),
             'width': self.getHtmlOption('width'),
             'height': self.getHtmlOption('height')}
         
     def base_include_application__x_javascript(self, outputOptions):
-        return {'content':"<script src='%s' type='text/javascript' ></script>" % (self.calculateOutputUrl(),)}
+        return {'content':"<script src='%s' type='text/javascript' ></script>" % (cgi.escape(self.calculateOutputUrl()),)}
 
 
     def draw_inline_text(self, outputOptions):
         return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>
                   %(name)s""" % {
-            'location': self.calculateOutputUrl(),
+            'location': cgi.escape(self.calculateOutputUrl()),
             'name': self.draw_inline_default(outputOptions),
             'width': self.getHtmlOption('width'),
             'height': self.getHtmlOption('height')

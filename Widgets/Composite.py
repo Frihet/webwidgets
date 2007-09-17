@@ -237,8 +237,8 @@ class TabbedView(Base.Input, Base.StaticComposite):
                                %(disabled)s
                                id="%(attr_html_id)s_%(page)s"
                                name="%(attr_html_id)s"
-                               value="%(page)s" />%(caption)s</button></li>
-                          """ % {'disabled': ['', 'disabled="true"'][page == self.page or not active],
+                               value="%(page)s">%(caption)s</button></li>
+                          """ % {'disabled': ['', 'disabled="disabled"'][page == self.page or not active],
                                  'attr_html_id': widgetId,
                                  'page':page,
                                  'caption':child.getTitle(self.path + [page])}

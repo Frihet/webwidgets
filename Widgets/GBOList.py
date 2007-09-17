@@ -25,7 +25,7 @@
 the user to sort the rows and simultaneously group the rows according
 to their content and the sorting."""
 
-import Webwidgets.Constants, Webwidgets.Utils, re, math
+import Webwidgets.Constants, Webwidgets.Utils, re, math, cgi
 import Base
 
 column_allowed_name_re = re.compile("^[a-z_]*$")
@@ -370,15 +370,15 @@ class GBOList(Base.ActionInput, Base.Composite):
             self.session.windows[self.winId].fields[pageId] = self
         return """
 <span class="left">
- <button type="submit" %(backActive)s id="%(attr_html_id)s_first" name="%(attr_html_id)s" value="%(first)s" />&lt;&lt;</button>
- <button type="submit" %(backActive)s id="%(attr_html_id)s_previous" name="%(attr_html_id)s" value="%(previous)s" />&lt;</button>
+ <button type="submit" %(backActive)s id="%(attr_html_id)s_first" name="%(attr_html_id)s" value="%(first)s">&lt;&lt;</button>
+ <button type="submit" %(backActive)s id="%(attr_html_id)s_previous" name="%(attr_html_id)s" value="%(previous)s">&lt;</button>
 </span>
 <span class="center">
  %(page)s/%(pages)s
 </span>
 <span class="right">
- <button type="submit" %(forwardActive)s id="%(attr_html_id)s_next" name="%(attr_html_id)s" value="%(next)s" />&gt;</button>
- <button type="submit" %(forwardActive)s id="%(attr_html_id)s_last" name="%(attr_html_id)s" value="%(last)s" />&gt;&gt;</button>
+ <button type="submit" %(forwardActive)s id="%(attr_html_id)s_next" name="%(attr_html_id)s" value="%(next)s">&gt;</button>
+ <button type="submit" %(forwardActive)s id="%(attr_html_id)s_last" name="%(attr_html_id)s" value="%(last)s">&gt;&gt;</button>
 </span>
 """ % {'attr_html_id': pageId,
        'first': 1,
@@ -387,15 +387,15 @@ class GBOList(Base.ActionInput, Base.Composite):
        'pages': self.getPages(),
        'next': self.page + 1,
        'last': self.getPages(),
-       'backActive': ['', 'disabled="true"'][not pageActive or self.page <= 1],
-       'forwardActive': ['', 'disabled="true"'][not pageActive or self.page >= self.getPages()],
+       'backActive': ['', 'disabled="disabled"'][not pageActive or self.page <= 1],
+       'forwardActive': ['', 'disabled="disabled"'][not pageActive or self.page >= self.getPages()],
        }
 
     def drawPrintableLink(self, outputOptions):
         location = self.calculateUrl({'widget': Webwidgets.Utils.pathToId(self.path),
                                       'printableVersion': 'yes'})
         return """<a class="printable" href="%(location)s">Printable version</a>""" % {
-            'location': location,
+            'location': cgi.escape(location),
             }
 
     def drawButtons(self, outputOptions):
@@ -424,7 +424,7 @@ class GBOList(Base.ActionInput, Base.Composite):
             info = {'inputId': inputId,
                     'attr_html_id': widgetId,
                     'column': column,
-                    'disabled': ['disabled="true"', ''][sortActive],
+                    'disabled': ['disabled="disabled"', ''][sortActive],
                     'caption': title,
                     'classes': sortToClasses(self.sort, reverseDependentColumns.get(column, column)),
                     'sort': sortToString(setSort(self.sort, reverseDependentColumns.get(column, column)))
@@ -438,7 +438,7 @@ class GBOList(Base.ActionInput, Base.Composite):
             else:
                 headings.append("""
 <th id="%(attr_html_id)s-_-head-%(column)s" class="column %(classes)s">
- <button type="submit" id="%(attr_html_id)s-_-sort-%(column)s" %(disabled)s name="%(attr_html_id)s-_-sort" value="%(sort)s" />%(caption)s</button>
+ <button type="submit" id="%(attr_html_id)s-_-sort-%(column)s" %(disabled)s name="%(attr_html_id)s-_-sort" value="%(sort)s">%(caption)s</button>
 </th>
 """ % info)
         return headings
@@ -460,10 +460,10 @@ class GBOList(Base.ActionInput, Base.Composite):
                     self.session.windows[self.winId].fields[Webwidgets.Utils.pathToId(self.path + ['_', 'function', function])] = self
             for rowNum in xrange(0, len(rows)):
                 functions = '<td class="functions">%s</td>' % ''.join([
-                    """<button type="submit" class="%(attr_html_class)s" %(disabled)s name="%(attr_html_id)s" value="%(row)s" />%(title)s</button>""" % {
+                    """<button type="submit" class="%(attr_html_class)s" %(disabled)s name="%(attr_html_id)s" value="%(row)s">%(title)s</button>""" % {
                         'attr_html_id': Webwidgets.Utils.pathToId(self.path + ['_', 'function', function]),
                         'attr_html_class': function,
-                        'disabled': ['disabled="true"', ''][functionActive[function]],
+                        'disabled': ['disabled="disabled"', ''][functionActive[function]],
                         'title': title,
                         'row':rowNum}
                     for function, title in self.functions.iteritems()])

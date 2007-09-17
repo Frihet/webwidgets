@@ -28,7 +28,7 @@ generic base classes that can be used when implementing more elaborate
 widgets.
 """
 
-import types, xml.sax.saxutils, os.path
+import types, xml.sax.saxutils, os.path, cgi
 import Webwidgets.Utils, Webwidgets.Constants
 
 debugNotifications = False
@@ -271,14 +271,14 @@ class Widget(object):
         contentName = 'script: ' + ' '.join(uris)
         self.registerHeadContent(
             contentName,
-            '\n'.join(["<script src='%s' type='text/javascript' ></script>" % (uri,)
+            '\n'.join(["<script src='%s' type='text/javascript' ></script>" % (cgi.escape(uri),)
                        for uri in uris]))
         
     def registerStyleLink(self, *uris):
         contentName = 'style: ' + ' '.join(uris)
         self.registerHeadContent(
             contentName,
-            '\n'.join(["<link href='%s' rel='stylesheet' type='text/css' />" % (uri,)
+            '\n'.join(["<link href='%s' rel='stylesheet' type='text/css' />" % (cgi.escape(uri),)
                        for uri in uris]))
 
     def calculateUrl(self, outputOptions, arguments = None):
@@ -300,7 +300,7 @@ class Widget(object):
         if hasattr(self, 'session'):
             if self.session.languages is not None:
                 return self.session.languages
-            return parseLanguages(self.session.program.request().environ()['HTTP_ACCEPT_LANGUAGE'])
+            return parseLanguages(self.session.program.request().environ().get('HTTP_ACCEPT_LANGUAGE', 'en'))
 
         return []
 
@@ -653,11 +653,12 @@ class HtmlWindow(Window, StaticComposite):
     attributes for title, encoding and doctype"""
     __attributes__ = StaticComposite.__attributes__ + ('headers', 'encoding', 'doctype')
     __children__ = ('head', 'body')
+    headers = {'Status': '200 OK'}
     title = 'Page not available'
     body = 'Page not available'
     head = ''
     encoding = 'UTF-8'
-    doctype = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">'
+    doctype = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
 
     widgetStyle = genericStyle
 
@@ -682,7 +683,7 @@ class HtmlWindow(Window, StaticComposite):
         if title is None: title = self.getTitle(self.path)
         result['title'] = '<title>' + title + '</title>'
         result['doctype'] = self.doctype
-        result['uri'] = self.session.program.request()._environ['REQUEST_URI']
+        result['uri'] = cgi.escape(self.session.program.request()._environ['REQUEST_URI'])
         result['name'] = result['id'] = Webwidgets.Utils.pathToId(self.path)
         result['base'] = self.session.program.requestBase()
         
@@ -690,14 +691,14 @@ class HtmlWindow(Window, StaticComposite):
         
         return ("""
 %(doctype)s
-<html %(attr_htmlAttributes)s>
+<html xmlns="http://www.w3.org/1999/xhtml">
  <head>
-  <base href='%(base)s'>
+  <base href='%(base)s' />
   %(headContent)s
   %(title)s
   %(head)s
  </head>
- <body id="%(attr_html_id)s-_-body">
+ <body %(attr_htmlAttributes)s>
   <form name="%(name)s" method='post' enctype='multipart/form-data' action='%(uri)s' id="%(attr_html_id)s-_-body-form">
    %(body)s
   </form>
