@@ -23,12 +23,9 @@
  xmlns:h="http://www.w3.org/TR/REC-html40"
  bind="Webwidgets.Widgets.CssFileEditorCallbacks">
  >
-
- <w:Div id="CssFileEditor">
-  <w:Html id="child">
-   <div><w:StringInput id="input" cols=":integer:40" rows=":integer:15" /></div>
-   <div><w:Button id="update" title="Update" /></div>
-   <div><w:Media id="preview" /></div>
-  </w:Html>
- </w:Div>
+ <w:Html id="CssFileEditor" topLevel="div">
+  <div><w:StringInput id="input" cols=":integer:40" rows=":integer:15" /></div>
+  <div><w:Button id="update" title="Update" /></div>
+  <div><w:Media id="preview" /></div>
+ </w:Html>
 </w:wwml>

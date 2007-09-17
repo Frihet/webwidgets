@@ -57,15 +57,19 @@ class Html(Base.StaticComposite):
     """Don't include the classname of this class in L{classes}."""
     __wwml_html_override__ = True
     """Let Wwml-defined subclasses override the html attribute"""
-    __attributes__ = Base.StaticComposite.__attributes__ + ('html',)
+    __attributes__ = Base.StaticComposite.__attributes__ + ('html','topLevel')
     html = ''
+    topLevel = None
     def draw(self, outputOptions):
         children = self.drawChildren(
             outputOptions,
             invisibleAsEmpty = True,
             includeAttributes = True)
         try:
-            return self.html % children
+            html = self.html
+            if self.topLevel is not None:
+                html = "<%(attr_topLevel)s %(attr_htmlAttributes)s>" + html + "</%(attr_topLevel)s>"
+            return html % children
         except KeyError, e:
             e.args = (self, self.path) + e.args + (self.html,)
             raise e
