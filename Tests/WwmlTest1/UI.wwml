@@ -29,6 +29,7 @@
   title="RedBack WebWidgets demo application">
 
   <w:Html id="body">
+   <w:CssEditor id="csstest" />
    <w:StringInput id="longtext" cols=":integer:20" rows=":integer:10">
     <w:string id="value">
 Hej allla barn,
@@ -46,7 +47,7 @@ Titta här skall ni få se vad farbror frej tar fram!
 
    <w:DateInput id="date" value=":time:1998-01-01 22:33:34" />
 
-   <w:FileInput id="file" />
+   <!-- w:FileInput id="file" / -->
 
    <w:TabbedView id="tabs" page="first">
     <w:Html id="first" title="First">The first page</w:Html>

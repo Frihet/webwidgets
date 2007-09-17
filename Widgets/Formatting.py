@@ -23,7 +23,7 @@
 """Output formatting widgets.
 """
 
-import types
+import types, StringIO
 import Webwidgets.Utils, Webwidgets.Constants
 import Base, TableModel
 
@@ -124,7 +124,27 @@ class Media(Base.Widget):
     """Media (file) viewing widget"""
     __attributes__ = ('content', 'base', 'types')
     content = None
-    base = None
+    class Base(object): pass
+    base = Base()
+    base.type = 'text/html'
+    base.file = StringIO.StringIO("""
+<html>
+ <head>
+  %(content)s
+ </head>
+ <body>
+  <p>
+   <h1>Head1</h1>
+   <p>Some text.</p>
+   <p>
+    <h2>Head1</h2>
+    <p>Some text and <a href='http://google.com'>a link</a>.</p>
+   </p>
+  </p>
+ </body>
+</html>
+""")
+
     types = {None:{'width':100,  # All
                    'height':100,
                    'empty': '&lt;No file&gt;',
@@ -219,7 +239,7 @@ class Media(Base.Widget):
             'height': self.getOption('height')
             }
     def base_include_text__css(self, outputOptions):
-        return {'content':"<link href='%s' rel='stylesheet' type='text/css' />" % (calculateOutputUrl(),)}
+        return {'content':"<link href='%s' rel='stylesheet' type='text/css' />" % (self.calculateOutputUrl(),)}
 
     def draw_inline_application__x_javascript(self, outputOptions):
         if self.getOption('merge'):
@@ -234,7 +254,7 @@ class Media(Base.Widget):
             'height': self.getOption('height')}
         
     def base_include_application__x_javascript(self, outputOptions):
-        return {'content':"<script src='%s' type='text/javascript' ></script>" % (calculateOutputUrl(),)}
+        return {'content':"<script src='%s' type='text/javascript' ></script>" % (self.calculateOutputUrl(),)}
 
 
     def draw_inline_text(self, outputOptions):
