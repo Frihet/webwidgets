@@ -187,13 +187,13 @@ class Media(Base.Widget):
         mimeType = 'text/plain'
         if outputOptions['part'] == 'content':
             if self.content is not None:
-                content = self.content.file.read()
                 self.content.file.seek(0)
+                content = self.content.file.read()
                 mimeType = self.content.type
         elif outputOptions['part'] == 'base':
             if self.base is not None:
-                content = self.base.file.read() % self.getRenderer('base_include')(outputOptions)
                 self.base.file.seek(0)
+                content = self.base.file.read() % self.getRenderer('base_include')(outputOptions)
                 mimeType = self.base.type
         return {Webwidgets.Constants.OUTPUT: content,
                 'Content-type': mimeType}

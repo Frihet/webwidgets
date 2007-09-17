@@ -258,20 +258,20 @@ input.error {
  border-top: 1px solid black;
 }
 
-.Webwidgets-Widgets-CssEditorCallbacks-CssEditor {
+.Webwidgets-Widgets-CssFileEditorCallbacks-CssFileEditor {
  display: table;
 }
 
-.Webwidgets-Widgets-CssEditorCallbacks-CssEditor > div {
+.Webwidgets-Widgets-CssFileEditorCallbacks-CssFileEditor > div {
  display: table-cell;
  vertical-align: top;
 }
 
-.Webwidgets-Widgets-CssEditorCallbacks-CssEditor > div > a {
+.Webwidgets-Widgets-CssFileEditorCallbacks-CssFileEditor > div > a {
  display: block;
 }
 
-.Webwidgets-Widgets-CssEditorCallbacks-CssEditor a iframe {
+.Webwidgets-Widgets-CssFileEditorCallbacks-CssFileEditor a iframe {
  border: 1px solid black;
  display: block;
 }

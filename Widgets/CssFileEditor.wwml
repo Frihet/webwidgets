@@ -21,10 +21,10 @@
  xmlns="http://www.w3.org/TR/REC-html40"
  xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
  xmlns:h="http://www.w3.org/TR/REC-html40"
- bind="Webwidgets.Widgets.CssEditorCallbacks">
+ bind="Webwidgets.Widgets.CssFileEditorCallbacks">
  >
 
- <w:Div id="CssEditor">
+ <w:Div id="CssFileEditor">
   <w:Html id="child">
    <div><w:StringInput id="input" cols=":integer:40" rows=":integer:15" /></div>
    <div><w:Button id="update" title="Update" /></div>
