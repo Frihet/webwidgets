@@ -122,89 +122,133 @@ class Message(Html):
 
 class Media(Base.Widget):
     """Media (file) viewing widget"""
-    __attributes__ = ('content', 'empty', 'width', 'height')
+    __attributes__ = ('content', 'base', 'types')
     content = None
-    empty = '&lt;No file&gt;'
-    width = 100
-    height = 100
-    inline = ('image/png', 'image/jpeg', 'image/gif')
-    #inline = ('image/png', 'image/jpeg', 'image/gif', 'text/css', 'text/html')
-    #inline = True
-    invisible = False
-    """Do not display the link, onlly inlined CSS and JavaScript will
-    do anything."""
+    base = None
+    types = {None:{'width':100,  # All
+                   'height':100,
+                   'empty': '&lt;No file&gt;',
+                   'inline':True,
+                   'merge':False,
+                   'invisible':False},
+             'image/png':{'inline':True},
+             'image/jpeg':{'inline':True},
+             'image/gif':{'inline':True},
+             'text/css':{'inline':True, 'merge':False, 'invisible':False},
+             'text/html':{'inline':True, 'merge':False, 'invisible':False}}
 
-    def getContent(self, path):
-        return self.content
-    
+    def getOption(self, option):
+        mimeType = getattr(self.content, 'type', None)
+        if type in self.types and option in self.types[mimeType]:
+            return self.types[mimeType][option]
+        return self.types[None][option]
+
+    def getRenderer(self, renderer):
+        mimeType = getattr(self.content, 'type', None)
+        resName = renderer + '_default'
+        if mimeType is not None:
+            name = renderer + "_" + mimeType.replace("/", "__").replace("-", "_")
+            if hasattr(self, name):
+                resName = name
+        return getattr(self, resName)
+
+    def calculateOutputUrl(self, part = 'content'):
+        return self.calculateUrl({'widget': Webwidgets.Utils.pathToId(self.path), 'part':part})
+
     def output(self, outputOptions):
-        content = self.getContent(self.path)
-        res = {Webwidgets.Constants.OUTPUT: content.file.read(),
-               'Content-type': content.type
-               }
-        content.file.seek(0)
-        return res
+        content = ''
+        mimeType = 'text/plain'
+        if outputOptions['part'] == 'content':
+            if self.content is not None:
+                content = self.content.file.read()
+                self.content.file.seek(0)
+                mimeType = self.content.type
+        elif outputOptions['part'] == 'base':
+            if self.base is not None:
+                content = self.base.file.read() % self.getRenderer('base_include')(outputOptions)
+                self.base.file.seek(0)
+                mimeType = self.base.type
+        return {Webwidgets.Constants.OUTPUT: content,
+                'Content-type': mimeType}
 
-    def draw_inline_default(self, location, outputOptions):
-        return self.getContent(self.path).filename
-    
-    def draw_inline_image(self, location, outputOptions):
+    def draw(self, outputOptions):
+        inline = self.getRenderer('draw_inline'
+                                  )(outputOptions)
+
+        if self.getOption('invisible'):
+            return ''
+
+        if self.content is None:
+            return self.getOption('empty')
+
+        return """<a %(attr_htmlAttributes)s href="%(location)s">%(inline)s</a>""" % {
+            'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
+            'location': self.calculateOutputUrl(),
+            'inline': inline
+            }
+
+    def draw_inline_default(self, outputOptions):
+        return getattr(self.content, 'filename', self.getOption('empty'))
+
+    def base_include_default(self, outputOptions):
+        return {'content': self.calculateOutputUrl()}
+
+
+    def draw_inline_image(self, outputOptions):
         return """<img src="%(location)s" alt="%(name)s" width="%(width)s" height="%(height)s" />""" % {
-            'location': location,
-            'name': self.draw_inline_default(location, outputOptions),
-            'width': self.width,
-            'height': self.height
+            'location': self.calculateOutputUrl(),
+            'name': self.draw_inline_default(outputOptions),
+            'width': self.getOption('width'),
+            'height': self.getOption('height')
             }
     
     draw_inline_image__png = draw_inline_image
     draw_inline_image__jpeg = draw_inline_image
     draw_inline_image__gif = draw_inline_image
     
-    def draw_inline_text__css(self, location, outputOptions):
-        self.registerStyleLink(location)
-        return self.draw_inline_default(location, outputOptions)
-
-    def draw_inline_application__x_javascript(self, location, outputOptions):
-        self.registerScriptLink(location)
-        return self.draw_inline_default(location, outputOptions)
-
-    def draw_inline_text(self, location, outputOptions):
-        return """<iframe src="%(location)s" title="%(name)s" width="%(width)s" height="%(height)s" />
+    def draw_inline_text__css(self, outputOptions):
+        if self.getOption('merge'):
+            self.registerStyleLink(self.calculateOutputUrl())
+            return self.draw_inline_default(outputOptions)
+        else:
+            return """<iframe src="%(location)s" title="%(name)s" width="%(width)s" height="%(height)s"></iframe>
                   %(name)s""" % {
-            'location': location,
-            'name': self.draw_inline_default(location, outputOptions),
-            'width': self.width,
-            'height': self.height
+            'location': self.calculateOutputUrl('base'),
+            'name': self.draw_inline_default(outputOptions),
+            'width': self.getOption('width'),
+            'height': self.getOption('height')
+            }
+    def base_include_text__css(self, outputOptions):
+        return {'content':"<link href='%s' rel='stylesheet' type='text/css' />" % (calculateOutputUrl(),)}
+
+    def draw_inline_application__x_javascript(self, outputOptions):
+        if self.getOption('merge'):
+            self.registerScriptLink(self.calculateOutputUrl())
+            return self.draw_inline_default(outputOptions)
+        else:
+            return """<iframe src="%(location)s" title="%(name)s" width="%(width)s" height="%(height)s"></iframe>
+                  %(name)s""" % {
+            'location': self.calculateOutputUrl('base'),
+            'name': self.draw_inline_default(outputOptions),
+            'width': self.getOption('width'),
+            'height': self.getOption('height')}
+        
+    def base_include_application__x_javascript(self, outputOptions):
+        return {'content':"<script src='%s' type='text/javascript' ></script>" % (calculateOutputUrl(),)}
+
+
+    def draw_inline_text(self, outputOptions):
+        return """<iframe src="%(location)s" title="%(name)s" width="%(width)s" height="%(height)s"></iframe>
+                  %(name)s""" % {
+            'location': self.calculateOutputUrl(),
+            'name': self.draw_inline_default(outputOptions),
+            'width': self.getOption('width'),
+            'height': self.getOption('height')
             }
 
     draw_inline_text__plain = draw_inline_text
     draw_inline_text__html = draw_inline_text
     draw_inline_text__xml = draw_inline_text
-    
-    
-    def draw(self, outputOptions):
-        content = self.getContent(self.path)
-
-        if content is None:
-            return self.empty
-
-        location = self.calculateUrl({'widget': Webwidgets.Utils.pathToId(self.path)})
-
-        inlineFnName = "draw_inline_" + content.type.replace("/", "__").replace("-", "_")
-        if (    (self.inline is True or content.type in self.inline)
-            and (hasattr(self, inlineFnName))):
-            preview = getattr(self, inlineFnName
-                              )(location, outputOptions)
-        else:
-            preview = self.draw_inline_default(location, outputOptions)
-
-        if self.invisible: return ''
-        
-        return """<a %(attr_htmlAttributes)s href="%(location)s">%(preview)s</a>""" % {
-            'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
-            'location': location,
-            'preview': preview
-            }
 
 class Label(Base.StaticComposite):
     """Renders a label for an input field. The input field can be

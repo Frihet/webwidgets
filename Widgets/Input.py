@@ -266,8 +266,12 @@ class FileInput(Base.ValueInput, Base.StaticComposite):
         return [self.value]
 
     class preview(Formatting.Media):
-        def getContent(self, path):
-            return self.parent.value
+        class Content(object):
+            def __get__(self, instance, owner):
+                if not hasattr(instance, 'parent'):
+                    return None
+                return instance.parent.value
+        content = Content()
         
     def output(self, outputOptions):
         res = {Webwidgets.Constants.OUTPUT: self.value.file.read(),
