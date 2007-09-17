@@ -257,3 +257,21 @@ input.error {
 .Webwidgets-Widgets-Composite-Dialog .dialog-buttons {
  border-top: 1px solid black;
 }
+
+.Webwidgets-Widgets-CssEditorCallbacks-CssEditor {
+ display: table;
+}
+
+.Webwidgets-Widgets-CssEditorCallbacks-CssEditor > div {
+ display: table-cell;
+ vertical-align: top;
+}
+
+.Webwidgets-Widgets-CssEditorCallbacks-CssEditor > div > a {
+ display: block;
+}
+
+.Webwidgets-Widgets-CssEditorCallbacks-CssEditor a iframe {
+ border: 1px solid black;
+ display: block;
+}

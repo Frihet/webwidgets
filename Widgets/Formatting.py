@@ -145,8 +145,8 @@ class Media(Base.Widget):
 </html>
 """)
 
-    types = {None:{'width':100,  # All
-                   'height':100,
+    types = {None:{'width':None,  # All
+                   'height':None,
                    'empty': '&lt;No file&gt;',
                    'inline':True,
                    'merge':False,
@@ -162,6 +162,13 @@ class Media(Base.Widget):
         if type in self.types and option in self.types[mimeType]:
             return self.types[mimeType][option]
         return self.types[None][option]
+
+    def getHtmlOption(self, option, htmlName = None):
+        value = self.getOption(option)
+        if value is None:
+            return ''
+        if htmlName is None: htmlName = option
+        return '%s = "%s"' % (htmlName, value)
 
     def getRenderer(self, renderer):
         mimeType = getattr(self.content, 'type', None)
@@ -215,11 +222,11 @@ class Media(Base.Widget):
 
 
     def draw_inline_image(self, outputOptions):
-        return """<img src="%(location)s" alt="%(name)s" width="%(width)s" height="%(height)s" />""" % {
+        return """<img src="%(location)s" alt="%(name)s" %(width)s %(height)s />""" % {
             'location': self.calculateOutputUrl(),
             'name': self.draw_inline_default(outputOptions),
-            'width': self.getOption('width'),
-            'height': self.getOption('height')
+            'width': self.getHtmlOption('width'),
+            'height': self.getHtmlOption('height')
             }
     
     draw_inline_image__png = draw_inline_image
@@ -231,12 +238,12 @@ class Media(Base.Widget):
             self.registerStyleLink(self.calculateOutputUrl())
             return self.draw_inline_default(outputOptions)
         else:
-            return """<iframe src="%(location)s" title="%(name)s" width="%(width)s" height="%(height)s"></iframe>
+            return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>
                   %(name)s""" % {
             'location': self.calculateOutputUrl('base'),
             'name': self.draw_inline_default(outputOptions),
-            'width': self.getOption('width'),
-            'height': self.getOption('height')
+            'width': self.getHtmlOption('width'),
+            'height': self.getHtmlOption('height')
             }
     def base_include_text__css(self, outputOptions):
         return {'content':"<link href='%s' rel='stylesheet' type='text/css' />" % (self.calculateOutputUrl(),)}
@@ -246,24 +253,24 @@ class Media(Base.Widget):
             self.registerScriptLink(self.calculateOutputUrl())
             return self.draw_inline_default(outputOptions)
         else:
-            return """<iframe src="%(location)s" title="%(name)s" width="%(width)s" height="%(height)s"></iframe>
+            return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>
                   %(name)s""" % {
             'location': self.calculateOutputUrl('base'),
             'name': self.draw_inline_default(outputOptions),
-            'width': self.getOption('width'),
-            'height': self.getOption('height')}
+            'width': self.getHtmlOption('width'),
+            'height': self.getHtmlOption('height')}
         
     def base_include_application__x_javascript(self, outputOptions):
         return {'content':"<script src='%s' type='text/javascript' ></script>" % (self.calculateOutputUrl(),)}
 
 
     def draw_inline_text(self, outputOptions):
-        return """<iframe src="%(location)s" title="%(name)s" width="%(width)s" height="%(height)s"></iframe>
+        return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>
                   %(name)s""" % {
             'location': self.calculateOutputUrl(),
             'name': self.draw_inline_default(outputOptions),
-            'width': self.getOption('width'),
-            'height': self.getOption('height')
+            'width': self.getHtmlOption('width'),
+            'height': self.getHtmlOption('height')
             }
 
     draw_inline_text__plain = draw_inline_text
