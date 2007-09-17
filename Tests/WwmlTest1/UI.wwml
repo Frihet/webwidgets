@@ -29,7 +29,7 @@
   title="RedBack WebWidgets demo application">
 
   <w:Html id="body">
-   <w:CssFileEditor id="csstest" />
+   <w:FileEditor id="fileedittest" />
    <w:StringInput id="longtext" cols=":integer:20" rows=":integer:10">
     <w:string id="value">
 Hej allla barn,

@@ -17,15 +17,14 @@ class CssFileEditor(object):
                 cssEditor.value.file.seek(0)
                 return cssEditor.value.file.read()
             def __set__(self, instance, value):
-                cssEditor = instance.parent
-                if not isinstance(cssEditor.value, cssEditor.Value):
-                    cssEditor.value = cssEditor.Value()
-                    cssEditor.value.type ='text/css'
-                    cssEditor.value.filename = 'CSS-file'
-                    cssEditor.value.file = StringIO.StringIO()
-                cssEditor.value.file.seek(0)
-                cssEditor.value.file.write(value)
-                cssEditor.value.file.truncate()
+                fileValue = instance.parent.Value()
+                fileValue.type ='text/css'
+                fileValue.filename = 'CSS-file'
+                fileValue.file = StringIO.StringIO()
+                fileValue.file.seek(0)
+                fileValue.file.write(value)
+                fileValue.file.truncate()
+                instance.parent.value = fileValue
         value = Value()
 
     class preview(object):
