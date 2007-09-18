@@ -196,7 +196,7 @@ class Tree(Base.Input):
     def selected(self, path, item):
         print '%s.selected(%s, %s)' % ('.'.join([str(x) for x in self.path]), '.'.join(path), '.'.join(item))
 
-class TabbedView(Base.Input, Base.StaticComposite):
+class TabbedView(Base.ActionInput, Base.StaticComposite):
     """Provides a set of overlapping 'pages' with tabs, each tab
     holding some other widget, through wich a user can browse using
     the tabs."""

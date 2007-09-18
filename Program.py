@@ -289,7 +289,7 @@ class Program(WebKit.Page.Page):
                         value = [value]
                     if field.fieldOutput(path) != value:
                         if self.debugFieldInput:
-                            print "Field input:", path, field.fieldOutput(path), value
+                            print "Field input:", path, fieldname, field.fieldOutput(path), value
                         field.fieldInput(path, *value)
 
         def writeHTML(self):

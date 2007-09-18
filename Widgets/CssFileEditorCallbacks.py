@@ -1,4 +1,4 @@
-import Formatting, StringIO
+import Formatting, cgi
 
 class CssFileEditor(object):
     class Value(object):
@@ -17,14 +17,17 @@ class CssFileEditor(object):
                 cssEditor.value.file.seek(0)
                 return cssEditor.value.file.read()
             def __set__(self, instance, value):
-                fileValue = instance.parent.Value()
-                fileValue.type ='text/css'
-                fileValue.filename = 'CSS-file'
-                fileValue.file = StringIO.StringIO()
-                fileValue.file.seek(0)
-                fileValue.file.write(value)
-                fileValue.file.truncate()
-                instance.parent.value = fileValue
+                cssEditor = instance.parent
+                if cssEditor.value is None:
+                    cssEditor.value = cgi.FieldStorage()
+                cssEditor.value.type ='text/css'
+                cssEditor.value.filename = 'CSS-file'
+                if cssEditor.value.file is None:
+                    cssEditor.value.file = cssEditor.value.make_file()
+                cssEditor.value.file.seek(0)
+                cssEditor.value.file.write(value)
+                cssEditor.value.file.truncate()
+                cssEditor.value.file.seek(0)
         value = Value()
 
     class preview(object):

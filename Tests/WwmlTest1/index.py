@@ -22,7 +22,7 @@
 import Webwidgets
 
 Webwidgets.Program.Session.debugFields = False
-Webwidgets.Program.Session.debugFieldInput = True
+Webwidgets.Program.Session.debugFieldInput = False
 Webwidgets.Program.Session.debugReceiveNotification = False
 Webwidgets.Wwml.debugImport = True
 

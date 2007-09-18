@@ -25,8 +25,14 @@
  >
 
  <w:Html id="FileEditor" topLevel="div">
-  <w:TabbedView id="editors" page="text__css">
+  <w:Field id="name" label="Filename">
+   <w:StringInput id="field" />
+  </w:Field>
+
+  <w:TabbedView id="editors" page="none">
+   <w:Html id="none" title="No file">No file created or uploaded</w:Html>
    <w:CssFileEditor id="text__css" title="CSS stylesheet" />
+   <w:Media id="default" title="All files" />
   </w:TabbedView>
 
   <w:Html id="upload" topLevel="div">

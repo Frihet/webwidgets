@@ -1,4 +1,10 @@
-import traceback
+import Webwidgets, cgi, traceback
+
+def mimeTypeToMethod(mimeType):
+    return mimeType.replace("/", "__").replace("-", "_")
+
+def methodToMimeType(mimeType):
+    return mimeType.replace("__", "/").replace("_", "-")
 
 class Value(object):
     def __get__(self, instance, owner):
@@ -7,31 +13,70 @@ class Value(object):
         return instance.parent.parent.value
     def __set__(self, instance, value):
         instance.parent.parent.value = value
-
+        
 class FileEditor(object):
+    __attributes__ = Webwidgets.Html.__attributes__ + ('value', 'error')
+
     value = None
     error = None
+
+    class name(object):
+        class field(object):
+            class Value(object):
+                def __get__(self, instance, owner):
+                    if not hasattr(instance, 'parent'):
+                        return None
+                    return getattr(instance.parent.parent.value, 'filename', '&lt;No file&gt;')
+                def __set__(self, instance, value):
+                    if instance.parent.parent.value is not None:
+                        instance.parent.parent.value.filename = value
+            value = Value()
 
     class editors(object):
         class text__css(object):
             value = Value()
+        class default(object):
+            content = Value()
+        def pageChanged(self, path, page):
+            Webwidgets.TabbedView.pageChanged(self, path, page)
+            if page not in (None, 'default'):
+                if page == 'none':
+                    self.parent.value = None
+                else:
+                    if self.parent.value is None:
+                        if self.parent.value is None:
+                            self.parent.value = cgi.FieldStorage()
+                    mimeType = methodToMimeType(page)
+                    if mimeType != self.parent.value.type:
+                        self.parent.value.type = mimeType
+                        if self.parent.value.file is None:
+                            self.parent.value.file = self.parent.value.make_file()
+                        self.parent.value.file.seek(0)
+                        self.parent.value.file.truncate()
+                        self.parent.value.filename = "new %s file" % mimeType
             
     class upload(object):
-        class file(object):
-            value = Value()
+        class action(object):
+            def clicked(self, path):
+                value = self.parent['file'].value
+                editors = self.parent.parent['editors']
+                if value is not None:
+                    editor = mimeTypeToMethod(value.type)
+                    if editor not in editors.children:
+                        if editors.children['default'].visible:
+                            editor = 'default'
+                        else:
+                            self.parent['file'].error = 'Unrecognized file-type: %s' % value.type
+                            return
+                    elif not editors[editor].visible:
+                        self.parent['file'].error = 'Unallowed file-type: %s' % value.type
+                        return
+                self.parent.parent.value = value
 
-            def fieldInput(self, path, fieldValue):
-                if path == self.path:
-                    if fieldValue != '':
-                        if fieldValue is not None:
-                            mimeType = fieldValue.type.replace("/", "__").replace("-", "_")
-                            if mimeType not in self.parent.parent['editors'].children:
-                                self.error = 'Unrecognized file-type: %s' % fieldValue.type
-                                return
-                            elif not self.parent.parent['editors'][mimeType].visible:
-                                self.error = 'Unallowed file-type: %s' % fieldValue.type
-                                return
-                        self.value = fieldValue
-                elif path == self.path + ['_', 'clear']:
-                    if fieldValue != '':
-                        self.value = None
+    def valueChanged(self, path, value):
+        if path != self.path: return
+        editor = mimeTypeToMethod(getattr(value, 'type', 'none'))
+        if editor not in self['editors'].children:
+            editor = 'default'
+        self['editors'].page = editor
+        

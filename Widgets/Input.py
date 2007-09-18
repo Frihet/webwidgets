@@ -263,7 +263,10 @@ class FileInput(Base.ValueInput, Base.StaticComposite):
                 self.value = None
                 
     def fieldOutput(self, path):
-        return [self.value]
+        if path == self.path:
+            return [self.value]
+        elif path == self.path + ['_', 'clear']:
+            return ''
 
     class preview(Formatting.Media):
         class Content(object):
@@ -290,8 +293,8 @@ class FileInput(Base.ValueInput, Base.StaticComposite):
                 self.registerInput(self.path + ['_', 'clear'], argumentName)
         return """<span %(attr_htmlAttributes)s>
                    %(current)s
-                   <input type="file" name="%(attr_html_id)s" %(disabled)s id="%(attr_html_id)s_input" />
-                   <input type='submit' name="%(attr_html_id)s_clear" %(clearable)s id="%(attr_html_id)s_clear" value="Clear" />
+                   <input type="file" name="%(attr_html_id)s" %(disabled)s id="%(attr_html_id)s-_-input" />
+                   <input type='submit' name="%(attr_html_id)s-_-clear" %(clearable)s id="%(attr_html_id)s-_-clear" value="Clear" />
                   </span>""" % {
                        'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
                        'current': self.drawChild(self.path + ['preview'], self['preview'], outputOptions, True),
