@@ -275,3 +275,8 @@ input.error {
  border: 1px solid black;
  display: block;
 }
+
+.Webwidgets-Widgets-FileEditorCallbacks-FileEditor {
+ border: 1px solid black;
+ display: table;
+}

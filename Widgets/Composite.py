@@ -5,6 +5,7 @@
 # Webwidgets web developement framework
 # Copyright (C) 2006 uAnywhere, Egil Moeller <redhog@redhog.org>
 # Copyright (C) 2007 FreeCode AS, Egil Moeller <redhog@redhog.org>
+# Copyright (C) 2007 FreeCode AS, Axel Liljencrantz <axel.liljencrantz@freecode.no>
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -261,3 +262,22 @@ class TabbedView(Base.ActionInput, Base.StaticComposite):
                """ % {'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
                       'page': self.drawChild(self.path + [self.page], self.getChild(self.page), outputOptions, True),
                       'tabs': tabs}
+
+class Hide(Base.StaticComposite):
+    """
+    A hide/show widget
+
+    Change the value of the title variable to change the text in the button.
+
+    TODO:
+    Implement an alternative javascript implementation for faster update at the expense of longer reloads
+    """
+
+    class hideButton(Input.ToggleButton):
+        title="Show/hide"
+
+    def draw(self, path):
+        self['child'].visible = self['hideButton'].value
+        children = self.drawChildren(path, invisibleAsEmpty=True, includeAttributes=True)
+        return """<div %(attr_htmlAttributes)s>%(hideButton)s %(child)s</div>""" % children
+ 

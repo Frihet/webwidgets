@@ -5,6 +5,7 @@
 # Webwidgets web developement framework
 # Copyright (C) 2006 uAnywhere, Egil Moeller <redhog@redhog.org>
 # Copyright (C) 2007 FreeCode AS, Egil Moeller <redhog@redhog.org>
+# Copyright (C) 2007 FreeCode AS, Axel Liljencrantz <axel.liljencrantz@freecode.no>
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -301,3 +302,32 @@ class FileInput(Base.ValueInput, Base.StaticComposite):
                        'disabled': ['', 'disabled="disabled"'][not self.getActive(self.path)],
                        'clearable': ['', 'disabled="disabled"'][not self.getActive(self.path) or self.value is None],
                        'attr_html_id': Webwidgets.Utils.pathToId(self.path)}
+
+class ToggleButton(Base.ValueInput, Button):
+    """
+    A toggle button is very similar to a checkbox button, except it is
+    rendered as a normal button, and instantly cause a page-load when
+    clicked, just as a Button.
+    """
+
+    value=False
+
+    class HtmlClass(object):
+        def __init__(self):
+            self.value=""
+        def __get__(self, instance, owner):
+            return self.value + " " + ['toggle-invisible','toggle-visible'][instance.value]
+        def __set__(self, instance, value):
+            self.value = value
+    html_class = HtmlClass()
+
+    def __init__(self,session,winId,**attrs):
+        setattr(type(self), 'html_class', self.HtmlClass())
+        super(ToggleButton, self).__init__(session,winId,**attrs)
+
+    def fieldInput(self, path, stringValue):
+        if stringValue != '':
+            self.value = not self.value
+
+    def fieldOutput(self, path):
+        return []
