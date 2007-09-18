@@ -32,7 +32,7 @@
   <w:TabbedView id="editors" page="none">
    <w:Html id="none" title="No file">No file created or uploaded</w:Html>
    <w:CssFileEditor id="text__css" title="CSS stylesheet" />
-   <w:Media id="default" title="All files" />
+   <w:Media id="default" title="All files" visible=":false" />
   </w:TabbedView>
 
   <w:Html id="upload" topLevel="div">
