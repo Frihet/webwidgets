@@ -22,7 +22,8 @@
 import Webwidgets
 
 Webwidgets.Program.Session.debugFields = False
-Webwidgets.Program.Session.debugSendNotification = False
+Webwidgets.Program.Session.debugFieldInput = True
+Webwidgets.Program.Session.debugReceiveNotification = False
 Webwidgets.Wwml.debugImport = True
 
 import UI

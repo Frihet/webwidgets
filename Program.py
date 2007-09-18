@@ -115,6 +115,7 @@ class Program(WebKit.Page.Page):
         
         debugArguments = False
         debugFields = False
+        debugFieldInput = False
         debugReceiveNotification = False
 
         def __init__(self):
@@ -287,6 +288,8 @@ class Program(WebKit.Page.Page):
                     if not isinstance(value, types.ListType):
                         value = [value]
                     if field.fieldOutput(path) != value:
+                        if self.debugFieldInput:
+                            print "Field input:", path, field.fieldOutput(path), value
                         field.fieldInput(path, *value)
 
         def writeHTML(self):
