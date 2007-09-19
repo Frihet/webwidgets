@@ -242,24 +242,33 @@ class Widget(object):
                 self.registerStyleLink(self.calculateUrl({'widgetClass': cls.__module__ + '.' + cls.__name__,
                                                           'aspect': 'style'},
                                                          {}))
+            if cls.__dict__.get('widgetScript', None):
+                self.registerScriptLink(self.calculateUrl({'widgetClass': cls.__module__ + '.' + cls.__name__,
+                                                           'aspect': 'script'},
+                                                          {}))
         registerClassStyles(cls)
         if self.__dict__.get('widgetStyle', None):
             self.registerStyleLink(self.calculateUrl({'widget': Webwidgets.Utils.pathToId(self.path),
                                                       'aspect': 'style'},
                                                      {}))
+        if self.__dict__.get('widgetScript', None):
+            self.registerScriptLink(self.calculateUrl({'widget': Webwidgets.Utils.pathToId(self.path),
+                                                       'aspect': 'script'},
+                                                      {}))
 
     def classOutput_style(cls, window, outputOptions):
-        return {Webwidgets.Constants.FINAL_OUTPUT: cls.widgetStyle,
-                'Content-type': 'text/css',
-                'Cache-Control': 'public; max-age=3600'
-                
-                }
+        return cls.widgetStyle
     classOutput_style = classmethod(classOutput_style)
 
     def output_style(self, outputOptions):
-        return {Webwidgets.Constants.FINAL_OUTPUT: self.widgetStyle,
-                'Content-type': 'text/css'
-                }
+        return self.widgetStyle
+
+    def classOutput_script(cls, window, outputOptions):
+        return cls.widgetScript
+    classOutput_script = classmethod(classOutput_script)
+
+    def output_script(self, outputOptions):
+        return self.widgetScript
 
     def getTitle(self, path):
         return self.title or Webwidgets.Utils.pathToId(path)
@@ -280,6 +289,13 @@ class Widget(object):
             contentName,
             '\n'.join(["<link href='%s' rel='stylesheet' type='text/css' />" % (cgi.escape(uri),)
                        for uri in uris]))
+
+    def registerValue(self, name, value):
+        self.registerHeadContent('value: ' + name,
+                                 """
+                                 <script language="javascript">webwidgets_values['%(name)s'] = '%(value)s';</script>
+                                 """ % {'name': name,
+                                        'value': value})
 
     def calculateUrl(self, outputOptions, arguments = None):
         location, generatedArguments = self.session.generateArguments(self.session.getWindow(self.winId))
@@ -605,6 +621,10 @@ class ActionInput(Input):
 
     __inputSubordinates__ = (ValueInput,)
 
+    def registerFieldValue(self, fieldName, value):
+        self.registerValue('fieldValue' + '_' + fieldName, value)
+        return ''
+
     def fieldInput(self, path, stringValue):
         if stringValue != '':
             self.notify('clicked')
@@ -647,6 +667,11 @@ file = open(os.path.join(os.path.dirname(os.path.dirname(__file__)),
 genericStyle = file.read()
 file.close()
 
+file = open(os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                         'Widgets.js'))
+genericScript = file.read()
+file.close()
+
 class HtmlWindow(Window, StaticComposite):
     """HtmlWindow is the main widget for any normal application window
     displaying HTML. It has two children - head and body aswell as
@@ -660,7 +685,14 @@ class HtmlWindow(Window, StaticComposite):
     encoding = 'UTF-8'
     doctype = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
 
-    widgetStyle = genericStyle
+    widgetStyle = {Webwidgets.Constants.FINAL_OUTPUT: genericStyle,
+                   'Content-type': 'text/css',
+                   'Cache-Control': 'public; max-age=3600',
+                   }
+    widgetScript = {Webwidgets.Constants.FINAL_OUTPUT: genericScript,
+                   'Content-type': 'application/x-javascript',
+                   'Cache-Control': 'public; max-age=3600',
+                   }
 
     def output(self, outputOptions):
         result = Window.output(self, outputOptions)

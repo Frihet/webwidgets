@@ -368,28 +368,34 @@ class GBOList(Base.ActionInput, Base.Composite):
         pageActive = self.getActive(self.path + ['_', 'page'])
         if pageActive:
             self.session.windows[self.winId].fields[pageId] = self
+        info = {'attr_html_id': pageId,
+                'first': 1,
+                'previous': self.page - 1,
+                'page': self.page,
+                'pages': self.getPages(),
+                'next': self.page + 1,
+                'last': self.getPages(),
+                'backActive': ['', 'disabled="disabled"'][not pageActive or self.page <= 1],
+                'forwardActive': ['', 'disabled="disabled"'][not pageActive or self.page >= self.getPages()],
+                }
+            
+        self.registerFieldValue("%(attr_html_id)s-_-first" % info, info['first'])            
+        self.registerFieldValue("%(attr_html_id)s-_-previous" % info, info['previous'])            
+        self.registerFieldValue("%(attr_html_id)s-_-next" % info, info['next'])            
+        self.registerFieldValue("%(attr_html_id)s-_-last" % info, info['last'])            
         return """
 <span class="left">
- <button type="submit" %(backActive)s id="%(attr_html_id)s_first" name="%(attr_html_id)s" value="%(first)s">&lt;&lt;</button>
- <button type="submit" %(backActive)s id="%(attr_html_id)s_previous" name="%(attr_html_id)s" value="%(previous)s">&lt;</button>
+ <button type="submit" %(backActive)s id="%(attr_html_id)s-_-first" name="%(attr_html_id)s" value="%(first)s">&lt;&lt;</button>
+ <button type="submit" %(backActive)s id="%(attr_html_id)s-_-previous" name="%(attr_html_id)s" value="%(previous)s">&lt;</button>
 </span>
 <span class="center">
  %(page)s/%(pages)s
 </span>
 <span class="right">
- <button type="submit" %(forwardActive)s id="%(attr_html_id)s_next" name="%(attr_html_id)s" value="%(next)s">&gt;</button>
- <button type="submit" %(forwardActive)s id="%(attr_html_id)s_last" name="%(attr_html_id)s" value="%(last)s">&gt;&gt;</button>
+ <button type="submit" %(forwardActive)s id="%(attr_html_id)s-_-next" name="%(attr_html_id)s" value="%(next)s">&gt;</button>
+ <button type="submit" %(forwardActive)s id="%(attr_html_id)s-_-last" name="%(attr_html_id)s" value="%(last)s">&gt;&gt;</button>
 </span>
-""" % {'attr_html_id': pageId,
-       'first': 1,
-       'previous': self.page - 1,
-       'page': self.page,
-       'pages': self.getPages(),
-       'next': self.page + 1,
-       'last': self.getPages(),
-       'backActive': ['', 'disabled="disabled"'][not pageActive or self.page <= 1],
-       'forwardActive': ['', 'disabled="disabled"'][not pageActive or self.page >= self.getPages()],
-       }
+""" % info
 
     def drawPrintableLink(self, outputOptions):
         location = self.calculateUrl({'widget': Webwidgets.Utils.pathToId(self.path),
@@ -436,6 +442,7 @@ class GBOList(Base.ActionInput, Base.Composite):
 </th>
 """ % info)
             else:
+                self.registerFieldValue("%(attr_html_id)s-_-sort-%(column)s" % info, info['sort'])            
                 headings.append("""
 <th id="%(attr_html_id)s-_-head-%(column)s" class="column %(classes)s">
  <button type="submit" id="%(attr_html_id)s-_-sort-%(column)s" %(disabled)s name="%(attr_html_id)s-_-sort" value="%(sort)s">%(caption)s</button>
@@ -460,12 +467,19 @@ class GBOList(Base.ActionInput, Base.Composite):
                     self.session.windows[self.winId].fields[Webwidgets.Utils.pathToId(self.path + ['_', 'function', function])] = self
             for rowNum in xrange(0, len(rows)):
                 functions = '<td class="functions">%s</td>' % ''.join([
-                    """<button type="submit" class="%(attr_html_class)s" %(disabled)s name="%(attr_html_id)s" value="%(row)s">%(title)s</button>""" % {
-                        'attr_html_id': Webwidgets.Utils.pathToId(self.path + ['_', 'function', function]),
-                        'attr_html_class': function,
-                        'disabled': ['disabled="disabled"', ''][functionActive[function]],
-                        'title': title,
-                        'row':rowNum}
+                    self.registerFieldValue(Webwidgets.Utils.pathToId(self.path + ['_', 'function', function, str(rowNum)]),
+                                            rowNum) +
+                    """<button
+                        type="submit"
+                        id="%(attr_html_id)s-%(row)s"
+                        class="%(attr_html_class)s"
+                        %(disabled)s
+                        name="%(attr_html_id)s"
+                        value="%(row)s">%(title)s</button>""" % {'attr_html_id': Webwidgets.Utils.pathToId(self.path + ['_', 'function', function]),
+                                                                 'attr_html_class': function,
+                                                                 'disabled': ['disabled="disabled"', ''][functionActive[function]],
+                                                                 'title': title,
+                                                                 'row': rowNum}
                     for function, title in self.functions.iteritems()])
                 rows[rowNum].insert(functionPosition, functions)
     

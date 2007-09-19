@@ -140,6 +140,7 @@ class Button(Base.ActionInput):
 
     def draw(self, outputOptions):
         super(Button, self).draw(outputOptions)
+        self.registerFieldValue(self.html_id, self.title)
         return '<input %(attr_htmlAttributes)s type="submit" %(disabled)s name="%(name)s" value="%(title)s" />' % {
             'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
             'name': Webwidgets.Utils.pathToId(self.path),
@@ -259,15 +260,9 @@ class FileInput(Base.ValueInput, Base.StaticComposite):
         if path == self.path:
             if fieldValue != '':
                 self.value = fieldValue
-        elif path == self.path + ['_', 'clear']:
-            if fieldValue != '':
-                self.value = None
                 
     def fieldOutput(self, path):
-        if path == self.path:
-            return [self.value]
-        elif path == self.path + ['_', 'clear']:
-            return ''
+        return [self.value]
 
     class preview(Formatting.Media):
         class Content(object):
@@ -276,6 +271,13 @@ class FileInput(Base.ValueInput, Base.StaticComposite):
                     return None
                 return instance.parent.value
         content = Content()
+
+    class clear(Button):
+        title = 'Clear'
+        def clicked(self, path):
+            self.parent.value = None
+        def getActive(self, path):
+            return self.parent.getActive(path[:-1]) and self.parent.value != None
         
     def output(self, outputOptions):
         res = {Webwidgets.Constants.OUTPUT: self.value.file.read(),
@@ -292,16 +294,16 @@ class FileInput(Base.ValueInput, Base.StaticComposite):
                 argumentName = self.argumentName
                 if argumentName: argumentName = argumentName + '_clear'
                 self.registerInput(self.path + ['_', 'clear'], argumentName)
+
+        result = self.drawChildren(outputOptions, includeAttributes = True)
+        result['disabled'] = ['', 'disabled="disabled"'][not self.getActive(self.path)],
+        result['clearable'] = ['', 'disabled="disabled"'][not self.getActive(self.path) or self.value is None],
+
         return """<span %(attr_htmlAttributes)s>
-                   %(current)s
+                   %(preview)s
                    <input type="file" name="%(attr_html_id)s" %(disabled)s id="%(attr_html_id)s-_-input" />
-                   <input type='submit' name="%(attr_html_id)s-_-clear" %(clearable)s id="%(attr_html_id)s-_-clear" value="Clear" />
-                  </span>""" % {
-                       'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
-                       'current': self.drawChild(self.path + ['preview'], self['preview'], outputOptions, True),
-                       'disabled': ['', 'disabled="disabled"'][not self.getActive(self.path)],
-                       'clearable': ['', 'disabled="disabled"'][not self.getActive(self.path) or self.value is None],
-                       'attr_html_id': Webwidgets.Utils.pathToId(self.path)}
+                   %(clear)s
+                  </span>""" % result
 
 class ToggleButton(Base.ValueInput, Button):
     """
