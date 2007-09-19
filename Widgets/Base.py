@@ -292,10 +292,8 @@ class Widget(object):
 
     def registerValue(self, name, value):
         self.registerHeadContent('value: ' + name,
-                                 """
-                                 <script language="javascript">webwidgets_values['%(name)s'] = '%(value)s';</script>
-                                 """ % {'name': name,
-                                        'value': value})
+                                 """<script language="javascript">webwidgets_values['%(name)s'] = '%(value)s';</script>""" % {'name': name,
+                                                                                                                              'value': value})
 
     def calculateUrl(self, outputOptions, arguments = None):
         location, generatedArguments = self.session.generateArguments(self.session.getWindow(self.winId))
