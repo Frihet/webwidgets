@@ -140,7 +140,6 @@ class Button(Base.ActionInput):
 
     def draw(self, outputOptions):
         super(Button, self).draw(outputOptions)
-        self.registerFieldValue(self.html_id, self.title)
         return '<input %(attr_htmlAttributes)s type="submit" %(disabled)s name="%(name)s" value="%(title)s" />' % {
             'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
             'name': Webwidgets.Utils.pathToId(self.path),

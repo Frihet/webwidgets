@@ -28,7 +28,7 @@ generic base classes that can be used when implementing more elaborate
 widgets.
 """
 
-import types, xml.sax.saxutils, os.path, cgi
+import types, xml.sax.saxutils, os.path, cgi, re
 import Webwidgets.Utils, Webwidgets.Constants
 
 debugNotifications = False
@@ -619,10 +619,6 @@ class ActionInput(Input):
 
     __inputSubordinates__ = (ValueInput,)
 
-    def registerFieldValue(self, fieldName, value):
-        self.registerValue('fieldValue' + '_' + fieldName, value)
-        return ''
-
     def fieldInput(self, path, stringValue):
         if stringValue != '':
             self.notify('clicked')
@@ -692,6 +688,10 @@ class HtmlWindow(Window, StaticComposite):
                    'Cache-Control': 'public; max-age=3600',
                    }
 
+    findallvalues = re.compile(
+        r"""(id=["']([^"'<>]*)["'][^<>]*value=["']([^"'<>]*)["'])|(value=["']([^"'<>]*)["'][^<>]*id=["']([^"'<>]*)["'])""",
+        re.MULTILINE)
+
     def output(self, outputOptions):
         result = Window.output(self, outputOptions)
         result['Content-Type'] = 'text/html; charset=%(encoding)s' % {'encoding': self.encoding}
@@ -716,7 +716,10 @@ class HtmlWindow(Window, StaticComposite):
         result['uri'] = cgi.escape(self.session.program.request()._environ['REQUEST_URI'])
         result['name'] = result['id'] = Webwidgets.Utils.pathToId(self.path)
         result['base'] = self.session.program.requestBase()
-        
+
+        for (all1, name1, value1, all2, value2, name2) in self.findallvalues.findall(result['body']):
+            self.registerValue('fieldValue' + '_' + (name1 or name2), (value1 or value2))
+
         result['headContent'] = '\n'.join(self.headContent.values())
         
         return ("""

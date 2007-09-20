@@ -165,7 +165,6 @@ class Tree(Base.Input):
             if node.leaf:
                 self.registerInput(selectParams['imgPath'])
                 self.registerInput(selectParams['labelPath'])
-                self.registerFieldValue(selectParams['labelId'], selectParams['labelText'])
                 res += ('<input type="image" name="%(imgId)s" value="%(imgId)s" src="%(imgSrc)s" alt="%(imgAlt)s" id="%(imgId)s" />' +
                         '<input type="submit" name="%(labelId)s" value="%(labelText)s" id="%(labelId)s" />') % selectParams
             else:
@@ -233,8 +232,7 @@ class TabbedView(Base.ActionInput, Base.StaticComposite):
         active = self.registerInput(self.path, self.argumentName)
 
         widgetId = Webwidgets.Utils.pathToId(self.path)
-        tabs = '\n'.join([self.registerFieldValue(widgetId + '_' + page, page) +
-                          """
+        tabs = '\n'.join(["""
                           <li><button
                                type="submit"
                                %(disabled)s

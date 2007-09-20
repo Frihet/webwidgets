@@ -379,10 +379,6 @@ class GBOList(Base.ActionInput, Base.Composite):
                 'forwardActive': ['', 'disabled="disabled"'][not pageActive or self.page >= self.getPages()],
                 }
             
-        self.registerFieldValue("%(attr_html_id)s-_-first" % info, info['first'])            
-        self.registerFieldValue("%(attr_html_id)s-_-previous" % info, info['previous'])            
-        self.registerFieldValue("%(attr_html_id)s-_-next" % info, info['next'])            
-        self.registerFieldValue("%(attr_html_id)s-_-last" % info, info['last'])            
         return """
 <span class="left">
  <button type="submit" %(backActive)s id="%(attr_html_id)s-_-first" name="%(attr_html_id)s" value="%(first)s">&lt;&lt;</button>
@@ -442,7 +438,6 @@ class GBOList(Base.ActionInput, Base.Composite):
 </th>
 """ % info)
             else:
-                self.registerFieldValue("%(attr_html_id)s-_-sort-%(column)s" % info, info['sort'])            
                 headings.append("""
 <th id="%(attr_html_id)s-_-head-%(column)s" class="column %(classes)s">
  <button type="submit" id="%(attr_html_id)s-_-sort-%(column)s" %(disabled)s name="%(attr_html_id)s-_-sort" value="%(sort)s">%(caption)s</button>
@@ -467,8 +462,6 @@ class GBOList(Base.ActionInput, Base.Composite):
                     self.session.windows[self.winId].fields[Webwidgets.Utils.pathToId(self.path + ['_', 'function', function])] = self
             for rowNum in xrange(0, len(rows)):
                 functions = '<td class="functions">%s</td>' % ''.join([
-                    self.registerFieldValue(Webwidgets.Utils.pathToId(self.path + ['_', 'function', function, str(rowNum)]),
-                                            rowNum) +
                     """<button
                         type="submit"
                         id="%(attr_html_id)s-%(row)s"
