@@ -290,6 +290,30 @@ class Widget(object):
             '\n'.join(["<link href='%s' rel='stylesheet' type='text/css' />" % (cgi.escape(uri),)
                        for uri in uris]))
 
+    def registerScript(self, name, script):
+        self.registerHeadContent(
+            name,
+            "<script language='javascript'>%s</script>" % (script,))
+
+    def registerStyle(self, name, style):
+        self.registerHeadContent(
+            name,
+            "<style>%s</style>" % (style,))
+
+    def registerSubmitAction(self, path, event):
+        info = {'id': Webwidgets.Utils.pathToId(path),
+                'event': event}
+        self.registerScript('submitAction: %(id)s: %(event)s' % info,
+                            """
+                            webwidgets_add_event_handler_once_loaded(
+                             '%(id)s',
+                             '%(event)s',
+                             'webwidgets_submit_action',
+                             function () {
+                              document.getElementById('root-_-body-form').submit();
+                             });
+                            """ % info)
+
     def registerValue(self, name, value):
         self.registerHeadContent('value: ' + name,
                                  """<script language="javascript">webwidgets_values['%(name)s'] = '%(value)s';</script>""" % {'name': name,

@@ -146,6 +146,31 @@ class Button(Base.ActionInput):
             'title': self.title,
             'disabled': ['', 'disabled="disabled"'][not self.getActive(self.path)]}
 
+class UpdateButton(Base.ActionInput):
+    """This is a special kind of button that only submits the form and
+    causes other widgets to get their input. In addition, it
+    dissapears if JavaScript is enabled. It is intended to be used in
+    conjunction with registerSubmitAction() on other widgets."""
+
+    def draw(self, outputOptions):
+        Base.ActionInput.draw(self, outputOptions)
+        info = {'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
+                'id': Webwidgets.Utils.pathToId(self.path),
+                'title': self.title,
+                'disabled': ['', 'disabled="disabled"'][not self.getActive(self.path)]}
+        self.registerScript('updateButton: %(id)s' % info,
+                            """
+                            webwidgets_add_event_handler(window, 'load',
+                             'webwidgets_update_button: %(id)s',
+                             function () {
+                              document.getElementById('%(id)s').style.display = 'none';
+                             });
+                            """ % info)
+        return '<input %(attr_htmlAttributes)s type="submit" %(disabled)s name="%(id)s" value="Update" />' % info
+
+    def fieldInput(self, path, stringValue):
+        pass
+
 class RadioButtonGroup(Base.ValueInput):
     """Group of radio buttons must be joined together. This is
     performed by setting the 'group' attribute on each of the
