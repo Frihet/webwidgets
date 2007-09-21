@@ -14,7 +14,7 @@ class TextFileEditor(Input.StringInput):
             self.value = cgi.FieldStorage()
             self.value.filename = '%s file' % (self.mimeType,)
         if hasattr(self.value, 'original'):
-            del self.value.origional
+            del self.value.original
         self.value.type = self.mimeType
         if self.value.file is None:
             self.value.file = self.value.make_file()

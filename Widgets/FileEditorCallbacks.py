@@ -41,6 +41,10 @@ class FileEditor(object):
     class editors(object):
         class text__css(object):
             value = Value()
+        class text__plain(object):
+            value = Value()
+        class text__html(object):
+            value = Value()
         class default(object):
             content = Value()
         def pageChanged(self, path, page):
