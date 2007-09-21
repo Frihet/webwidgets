@@ -20,6 +20,12 @@ class FileEditor(object):
     value = None
     error = None
 
+    def mimeTypeToMethod(self, mimeType):
+        return mimeTypeToMethod(mimeType)
+    
+    def methodToMimeType(self, mimeType):
+        return methodToMimeType(mimeType)
+
     class name(object):
         class field(object):
             class Value(object):

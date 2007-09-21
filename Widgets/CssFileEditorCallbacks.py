@@ -20,6 +20,8 @@ class CssFileEditor(object):
                 cssEditor = instance.parent
                 if cssEditor.value is None:
                     cssEditor.value = cgi.FieldStorage()
+                if hasattr(cssEditor.value, 'original'):
+                    del cssEditor.value.origional
                 cssEditor.value.type ='text/css'
                 cssEditor.value.filename = 'CSS-file'
                 if cssEditor.value.file is None:
