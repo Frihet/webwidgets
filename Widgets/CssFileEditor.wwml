@@ -24,7 +24,7 @@
  bind="Webwidgets.Widgets.CssFileEditorCallbacks">
  >
  <w:Html id="CssFileEditor" topLevel="div">
-  <div><w:StringInput id="input" cols=":integer:40" rows=":integer:15" /></div>
+  <div><w:TextFileEditor id="input" mimeType="text/css" /></div>
   <div><w:Button id="update" title="Update" /></div>
   <div><w:Media id="preview" /></div>
  </w:Html>

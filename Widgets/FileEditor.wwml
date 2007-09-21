@@ -31,6 +31,8 @@
 
   <w:TabbedView id="editors" page="none">
    <w:Html id="none" title="No file">No file created or uploaded</w:Html>
+   <w:TextFileEditor id="text__plain" mimeType="text/plain" title="Plain text" />
+   <w:TextFileEditor id="text__html" mimeType="text/html" title="HTML document" />
    <w:CssFileEditor id="text__css" title="CSS stylesheet" />
    <w:Media id="default" title="All files" visible=":false">
     <w:Media.types id="types">

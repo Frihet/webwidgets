@@ -56,5 +56,6 @@ from Widgets.GBOList import *
 from Widgets.InputCombinations import *
 from Widgets.DateInput import *
 from Widgets.LogIn import *
+from Widgets.TextFileEditor import *
 from Widgets.CssFileEditor import *
 from Widgets.FileEditor import *
