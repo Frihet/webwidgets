@@ -49,17 +49,18 @@ class FileEditor(object):
                 if page == 'none':
                     self.parent.value = None
                 else:
-                    if self.parent.value is None:
-                        if self.parent.value is None:
-                            self.parent.value = cgi.FieldStorage()
                     mimeType = methodToMimeType(page)
-                    if mimeType != self.parent.value.type:
-                        self.parent.value.type = mimeType
-                        if self.parent.value.file is None:
-                            self.parent.value.file = self.parent.value.make_file()
-                        self.parent.value.file.seek(0)
-                        self.parent.value.file.truncate()
-                        self.parent.value.filename = "new %s file" % mimeType
+                    value = self.parent.value
+                    if value is None or mimeType != value.type:
+                        if value is None:
+                            value = cgi.FieldStorage()
+                        value.type = mimeType
+                        if value.file is None:
+                            value.file = value.make_file()
+                        value.file.seek(0)
+                        value.file.truncate()
+                        value.filename = "new %s file" % mimeType
+                        self.parent.value = value
             
     class upload(object):
         class action(object):
