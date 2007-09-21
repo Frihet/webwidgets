@@ -257,8 +257,15 @@ def loadClass(name, using = [], imp = None, globalDict = None, localDict = None,
             del prefix[-1]
         if mod is None:
             raise ImportError("Class does not exist:", name, using, file)
-        for comp in components[1:]:
-            mod = getattr(mod, comp)
+        for component in components[1:]:
+            dictComponents = []
+            if '-' in component:
+                dictComponents = component.split('-')
+                component = dictComponents[0]
+                del dictComponents[0]
+            mod = getattr(mod, component)
+            for dictComponent in dictComponents:
+                mod = mod[dictComponent]
         return mod
 
     for pkg in using:
@@ -271,3 +278,12 @@ def loadClass(name, using = [], imp = None, globalDict = None, localDict = None,
     except (ImportError, AttributeError), e:
         if debugClassLoading: print "loadClass:         %s" % str(e)
         raise ImportError("Class does not exist:", name, using, file)
+
+def subclassDict(superdict, members):
+    res = type(superdict)(superdict)
+    res.update(members)
+    return res
+
+def subclassList(superlist, members):
+    return superlist + members
+

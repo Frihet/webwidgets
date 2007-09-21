@@ -34,9 +34,9 @@ class CssFileEditor(object):
 
     class preview(object):
         types = dict(Formatting.Media.types)
-        types[None] = dict(types[None])
-        types[None]['width'] = None
-        types[None]['height'] = None
+        types['default'] = dict(types['default'])
+        types['default']['width'] = None
+        types['default']['height'] = None
 
         class Content(object):
             def __get__(self, instance, owner):

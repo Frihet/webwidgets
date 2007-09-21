@@ -149,12 +149,12 @@ class Media(Base.Widget):
 </html>
 """)
 
-    types = {None:{'width':None,  # All
-                   'height':None,
-                   'empty': '&lt;No file&gt;',
-                   'inline':True,
-                   'merge':False,
-                   'invisible':False},
+    types = {'default':{'width':None,  # All
+                        'height':None,
+                        'empty': '&lt;No file&gt;',
+                        'inline':True,
+                        'merge':False,
+                        'invisible':False},
              'image/png':{'inline':True},
              'image/jpeg':{'inline':True},
              'image/gif':{'inline':True},
@@ -162,10 +162,10 @@ class Media(Base.Widget):
              'text/html':{'inline':True, 'merge':False, 'invisible':False}}
 
     def getOption(self, option):
-        mimeType = getattr(self.content, 'type', None)
-        if type in self.types and option in self.types[mimeType]:
+        mimeType = getattr(self.content, 'type', 'default')
+        if mimeType in self.types and option in self.types[mimeType]:
             return self.types[mimeType][option]
-        return self.types[None][option]
+        return self.types['default'][option]
 
     def getHtmlOption(self, option, htmlName = None):
         value = self.getOption(option)

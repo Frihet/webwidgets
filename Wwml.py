@@ -167,43 +167,54 @@ def generateValueForNode(module, node, using = [], context = []):
         if debugSubclass:
             print "WWML: class %s(%s): pass" % (callbackName, node.localName)
             print "WWML:     using: %s" % ' '.join(using)
-        widgetCls = Utils.loadClass(node.localName, using, module = module)
-        baseCls = ()
-        try:
-            baseCls += (Utils.loadClass(callbackName, using, module = module),)
-        except ImportError, e:
-            pass
-        baseCls += (widgetCls,)
+        nodeValue = Utils.loadClass(node.localName, using, module = module)
+        if isinstance(nodeValue, types.TypeType) and issubclass(nodeValue, Webwidgets.Widgets.Base.Widget):
+            baseCls = ()
+            try:
+                baseCls += (Utils.loadClass(callbackName, using, module = module),)
+            except ImportError, e:
+                pass
+            baseCls += (nodeValue,)
 
-        if 'html' not in attributes and hasattr(widgetCls, '__wwml_html_override__') and widgetCls.__wwml_html_override__:
-            attributes['html'] = text
-        if getattr(widgetCls, '__args_children__', False):
-            __children__ = ()
-            for cls in baseCls:
-                __children__ = getattr(cls, '__children__', __children__)
-            __children__ = attributes.get('__children__', __children__)
-            __children__ = list(__children__)
-            for name, value in attributes.iteritems():
-                if isinstance(value, type) and issubclass(value, Webwidgets.Widgets.Base.Widget) and not value.__explicit_load__:
-                    if name not in __children__:
-                        __children__.append(name)
-            attributes['__children__'] = tuple(__children__)
-        if 'id' not in attributes:
-            attributes['__explicit_load__'] = True
-        if '__wwml_html_override__' not in attributes:
-            attributes['__wwml_html_override__'] = False
-        attributes['__module__'] = '.'.join(context[:-1])
-        #print baseCls
-        try:
-            value = types.TypeType(str(attributes['classid']),
-                                   baseCls,
-                                   attributes)
-        except TypeError, e:
-            raise TypeError("Unable to instantiate widget in %s: %s(%s): %s" % (
-                module,
-                str(attributes['classid']),
-                ', '.join([str(cls) for cls in baseCls]),
-                str(e)))
+            if 'html' not in attributes and hasattr(nodeValue, '__wwml_html_override__') and nodeValue.__wwml_html_override__:
+                attributes['html'] = text
+            if getattr(nodeValue, '__args_children__', False):
+                __children__ = ()
+                for cls in baseCls:
+                    __children__ = getattr(cls, '__children__', __children__)
+                __children__ = attributes.get('__children__', __children__)
+                __children__ = list(__children__)
+                for name, value in attributes.iteritems():
+                    if isinstance(value, type) and issubclass(value, Webwidgets.Widgets.Base.Widget) and not value.__explicit_load__:
+                        if name not in __children__:
+                            __children__.append(name)
+                attributes['__children__'] = tuple(__children__)
+            if 'id' not in attributes:
+                attributes['__explicit_load__'] = True
+            if '__wwml_html_override__' not in attributes:
+                attributes['__wwml_html_override__'] = False
+            attributes['__module__'] = '.'.join(context[:-1])
+            #print baseCls
+            try:
+                value = types.TypeType(str(attributes['classid']),
+                                       baseCls,
+                                       attributes)
+            except TypeError, e:
+                raise TypeError("Unable to instantiate widget in %s: %s(%s): %s" % (
+                    module,
+                    str(attributes['classid']),
+                    ', '.join([str(cls) for cls in baseCls]),
+                    str(e)))
+        elif hasattr(nodeValue, '__iter__'):
+            value = dict(attributes)
+            if 'classid' in value: del value['classid']
+            if 'id' in value: del value['id']
+            if hasattr(nodeValue, 'iteritems'):
+                value = Utils.subclassDict(nodeValue, value)
+            else:
+                value = Utils.subclassList(nodeValue, value.values())
+        else:
+            value = nodeValue
         
     return attributes.get('id', None), attributes.get('classid', None), value
 
