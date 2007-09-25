@@ -25,11 +25,15 @@
  >
 
  <w:Html id="FileEditor" topLevel="div">
-  <w:Field id="name" label="Filename">
-   <w:StringInput id="field" />
-  </w:Field>
+  <div class="top">
+   <w:Field id="name" label="Filename">
+    <w:StringInput id="field" />
+   </w:Field>
 
-  <w:TabbedView id="editors" page="none">
+   <w:ToggleButton id="hide" falseTitle="Edit file" trueTitle="Hide editor" />
+  </div>
+
+  <w:TabbedView id="editors" page="none" visible=":false">
    <w:Html id="none" title="No file">No file created or uploaded</w:Html>
    <w:TextFileEditor id="text__plain" mimeType="text/plain" title="Plain text" />
    <w:TextFileEditor id="text__html" mimeType="text/html" title="HTML document" />
@@ -44,7 +48,7 @@
    </w:Media>
   </w:TabbedView>
 
-  <w:Html id="upload" topLevel="div">
+  <w:Html id="upload" topLevel="div" visible=":false">
    <w:Label id="fileLabel" target="1/file" label="Upload file" />
    <w:FileInput id="file">
     <w:Html id="preview" />

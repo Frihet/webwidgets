@@ -335,7 +335,10 @@ class ToggleButton(Base.ValueInput, Button):
     rendered as a normal button, and instantly cause a page-load when
     clicked, just as a Button.
     """
+    __attributes__ = Base.ValueInput.__attributes__ + ('trueTitle', 'falseTitle')
 
+    trueTitle = 'True'
+    falseTitle = 'False'
     value=False
 
     class HtmlClass(object):
@@ -346,6 +349,13 @@ class ToggleButton(Base.ValueInput, Button):
         def __set__(self, instance, value):
             self.value = value
     html_class = HtmlClass()
+
+    class Title(object):
+        def __get__(self, instance, owner):
+            if instance.value:
+                return instance.trueTitle
+            return instance.falseTitle
+    title = Title()
 
     def __init__(self,session,winId,**attrs):
         setattr(type(self), 'html_class', self.HtmlClass())

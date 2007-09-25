@@ -276,17 +276,13 @@ input.error {
  display: block;
 }
 
-.Webwidgets-Widgets-FileEditorCallbacks-FileEditor {
- border: 1px solid black;
- display: table;
-}
-
 .Webwidgets-Widgets-Formatting-Fieldgroup {
  display: table;
  border-bottom: 1px solid black;
  padding: 5pt;
  margin-bottom: 10pt;
 }
+
 .Webwidgets-Widgets-Formatting-Field {
  display: table-row;
 }
@@ -294,4 +290,13 @@ input.error {
  display: table-cell;
  vertical-align: top;
  text-align: left;
+}
+
+.Webwidgets-Widgets-FileEditorCallbacks-FileEditor {
+ border: 1px solid black;
+ display: table;
+}
+
+.Webwidgets-Widgets-FileEditorCallbacks-FileEditor-editors {
+ border-top: 1px solid #000000;
 }

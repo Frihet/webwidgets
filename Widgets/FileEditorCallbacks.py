@@ -38,6 +38,10 @@ class FileEditor(object):
                         instance.parent.parent.value.filename = value
             value = Value()
 
+    class hide(object):
+        def valueChanged(self, path, value):
+            self.parent['editors'].visible = self.parent['upload'].visible = value
+
     class editors(object):
         class text__css(object):
             value = Value()

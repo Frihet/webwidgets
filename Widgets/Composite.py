@@ -274,7 +274,8 @@ class Hide(Base.StaticComposite):
     """
 
     class hideButton(Input.ToggleButton):
-        title="Show/hide"
+        trueTitle = "Hide"
+        falseTitle = "Show"
 
     def draw(self, path):
         self['child'].visible = self['hideButton'].value
