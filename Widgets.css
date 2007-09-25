@@ -280,3 +280,18 @@ input.error {
  border: 1px solid black;
  display: table;
 }
+
+.Webwidgets-Widgets-Formatting-Fieldgroup {
+ display: table;
+ border-bottom: 1px solid black;
+ padding: 5pt;
+ margin-bottom: 10pt;
+}
+.Webwidgets-Widgets-Formatting-Field {
+ display: table-row;
+}
+.Webwidgets-Widgets-Formatting-Field > *{
+ display: table-cell;
+ vertical-align: top;
+ text-align: left;
+}

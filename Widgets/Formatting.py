@@ -312,7 +312,6 @@ class Label(Base.StaticComposite):
         </label>""" % res
 
 class Field(Label):
-    __no_classes_name__ = True
     __wwml_html_override__ = False
     __children__ = Label.__children__ + ('field',)
     
