@@ -53,7 +53,7 @@ class DateInput(Input.StringInput):
                                                    'type': 'text/plain'},
                                                   {}))
 
-        return '''<input %(attr_htmlAttributes)s name="%(name)s" value="%(value)s" autocomplete="off" />
+        return '''<input %(attr_htmlAttributes)s name="%(name)s" value="%(value)s" autocomplete="off" %(disabled)s />
        <script type="text/javascript">
          Calendar.setup(
            {
