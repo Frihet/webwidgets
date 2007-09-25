@@ -345,7 +345,7 @@ class Widget(object):
     def __unicode__(self):
         return "<%(module)s.%(name)s/%(path)s at %(id)s>" % {'module': type(self).__module__,
                                                              'name': type(self).__name__,
-                                                             'path': self.path,
+                                                             'path': Webwidgets.Utils.pathToId(self.path),
                                                              'id': id(self)}
 
     def __str__(self):

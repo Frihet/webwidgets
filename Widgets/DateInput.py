@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import time, os.path
+import datetime, time, os.path
 import Webwidgets.Utils
 import Input
 
@@ -28,7 +28,7 @@ class DateInput(Input.StringInput):
     """
     __attributes__ = Input.StringInput.__attributes__ + ('format',)
     format = '%Y-%m-%d'
-    value = time.localtime()
+    value = datetime.datetime.now()
 
     def draw(self, outputOptions):
         """
@@ -74,13 +74,13 @@ class DateInput(Input.StringInput):
 
     def fieldInput(self, path, stringValue):
         try:
-            self.value = time.strptime(stringValue, self.format)
+            self.value = datetime.datetime(*(time.strptime(stringValue, self.format)[0:6]))
         except ValueError:
             self.error = 'Invalid date format, expected %s got %s' \
                 % (self.format, stringValue)
                 
     def fieldOutput(self, path):
-        return [time.strftime(self.format, self.value)]
+        return [self.value.strftime(self.format)]
 
     def classOutput(cls, window, outputOptions):
         path = outputOptions['file']
