@@ -74,12 +74,17 @@ class DateInput(Input.StringInput):
 
     def fieldInput(self, path, stringValue):
         try:
-            self.value = datetime.datetime(*(time.strptime(stringValue, self.format)[0:6]))
+            if stringValue == '':
+                self.value = None
+            else:
+                self.value = datetime.datetime(*(time.strptime(stringValue, self.format)[0:6]))
         except ValueError:
             self.error = 'Invalid date format, expected %s got %s' \
                 % (self.format, stringValue)
                 
     def fieldOutput(self, path):
+        if self.value is None:
+            return ['']
         return [self.value.strftime(self.format)]
 
     def classOutput(cls, window, outputOptions):
