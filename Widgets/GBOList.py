@@ -156,13 +156,14 @@ class GBOList(Base.ActionInput, Base.Composite):
     
     __attributes__ = Base.Composite.__attributes__ + (
         'dependentColumns', 'columns', 'dependentColumns',
-        'functions', 'disabledFunctions', 'functionPosition',
+        'functions', 'groupFunctions', 'disabledFunctions', 'functionPosition',
         'sort', 'rows', 'page', 'pages', 'rowsPerPage',
         'nonMemoryStorage', 'dontMergeWidgets', 'dontMergeColumns')
     columns = {}
     argumentName = None
     dependentColumns = {}
     functions = {}
+    groupFunctions = {}
     disabledFunctions = []
     functionPosition = 0
     sort = []
@@ -184,6 +185,9 @@ class GBOList(Base.ActionInput, Base.Composite):
 
     def function(self, path, function, row):
         raise Exception('%s: Function %s not implemented (called for row %s)' % (Webwidgets.Utils.pathToId(path), function, row))
+
+    def groupFunction(self, path, function):
+        raise Exception('%s: Function %s not implemented' % (Webwidgets.Utils.pathToId(path), function))
 
     def reread(self):
         """Reload the list after a repaging/resorting here. This is
@@ -260,6 +264,9 @@ class GBOList(Base.ActionInput, Base.Composite):
         elif subWidget[0] == 'function':
             if stringValue != '':
                 self.notify('function', subWidget[1], int(stringValue))
+        elif subWidget[0] == 'groupFunction':
+            if stringValue != '':
+                self.notify('groupFunction', subWidget[1])
     
     def fieldOutput(self, path):
         widgetPath = self.path
@@ -270,6 +277,8 @@ class GBOList(Base.ActionInput, Base.Composite):
         elif subWidget == ['page']:
             return [unicode(self.page)]
         elif subWidget[0] == 'function':
+            return []
+        elif subWidget[0] == 'groupFunction':
             return []
         else:
             raise Exception('Unknown sub-widget %s in %s' %(subWidget, widgetPath))
@@ -288,6 +297,9 @@ class GBOList(Base.ActionInput, Base.Composite):
         elif subWidget[0] == 'column':
             return self.session.AccessManager(Webwidgets.Constants.VIEW, self.winId, path)
         elif subWidget[0] == 'function':
+            if subWidget[1] in self.disabledFunctions: return False
+            return self.session.AccessManager(Webwidgets.Constants.EDIT, self.winId, path)
+        elif subWidget[0] == 'groupFunction':
             if subWidget[1] in self.disabledFunctions: return False
             return self.session.AccessManager(Webwidgets.Constants.EDIT, self.winId, path)
         else:
@@ -400,16 +412,40 @@ class GBOList(Base.ActionInput, Base.Composite):
             'location': cgi.escape(location),
             }
 
+    def drawGroupFunctions(self, outputOptions):
+        functionActive = {}
+        for function in self.groupFunctions:
+            functionActive[function] = self.getActive(self.path + ['_', 'groupFunction', function])
+
+        for function in self.groupFunctions:
+            if functionActive[function]:
+                self.session.windows[self.winId].fields[Webwidgets.Utils.pathToId(self.path + ['_', 'groupFunction', function])] = self
+
+        return '\n'.join([
+            """<button
+                type="submit"
+                id="%(attr_html_id)s"
+                class="%(attr_html_class)s"
+                %(disabled)s
+                name="%(attr_html_id)s"
+                value="selected">%(title)s</button>""" % {'attr_html_id': Webwidgets.Utils.pathToId(self.path + ['_', 'groupFunction', function]),
+                                                          'attr_html_class': function,
+                                                          'disabled': ['disabled="disabled"', ''][functionActive[function]],
+                                                          'title': title}
+            for function, title in self.groupFunctions.iteritems()])
+
     def drawButtons(self, outputOptions):
         if 'printableVersion' in outputOptions:
             return ''
         return """
 <div class="buttons">
  %(pagingButtons)s
- %(printableLink)s 
+ %(printableLink)s
+ %(groupFunctions)s
 </div>
 """ % {'pagingButtons': self.drawPagingButtons(outputOptions),
-       'printableLink': self.drawPrintableLink(outputOptions)}
+       'printableLink': self.drawPrintableLink(outputOptions),
+       'groupFunctions': self.drawGroupFunctions(outputOptions)}
 
     def drawHeadings(self, visibleColumns, reverseDependentColumns, outputOptions):
         if self.argumentName:
