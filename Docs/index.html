@@ -1,6 +1,10 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
  <head>
-  <style>
+  <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+  <title>Webwidgets documentation</title>
+  <style type="text/css">
    h1 {
     font-variant: small-caps;
     font-size: 18pt;
@@ -23,6 +27,11 @@
    p.intro {
     font-style: italic;
     padding-left: 1em;
+   }
+
+   p.comment {
+    font-style: italic;
+    color: #FF0000;
    }
 
    p.rationale {
@@ -58,8 +67,7 @@
 
 
 
-  <a name="copyright">
-  <h1>Copyright</h1>
+  <h1><a name="copyright" />Copyright</h1>
   <div>Webwidgets documentation</div>
   <div>Copyright (C) 2007 FreeCode AS, Egil Moeller &lt;egil.moller@freecode.no&gt;</div>
   <div>Copyright (C) 2007 FreeCode AS, Egil Moeller &lt;redhog@redhog.org&gt;</div>
@@ -79,20 +87,24 @@
 
 
 
-  <a name="installation" />
-  <h1>Installation</h1>
-  <p class="intro">This part help you install Webwidgets and test that
+  <h1><a name="installation" />Installation</h1>
+  <p class="intro">This part helps you install Webwidgets and test that
   it works correctly</p>
 
-  <p>Webwidgets dependes on Webware, and the first step of the
-  installation is to install Webware. Although installing Webware is
-  over half the work of setting up Webwidgets, guiding you through
-  that installation process is out of scope of this documentation.</p>
+  <p>Webwidgets depends on the Python library <a
+  href="http://www.webwareforpython.org/">Webware</a>, and the first
+  step of the installation is to install <a
+  href="http://www.webwareforpython.org/">Webware</a>. Although
+  installing Webware is more than half of the work of setting up
+  Webwidgets, guiding you through that installation process is out of
+  the scope of this documentation.</p>
 
   <p>For the rest of this guide, we will assume that you have
-  installed Webware and that you have prepared a Webware workdir under
-  <tt>/var/www/WebWare</tt>, accessible through Apache and mod_webkit
-  at <tt>http://example.com/WKMod</tt>.</p>
+  installed <a href="http://www.webwareforpython.org/">Webware</a> and
+  that you have prepared a <a
+  href="http://www.webwareforpython.org/">Webware</a> working
+  directory at <tt>/var/www/WebWare</tt>, accessible using Apache
+  and mod_webkit at <tt>http://example.com/WKMod</tt>.</p>
 
   <p>Python modules must be installed in a directory in the python
   path. By default, only the directory
@@ -101,17 +113,17 @@
   <tt>PYTHONPATH</tt> environment variable. The second step is thus to
   unpack <tt>Webwidgets.$VERSION.tgz</tt> under
   <tt>/usr/lib/python$#PYTONVERSION/site-packages</tt>, or anywhere
-  along the python path.</p>
+  else in the python path.</p>
 
-  <p>There are several Webwidgets test applications available under
-  the Tests subdirectory of the Webwidgets directory. To use these,
-  the whole Webwidgets directory must be made available as a Webware
-  context. To install this directory as a context, add the following
-  line to the file
-  <tt>/var/www/WebWare/Configs/Application.config</tt>:</p>
+  <p>There are several Webwidgets examples available in
+  the Tests subdirectory of the Webwidgets directory. To use these
+  without modification, the whole Webwidgets directory must be made
+  available as a Webware context. To install this directory as a
+  context, add the following line to the file
+  <tt>/var/www/WebWare/Configs/Application.config</tt>:</p> 
 
   <blockquote><pre>
-Contexts['Webwidgets'] = '/usr/lib/python$#PYTONVERSION/site-packages/Webwidgets'</tt>
+Contexts['Webwidgets'] = '/usr/lib/python$#PYTONVERSION/site-packages/Webwidgets'
   </pre></blockquote>
 
   <p>After the context has been installed, restart the app server,
@@ -127,14 +139,13 @@ Contexts['Webwidgets'] = '/usr/lib/python$#PYTONVERSION/site-packages/Webwidgets
 
 
 
-  <a name="introduction" />
-  <h1>Introduction to Webwidgets</h1>
+  <h1><a name="introduction" />Introduction to Webwidgets</h1>
   <p class="intro">This part will guide you through creating your
   first Webwidgets application. It assumes you have already
-  successfully installed Webware and Webwidgets and tested that it all
-  works.</p>
+  successfully installed Webware and Webwidgets and tested that it
+  works as expected.</p>
 
-  <p>A webwidgets application is itself a Webware page, and each
+  <p>A Webwidgets application is in itself a Webware page and each
   Webware page must reside in some Webware context. So the first step
   of creating a Webwidgets application would be to create a Webware
   context: First create the directory
@@ -143,27 +154,27 @@ Contexts['Webwidgets'] = '/usr/lib/python$#PYTONVERSION/site-packages/Webwidgets
   <tt>/var/www/WebWare/Configs/Application.config</tt>:</p>
 
   <blockquote><pre>
-Contexts['HelloWeb'] = '/usr/lib/python2.3/site-packages/HelloWeb'
+Contexts['HelloWeb'] = '/usr/lib/python$#PYTHONVERSION/site-packages/HelloWeb'
   </pre></blockquote>
 
-  <p>Next, we need to add a webware page file, a user interface
-  definition file and a callbacks file to the context directory. When
-  done, the directory will look thus:<p>
+  <p>Next, we need to add a Webware page, a user interface
+  definition and a callbacks file to the context directory. When
+  done, the directory will look thus:</p>
 
   <blockquote><pre>
-/usr/lib/python2.3/site-packages/HelloWeb
-/usr/lib/python2.3/site-packages/HelloWeb/__init__.py
-/usr/lib/python2.3/site-packages/HelloWeb/index.py #This is the webware page
-/usr/lib/python2.3/site-packages/HelloWeb/UI
-/usr/lib/python2.3/site-packages/HelloWeb/UI/__init__.wwml
-/usr/lib/python2.3/site-packages/HelloWeb/Callbacks
-/usr/lib/python2.3/site-packages/HelloWeb/Callbacks/__init__.py
+/usr/lib/python$#PYTONVERSION/site-packages/HelloWeb
+/usr/lib/python$#PYTONVERSION/site-packages/HelloWeb/__init__.py
+/usr/lib/python$#PYTONVERSION/site-packages/HelloWeb/index.py #This is the webware page
+/usr/lib/python$#PYTONVERSION/site-packages/HelloWeb/UI
+/usr/lib/python$#PYTONVERSION/site-packages/HelloWeb/UI/__init__.wwml
+/usr/lib/python$#PYTONVERSION/site-packages/HelloWeb/Callbacks
+/usr/lib/python$#PYTONVERSION/site-packages/HelloWeb/Callbacks/__init__.py
   </pre></blockquote>
 
-  <p>The Webware page index.py is the main entry point of the
-  application, and loads the user interface when a new user session is
-  opened by a user. Note that Webware requires the Program subclass to
-  be named the same as the file (index)</p>
+  <p>The Webware index page index.py is the main entry point of the
+  application which loads the user interface when a new session is
+  opened by a user. Do note that Webware requires the Program subclass
+  to be named the same as the file (index)</p>
 
   <blockquote><pre>
 #! /bin/env python
@@ -179,22 +190,22 @@ class index(Webwidgets.Program):
 	    return HelloWeb.UI.MyWindow(self, winId)
   </pre></blockquote>
 
-  <p>The user interface definition is the module named UI above, and
-  is expected by the above code to contain a top-level Window subclass
-  called MyWindow.</p>
+  <p>The user interface definition is the module named UI above and is
+  expected to contain a top-level Window subclass called
+  MyWindow.</p> 
 
   <p>It is possible to write the user interface definition in pure
   Python which allows for greate flexibility, but is also quite
-  verbose and requires lots of boilerplate code, so the code presented
-  here uses the <a href="#wwml">Wwml</a> language to define the user
-  interface. This is a simple XML-based language for defining the UI
-  layout (but not the actual look - that's the job of <a
+  verbose and requires lots and lots of boilerplate code, so the code
+  presented here uses the <a href="#wwml">Wwml</a> language to define
+  the user interface. This is a simple XML-based language for defining
+  the UI layout (but not the actual look - that's the job of <a
   href="http://www.w3.org/TR/CSS21/">CSS</a>!).</p>
 
   <p>Not only does Wwml simplify the work to create widgets, it also
   helps separating the layout from the application code, which is
   stored in a separate python module file. In this example, that's the
-  HelloWeb.Callbacks module.<p>
+  HelloWeb.Callbacks module.</p>
 
   <p>First <tt>UI/__init__.wwml</tt>:</p>
   <blockquote><pre>
@@ -236,11 +247,10 @@ class MyWindow(object):
   </pre></blockquote>
 
   <p>Hey, that was a load of XML in that Wwml-file. Actually, quite
-  some of it was just boilerplate that needs to be there for it to be
+  a lot of it was just boilerplate that needs to be there for it to be
   correct XML and thus Wwml. We'll go though the code line-by line
   now:</p>
 
-  <p>
    <blockquote><pre>
 &lt;?xml version="1.0"?&gt;
 &lt;w:wwml
@@ -249,18 +259,18 @@ class MyWindow(object):
  xmlns:html="http://www.w3.org/TR/REC-html40"
    </pre></blockquote>
 
-   Ok, so that's the boilerplate. This is setting up namespaces for
-   Wwml tags and HTML tags, so that they can be freely mixed.
+   <p>Ok, so that's the boilerplate. This is setting up namespaces for
+   Wwml tags and HTML tags, so that they can be freely mixed.</p>
 
    <blockquote><pre>
  bind="HelloWeb.Callbacks"
  &gt;
    </pre></blockquote>
 
-   This <a href="#wwml_callback-binding">binds</a> the
+   <p>This <a href="#wwml_callback-binding">binds</a> the
    python module HelloWeb.Callbacks to the widgets in the interface
    definition, so that the callback function (clicked) defined in
-   there will be called when the button in the UI is clicked.
+   there will be called when the button in the UI is clicked.</p>
 
    <blockquote><pre>
  &lt;w:HtmlWindow
@@ -268,24 +278,26 @@ class MyWindow(object):
   title="Redback Webwidgets demo application"&gt;
    </pre></blockquote>
 
-   This is what creates our main window widget. The tag name is the
+   <p>This is what creates our main window widget. The tag name is the
    name of an existing widget, either defined in some other Wwml-file
    in the aplication, or one of the predefined ones from the
    Webwidgets package. The id tag is required, and gives the name of
-   the widget that gets created. More information on the tag syntax can be found under <a
-   href="#wwml_basic-tag-structure">Basic tag structure</a>.
+   the widget that gets created. More information on the tag syntax
+   can be found at <a href="#wwml_basic-tag-structure">Basic tag
+   structure</a>.</p>
 
    <blockquote><pre>
   &lt;w:StyleLink id="head" style="../../Widgets.css" /&gt;
    </pre></blockquote>
 
-   This just adds a stylesheet to the head section of the HTML document.
+   <p>This just adds a stylesheet to the head section of the HTML
+   document.</p>
 
    <blockquote><pre>
   &lt;w:Html id="body"&gt;
    </pre></blockquote>
 
-   Here goes the bulk of the document...
+   <p>Here goes the bulk of the document...</p>
 
    <blockquote><pre>
    &lt;div&gt;Please enter some random string below and press "go"&lt;/div&gt;
@@ -299,9 +311,8 @@ class MyWindow(object):
 &lt;/w:wwml&gt;
    </pre></blockquote>
   
-  Html code can <a
-  href="#wwml_html-format-strings">freely be mixed</a> in
-  with the Wwml inside a w:Html tag.
+  <p>Html code can <a href="#wwml_html-format-strings">freely be
+  mixed</a> in with the Wwml inside a w:Html tag. 
   </p>
  
   <p>The callbacks file defines what actually happens when the user
@@ -311,7 +322,7 @@ class MyWindow(object):
   in e.g. PHP or JavaBeans, but it works much the same as <a
   href="http://gtk.org/">Gtk</a> - the UI stays the same until
   explicitly modified, and changes are seen by the user more or less
-  directly (as soon as the webpage finnishes loading :).</p>
+  directly (as soon as the webpage finishes loading :).</p>
 
 
   <blockquote><pre>
@@ -353,8 +364,8 @@ class MyWindow(object):
   widget.</p>
 
   <p>So, if you have managed to read this far, and have a working
-  first application, it's time to read up on what widgets there are in
-  the <a href="ReferenceManual">reference manual</A> and start
+  first application and it's time to read up on what widgets there are in
+  the <a href="ReferenceManual">reference manual</a> and start
   breaking your first app :P</p>
 
   <!-- ################################################################ -->
@@ -365,28 +376,26 @@ class MyWindow(object):
 
 
 
-  <a name="overview">
-  <h1>Architecture overview</h1>
-  <a name="overview-design">
-  <h2>Design</h2>
+  <h1><a name="overview" />Architecture overview</h1>
+  <h2><a name="overview-design" />Design</h2>
+
   <p class="intro">This document explains the overall architecture and
   design choices of Webwidgets. It answers both the how:s and the
   why:s.</p>
 
-  <a name="overview_design_user-interfaces-as-widget-trees">
-  <h3>User interfaces as widget trees</h3>
-  <p>In Webwidgets, everything you see is a widget. Even an
-  application is a widget. Each such widget in turn might consist of
-  several other widgets, either by incorporationg them as child
-  widgets or by subclassing them.<p>
+  <h3><a name="overview_design_user-interfaces-as-widget-trees" />User interfaces as widget trees</h3>
+  <p>In Webwidgets everything you see is a widget. Even an
+  application is a widget. Each such widget might in its turn
+  consist of several other widgets, either by incorporating them as
+  child widgets or by subclassing them.</p>
 
-  <p class="rationale">The aim of this is to encourage and ease code
-  re-use - user interface functionality can easily be packaged and
-  reused throughout a set of applications.</p>
+  <p class="rationale">The aim of this library is to encourage and
+  ease code re-use - user interface functionality can easily be
+  packaged and reused throughout a set of applications.</p>
 
 
-  <a name="overview_design_statefull-widgets">
-  <h3>Statefull widgets</h3>
+  
+  <h3><a name="overview_design_statefull-widgets" />Statefull widgets</h3>
   <p>Each widget is implemented as a Python class. A web user session
   then consists of one or more instance of such classes.</p>
 
@@ -401,8 +410,7 @@ class MyWindow(object):
   each page-load, and manually managing session content.</p>
 
 
-  <a name="overview_design_notifications">
-  <h3>Notifications</h3>
+  <h3><a name="overview_design_notifications" />Notifications</h3>
   <p>As soon as an attribute of a widget is changed, either by user
   input or by some code, a notification is sent to the widget. This
   notification is named as the attribute, with <tt>Changed</tt>
@@ -418,55 +426,51 @@ class MyWindow(object):
   same, pointing to the originally notified widget.</p>
 
   <p class="rationale">The propagation makes it possible to implement
-  a complicated widget with many field, with a single funtion to
-  handle all state changes and calculate a compound value of some sort
-  for the widget.</p>
+  a complicated widget with many fields and just one single function
+  to handle all of the state changes.</p>
 
 
-  <a name="overview_design_input-handling">
-  <h3>Input handling</h3>
-  <p>Input handling is done using two special method,
+  <h3><a name="overview_design_input-handling" />Input handling</h3>
+  <p>Input handling is done using two special methods,
   <tt>fieldInput</tt> and <tt>fieldOutput</tt>. The former method is
   called with a list of field values, and can update any attributes on
   the widget as it sees fit. This in turn raises notifications as
   usual. The latter method is used to query the widget for its current
-  state, and should return a list of the same format. This is used to
+  state and should return a list of the same format. This is used to
   inhibit calls to fieldInput when the user hasn't actually changed
   anything.</p>
 
 
-  <a name="overview_design_url-argument-handling">
-  <h3>URL argument handling</h3>
+  <h3><a name="overview_design_url-argument-handling" />URL argument handling</h3>
   <p>URL arguments (<tt>GET</tt> parameters) are grafted onto the
-  Webwidgets framework, wich is based on a global HTML form and
-  <tt>POST</tt>. Their main purpose is to allow the user to bookmark a
-  page, and as an alternative way of user input and output.</p>
+  Webwidgets framework which is based on a global HTML form and
+  <tt>POST</tt> requests. Their main purpose is to allow the user to
+  bookmark a page, and as an alternative way of user input and
+  output.</p> 
 
-  <p>URL arguments allways corresponds to widget attribute values. If
+  <p>URL arguments always corresponds to widget attribute values. If
   not, the widget attributes are updated (and notifications sent as
   usual).</p>
 
-  <p>However, all widget attributes need not be present in the URL,
-  and specifically, attributes of hidden widgets are never present in
-  the URL. If a previously hidden widget is made visible, and it has
+  <p>However, all widget attributes need not be present in the
+  URL, specifically attributes of hidden widgets are never present in
+  the URL. If a previously hidden widget is made visible and has
   attributes that are supposed to be in the URL, the browser is sent a
-  HTTP redirect to an new URL containing those new values.</p>
+  HTTP redirect to a new URL containing those new values.</p>
 
   <p class="rationale">This provides the functionality the user
-  expects, while requiring the least amount of effort from the
+  expects while requiring the least amount of effort from the
   application programmer.</p>
 
-  <a name="overview_design_output-options">
-  <h3>Output options</h3>
-  FIXME
+  <h3><a name="overview_design_output-options" />Output options</h3>
+  <p>FIXME</p>
 
-  <a name="overview_design_windows">
-  <h3>Windows</h3>
-  <p>A webwidget application can provide the user with several
-  separate pages, or windows, each with its own widget tree and its
-  own URL. These windows are created by the application after the user
-  having navigated to the corresponding URL, and must be destroyed by
-  the application code manually (ultimately, they are destroyed as the
+  <h3><a name="overview_design_windows" />Windows</h3>
+  <p>A Webwidgets application can provide the user with several
+  separate pages or windows each with its own widget tree and
+  URL. These windows are created by the application after the user has
+  navigated to the corresponding URL and must be destroyed by the
+  application code manually (ultimately, they are destroyed as the
   session is destroyed when it times out).</p>
 
   <p class="rationale">It is sometimes desirable to have separate
@@ -474,38 +478,37 @@ class MyWindow(object):
   provides that.</p>
 
 
-  <a name="overview_implementation">
-  <h2>Implementation details</h2>
+  <h2><a name="overview_implementation" />Implementation details</h2>
 
   <h3>Instantiation and initialization</h3>
-  <p>When a session is created, a <tt>Window</tt> widget is
-  instantiated, and with it any number of child widgets. This child
+  <p>When a session is created a <tt>Window</tt> widget is
+  instantiated and with it any number of child widgets. This child
   widget instantiation can be done either automatically or manually
   from the initialization method of the parent widget.</p>
 
   <p>If the child widget does not need any special parameters for its
-  initialization method, it can be instantiated automatically, and no
-  special code is required except the child widget class being a class
-  member of the parent widget class.</p>
+  initialization method, it can be instantiated automatically and
+  nothing special is required except for the child widget class to be
+  a member of the parent widget class.</p>
 
-  <p>If the child widget class is to be a class member of the parent
-  widget class and still not be instantiated automatically, it has to
-  set a special class member variable. Regardless, child widgets that
-  are to be instantiated manually shoudl be done so with in the
-  initialization function of the parent widget, which should give
-  those children as parameters to its superclass initialization
+  <p>If the child widget class is a class member of the parent
+  widget class while it is not desired for it to be instantiated
+  automatically, it has to set a special class member
+  variable. Whenever manual instantiation is used for child widgets
+  they should be initialized in the parents initialization
+  function. The parents initialization function should also give those
+  children as parameters to its superclass' initialization
   function.</p>
 
   <p class="rationale">It is practical to encapsulate child widget
-  classes within the parent widget class, as this makes the widget
-  more portable and parts of it more overridable. The automatic
+  classes within the parent widget class as this makes the widget
+  more portable and parts of it more overrideable. The automatic
   instantiation solves the problem nine times out of ten in
   practice.</p>
 
-  <a name="overview_implementation_output">
-  <h3>Output</h3>
-  <p>Output to the webbrowser can come from one of two sources - a
-  widget class or a widget instance depending on the precense of
+  <h3><a name="overview_implementation_output" />Output</h3>
+  <p>Output to the web browser can come from one of two sources - a
+  widget class or a widget instance depending on the presence of
   <tt>_widget</tt> or <tt>_widgetClass</tt> among the output
   parameters. In the former case, <tt>classOutput(outputOptions)</tt>
   is called on the class, and in the latter
@@ -513,31 +516,29 @@ class MyWindow(object):
 
   <p>The default case is that output comes from the top level widget,
   that is from the window instance. The <tt>output(outputOptions)</tt>
-  method of the window instance then constructs this output by calling
+  method of the window instance then constructs the output by calling
   <tt>draw(outputOptions)</tt>, which recurses to
-  <tt>draw(outputOptions)</tt> on its child widgets, and they in turn
-  may do the same.</p>
+  <tt>draw(outputOptions)</tt> on its child widgets whom in their turn
+  may call this function on their children.</p>
 
-  <a name="overview_implementation_output_html">
-  <h4>In-page HTML output</h4>
+  <h4><a name="overview_implementation_output_html" />In-page HTML output</h4>
   <p>The <tt>draw</tt> method is called on a widget to draw the HTML
   of that widget to be incorporated in the output of draw of its
   parent widget. This method can also optionally register input fields
   and URL arguments.</p>
 
   <p>The <tt>Composite</tt> widget is the base class for all widgets
-  that have children, and provides methods for recursing over the
-  <tt>draw</tt> methods of its children, including handling visibility
+  that have children and provides methods for recursing over the
+  <tt>draw</tt> methods of its children including handling visibility
   of children.</p>
 
-  <a name="overview_implementation_output_raw-data-output">
-  <h4>Raw data output</h4>
+  <h4><a name="overview_implementation_output_raw-data-output" />Raw data output</h4>
 
   <p>For a widget to include raw data, e.g. an image, CSS file that is
   to be referenced by a link in the HTML, it needs to provide this
   data using one of the <tt>output()</tt> and <tt>classOutput()</tt>
-  methods. It can the construct the URL using the
-  <tt>calculateUrl()</tt> method.</p>
+  methods. The widget can construct the URL using the
+  <tt>calculateUrl()</tt> method.</p> 
 
   <!-- ################################################################ -->
 
@@ -547,38 +548,36 @@ class MyWindow(object):
 
 
 
-  <a name="wwml">
-  <h1>The Wwml user interface markup language</h1>
-  <p class="intro">Wwml provides an alternative, and much shorter
-  syntax for defining widget classes than Python, but does not add any
-  extra functionality. That is, every Wwml construct can be mapped
-  into an equivalent Python construct, and is compiled to such a one
-  when the Wwml file is loaded.</p>
+  <h1><a name="wwml" />The Wwml user interface markup language</h1>
+  <p class="intro">Wwml provides an alternative and much shorter
+  syntax for defining widget classes than to define them using pure
+  Python. It does however not add any extra functionality. That is,
+  every Wwml construct can be mapped into an equivalent Python
+  construct, and is indeed compiled to one when the Wwml file is
+  loaded.</p> 
 
 
-  <a name="wwml_the-module-system" />
-  <h2>The module system</h2>
-  <p>Wwml integrates with Python and its module system, and Wwml files
-  appear as normal Python modules to a Python program, and can be
-  imported the same way as such modules, as long as the Webwidgets
-  module has been loaded prior to the attempt to load a Wwml
-  module.</p>
+  <h2><a name="wwml_the-module-system" />The module system</h2>
+  <p>Wwml integrates with Python and its module system in a way that
+  makes Wwml files appear as normal Python modules to a Python
+  program. Those modules can be imported and used in the same way as
+  ordinary Python modules as long as the Webwidgets module has been
+  loaded prior to the attempt to load a Wwml module.</p>
 
-  <p>Wwml also imports Python modules (or Wwml files) with widget
-  definitions for widgets that are used in a Wwml file. When refering
-  to widgets, Wwml uses Python module paths, e.g.
-  <tt>Module.SubModule.SomeClass.SomeClassWithinTheFirstClass</tt>.</p>
+  <p>Wwml also imports Python modules (or Wwml files) along with
+  widget definitions for widgets that are used in a Wwml file. When
+  referring to widgets Wwml uses Python module paths (e.g.
+  <tt>Module.SubModule.SomeClass.SomeClassWithinTheFirstClass</tt>).</p>
 
-  <a name="wwml_xml-syntax" />
-  <h2>XML syntax</h2>
+  <h2><a name="wwml_xml-syntax" />XML syntax</h2>
   <p>Wwml is an <a href="http://www.w3.org/XML/">XML</a> application,
   and uses <a href="http://www.w3.org/TR/REC-xml-names/">XML
   namespaces</a> to separate embedded HTMl code from Wwml code. Wwml
   tags live in the namespace
-  <tt>http://freecode.no/xml/namespaces/wwml-1.0</tt>. The outher-most
-  tag of a Wwml document is allways the <tt>wwml</tt> tag, which
-  serves the prupose of container for namespace declarations,
-  callback-bindings and declaring a search-path for widgets.</p>
+  <tt>http://freecode.no/xml/namespaces/wwml-1.0</tt>. The outermost
+  tag of a Wwml document is always the <tt>wwml</tt> tag which serves
+  the purpose of containing namespace declarationsm the callback
+  bindings and declaring a search path for widgets.</p>
 
   <blockquote><pre>
 &lt;?xml version="1.0"?&gt;
@@ -589,20 +588,19 @@ class MyWindow(object):
  &gt;
   </pre></blockquote>
 
-  <a name="wwml_basic-tag-structure" />
-  <h2>Basic tag structure</h2>
-  <p>Each tag, except for the top-level <tt>wwml</tt> tag, defines a
+  <h2><a name="wwml_basic-tag-structure" />Basic tag structure</h2>
+  <p>Each tag except for the top-level <tt>wwml</tt> tag defines a
   widget class. It consists of a tag name, an id attribute, any number
-  of attributes and child widgets and an implicit HTML format string
-  (if the tag has children).</p>
+  of attributes, any number of child widgets and an implicit HTML
+  format string (if the tag has children).</p>
 
   <p>The tag name is the name (or module path) of some existing widget
-  to subclass, and the id attribute defines the name of the new
+  to subclass and the id attribute defines the name of the new
   class.</p>
 
-  <p>Attributes and children are interchangable, and defines class
+  <p>Attributes and children are interchangable and defines class
   variables for the new class. These can hold either child widgets or
-  Python values, e.g. strings, integers, lists, dictionaries...</p>
+  Python values (e.g. strings, integers, lists, dictionaries...).</p>
 
   <p>Example:</p>
   <blockquote><pre>
@@ -611,7 +609,7 @@ class MyWindow(object):
 &lt;/w:MyModule.MyWidget&gt;
   </pre></blockquote>
   
-  <p>This compiles (roughtly) into:
+  <p>This compiles (roughly) into:</p>
   <blockquote><pre>
 import MyModule, OtherModule.SubMod
 
@@ -621,14 +619,13 @@ class MyFirstWidget(MyModule.MyWidget):
         pass
   </pre></blockquote>
 
-  <a name="wwml_special-tags-and-attribute-types" />
-  <h2>Special tags and attribute types</h2>
-  <p>Wwml allows for attributes to hold values of different types,
-  e.g. strings, integers, booleans... By default an attribute value is
-  considered a string value. To define a value of a different type,
-  the attribute value is prefixed with a <tt>":type:"</tt>, e.g.
-  <tt>":string:My string value here"</tt>, <tt>":integer:4711"</tt>,
-  <tt>":time:2007-07-31 17:22:05"</tt>.</p>
+  <h2><a name="wwml_special-tags-and-attribute-types" />Special tags and attribute types</h2>
+  <p>Wwml allows for attributes to hold values of different types
+  (e.g. strings, integers, booleans...). By default an attribute value is
+  considered a string. To define an attribute value of a different
+  type the attribute value must be prefixed with a <tt>":type:"</tt>,
+  (e.g. <tt>":string:My string value here"</tt>, <tt>":integer:4711"</tt>,
+  <tt>":time:2007-07-31 17:22:05"</tt>).</p>
 
   <p>These same types are also available as tags to make attributes
   and children more interchangable.</p>
@@ -641,14 +638,13 @@ class MyFirstWidget(MyModule.MyWidget):
   </pre></blockquote>
 
 
-  <a name="wwml_html-format-strings" />
-  <h2>HTML format strings</h2>
+  <h2><a name="wwml_html-format-strings" />HTML format strings</h2>
   <p>Wwml is intended to assist in writing complicated user interfaces
   that mixes widgets and static HTML content. To help with this, Wwml
-  provides widgets with a special attribute called <tt>html</tt>, that
+  provides widgets with a special attribute called <tt>html</tt> that
   holds a Python format string corresponding to the content inside the
   Wwml tag for the widget. All non-wwml content (e.g. HTML tags and
-  text) is copied as-is to this attribute, while Wwml tags are
+  text) is copied as-is to this attribute while Wwml tags are
   replaced by <tt>%(id)s</tt>, where id is the value of the
   <tt>id</tt> attribute of the child tag.</p>
 
@@ -663,7 +659,7 @@ class MyFirstWidget(MyModule.MyWidget):
 &lt;/w:Html&gt;
   </pre></blockquote>
   
-  <p>This compiles (roughtly) into:
+  <p>This compiles (roughly) into:</p>
   <blockquote><pre>
 import MyModule, OtherModule.SubMod
 
@@ -683,29 +679,28 @@ class MySearchBox(Html):
 
   <p>This is the foundation for using the <tt>Html</tt> widget, which
   uses this format string to merge the rendering of its child widgets.
-  This widget is usefull for implementing fancy layouts, extra CSS
+  This widget is useful for implementing fancy layouts, extra CSS
   hooks and intermingle widgets with static text (e.g. labels,
   descriptions, help-texts etc).</p>
 
 
-  <a name="wwml_callback-binding" />
-  <h2>Callback binding</h2>
-  <p>A user interface is nothing without interactivity, and in
+  <h2><a name="wwml_callback-binding" />Callback binding</h2>
+  <p>A user interface is nothing without interactivity, in
   Webwidgets this is provided by callback functions. Callback
-  functions can not be declared withing Wwml, as Wwml is not a
-  programming language, but a purely declarative UI definition
-  language. Instead, the Wwml widget definition has to "bind" to some
-  Python class implementing the callbacks.<p>
+  functions can not be declared within Wwml as Wwml is not a
+  programming language but a purely declarative UI definition
+  language. Instead the Wwml widget definition has to "bind" to some
+  Python class implementing the callbacks.</p>
 
   <p>A callback class is bound to a widget using the the <tt>bind</tt>
-  attribute, which specifies a class with callback methods.</p>
+  attribute which specifies a class with callback methods.</p>
 
   <p>Example:</p>
   <blockquote><pre>
 &lt;w:MyModule.MyWidget id="MyFirstWidget" foo="xyzzy" bind="MyCallBacks.MyCallbackClass" /&gt;
   </pre></blockquote>
   
-  <p>This compiles into:
+  <p>This compiles into:</p>
   <blockquote><pre>
 import MyModule, MyCallBacks
 
@@ -714,7 +709,7 @@ class MyFirstWidget(MyCallBacks.MyCallbackClass, MyModule.MyWidget):
   </pre></blockquote>
 
   <p>To reduce code overhead, callback binding recurses through
-  widgets, so that child widgets are bound to member classes:</p>
+  widgets so that child widgets are bound to member classes:</p>
 
   <p>Example:</p>
   <blockquote><pre>
@@ -725,7 +720,7 @@ class MyFirstWidget(MyCallBacks.MyCallbackClass, MyModule.MyWidget):
 &lt;/w:Html&gt;
   </pre></blockquote>
   
-  <p>This compiles into:
+  <p>This compiles into:</p>
   <blockquote><pre>
 import MyModule, MyCallBacks
 
@@ -736,22 +731,20 @@ class MyFirstWidget(MyCallBacks.MyCallbackClass, html):
   </pre></blockquote>
 
 
-  <a name="wwml_search-paths-for-widgets" />
-  <h2>Search paths for widgets</h2>
+  <h2><a name="wwml_search-paths-for-widgets" />Search paths for widgets</h2>
   <p>As already stated tag names are module paths to existing widget
   classes. But these paths need not be complete - they are looked up
   along a search path of modules.</p>
 
   <p>Consider a search path consisting of <tt>MyProg.UI</tt>,
   <tt>MyLib.Widgets</tt> and <tt>Webwidgets</tt>. The tag
-  <tt>&lt;w:Foo.SomeWidget /&gt;</tt> then results in a lookup for
+  <tt>&lt;w:Foo.SomeWidget /&gt;</tt> then results in a lookup for</p>
   <ul>
    <li><tt>MyProg.UI.Foo.SomeWidget</tt></li>
    <li><tt>MyLib.Widgets.Foo.SomeWidget</tt></li>
    <li><tt>Webwidgets.Foo.SomeWidget</tt></li>
   </ul>
-  and the first existing class in that list will be used.
-  </p>
+  <p>and the first existing class in that list will be used.</p>
 
   <p>Search paths can be overridden for any widget and its children by
   specifying the <tt>using</tt> attribute. The contents of this
@@ -776,23 +769,20 @@ class MyFirstWidget(MyCallBacks.MyCallbackClass, html):
 
 
 
-  <a name="license">
-  <h1>GNU Free Documentation License</h1>
+  <h1><a name="license" />GNU Free Documentation License</h1>
 <p>
 
 Version 1.2, November 2002
 </p>
 
-<p>
 <pre>
 Copyright (C) 2000,2001,2002  Free Software Foundation, Inc.
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 Everyone is permitted to copy and distribute verbatim copies
 of this license document, but changing it is not allowed.
 </pre>
-</p>
 
-<strong>0. PREAMBLE</strong>
+<h3>0. PREAMBLE</h3>
 <p>
 The purpose of this License is to make a manual, textbook, or other
 functional and useful document "free" in the sense of freedom: to
@@ -821,7 +811,7 @@ whether it is published as a printed book.  We recommend this License
 principally for works whose purpose is instruction or reference.
 </p>
 
-<strong>1. APPLICABILITY AND DEFINITIONS</strong>
+<h3>1. APPLICABILITY AND DEFINITIONS</h3>
 <p>
 This License applies to any manual or other work, in any medium, that
 contains a notice placed by the copyright holder saying it can be
@@ -928,7 +918,7 @@ implication that these Warranty Disclaimers may have is void and has
 no effect on the meaning of this License.
 </p>
 
-<strong>2. VERBATIM COPYING</strong>
+<h3>2. VERBATIM COPYING</h3>
 <p>
 
 You may copy and distribute the Document in any medium, either
@@ -947,7 +937,7 @@ You may also lend copies, under the same conditions stated above, and
 you may publicly display copies.
 </p>
 
-<strong>3. COPYING IN QUANTITY</strong>
+<h3>3. COPYING IN QUANTITY</h3>
 <p>
 If you publish printed copies (or copies in media that commonly have
 printed covers) of the Document, numbering more than 100, and the
@@ -991,7 +981,7 @@ Document well before redistributing any large number of copies, to give
 them a chance to provide you with an updated version of the Document.
 </p>
 
-<strong>4. MODIFICATIONS</strong>
+<h3>4. MODIFICATIONS</h3>
 <p>
 You may copy and distribute a Modified Version of the Document under
 the conditions of sections 2 and 3 above, provided that you release
@@ -1091,7 +1081,7 @@ give permission to use their names for publicity for or to assert or
 imply endorsement of any Modified Version.
 </p>
 
-<strong>5. COMBINING DOCUMENTS</strong>
+<h3>5. COMBINING DOCUMENTS</h3>
 <p>
 You may combine the Document with other documents released under this
 License, under the terms defined in section 4 above for modified
@@ -1120,7 +1110,7 @@ and any sections Entitled "Dedications".  You must delete all sections
 Entitled "Endorsements."
 </p>
 
-<strong>6. COLLECTIONS OF DOCUMENTS</strong>
+<h3>6. COLLECTIONS OF DOCUMENTS</h3>
 
 <p>
 You may make a collection consisting of the Document and other documents
@@ -1139,7 +1129,7 @@ other respects regarding verbatim copying of that document.
 </p>
 
 
-<strong>7. AGGREGATION WITH INDEPENDENT WORKS</strong>
+<h3>7. AGGREGATION WITH INDEPENDENT WORKS</h3>
 <p>
 A compilation of the Document or its derivatives with other separate
 and independent documents or works, in or on a volume of a storage or
@@ -1161,7 +1151,7 @@ Otherwise they must appear on printed covers that bracket the whole
 aggregate.
 </p>
 
-<strong>8. TRANSLATION</strong>
+<h3>8. TRANSLATION</h3>
 <p>
 
 Translation is considered a kind of modification, so you may
@@ -1185,7 +1175,7 @@ its Title (section 1) will typically require changing the actual
 title.
 </p>
 
-<strong>9. TERMINATION</strong>
+<h3>9. TERMINATION</h3>
 <p>
 You may not copy, modify, sublicense, or distribute the Document except
 as expressly provided for under this License.  Any other attempt to
@@ -1196,7 +1186,7 @@ License will not have their licenses terminated so long as such
 parties remain in full compliance.
 </p>
 
-<strong>10. FUTURE REVISIONS OF THIS LICENSE</strong>
+<h3>10. FUTURE REVISIONS OF THIS LICENSE</h3>
 <p>
 The Free Software Foundation may publish new, revised versions
 of the GNU Free Documentation License from time to time.  Such new
@@ -1225,7 +1215,6 @@ the License in the document and put the following copyright and
 license notices just after the title page:
 </p>
 
-<p>
 <pre>
       Copyright (c)  YEAR  YOUR NAME.
       Permission is granted to copy, distribute and/or modify this document
@@ -1236,19 +1225,16 @@ license notices just after the title page:
       Free Documentation License".
 
 </pre>
-</p>
 
 <p>
 If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
 replace the "with...Texts." line with this:
 </p>
 
-<p>
 <pre>
     with the Invariant Sections being LIST THEIR TITLES, with the
     Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.
 </pre>
-</p>
 
 <p>
 If you have Invariant Sections without Cover Texts, or some other
