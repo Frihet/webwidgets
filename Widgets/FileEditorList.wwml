@@ -35,7 +35,7 @@
   </w:odict>
 
   <w:FileEditor classid="FileEditor">
-   <w:Html id="name" />
+   <w:Html id="infoGroup" />
    <w:FileEditor.editors id="editors">
     <w:FileEditor.editors.default id="default" visible=":true" />
    </w:FileEditor.editors>

@@ -26,11 +26,19 @@ class FileEditorList(object):
         value = NameValue()
 
     class DescriptionInput(Webwidgets.StringInput):
-        __attributes__ = Webwidgets.StringInput.__attributes__ + ('fileEditor',)
+        __attributes__ = Webwidgets.StringInput.__attributes__ + ('rowsExpanded', 'rowsCollapsed', 'fileEditor',)
         __explicit_load__ = True
         fileEditor = None
         cols = 40
-        rows = 2
+        rowsExpanded = 10
+        rowsCollapsed = 1
+
+        class Rows(object):
+            def __get__(self, instance, owner):
+                if not instance or instance.fileEditor is None:
+                    return None
+                return [instance.rowsCollapsed, instance.rowsExpanded][instance.fileEditor.expanded]
+        rows = Rows()
         
         class DescriptionValue(Value):
             attribute = 'description'

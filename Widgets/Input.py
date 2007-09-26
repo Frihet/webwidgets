@@ -345,7 +345,7 @@ class ToggleButton(Base.ValueInput, Button):
         def __init__(self):
             self.value=""
         def __get__(self, instance, owner):
-            return self.value + " " + ['toggle-invisible','toggle-visible'][instance.value]
+            return self.value + " " + ['toggle-false','toggle-true'][not not instance.value]
         def __set__(self, instance, value):
             self.value = value
     html_class = HtmlClass()

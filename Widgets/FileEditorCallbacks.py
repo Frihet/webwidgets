@@ -15,14 +15,16 @@ class Value(object):
         instance.parent.parent.value = value
         
 class FileEditor(object):
-    __attributes__ = Webwidgets.Html.__attributes__ + ('value', 'error')
+    __attributes__ = Webwidgets.Html.__attributes__ + ('expanded', 'value', 'error')
 
     def __init__(self, session, winId, **attr):
         Webwidgets.Html.__init__(self, session, winId, **attr)
         self.valueChanged(self.path, self.value)
+        self.expandedChanged(self.path, self.expanded)
 
     value = None
     error = None
+    expanded = False
 
     def mimeTypeToMethod(self, mimeType):
         return mimeTypeToMethod(mimeType)
@@ -30,21 +32,39 @@ class FileEditor(object):
     def methodToMimeType(self, mimeType):
         return methodToMimeType(mimeType)
 
-    class name(object):
-        class field(object):
-            class Value(object):
-                def __get__(self, instance, owner):
-                    if not hasattr(instance, 'parent'):
-                        return None
-                    return getattr(instance.parent.parent.value, 'filename', '&lt;No file&gt;')
-                def __set__(self, instance, value):
-                    if instance.parent.parent.value is not None:
-                        instance.parent.parent.value.filename = value
-            value = Value()
+    class downloadLink(object):
+        class Content(object):
+            def __get__(self, instance, owner):
+                if not hasattr(instance, 'parent'):
+                    return None
+                return instance.parent.value
+        content = Content()
 
     class hide(object):
-        def valueChanged(self, path, value):
-            self.parent['editors'].visible = self.parent['upload'].visible = value
+        class Value(object):
+            def __get__(self, instance, owner):
+                if not hasattr(instance, 'parent'):
+                    return None
+                return instance.parent.expanded
+            def __set__(self, instance, value):
+                instance.parent.expanded = value
+        value = Value()
+
+    def expandedChanged(self, path, value):
+        self['infoGroup'].visible = self['editors'].visible = self['upload'].visible = value
+
+    class infoGroup(object):
+        class name(object):
+            class field(object):
+                class Value(object):
+                    def __get__(self, instance, owner):
+                        if not hasattr(instance, 'parent'):
+                            return None
+                        return getattr(instance.parent.parent.parent.value, 'filename', '&lt;No file&gt;')
+                    def __set__(self, instance, value):
+                        if instance.parent.parent.parent.value is not None:
+                            instance.parent.parent.parent.value.filename = value
+                value = Value()
 
     class editors(object):
         class text__css(object):

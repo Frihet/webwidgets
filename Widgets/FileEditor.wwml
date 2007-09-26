@@ -24,16 +24,25 @@
  bind="Webwidgets.Widgets.FileEditorCallbacks">
  >
 
- <w:Html id="FileEditor" topLevel="div">
+ <w:Html id="FileEditor" topLevel="div" expanded=":false">
   <div class="top">
-   <w:Field id="name" label="Filename">
-    <w:StringInput id="field" />
-   </w:Field>
-
+   <w:Media id="downloadLink">
+    <w:dict id="types">
+     <w:Media.types-default id="default">
+      <w:false id="inline" />
+     </w:Media.types-default>
+    </w:dict>
+   </w:Media>
    <w:ToggleButton id="hide" falseTitle="Edit file" trueTitle="Hide editor" />
   </div>
 
-  <w:TabbedView id="editors" page="none" visible=":false">
+  <w:Fieldgroup id="infoGroup">
+   <w:Field id="name" label="Filename">
+    <w:StringInput id="field" />
+   </w:Field>
+  </w:Fieldgroup>
+
+  <w:TabbedView id="editors" page="none">
    <w:Html id="none" title="No file">No file created or uploaded</w:Html>
    <w:TextFileEditor id="text__plain" mimeType="text/plain" title="Plain text" />
    <w:TextFileEditor id="text__html" mimeType="text/html" title="HTML document" />
@@ -48,7 +57,7 @@
    </w:Media>
   </w:TabbedView>
 
-  <w:Html id="upload" topLevel="div" visible=":false">
+  <w:Html id="upload" topLevel="div">
    <w:Label id="fileLabel" target="1/file" label="Upload file" />
    <w:FileInput id="file">
     <w:Html id="preview" />

@@ -203,8 +203,12 @@ class Media(Base.Widget):
                 'Content-type': mimeType}
 
     def draw(self, outputOptions):
-        inline = self.getRenderer('draw_inline'
-                                  )(outputOptions)
+        if self.getOption('inline'):
+            inlineRenderer = self.getRenderer('draw_inline')
+        else:
+            inlineRenderer = self.draw_inline_default
+        inline = inlineRenderer(outputOptions)
+
 
         if self.getOption('invisible'):
             return ''
