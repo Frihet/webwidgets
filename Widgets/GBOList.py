@@ -183,11 +183,11 @@ class GBOList(Base.ActionInput, Base.Composite):
         self.rows = ChildNodeRows(self, self.rows)
         self.reread()
 
-    def function(self, path, function, row):
-        raise Exception('%s: Function %s not implemented (called for row %s)' % (Webwidgets.Utils.pathToId(path), function, row))
+#     def function(self, path, function, row):
+#         raise Exception('%s: Function %s not implemented (called for row %s)' % (Webwidgets.Utils.pathToId(path), function, row))
 
-    def groupFunction(self, path, function):
-        raise Exception('%s: Function %s not implemented' % (Webwidgets.Utils.pathToId(path), function))
+#     def groupFunction(self, path, function):
+#         raise Exception('%s: Function %s not implemented' % (Webwidgets.Utils.pathToId(path), function))
 
     def reread(self):
         """Reload the list after a repaging/resorting here. This is
