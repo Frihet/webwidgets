@@ -61,7 +61,8 @@ class FileEditorList(object):
         if path != self.path: return
         if function == 'delete':
             del self.rows[row]
-
+        if function == 'edit':
+            self.rows[row]['file'].expanded = not self.rows[row]['file'].expanded
     class FileListValue(object):
         def __get__(self, instance, owner):
             if not instance or instance.rows is None:

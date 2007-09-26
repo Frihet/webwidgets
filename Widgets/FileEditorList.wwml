@@ -26,7 +26,10 @@
 
  <w:GBOList
   id="FileEditorList">
-  <w:dict id="functions" delete="Delete" />
+  <w:odict id="functions">
+   <w:string id="delete">Delete</w:string>
+   <w:string id="edit">Edit</w:string>
+  </w:odict>
   <w:dict id="groupFunctions" add="Add new file" />
   <w:odict id="columns">
    <w:string id="name">Filename</w:string>
@@ -35,6 +38,7 @@
   </w:odict>
 
   <w:FileEditor classid="FileEditor">
+   <w:Html id="hide" />
    <w:Html id="infoGroup" />
    <w:FileEditor.editors id="editors">
     <w:FileEditor.editors.default id="default" visible=":true" />
