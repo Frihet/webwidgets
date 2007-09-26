@@ -79,6 +79,7 @@ class DateInput(Input.StringInput):
             else:
                 self.value = datetime.datetime(*(time.strptime(stringValue, self.format)[0:6]))
         except ValueError:
+            self.value = None
             self.error = 'Invalid date format, expected %s got %s' \
                 % (self.format, stringValue)
                 
