@@ -5,10 +5,14 @@ class Value(object):
     def __get__(self, instance, owner):
         if not instance or instance.fileEditor is None:
             return None
-        return getattr(instance.fileEditor.value, self.attribute, self.empty)
+        if instance.fileEditor.value is None:
+            return self.empty
+        if not hasattr(instance.fileEditor.value, self.attribute):
+            setattr(instance.fileEditor.value, self.attribute, '')
+        return getattr(instance.fileEditor.value, self.attribute)
     def __set__(self, instance, value):
         if instance.fileEditor.value is not None :
-            setattr(instance.fileEditor.value, 'filename', value)
+            setattr(instance.fileEditor.value, self.attribute, value)
 
 class FileEditorList(object):
     class NameInput(Webwidgets.StringInput):
@@ -56,7 +60,8 @@ class FileEditorList(object):
                 return None
             return [row['file'].value for row in instance.rows]
         def __set__(self, instance, value):
-            if instance.rows is not None :
+            if instance.rows is not None:
+                del instance.rows[:]
                 for file in value:
                     instance.addRow(file)
     value = FileListValue()

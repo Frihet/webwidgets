@@ -17,6 +17,10 @@ class Value(object):
 class FileEditor(object):
     __attributes__ = Webwidgets.Html.__attributes__ + ('value', 'error')
 
+    def __init__(self, session, winId, **attr):
+        Webwidgets.Html.__init__(self, session, winId, **attr)
+        self.valueChanged(self.path, self.value)
+
     value = None
     error = None
 
