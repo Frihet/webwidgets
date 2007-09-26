@@ -137,7 +137,7 @@ class Widget(object):
         self.__attributes__ += tuple(['html_' + name for name in self.__htmlAttributes__])
         for attr in self.__attributes__:
             if not hasattr(self, attr):
-                raise TypeError('Required attribute not set:', type(self).__name__, attr)
+                raise TypeError('Required attribute not set:', str(self), attr)
 
     class htmlId(object):
         def __get__(self, instance, owner):
@@ -199,7 +199,7 @@ class Widget(object):
     def pathToSubwidgetPath(self, path):
         widgetPath = self.path
         if not Webwidgets.Utils.isPrefix(widgetPath + ['_'], path):
-            raise Webwidgets.Constants.NotASubwidgetException('Not a subwidget path %s' % (path,))
+            raise Webwidgets.Constants.NotASubwidgetException('%s: Not a subwidget path %s' % (str(self), path,))
         return path[len(widgetPath) + 1:]
 
     def notify(self, message, *args, **kw):
@@ -220,6 +220,10 @@ class Widget(object):
                          for (name, value)
                          in attributes
                          if value])
+
+    def drawAttributes(self, outputOptions):
+        return Webwidgets.Utils.OrderedDict([('attr_' + key, getattr(self, key))
+                                             for key in self.__attributes__])
 
     def draw(self, outputOptions):
         """Renders the widget to HTML. Path is where the full path to
@@ -434,8 +438,7 @@ class Composite(Widget):
                 res[name] = child
 
         if includeAttributes:
-            for key in self.__attributes__:
-                res['attr_' + key] = getattr(self, key)
+            res.update(self.drawAttributes(outputOptions))
         return res
 
     def getChildren(self):

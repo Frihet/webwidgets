@@ -29,17 +29,29 @@ import Base, TableModel
 
 class List(Base.StaticComposite):
     """Concatenates all children in name order, drawing the "sep"
-    child inbetween each and the "pre" and "post" children before and
-    after the whole list, respectively. Note: sep should not be an
-    input widget, or all hell breaks lose."""
+    string inbetween each and the "pre" and "post" strings before and
+    after the whole list, respectively."""
     __no_classes_name__ = True
-    __children__ = ('pre', 'sep', 'post')
+    __attributes__ = Base.StaticComposite.__attributes__ + ('pre', 'sep', 'frame', 'post')
     pre = sep = post = ''
+    frame = '%(child)s'
+    
     def draw(self, outputOptions):
         children = self.drawChildren(outputOptions)
-        return children['pre'] + children['sep'].join([child
-                                                       for name, child in children.iteritems()
-                                                       if name not in ('pre', 'sep', 'post')]) + children['post']
+        attributes = self.drawAttributes(outputOptions)
+
+        pre = attributes['attr_pre'] % attributes
+        sep = attributes['attr_sep'] % attributes
+        post = attributes['attr_post'] % attributes
+
+        return pre + sep.join([attributes['attr_frame'] % Webwidgets.Utils.subclassDict(attributes, {'child': child})
+                               for name, child in children.iteritems()]) + post
+
+class BulletList(List):
+    pre = "<ul %(attr_htmlAttributes)s>"
+    sep = "\n"
+    frame= "<li>%(child)s</li>"
+    post = "</ul>"
 
 class Html(Base.StaticComposite):
     """This widget is the base widget for most output widgets and the
@@ -315,6 +327,10 @@ class Label(Base.StaticComposite):
         %(error)s
         </label>""" % res
 
+class DownloadLink(Media):
+    types = {'default': Webwidgets.Utils.subclassDict(Media.types['default'],
+                                                      {'inline':False})}
+
 class Field(Label):
     __wwml_html_override__ = False
     __children__ = Label.__children__ + ('field',)
@@ -341,11 +357,7 @@ class Field(Label):
                   """ % res
 
 class Fieldgroup(List):
-    class pre(Base.Widget):
-        def draw(self, outputOptions):
-            return """<div %(attr_htmlAttributes)s>""" % {
-                'attr_htmlAttributes': self.parent.drawHtmlAttributes(self.parent.path),
-                }
+    pre = "<div %(attr_htmlAttributes)s>"
     post = "</div>\n"
 
 class Table(Base.StaticComposite, TableModel.Table):
