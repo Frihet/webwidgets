@@ -50,7 +50,7 @@ class FileEditorList(object):
         if function == 'delete':
             del self.rows[row]
 
-    def FileListValue(object):
+    class FileListValue(object):
         def __get__(self, instance, owner):
             if not instance or instance.rows is None:
                 return None
@@ -59,3 +59,4 @@ class FileEditorList(object):
             if instance.rows is not None :
                 for file in value:
                     instance.addRow(file)
+    value = FileListValue()
