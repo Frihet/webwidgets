@@ -207,7 +207,7 @@ select {
  display: block;
 }
 
-div.error {
+span.error, div.error {
  color: #ff0000;
 }
 

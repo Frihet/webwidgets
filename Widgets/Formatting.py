@@ -320,12 +320,9 @@ class Label(Base.StaticComposite):
         res = self.drawChildren(outputOptions, includeAttributes = True)
         res['error'] = ''
         if target.error is not None:
-           res['error'] = """<span class="error">(%s)</span>""" % (target.error,)
+           res['error'] = """ <span class="error">(%s)</span>""" % (target.error,)
         res['target'] = Webwidgets.Utils.pathToId(targetPath)
-        return """<label %(attr_htmlAttributes)s for="%(target)s">
-        %(label)s
-        %(error)s
-        </label>""" % res
+        return """<label %(attr_htmlAttributes)s for="%(target)s">%(label)s%(error)s</label>""" % res
 
 class DownloadLink(Media):
     types = {'default': Webwidgets.Utils.subclassDict(Media.types['default'],
@@ -344,7 +341,7 @@ class Field(Label):
         res = self.drawChildren(outputOptions, includeAttributes = True)
         res['error'] = ''
         if target.error is not None:
-           res['error'] = """<span class="error">(%s)</span>""" % (target.error,)
+           res['error'] = """ <span class="error">(%s)</span>""" % (target.error,)
         res['target'] = Webwidgets.Utils.pathToId(targetPath)
         return """<div %(attr_htmlAttributes)s>
                    <label for="%(target)s">
