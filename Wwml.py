@@ -52,6 +52,14 @@ def generatePartsForNode(module, node, using = [], context = [], htmlContext = [
             if child.namespaceURI == 'http://freecode.no/xml/namespaces/wwml-1.0':
                 if child.localName == 'variable':
                      texts.append("%(" + child.attributes.get('id').value + ")s")
+                elif child.localName == 'pre':
+                    subAttrs, subText = generatePartsForNode(module, child, using, context, htmlContext)
+                    attributes.extend(subAttrs)
+                    attributes.append((':pre', subText))
+                elif child.localName == 'post':
+                    subAttrs, subText = generatePartsForNode(module, child, using, context, htmlContext)
+                    attributes.extend(subAttrs)
+                    attributes.append((':post', subText))
                 else:
                     id, classid, value = generateValueForNode(module, child, using, context)
                     if isinstance(value, types.TypeType):
@@ -178,6 +186,18 @@ def generateValueForNode(module, node, using = [], context = []):
 
             if 'html' not in attributes and hasattr(nodeValue, '__wwml_html_override__') and nodeValue.__wwml_html_override__:
                 attributes['html'] = text
+
+            if ':pre' in attributes or ':post' in attributes:
+                if 'html' not in attributes:
+                    attributes['html'] = nodeValue.html
+
+                if ':pre' in attributes:
+                    attributes['html'] = attributes[':pre'] + attributes['html']
+                    del attributes[':pre']
+                if ':post' in attributes:
+                    attributes['html'] = attributes['html'] + attributes[':post']
+                    del attributes[':post']
+                    
             if getattr(nodeValue, '__args_children__', False):
                 __children__ = ()
                 for cls in baseCls:
