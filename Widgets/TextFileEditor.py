@@ -1,6 +1,6 @@
 import Input
 
-class TextFileEditor(Input.FileInput, Input.StringInput):
+class TextFileEditor(Input.FieldStorageInput, Input.StringInput):
     __attributes__  = Input.StringInput.__attributes__ + ('mimeType',)
     
     cols = 40

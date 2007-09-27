@@ -52,7 +52,7 @@
   </w:TabbedView>
 
   <w:Html id="upload" topLevel="div">
-   <w:Label id="fileLabel" target="1/file" label="Upload file" />
+   <w:Label id="fileLabel" target="1/file" label="Upload file: " />
    <w:FileInput id="file">
     <w:Html id="preview" />
     <w:Html id="clear" />

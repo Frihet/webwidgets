@@ -368,7 +368,7 @@ class ToggleButton(Base.ValueInput, Button):
     def fieldOutput(self, path):
         return []
 
-class FileInput(Base.ValueInput):
+class FieldStorageInput(Base.ValueInput):
     value = None
 
     def fieldInput(self, path, stringValue):
@@ -381,7 +381,7 @@ class FileInput(Base.ValueInput):
         if self.value.file is None:
             self.value.file = self.value.make_file()
         self.value.file.seek(0)
-        self.value.file.write(stringValue)
+        self.value.file.write(stringValue.encode('utf-8'))
         self.value.file.truncate()
         self.value.file.seek(0)
 
@@ -389,6 +389,6 @@ class FileInput(Base.ValueInput):
         res = ''
         if self.value is not None:
             self.value.file.seek(0)
-            res = self.value.file.read()
+            res = self.value.file.read().decode('utf-8')
         return [res]
 
