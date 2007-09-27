@@ -60,3 +60,4 @@ from Widgets.TextFileEditor import *
 from Widgets.CssFileEditor import *
 from Widgets.FileEditor import *
 from Widgets.FileEditorList import *
+from Widgets.HtmlInput import *

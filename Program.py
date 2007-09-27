@@ -372,7 +372,10 @@ class Program(WebKit.Page.Page):
                 self.output = {'Status': '404 No such window',
                                'Content-Type': 'text/plain',
                                Constants.OUTPUT: '404 No such window'}
-
+                
+            if 'Status' not in self.output:
+                self.output['Status'] = '200 OK'
+                
             for key, value in self.output.iteritems():
                 if key not in (Constants.OUTPUT, Constants.FINAL_OUTPUT):
                     response.setHeader(key.encode('utf-8'), value.encode('utf-8'))
@@ -477,7 +480,11 @@ class Program(WebKit.Page.Page):
                     for valuePart in value:
                         urlArgList.append(('_' + key, valuePart))
 
-            return '/'.join(path) + '?' + urllib.urlencode(urlArgList)
+            args = ''
+            if urlArgList:
+                args = '?' + urllib.urlencode(urlArgList)
+                
+            return '/'.join(path) + args
 
         def redirect(self, outputOptions, arguments):
             self.output = {'Status': '303 See Other',

@@ -29,6 +29,8 @@
   title="RedBack WebWidgets demo application">
 
   <w:Html id="body">
+
+   <w:HtmlInput id="htmltest" />
    <w:FileEditorList id="fileditorlisttest" />
    <w:FileEditor id="fileditortest" />
    <w:StringInput id="longtext" cols=":integer:20" rows=":integer:10">
