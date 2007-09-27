@@ -26,7 +26,8 @@ class HtmlInput(Input.StringInput):
     """
     Html Input Widget.
     """
-    rows = 10
+    rows = 40
+    cols = 80
     
     def draw(self, outputOptions):
         """
