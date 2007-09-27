@@ -58,6 +58,7 @@ from Widgets.DateInput import *
 from Widgets.LogIn import *
 from Widgets.TextFileEditor import *
 from Widgets.CssFileEditor import *
+from Widgets.HtmlInput import *
+from Widgets.HtmlFileEditor import *
 from Widgets.FileEditor import *
 from Widgets.FileEditorList import *
-from Widgets.HtmlInput import *
