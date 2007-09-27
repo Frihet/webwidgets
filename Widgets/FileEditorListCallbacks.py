@@ -63,14 +63,18 @@ class FileEditorList(object):
             del self.rows[row]
         if function == 'edit':
             self.rows[row]['file'].expanded = not self.rows[row]['file'].expanded
+
     class FileListValue(object):
         def __get__(self, instance, owner):
             if not instance or instance.rows is None:
                 return None
-            return [row['file'].value for row in instance.rows]
+            return [row['file'].value
+                    for row in instance.rows
+                    if row['file'].value is not None]
         def __set__(self, instance, value):
             if instance.rows is not None:
                 del instance.rows[:]
                 for file in value:
-                    instance.addRow(file)
+                    if file is not None:
+                        instance.addRow(file)
     value = FileListValue()

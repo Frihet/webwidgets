@@ -88,7 +88,7 @@ class DateInput(Input.StringInput):
             return ['']
         return [self.value.strftime(self.format)]
 
-    def classOutput(cls, window, outputOptions):
+    def classOutput(cls, session, arguments, outputOptions):
         path = outputOptions['file']
         assert not path.startswith('/')
         while path:

@@ -27,7 +27,9 @@ class Singleton(object):
         def __str__(self):
             return self.__name__
 
+DEFAULT_WIDGET_CLASS = 'Webwidgets.Program.Session'
 DEFAULT_WINDOW = 'default'
+DEFAULT_WIDGET = 'root'
 
 class OUTPUT(Singleton): pass
 class FINAL_OUTPUT(OUTPUT): pass

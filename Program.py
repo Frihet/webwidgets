@@ -85,7 +85,7 @@ class Program(WebKit.Page.Page):
         if not session.hasValue(servlet):
             session[servlet] = self.Session()
         session[servlet].program = self
-        return session[servlet].writeHTML()
+        return session[servlet].handleRequest()
 
     def webwareBase(self):
         """@return: A URL to where the Webware installation is serving
@@ -104,8 +104,7 @@ class Program(WebKit.Page.Page):
 
     def requestBase(self):
         """@return: A URL to this Webwidgets application."""
-        req = self.request()
-        return self.webwareBase() + req.servletURI() + '/'
+        return self.webwareBase() + self.request().servletURI()
 
     class Session(object):
         """The application programmer should subclass this class and
@@ -292,7 +291,7 @@ class Program(WebKit.Page.Page):
                             print "Field input:", path, fieldname, field.fieldOutput(path), value
                         field.fieldInput(path, *value)
 
-        def writeHTML(self):
+        def handleRequest(self):
             """Main processing method, called by WebWare. This method will
             notify widgets of changed input values, process any pending
             notifications and then redraw all widgets (unless output has
@@ -306,69 +305,95 @@ class Program(WebKit.Page.Page):
 
             # extraURLPath begins with a /, so remove the first empty item in location
             location = req.extraURLPath().split('/')[1:]            
-            winId = Constants.DEFAULT_WINDOW
+
+            baseOptions = {'widgetClass': Constants.DEFAULT_WIDGET_CLASS,
+                           'winId': Constants.DEFAULT_WINDOW,
+                           'widget': Constants.DEFAULT_WIDGET}
             if location and location[0].startswith('_'):
-                winId = location[0][1:]
+                baseOptions['widgetClass'] = location[0][1:]
                 location = location[1:]
+            if location and location[0].startswith('_'):
+                baseOptions['winId'] = location[0][1:]
+                location = location[1:]
+            if location and location[0].startswith('_'):
+                baseOptions['widget'] = location[0][1:]
+                location = location[1:]
+            baseOptions['location'] = location
 
-            window = self.getWindow(winId)
+            arguments = decodeFields(normalizeFields(cgi.parse_qs(req.queryString())))
+            arguments, outputOptions = filterArguments(arguments)
+            outputOptions.update(baseOptions)
+
+            obj = Utils.loadClass(outputOptions['widgetClass'])
+            assert issubclass(obj, Program.Session) or issubclass(obj, Widgets.Base.Widget)
+            fnName = 'classOutput'
+            if 'aspect' in outputOptions:
+                fnName += '_' + outputOptions['aspect']
+            outputFn = getattr(obj, fnName)
+
+            try:
+                self.output = outputFn(self, arguments, outputOptions)
+            except Constants.OutputGiven:
+                pass
+
+            if self.output is None:
+                self.output = {'Status': '404 No such window',
+                               'Content-Type': 'text/plain',
+                               Constants.OUTPUT: '404 No such window'}
+
+            for key, value in self.output.iteritems():
+                if key not in (Constants.OUTPUT, Constants.FINAL_OUTPUT):
+                    response.setHeader(key.encode('utf-8'), value.encode('utf-8'))
+            content = None
+            if Constants.OUTPUT in self.output:
+                content = self.output[Constants.OUTPUT]
+            if Constants.FINAL_OUTPUT in self.output:
+                content = self.output[Constants.FINAL_OUTPUT]
+            if isinstance(content, types.StringType):
+                self.program.write(content)
+            elif content is not None:
+                for item in content:
+                    self.program.write(item)
+
+        def classOutput(cls, session, arguments, outputOptions):
+            req = session.program.request()
+            response = session.program.response()
+
+            window = session.getWindow(outputOptions['winId'])
             if window:
-                arguments = decodeFields(normalizeFields(cgi.parse_qs(req.queryString())))
-                arguments, outputOptions = filterArguments(arguments)
-                self.processArguments(window, location, arguments)
+                session.processArguments(window, outputOptions['location'], arguments)
                 if req.method() == 'POST':
-                    self.processFields(window,
-                                       decodeFields(normalizeFields(req.fields())))
+                    session.processFields(window,
+                                          decodeFields(normalizeFields(req.fields())))
 
-                if self.output is None:
-                    if 'widgetClass' in outputOptions:
-                        obj = Utils.loadClass(outputOptions['widgetClass'])
-                        assert issubclass(obj, Widgets.Base.Widget)
-                        fnName = 'classOutput'
-                        args = (window, outputOptions)
-                    else:
-                        obj = window
-                        fnName = 'output'
-                        args = (outputOptions,)
-                        if 'widget' in outputOptions:
-                            for name in Utils.idToPath(outputOptions['widget']):
-                                obj = obj[name]
-                    if 'aspect' in outputOptions:
-                        fnName += '_' + outputOptions['aspect']
-                    outputFn = getattr(obj, fnName)
+                obj = window
+                fnName = 'output'
+                args = (outputOptions,)
+                if 'widget' in outputOptions:
+                    for name in Utils.idToPath(outputOptions['widget']):
+                        obj = obj[name]
+                if 'aspect' in outputOptions:
+                    fnName += '_' + outputOptions['aspect']
+                outputFn = getattr(obj, fnName)
 
-                    try:
-                        self.output = outputFn(*args)
-                    except Constants.OutputGiven:
-                        pass
-                    else:
-                        if not self.output or ('Location' not in self.output and Constants.FINAL_OUTPUT not in self.output):
-                            (newLocation, newArguments) = self.generateArguments(window)
-                            newArguments = normalizeFields(newArguments)
-                            if newLocation != location or newArguments != arguments:
-                                if self.debugArguments:
-                                    print "Old: %s: %s" %(location, arguments)
-                                    print "New: %s: %s" % (newLocation, newArguments)
-                                self.redirect(winId, newLocation, newArguments, outputOptions)
+                res = outputFn(*args)
+                if (not res
+                    or (    'Location' not in res
+                        and Constants.FINAL_OUTPUT not in res)):
+                    (newLocation, newArguments) = session.generateArguments(window)
+                    newArguments = normalizeFields(newArguments)
+                    if (   newLocation != outputOptions['location']
+                        or newArguments != arguments):
+                        if session.debugArguments:
+                            print "Old: %s: %s" % (outputOptions['location'], arguments)
+                            print "New: %s: %s" % (newLocation, newArguments)
+                        session.redirect(
+                            Utils.subclassDict(outputOptions,
+                                               {'location': newLocation}),
 
-            if self.output is not None:
-                for key, value in self.output.iteritems():
-                    if key not in (Constants.OUTPUT, Constants.FINAL_OUTPUT):
-                        response.setHeader(key.encode('utf-8'), value.encode('utf-8'))
-                content = None
-                if Constants.OUTPUT in self.output:
-                    content = self.output[Constants.OUTPUT]
-                if Constants.FINAL_OUTPUT in self.output:
-                    content = self.output[Constants.FINAL_OUTPUT]
-                if isinstance(content, types.StringType):
-                    self.program.write(content)
-                elif content is not None:
-                    for item in content:
-                        self.program.write(item)
-            else:
-                response.setHeader('Status', '404 No such window')
-                response.setHeader('Content-Type', 'text/plain')
-                self.program.writeln('404 No such window')
+                            newArguments)
+                return res
+        classOutput = classmethod(classOutput)
 
         def notify(self, *arg, **kw):
             """Enques a message (method name and arguments) for a
@@ -387,12 +412,27 @@ class Program(WebKit.Page.Page):
             """
             self.Notification(*arg, **kw).process()
 
-        def calculateUrl(self, winId, location, arguments, outputOptions):
-            path = self.program.requestBase()
-            if winId != Constants.DEFAULT_WINDOW:
-                path += '/_' + winId
-            if location:
-                path += '/' + '/'.join(location)
+        def calculateUrl(self, outputOptions, arguments):
+            path = [self.program.requestBase()]
+
+            if (   (    'widgetClass' in outputOptions
+                    and outputOptions['widgetClass'] != Constants.DEFAULT_WIDGET_CLASS)
+                or (    'winId' in outputOptions
+                    and outputOptions['winId'] != Constants.DEFAULT_WINDOW)
+                or (    'widget' in outputOptions
+                    and outputOptions['widget'] != Constants.DEFAULT_WIDGET)):
+                path.append('_' + outputOptions.get('widgetClass', Constants.DEFAULT_WIDGET_CLASS))
+                if (   (    'winId' in outputOptions
+                        and outputOptions['winId'] != Constants.DEFAULT_WINDOW)
+                    or (    'widget' in outputOptions
+                        and outputOptions['widget'] != Constants.DEFAULT_WIDGET)):
+                    path.append('_' + outputOptions.get('winId', Constants.DEFAULT_WINDOW))
+                    if (    'widget' in outputOptions
+                        and outputOptions['widget'] != Constants.DEFAULT_WIDGET):
+                        path.append('_' + outputOptions['widget'])
+                
+            if 'location' in outputOptions and outputOptions['location']:
+                path.extend(outputOptions['location'])
 
             urlArgList = []
             for key, value in arguments.iteritems():
@@ -400,16 +440,19 @@ class Program(WebKit.Page.Page):
                 for valuePart in value:
                     urlArgList.append((key, valuePart))
             for key, value in outputOptions.iteritems():
-                if not isinstance(value, list): value = [value]
-                for valuePart in value:
-                    urlArgList.append(('_' + key, valuePart))
+                if key not in ('widgetClass', 'winId', 'widget', 'location'):
+                    if not isinstance(value, list): value = [value]
+                    for valuePart in value:
+                        urlArgList.append(('_' + key, valuePart))
 
-            return path + '?' + urllib.urlencode(urlArgList)
+            return '/'.join(path) + '?' + urllib.urlencode(urlArgList)
 
-        def redirect(self, winId, location, arguments, outputOptions):
+        def redirect(self, outputOptions, arguments):
             self.output = {'Status': '303 See Other',
-                           'Location': self.calculateUrl(winId, location, arguments, outputOptions)}
-
+                           'Location': self.calculateUrl(outputOptions,
+                                                         arguments)}
+            raise Constants.OutputGiven
+        
         def newWindow(self, winId):
             """You should override this to return a Window instance in
             your own application."""

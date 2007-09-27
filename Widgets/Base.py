@@ -260,14 +260,14 @@ class Widget(object):
                                                        'aspect': 'script'},
                                                       {}))
 
-    def classOutput_style(cls, window, outputOptions):
+    def classOutput_style(cls, session, arguments, outputOptions):
         return cls.widgetStyle
     classOutput_style = classmethod(classOutput_style)
 
     def output_style(self, outputOptions):
         return self.widgetStyle
 
-    def classOutput_script(cls, window, outputOptions):
+    def classOutput_script(cls, session, arguments, outputOptions):
         return cls.widgetScript
     classOutput_script = classmethod(classOutput_script)
 
@@ -324,10 +324,17 @@ class Widget(object):
                                                                                                                               'value': value})
 
     def calculateUrl(self, outputOptions, arguments = None):
-        location, generatedArguments = self.session.generateArguments(self.session.getWindow(self.winId))
-        if arguments is None: arguments = generatedArguments
-        return self.session.calculateUrl(self.winId, location, arguments,
-                                         outputOptions)
+        outputOptions = dict(outputOptions)
+        location, newArguments = self.session.generateArguments(
+            self.session.getWindow(self.winId))
+        if arguments is None:
+            arguments = newArguments
+        if 'winId' not in outputOptions:
+            outputOptions['winId'] = self.winId
+        if 'location' not in outputOptions:
+            outputOptions['location'] = location
+        return self.session.calculateUrl(outputOptions,
+                                         arguments)
         
     def getLanguages(self, outputOptions):
         def parseLanguages(languages):
