@@ -29,6 +29,7 @@ application.
 import WebKit.Page
 import cgi, urllib, types, os
 import Utils, Widgets, AccessManager, Constants
+import hotshot, pdb
 
 def decodeField(value):
     if isinstance(value, types.StringType):
@@ -78,14 +79,40 @@ class Program(WebKit.Page.Page):
     method.
     """
 
+    profile = True
+    debug = False
+    
+    requestNr = 0
+
     def writeHTML(self):
         """Main processing method, called by WebWare."""
+
+        self.requestNr += 1
+        
         session = self.session()
         servlet = self.request().servletURI()
         if not session.hasValue(servlet):
             session[servlet] = self.Session()
         session[servlet].program = self
-        return session[servlet].handleRequest()
+        fn = session[servlet].handleRequest
+
+        if self.profile:
+            nonProfiledFn = fn
+            def profileFn():
+                profiler = hotshot.Profile("webwidgets.profile.request.%s" % self.requestNr)
+                try:
+                    return profiler.runcall(nonProfiledFn)
+                finally:
+                    profiler.close()
+            fn = profileFn
+
+        if self.debug:
+            nondebuggedFn = fn
+            def debugFn():
+                return pdb.runcall(nondebuggedFn)
+            fn = debugFn
+
+        return fn()
 
     def webwareBase(self):
         """@return: A URL to where the Webware installation is serving
