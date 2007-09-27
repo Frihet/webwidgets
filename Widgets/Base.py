@@ -87,6 +87,10 @@ class Widget(object):
     """The (human readable) title for the widget, used for pages,
     items in lists etc. If None, the widget path is used."""
 
+    root = False
+    parent = None
+    name = None
+
     class __metaclass__(type):
         def __new__(cls, name, bases, members):
             members = dict(members)
@@ -141,7 +145,7 @@ class Widget(object):
 
     class htmlId(object):
         def __get__(self, instance, owner):
-            if not hasattr(instance, 'parent'):
+            if instance.parent is None:
                 return None
             return Webwidgets.Utils.pathToId(instance.path)
     html_id = htmlId()
@@ -157,7 +161,7 @@ class Widget(object):
 
     class HtmlAttributes(object):
         def __get__(self, instance, owner):
-            if not hasattr(instance, 'parent'):
+            if instance.parent is None:
                 return None
             return instance.drawHtmlAttributes(instance.path)            
     htmlAttributes = HtmlAttributes()
@@ -165,11 +169,15 @@ class Widget(object):
     class Path(object):
         def __get__(self, instance, owner):
             """Returns the path of the widget within the widget tree."""
-            if not hasattr(instance, 'parent'):
+            node = instance
+            path = []
+            while node.parent and not node.root:
+                path.append(node.name)
+                node = node.parent
+            if not node.root:
                 return None
-            if instance.parent.path is None:
-                return None
-            return instance.parent.path + [instance.name]
+            path.reverse()
+            return path
     path = Path()
 
     class Window(object):
@@ -672,13 +680,13 @@ class Window(Widget):
     headers = {'Status': '404 Page not implemented'}
     languages = None
 
+    root = True
+    path = []
+    
     def __init__(self, session, winId, **attrs):
         super(Window, self).__init__(session, winId, **attrs)
         self.fields = {}
         self.arguments = {}
-
-    path = []
-
     def output(self, outputOptions):
         result = {Webwidgets.Constants.OUTPUT: self.draw(outputOptions)}
         result.update(self.headers)

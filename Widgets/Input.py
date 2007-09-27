@@ -291,7 +291,7 @@ class FileInput(Base.ValueInput, Base.StaticComposite):
     class preview(Formatting.Media):
         class Content(object):
             def __get__(self, instance, owner):
-                if not hasattr(instance, 'parent'):
+                if instance.parent is None:
                     return None
                 return instance.parent.value
         content = Content()

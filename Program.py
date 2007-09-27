@@ -144,6 +144,10 @@ class Program(WebKit.Page.Page):
         debugFieldInput = False
         debugReceiveNotification = False
 
+        root = True
+        parent = None
+        name = None
+
         def __init__(self):
             self.windows = Widgets.Base.ChildNodes(self)
             self.notifications = []
@@ -180,7 +184,7 @@ class Program(WebKit.Page.Page):
             path = Path()
 
             def parent(self):
-                if not hasattr(self.widget, 'parent'):
+                if self.widget.parent is None:
                     raise StopIteration()
                 return type(self)(self.widget.parent, self.message, self.args, self.kw, self.path)
 

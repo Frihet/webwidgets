@@ -6,7 +6,7 @@ class CssFileEditor(object):
     class input(object):
         class Value(object):
             def __get__(self, instance, owner):
-                if not hasattr(instance, 'parent'):
+                if instance.parent is None:
                     return None
                 return instance.parent.value
             def __set__(self, instance, value):
@@ -21,7 +21,7 @@ class CssFileEditor(object):
 
         class Content(object):
             def __get__(self, instance, owner):
-                if not hasattr(instance, 'parent'):
+                if instance.parent is None:
                     return None
                 return instance.parent.value
         content = Content()
