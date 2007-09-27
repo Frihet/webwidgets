@@ -87,7 +87,7 @@ class Program(WebKit.Page.Page):
     def writeHTML(self):
         """Main processing method, called by WebWare."""
 
-        self.requestNr += 1
+        type(self).requestNr += 1
         
         session = self.session()
         servlet = self.request().servletURI()
@@ -99,7 +99,8 @@ class Program(WebKit.Page.Page):
         if self.profile:
             nonProfiledFn = fn
             def profileFn():
-                profiler = hotshot.Profile("webwidgets.profile.request.%s" % self.requestNr)
+                profiler = hotshot.Profile("webwidgets.profile.request.%s" % type(self).requestNr)
+                profiler.addinfo('url', self.requestBase() + self.request().extraURLPath() + '?' + self.request().queryString())
                 try:
                     return profiler.runcall(nonProfiledFn)
                 finally:
