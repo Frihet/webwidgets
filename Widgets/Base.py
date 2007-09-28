@@ -96,7 +96,11 @@ class Widget(object):
             members = dict(members)
             classes = []
             if '__no_classes_name__' not in members or not members['__no_classes_name__']:
-                classes.append(members['__module__'] + '.' + name)
+                clsName = members['__module__']
+                if '__classPath__' in members and members['__classPath__']:
+                    clsName += '.' + members['__classPath__']
+                clsName += '.' + name
+                classes.append(clsName)
             if '__no_classes_name__' in members:
                 del members['__no_classes_name__'] # No inheritance! This is a magic marker, not an attribute
             for base in bases:

@@ -40,7 +40,7 @@ debugLoader = False
 debugSubclass = False
 
 markupCleanSpaceRe = re.compile(r'[ \t\n]+')
-def generatePartsForNode(module, node, using = [], context = [], htmlContext = []):
+def generatePartsForNode(module, node, using = [], classPath = [], bindContext = [], htmlContext = []):
     attributes = []
     texts = []
     for child in node.childNodes:
@@ -53,15 +53,15 @@ def generatePartsForNode(module, node, using = [], context = [], htmlContext = [
                 if child.localName == 'variable':
                      texts.append("%(" + child.attributes.get('id').value + ")s")
                 elif child.localName == 'pre':
-                    subAttrs, subText = generatePartsForNode(module, child, using, context, htmlContext)
+                    subAttrs, subText = generatePartsForNode(module, child, using, classPath, bindContext, htmlContext)
                     attributes.extend(subAttrs)
                     attributes.append((':pre', subText))
                 elif child.localName == 'post':
-                    subAttrs, subText = generatePartsForNode(module, child, using, context, htmlContext)
+                    subAttrs, subText = generatePartsForNode(module, child, using, classPath, bindContext, htmlContext)
                     attributes.extend(subAttrs)
                     attributes.append((':post', subText))
                 else:
-                    id, classid, value = generateValueForNode(module, child, using, context)
+                    id, classid, value = generateValueForNode(module, child, using, classPath, bindContext)
                     if isinstance(value, types.TypeType):
                         if issubclass(value, Webwidgets.Widgets.Base.Widget) and id:
                             texts.append("%(" + id + ")s")
@@ -74,7 +74,7 @@ def generatePartsForNode(module, node, using = [], context = [], htmlContext = [
                     module,
                     child,
                     using,
-                    context,
+                    bindContext,
                     htmlContext = htmlContext + [childAttributesValues.get('id', child.localName)])
                 if 'id' in childAttributesValues:
                     childAttributesValues['id'] = "%(attr_html_id)s_" + "-".join(htmlContext + [childAttributesValues['id']])
@@ -120,7 +120,7 @@ def mangleAttributeValue(value):
     elif type == 'time': return datetime.datetime(*(time.strptime(value, '%Y-%m-%d %H:%M:%S')[0:6]))
     raise Exception("Unknown type: %s for value '%s'" % (type, value))
 
-def generateValueForNode(module, node, using = [], context = []):
+def generateValueForNode(module, node, using = [], classPath = [], bindContext = []):
     if not node.nodeType == node.ELEMENT_NODE:
         raise Exception('Non element node given to generateValueForNode: %s' % str(node))
     # Yes, ordered dict here, since we mix it with child nodes further
@@ -140,11 +140,13 @@ def generateValueForNode(module, node, using = [], context = []):
         using = attributes['using'].split(' ') + using
 
     if 'bind' in attributes:
-        context = attributes['bind'].split('.')
+        bindContext = attributes['bind'].split('.')
     else:
-        context = context + [attributes.get('classid', '__unknown__')]
+        bindContext = bindContext + [attributes.get('classid', '__unknown__')]
 
-    children, text = generatePartsForNode(module, node, using, context)
+    classPath = classPath + [attributes.get('classid', '__unknown__')]
+
+    children, text = generatePartsForNode(module, node, using, classPath, bindContext)
     attributes.update(children)
 
     if node.localName == 'false': value = False
@@ -171,7 +173,7 @@ def generateValueForNode(module, node, using = [], context = []):
             setattr(value, k, v)
         attributes['classid'] = 'wwml'
     else:
-        callbackName = '.'.join(context)
+        callbackName = '.'.join(bindContext)
         if debugSubclass:
             print "WWML: class %s(%s): pass" % (callbackName, node.localName)
             print "WWML:     using: %s" % ' '.join(using)
@@ -213,6 +215,7 @@ def generateValueForNode(module, node, using = [], context = []):
                 attributes['__explicit_load__'] = True
             if '__wwml_html_override__' not in attributes:
                 attributes['__wwml_html_override__'] = False
+            attributes['__classPath__'] = '.'.join(classPath[1:-1]) # Remove both the wwml-tag and self
             attributes['__module__'] = module.__name__
             #print baseCls
             try:
@@ -239,12 +242,12 @@ def generateValueForNode(module, node, using = [], context = []):
     return attributes.get('id', None), attributes.get('classid', None), value
 
 
-def generateWidgetsFromFile(modulename, filename, file, path = None, context = ''):
+def generateWidgetsFromFile(modulename, filename, file, path = None, bindContext = ''):
     if debugLoader: print "generateWidgetsFromFile(%s, %s)" % (modulename, filename)
-    if context:
-        context = context.split('.')
+    if bindContext:
+        bindContext = bindContext.split('.')
     else:
-        context = []
+        bindContext = []
     module = types.ModuleType(modulename)
     module.__file__ = filename
     if path is not None:
@@ -263,7 +266,9 @@ def generateWidgetsFromFile(modulename, filename, file, path = None, context = '
     return generateValueForNode(
         module,
         domNode,
-        ['Webwidgets'], context)[2]
+        ['Webwidgets'],
+        [],
+        bindContext)[2]
 
 import imp, ihooks
 
