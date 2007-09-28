@@ -230,7 +230,7 @@ class Widget(object):
                          if value])
 
     def drawAttributes(self, outputOptions):
-        return Webwidgets.Utils.OrderedDict([('attr_' + key, self._(unicode(getattr(self, key)), outputOptions))
+        return Webwidgets.Utils.OrderedDict([('attr_' + key, self._(getattr(self, key), outputOptions))
                                              for key in self.__attributes__])
 
     def draw(self, outputOptions):
@@ -458,7 +458,7 @@ class Composite(Widget):
         else:
             if not self.session.AccessManager(Webwidgets.Constants.VIEW, self.winId, path):
                 return invisible
-            return self._(unicode(child), outputOptions)
+            return self._(child, outputOptions)
 
     def drawChildren(self, outputOptions, invisibleAsEmpty = False, includeAttributes = False):
         """Renders all child widgets to HTML using their draw methods.

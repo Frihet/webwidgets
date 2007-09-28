@@ -242,7 +242,7 @@ class TabbedView(Base.ActionInput, Base.StaticComposite):
                           """ % {'disabled': ['', 'disabled="disabled"'][page == self.page or not active],
                                  'attr_html_id': widgetId,
                                  'page':page,
-                                 'caption':child.getTitle(self.path + [page])}
+                                 'caption':child._(child.getTitle(self.path + [page]), outputOptions)}
                           for page, child in self.getChildren()
                           #### fixme ####
                           # name = "Child must be widget"

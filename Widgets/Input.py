@@ -143,7 +143,7 @@ class Button(Base.ActionInput):
         return '<input %(attr_htmlAttributes)s type="submit" %(disabled)s name="%(name)s" value="%(title)s" />' % {
             'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
             'name': Webwidgets.Utils.pathToId(self.path),
-            'title': self.title,
+            'title': self._(self.title, outputOptions),
             'disabled': ['', 'disabled="disabled"'][not self.getActive(self.path)]}
 
 class UpdateButton(Base.ActionInput):
@@ -156,7 +156,7 @@ class UpdateButton(Base.ActionInput):
         Base.ActionInput.draw(self, outputOptions)
         info = {'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
                 'id': Webwidgets.Utils.pathToId(self.path),
-                'title': self.title,
+                'title': self._("Update", outputOptions),
                 'disabled': ['', 'disabled="disabled"'][not self.getActive(self.path)]}
         self.registerScript('updateButton: %(id)s' % info,
                             """
@@ -166,7 +166,7 @@ class UpdateButton(Base.ActionInput):
                               document.getElementById('%(id)s').style.display = 'none';
                              });
                             """ % info)
-        return '<input %(attr_htmlAttributes)s type="submit" %(disabled)s name="%(id)s" value="Update" />' % info
+        return '<input %(attr_htmlAttributes)s type="submit" %(disabled)s name="%(id)s" value="%(title)s" />' % info
 
     def fieldInput(self, path, stringValue):
         pass

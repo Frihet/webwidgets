@@ -48,6 +48,7 @@ class NullTranslations(gettext.NullTranslations):
         raise UntranslatableError()
 
     def _(self, message):
+        message = unicode(message)
         try:
             return self.ugettext(message)
         except UntranslatableError:

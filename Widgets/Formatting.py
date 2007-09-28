@@ -320,7 +320,7 @@ class Label(Base.StaticComposite):
         res = self.drawChildren(outputOptions, includeAttributes = True)
         res['error'] = ''
         if target.error is not None:
-           res['error'] = """ <span class="error">(%s)</span>""" % (target.error,)
+           res['error'] = """ <span class="error">(%s)</span>""" % (target._(target.error, outputOptions),)
         res['target'] = Webwidgets.Utils.pathToId(targetPath)
         return """<label %(attr_htmlAttributes)s for="%(target)s">%(label)s%(error)s</label>""" % res
 
