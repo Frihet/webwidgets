@@ -28,8 +28,8 @@ generic base classes that can be used when implementing more elaborate
 widgets.
 """
 
-import types, xml.sax.saxutils, os.path, cgi, re
-import Webwidgets.Utils, Webwidgets.Constants
+import types, xml.sax.saxutils, os.path, cgi, re, sys
+import Webwidgets.Utils, Webwidgets.Utils.Gettext, Webwidgets.Constants
 
 debugNotifications = False
 
@@ -360,6 +360,22 @@ class Widget(object):
             return parseLanguages(self.session.program.request().environ().get('HTTP_ACCEPT_LANGUAGE', 'en'))
 
         return []
+
+    def getTranslations(self, outputOptions, languages = None):
+        if languages is None:
+            languages = self.getLanguages(outputOptions)
+
+        localedirs = []
+        def classToLocaledirs(cls):
+            module = sys.modules[cls.__module__]
+            if not hasattr(module, '__file__'):
+                return
+            localedirs.append(os.path.splitext(module.__file__)[0] + '.translations')
+            for base in cls.__bases__:
+                classToLocaledirs(base)
+        classToLocaledirs(type(self))
+
+        return Webwidgets.Utils.Gettext.translations("Webwidgets", localedirs, languages)
 
     def __unicode__(self):
         return "<%(module)s.%(name)s/%(path)s at %(id)s>" % {'module': type(self).__module__,
