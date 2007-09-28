@@ -350,8 +350,8 @@ class Widget(object):
         
     def getLanguages(self, outputOptions):
         def parseLanguages(languages):
-            return [item.split(';')[0]
-                    for item in languages.split(',')]
+            return tuple([item.split(';')[0]
+                          for item in languages.split(',')])
         
         if 'languages' in outputOptions:
             return parseLanguages(outputOptions['languages'])
@@ -363,22 +363,25 @@ class Widget(object):
                 return self.session.languages
             return parseLanguages(self.session.program.request().environ().get('HTTP_ACCEPT_LANGUAGE', 'en'))
 
-        return []
+        return ()
 
     def __getTranslations__(cls, languages, fallback = False):
-        obj = Webwidgets.Utils.Gettext.NullTranslations()
-        for base in cls.__bases__:
-            if hasattr(base, '__getTranslations__'):
-                obj = base.__getTranslations__(languages, fallback = obj)
-        module = sys.modules[cls.__module__]
-        if hasattr(module, '__file__'):
-            localedir = os.path.splitext(module.__file__)[0] + '.translations'
-            obj = Webwidgets.Utils.Gettext.translation(
-                domain = "Webwidgets",
-                localedir = localedir,
-                languages = languages,
-                fallback = obj)
-        return obj
+        if not hasattr(cls, '__translations__'): cls.__translations__ = {}
+        if languages not in cls.__translations__:
+            obj = Webwidgets.Utils.Gettext.NullTranslations()
+            for base in cls.__bases__:
+                if hasattr(base, '__getTranslations__'):
+                    obj = base.__getTranslations__(languages, fallback = obj)
+            module = sys.modules[cls.__module__]
+            if hasattr(module, '__file__'):
+                localedir = os.path.splitext(module.__file__)[0] + '.translations'
+                obj = Webwidgets.Utils.Gettext.translation(
+                    domain = "Webwidgets",
+                    localedir = localedir,
+                    languages = languages,
+                    fallback = obj)
+            cls.__translations__[languages] = obj
+        return cls.__translations__[languages]
     __getTranslations__ = classmethod(__getTranslations__)
 
     def getTranslations(self, outputOptions, languages = None):

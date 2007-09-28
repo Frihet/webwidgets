@@ -44,7 +44,7 @@ class LanguageSelector(LanguageInput):
                 return instance.getLanguages({})[0]
             return instance.session.languages[0]
         def __set__(self, instance, value):
-            instance.session.languages = [value]
+            instance.session.languages = (value,)
     value = Value()
 
 class Dialog(Formatting.Html):
