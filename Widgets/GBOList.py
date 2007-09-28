@@ -408,7 +408,8 @@ class GBOList(Base.ActionInput, Base.Composite):
     def drawPrintableLink(self, outputOptions):
         location = self.calculateUrl({'widget': Webwidgets.Utils.pathToId(self.path),
                                       'printableVersion': 'yes'})
-        return """<a class="printable" href="%(location)s">Printable version</a>""" % {
+        return """<a class="printable" href="%(location)s">%(caption)s</a>""" % {
+            'caption': self._("Printable version", outputOptions),
             'location': cgi.escape(location),
             }
 
@@ -431,7 +432,7 @@ class GBOList(Base.ActionInput, Base.Composite):
                 value="selected">%(title)s</button>""" % {'attr_html_id': Webwidgets.Utils.pathToId(self.path + ['_', 'groupFunction', function]),
                                                           'attr_html_class': function,
                                                           'disabled': ['disabled="disabled"', ''][functionActive[function]],
-                                                          'title': title}
+                                                          'title': self._(title, outputOptions)}
             for function, title in self.groupFunctions.iteritems()])
 
     def drawButtons(self, outputOptions):
@@ -463,7 +464,7 @@ class GBOList(Base.ActionInput, Base.Composite):
                     'attr_html_id': widgetId,
                     'column': column,
                     'disabled': ['disabled="disabled"', ''][sortActive],
-                    'caption': title,
+                    'caption': self._(title, outputOptions),
                     'classes': sortToClasses(self.sort, reverseDependentColumns.get(column, column)),
                     'sort': sortToString(setSort(self.sort, reverseDependentColumns.get(column, column)))
                     }
@@ -507,7 +508,7 @@ class GBOList(Base.ActionInput, Base.Composite):
                         value="%(row)s">%(title)s</button>""" % {'attr_html_id': Webwidgets.Utils.pathToId(self.path + ['_', 'function', function]),
                                                                  'attr_html_class': function,
                                                                  'disabled': ['disabled="disabled"', ''][functionActive[function]],
-                                                                 'title': title,
+                                                                 'title': self._(title, outputOptions),
                                                                  'row': rowNum}
                     for function, title in self.functions.iteritems()])
                 rows[rowNum].insert(functionPosition, functions)

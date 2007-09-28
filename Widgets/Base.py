@@ -230,7 +230,7 @@ class Widget(object):
                          if value])
 
     def drawAttributes(self, outputOptions):
-        return Webwidgets.Utils.OrderedDict([('attr_' + key, getattr(self, key))
+        return Webwidgets.Utils.OrderedDict([('attr_' + key, self._(unicode(getattr(self, key)), outputOptions))
                                              for key in self.__attributes__])
 
     def draw(self, outputOptions):
@@ -361,21 +361,29 @@ class Widget(object):
 
         return []
 
+    def __getTranslations__(cls, languages, fallback = False):
+        obj = Webwidgets.Utils.Gettext.NullTranslations()
+        for base in cls.__bases__:
+            if hasattr(base, '__getTranslations__'):
+                obj = base.__getTranslations__(languages, fallback = obj)
+        module = sys.modules[cls.__module__]
+        if hasattr(module, '__file__'):
+            localedir = os.path.splitext(module.__file__)[0] + '.translations'
+            obj = Webwidgets.Utils.Gettext.translation(
+                domain = "Webwidgets",
+                localedir = localedir,
+                languages = languages,
+                fallback = obj)
+        return obj
+    __getTranslations__ = classmethod(__getTranslations__)
+
     def getTranslations(self, outputOptions, languages = None):
         if languages is None:
             languages = self.getLanguages(outputOptions)
+        return self.__getTranslations__(languages)
 
-        localedirs = []
-        def classToLocaledirs(cls):
-            module = sys.modules[cls.__module__]
-            if not hasattr(module, '__file__'):
-                return
-            localedirs.append(os.path.splitext(module.__file__)[0] + '.translations')
-            for base in cls.__bases__:
-                classToLocaledirs(base)
-        classToLocaledirs(type(self))
-
-        return Webwidgets.Utils.Gettext.translations("Webwidgets", localedirs, languages)
+    def _(self, message, outputOptions):
+        return self.getTranslations(outputOptions)._(message)
 
     def __unicode__(self):
         return "<%(module)s.%(name)s/%(path)s at %(id)s>" % {'module': type(self).__module__,
@@ -450,7 +458,7 @@ class Composite(Widget):
         else:
             if not self.session.AccessManager(Webwidgets.Constants.VIEW, self.winId, path):
                 return invisible
-            return unicode(child)
+            return self._(unicode(child), outputOptions)
 
     def drawChildren(self, outputOptions, invisibleAsEmpty = False, includeAttributes = False):
         """Renders all child widgets to HTML using their draw methods.

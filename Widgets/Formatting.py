@@ -77,8 +77,8 @@ class Html(Base.StaticComposite):
             outputOptions,
             invisibleAsEmpty = True,
             includeAttributes = True)
+        html = self._(self.html, outputOptions)
         try:
-            html = self.html
             if self.topLevel is not None:
                 html = "<%(attr_topLevel)s %(attr_htmlAttributes)s>" + html + "</%(attr_topLevel)s>"
             return html % children

@@ -9,7 +9,7 @@
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; version 2 of the License.
+# the Free Software Founda; version 2 of the License.
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -46,6 +46,12 @@ class NullTranslations(gettext.NullTranslations):
         if self._fallback:
             return self._fallback.ungettext(msgid1, msgid2, n)
         raise UntranslatableError()
+
+    def _(self, message):
+        try:
+            return self.ugettext(message)
+        except UntranslatableError:
+            return message
 
 class GNUTranslations(gettext.GNUTranslations, NullTranslations):
     def __init__(self, *arg, **kw):
@@ -95,14 +101,3 @@ def translation(domain, localedir=None, languages=None,
             return fallback
         else:
             raise e
-
-def translations(domain, localedirs=None, languages=None,
-                 class_=GNUTranslations, fallback=False):
-    if not localedirs:
-        return translation(domain = domain, localedir = localedirs, languages = languages, fallback = fallback)
-    localedirs = list(localedirs)
-    localedirs.reverse()
-    obj = NullTranslations()
-    for localedir in localedirs:
-        obj = translation(domain = domain, localedir = localedir, languages = languages, fallback = obj)
-    return obj

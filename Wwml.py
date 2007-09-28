@@ -213,7 +213,7 @@ def generateValueForNode(module, node, using = [], context = []):
                 attributes['__explicit_load__'] = True
             if '__wwml_html_override__' not in attributes:
                 attributes['__wwml_html_override__'] = False
-            attributes['__module__'] = '.'.join(context[:-1])
+            attributes['__module__'] = module.__name__
             #print baseCls
             try:
                 value = types.TypeType(str(attributes['classid']),
