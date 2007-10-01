@@ -258,20 +258,20 @@ input.error {
  border-top: 1px solid black;
 }
 
-.Webwidgets-Widgets-CssFileEditorCallbacks-CssFileEditor {
+.Webwidgets-Widgets-CssFileEditor-CssFileEditor {
  display: table;
 }
 
-.Webwidgets-Widgets-CssFileEditorCallbacks-CssFileEditor > div {
+.Webwidgets-Widgets-CssFileEditor-CssFileEditor > div {
  display: table-cell;
  vertical-align: top;
 }
 
-.Webwidgets-Widgets-CssFileEditorCallbacks-CssFileEditor > div > a {
+.Webwidgets-Widgets-CssFileEditor-CssFileEditor > div > a {
  display: block;
 }
 
-.Webwidgets-Widgets-CssFileEditorCallbacks-CssFileEditor a iframe {
+.Webwidgets-Widgets-CssFileEditor-CssFileEditor a iframe {
  border: 1px solid black;
  display: block;
 }
@@ -292,10 +292,10 @@ input.error {
  text-align: left;
 }
 
-.Webwidgets-Widgets-FileEditorCallbacks-FileEditor {
+.Webwidgets-Widgets-FileEditor-FileEditor {
  border: 1px solid black;
  display: table;
 }
 
-.Webwidgets-Widgets-FileEditorCallbacks-FileEditor-editors {
+.Webwidgets-Widgets-FileEditor-FileEditor-editors {
 }

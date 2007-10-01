@@ -74,6 +74,7 @@ def generatePartsForNode(module, node, using = [], classPath = [], bindContext =
                     module,
                     child,
                     using,
+                    classPath,
                     bindContext,
                     htmlContext = htmlContext + [childAttributesValues.get('id', child.localName)])
                 if 'id' in childAttributesValues:
@@ -175,7 +176,7 @@ def generateValueForNode(module, node, using = [], classPath = [], bindContext =
     else:
         callbackName = '.'.join(bindContext)
         if debugSubclass:
-            print "WWML: class %s(%s): pass" % (callbackName, node.localName)
+            print "WWML: class %s(%s, %s): pass" % (attributes['classid'], callbackName, node.localName)
             print "WWML:     using: %s" % ' '.join(using)
         nodeValue = Utils.loadClass(node.localName, using, module = module)
         if isinstance(nodeValue, types.TypeType) and issubclass(nodeValue, Webwidgets.Widgets.Base.Widget):
