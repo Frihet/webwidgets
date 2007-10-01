@@ -30,15 +30,25 @@
 
   <w:Html id="body">
 
-   <w:FileEditorList id="fileditorlisttest" />
-   <w:FileEditor id="fileditortest" />
-   <w:StringInput id="longtext" cols=":integer:20" rows=":integer:10">
-    <w:string id="value">
-Hej allla barn,
-nu är det branprogram!
-Titta här skall ni få se vad farbror frej tar fram!
-    </w:string>
-   </w:StringInput>
+   <w:TabbedView id="tabs" page=":path:first">
+    <w:Tabset id="first" title="First menu">
+     <w:Html id="first" title="First item">
+      <w:FileEditorList id="fileditorlisttest" />
+      <w:FileEditor id="fileditortest" />
+     </w:Html>
+     <w:Html id="second" title="Second item">
+      <w:StringInput id="longtext" cols=":integer:20" rows=":integer:10">
+       <w:string id="value">
+ Hej allla barn,
+ nu är det branprogram!
+ Titta här skall ni få se vad farbror frej tar fram!
+       </w:string>
+      </w:StringInput>
+     </w:Html>
+    </w:Tabset>
+    <w:Html id="second" title="Second menu">The third page</w:Html>
+   </w:TabbedView>
+
    Last password: <w:Html id="lastpwd" /><br />
    <w:Field id='newpwd' label='New password'><w:NewPasswordInput id="field" value="foo" /></w:Field>
    <w:Button id="pwdclear" title="Clear new password" />
@@ -50,12 +60,6 @@ Titta här skall ni få se vad farbror frej tar fram!
    <w:DateInput id="date" value=":time:1998-01-01 22:33:34" />
 
    <!-- w:FileInput id="file" / -->
-
-   <w:TabbedView id="tabs" page="first">
-    <w:Html id="first" title="First">The first page</w:Html>
-    <w:Html id="second" title="Second">The second page</w:Html>
-    <w:Html id="third" title="Third">The third page</w:Html>
-   </w:TabbedView>
 
    <w:GBOList id="ListTest" argumentName='test' rowsPerPage=":integer:20">
     <w:dict id="functions" copy="C" edit="E" delete="D" />

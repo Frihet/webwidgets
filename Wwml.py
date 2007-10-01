@@ -116,6 +116,8 @@ def mangleAttributeValue(value):
     elif type == 'true': return True
     elif type == 'none': return None
     elif type == 'string': return value
+    elif type == 'id': return Utils.idToPath(value)
+    elif type == 'path': return Utils.RelativePath(value, pathAsList = True)
     elif type == 'integer': return int(value)
     elif type == 'float': return float(value)
     elif type == 'time': return datetime.datetime(*(time.strptime(value, '%Y-%m-%d %H:%M:%S')[0:6]))
@@ -154,6 +156,8 @@ def generateValueForNode(module, node, using = [], classPath = [], bindContext =
     elif node.localName == 'true': value = True
     elif node.localName == 'none': value = None
     elif node.localName == 'string': value = text
+    elif node.localName == 'id': value = Utils.idToPath(text)
+    elif node.localName == 'path': value = Utils.RelativePath(text, pathAsList = True)
     elif node.localName == 'integer': value = int(text)
     elif node.localName == 'float': value = float(text)
     elif node.localName == 'time': value = datetime.datetime(*(time.strptime(text, '%Y-%m-%d %H:%M:%S')[0:6]))

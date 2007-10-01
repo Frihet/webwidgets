@@ -129,12 +129,12 @@ class RelativePath(object):
     Example: 3/foo/bar/fie means go three levels up, then down along
     the branch foo and bar and end up at the node fie.
     """
-    def __init__(self, path, levels = 0):
+    def __new__(cls, path, levels = 0, pathAsList = False):
         """Create a new RelativePath instance. There are three formats
         for creating RelativePath instances:
 
          - 'RelativePath(string path)' The string should be of the
-           format 3/foo/bar/fie, which is also the format output from
+           format 3/foo-bar-fie, which is also the format output from
            L{__str__}.
 
          - 'RelativePath(list path, int levels = 0)' creates a
@@ -145,6 +145,8 @@ class RelativePath(object):
          - 'RelativePath(RelativePath path)' copies an existing
            relative path.
         """
+
+        self = super(RelativePath, cls).__new__(cls)
         
         if isinstance(path, basestring):
             if '/' in path:
@@ -159,6 +161,10 @@ class RelativePath(object):
             path = path.path
         self.levels = levels
         self.path = list(path)
+
+        if pathAsList and self.levels == 0:
+            return self.path
+        return self
         
     def __add__(self, child):
         """If a is rooted at c and b is rooted at a, then a + b
@@ -220,15 +226,21 @@ class RelativePath(object):
     def __str__(self):
         return str(unicode(self))
 
-def pathToId(path):
+def pathToId(path, acceptNone = False):
     """Converts a widget path to a string suitable for use in a HTML
     id attribute"""
+    if path is None and acceptNone:
+        return 'none'
     return '-'.join(['root'] + path)
 
-def idToPath(id):
+def idToPath(id, acceptNone = False):
     """Convert a string previously created using L{pathToId} back into
     a widget path."""
-    return id.split('-')[1:]
+    if id == 'none' and acceptNone:
+        return None
+    path = id.split('-')
+    assert path[0] == 'root'
+    return path[1:]
 
 def isPrefix(prefix, list):
     prefixLen = len(prefix)

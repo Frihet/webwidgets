@@ -197,7 +197,37 @@ class Tree(Base.Input):
     def selected(self, path, item):
         print '%s.selected(%s, %s)' % ('.'.join([str(x) for x in self.path]), '.'.join(path), '.'.join(item))
 
-class TabbedView(Base.ActionInput, Base.StaticComposite):
+class Tabset(Base.StaticComposite):
+    def getPages(self, path = []):
+        tabs = Webwidgets.Utils.OrderedDict()
+        for name, child in self.getChildren():
+            #### fixme ####
+            # name = "Child must be widget"
+            # description = """If child is not a widget
+            # but a string, this fails..."""
+            #### end ####
+            if not child.getVisible(child.path): continue
+
+            page = path + [name]
+
+            if isinstance(child, Tabset):
+                tabs[name] = (page, child, child.getPages(page))
+            else:
+                tabs[name] = (page, child, None)
+        return tabs
+
+    def drawPageTitles(self, outputOptions):
+        def drawPageTitles(pages):
+            if pages is None: return None
+            res = Webwidgets.Utils.OrderedDict()
+            for name, (page, widget, children) in pages.iteritems():
+                res[name] = (page,
+                             widget._(widget.getTitle(widget.path), outputOptions),
+                             drawPageTitles(children))
+            return res
+        return drawPageTitles(self.getPages())
+
+class TabbedView(Base.ActionInput, Tabset):
     """Provides a set of overlapping 'pages' with tabs, each tab
     holding some other widget, through wich a user can browse using
     the tabs."""
@@ -208,10 +238,10 @@ class TabbedView(Base.ActionInput, Base.StaticComposite):
 
     def fieldInput(self, path, stringValue):
         if stringValue != '':
-            self.page = stringValue
+            self.page = Webwidgets.Utils.idToPath(stringValue, True)
 
     def fieldOutput(self, path):
-        return [unicode(self.page)]
+        return [unicode(Webwidgets.Utils.pathToId(self.page, True))]
 
     def getActive(self, path):
         """@return: Whether the widget is allowing input from the user
@@ -223,45 +253,52 @@ class TabbedView(Base.ActionInput, Base.StaticComposite):
         """Notification that the user has changed page."""
         if path != self.path: return
         if self.oldPage is not None:
-            self[self.oldPage].notify('tabBlur')
+            self.getWidgetByPath(self.oldPage).notify('tabBlur')
         if self.page is not None:
-            self[self.page].notify('tabFocus')
+            self.getWidgetByPath(self.page).notify('tabFocus')
         self.oldPage = self.page
 
-    def draw(self, outputOptions):
+    def drawTabs(self, outputOptions):
         active = self.registerInput(self.path, self.argumentName)
-
         widgetId = Webwidgets.Utils.pathToId(self.path)
-        tabs = '\n'.join(["""
-                          <li><button
-                               type="submit"
-                               %(disabled)s
-                               id="%(attr_html_id)s_%(page)s"
-                               name="%(attr_html_id)s"
-                               value="%(page)s">%(caption)s</button></li>
-                          """ % {'disabled': ['', 'disabled="disabled"'][page == self.page or not active],
-                                 'attr_html_id': widgetId,
-                                 'page':page,
-                                 'caption':child._(child.getTitle(self.path + [page]), outputOptions)}
-                          for page, child in self.getChildren()
-                          #### fixme ####
-                          # name = "Child must be widget"
-                          # description = """If child is not a widget
-                          # but a string, this fails..."""
-                          #### end ####
-                          if child.getVisible(child.path)])
+
+        def drawTabs(pages):
+            tabs = []
+            for name, (page, title, children) in pages.iteritems():
+                info = {'disabled': ['', 'disabled="disabled"'][page == self.page or not active],
+                        'attr_html_id': widgetId,
+                        'page': Webwidgets.Utils.pathToId(page),
+                        'caption': title}
+                if children is None:
+                    tabs.append("""
+                                 <li><button
+                                      type="submit"
+                                      %(disabled)s
+                                      id="%(attr_html_id)s-_-%(page)s"
+                                      name="%(attr_html_id)s"
+                                      value="%(page)s">%(caption)s</button></li>
+                                """ % info)
+                else:
+                    info['children'] = drawTabs(children)
+                    tabs.append("<li><span>%(caption)s</span>%(children)s</li>" % info)
+            return """
+                    <ul class="tabs">
+                     %(tabs)s
+                    </ul>
+                   """ % {'tabs': '\n'.join(tabs)}
+        return drawTabs(self.drawPageTitles(outputOptions))
+        
+    def draw(self, outputOptions):
         return """
                <div %(attr_htmlAttributes)s>
-                <ul class="tabs">
-                 %(tabs)s
-                </ul>
+                %(tabs)s
                 <div class="page">
                  %(page)s
                 </div>
                </div>
                """ % {'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
-                      'page': self.drawChild(self.path + [self.page], self.getChild(self.page), outputOptions, True),
-                      'tabs': tabs}
+                      'page': self.drawChild(self.getWidgetByPath(self.page).path, self.getWidgetByPath(self.page), outputOptions, True),
+                      'tabs': self.drawTabs(outputOptions)}
 
 class Hide(Base.StaticComposite):
     """
