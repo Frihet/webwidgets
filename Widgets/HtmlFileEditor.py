@@ -1,4 +1,5 @@
-import Input, HtmlInput
+import Input
+import HtmlInput as HtmlInputModule
 
-class HtmlFileEditor(Input.FieldStorageInput, HtmlInput.HtmlInput):
+class HtmlFileEditor(Input.FieldStorageInput, HtmlInputModule.HtmlInput):
     mimeType = 'text/html'
