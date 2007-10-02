@@ -30,6 +30,7 @@ widgets.
 
 import types, xml.sax.saxutils, os.path, cgi, re, sys
 import Webwidgets.Utils, Webwidgets.Utils.Gettext, Webwidgets.Constants
+import Webwidgets.Utils.FileHandling
 
 debugNotifications = False
 
@@ -702,6 +703,29 @@ class ActionInput(Input):
     def clicked(self, path):
         if path != self.path: return
         return
+
+class DirectoryServer(Widget):
+    class BaseDirectory(object):
+        def __get__(self, instance, owner):
+            filePath = sys.modules[owner.__module__].__file__
+            return os.path.splitext(filePath)[0] + '.scripts'
+    baseDirectory = BaseDirectory()
+    
+    def classOutput(cls, session, arguments, outputOptions):
+        path = outputOptions['location']
+        for item in path:
+            assert item != '..'
+
+        ext = os.path.splitext(path[-1])[1][1:]
+        file = open(os.path.join(cls.baseDirectory,
+                                 *path))
+        try:
+            return {Webwidgets.Constants.FINAL_OUTPUT: file.read(),
+                    'Content-type': Webwidgets.Utils.FileHandling.extensionToMimeType[ext]}
+        finally:
+            file.close()
+    classOutput = classmethod(classOutput)
+
 
 class Window(Widget):
     """Window is the main widget and should allways be the top-level

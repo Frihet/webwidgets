@@ -20,9 +20,9 @@
 
 import time, os.path
 import Webwidgets.Utils
-import Input
+import Input, Base
 
-class HtmlInput(Input.StringInput):
+class HtmlInput(Input.StringInput, Base.DirectoryServer):
     """
     Html Input Widget.
     """
@@ -52,26 +52,3 @@ webwidgets_add_event_handler(
   """ % {'widgetId': widgetId,
          'widgetUrl': self.calculateUrl({'widgetClass': 'Webwidgets.HtmlInput.HtmlInput'})})
         return super(HtmlInput, self).draw(outputOptions)
-
-    def classOutput(cls, session, arguments, outputOptions):
-        path = outputOptions['location']
-        for item in path:
-            assert item != '..'
-
-        ext = os.path.splitext(path[-1])[1][1:]
-        file = open(os.path.join(os.path.dirname(__file__),
-                                 'HtmlInput.scripts',
-                                 *path))
-        try:
-            return {Webwidgets.Constants.FINAL_OUTPUT: file.read(),
-                    'Content-type': {'html':'text/html',
-                                     'xml':'text/xml',
-                                     'js':'pplication/x-javascript',
-                                     'css':'text/css',
-                                     'gif':'image/gif',
-                                     'png':'image/png',
-                                     'jpg':'image/jpeg',
-                                     }[ext]}
-        finally:
-            file.close()
-    classOutput = classmethod(classOutput)

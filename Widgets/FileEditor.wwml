@@ -36,7 +36,7 @@
    </w:Field>
   </w:Fieldgroup>
 
-  <w:TabbedView id="editors" page="none">
+  <w:TabbedView id="editors" page=":path:none">
    <w:Html id="none" title="No file">No file created or uploaded</w:Html>
    <w:TextFileEditor id="text__plain" title="Plain text" />
    <w:HtmlFileEditor id="text__html" title="HTML document" />

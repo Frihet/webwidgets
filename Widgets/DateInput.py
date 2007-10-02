@@ -19,10 +19,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import datetime, time, os.path
-import Webwidgets.Utils, Webwidgets.Utils.FileHandling
-import Input
+import Webwidgets.Utils
+import Input, Base 
 
-class DateInput(Input.StringInput):
+class DateInput(Input.StringInput, Base.DirectoryServer):
     """
     Date Selector Widget.
     """
@@ -37,20 +37,16 @@ class DateInput(Input.StringInput):
         super(DateInput, self).draw(outputOptions)
 
         self.registerStyleLink(self.calculateUrl({'widgetClass': 'Webwidgets.DateInput',
-                                                  'file': 'calendar-blue.css',
-                                                  'type': 'text/css'},
+                                                  'location': ['calendar-blue.css']},
                                                  {}))
         self.registerScriptLink(self.calculateUrl({'widgetClass': 'Webwidgets.DateInput',
-                                                   'file': 'calendar.js',
-                                                   'type': 'text/plain'},
+                                                   'location': ['calendar.js']},
                                                   {}),
                                 self.calculateUrl({'widgetClass': 'Webwidgets.DateInput',
-                                                   'file': 'lang/calendar-en.js',
-                                                   'type': 'text/plain'},
+                                                   'location': ['lang', 'calendar-en.js']},
                                                   {}),
                                 self.calculateUrl({'widgetClass': 'Webwidgets.DateInput',
-                                                   'file': 'calendar-setup.js',
-                                                   'type': 'text/plain'},
+                                                   'location': ['calendar-setup.js']},
                                                   {}))
 
         return '''<input %(attr_htmlAttributes)s name="%(name)s" value="%(value)s" autocomplete="off" %(disabled)s />
@@ -87,7 +83,3 @@ class DateInput(Input.StringInput):
         if self.value is None:
             return ['']
         return [self.value.strftime(self.format)]
-
-    def classOutput(cls, session, arguments, outputOptions):
-        return Webwidgets.Utils.FileHandling.directoryClassOutput(__file__, outputOptions)
-    classOutput = classmethod(classOutput)

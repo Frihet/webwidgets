@@ -77,11 +77,11 @@ class FileEditor(object):
             content = Value()
         def pageChanged(self, path, page):
             Webwidgets.TabbedView.pageChanged(self, path, page)
-            if page not in (None, 'default'):
-                if page == 'none':
+            if page not in (None, ['default']):
+                if page == ['none']:
                     self.parent.value = None
                 else:
-                    mimeType = methodToMimeType(page)
+                    mimeType = methodToMimeType(page[0])
                     value = self.parent.value
                     if value is None or mimeType != value.type:
                         if value is None:
@@ -117,5 +117,5 @@ class FileEditor(object):
         editor = mimeTypeToMethod(getattr(value, 'type', 'none'))
         if editor not in self['editors'].children:
             editor = 'default'
-        self['editors'].page = editor
+        self['editors'].page = [editor]
         
