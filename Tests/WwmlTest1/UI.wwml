@@ -30,7 +30,7 @@
 
   <w:Html id="body">
 
-   <w:TabbedView id="tabs" page=":path:first">
+   <w:MainMenu id="tabs" page=":path:first" title="Test app">
     <w:Tabset id="first" title="First menu">
      <w:Html id="first" title="First item">
       <w:FileEditorList id="fileditorlisttest" />
@@ -45,9 +45,17 @@
        </w:string>
       </w:StringInput>
      </w:Html>
+     <w:Tabset id="third" title="Third item">
+      <w:Html id="first" title="First sub item">
+       Mananana
+      </w:Html>
+      <w:Html id="second" title="Second sub item">
+       Mananana-mamanana
+      </w:Html>
+     </w:Tabset>
     </w:Tabset>
     <w:Html id="second" title="Second menu">The third page</w:Html>
-   </w:TabbedView>
+   </w:MainMenu>
 
    Last password: <w:Html id="lastpwd" /><br />
    <w:Field id='newpwd' label='New password'><w:NewPasswordInput id="field" value="foo" /></w:Field>

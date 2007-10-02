@@ -1,0 +1,11 @@
+dhtmlxMenu v.1.0 
+
+build 70115
+
++ possibility to automatically fetch sub menu from server side XML
++ "disabled" attribute in XML
++ IE 7 compatibility
++ latest dhtmlxCommon.js compatibility
+- fixed problem with distorsion after item catption changing
+- fixed menu items can't be recreated after deleting
+- image path ignored for scroller images
