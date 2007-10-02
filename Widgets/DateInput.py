@@ -19,7 +19,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import datetime, time, os.path
-import Webwidgets.Utils
+import Webwidgets.Utils, Webwidgets.Utils.FileHandling
 import Input
 
 class DateInput(Input.StringInput):
@@ -89,19 +89,5 @@ class DateInput(Input.StringInput):
         return [self.value.strftime(self.format)]
 
     def classOutput(cls, session, arguments, outputOptions):
-        path = outputOptions['file']
-        assert not path.startswith('/')
-        while path:
-            path, item = os.path.split(path)
-            assert item != '..'
-
-        file = open(os.path.join(os.path.dirname(__file__),
-                                 'DateInput.scripts',
-                                 outputOptions['file']))
-        try:
-            return {Webwidgets.Constants.FINAL_OUTPUT: file.read(),
-                    'Content-type': outputOptions['type']
-                    }
-        finally:
-            file.close()
+        return Webwidgets.Utils.FileHandling.directoryClassOutput(__file__, outputOptions)
     classOutput = classmethod(classOutput)
