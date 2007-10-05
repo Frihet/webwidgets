@@ -73,7 +73,7 @@ class DateInput(Input.StringInput, Base.DirectoryServer):
             if stringValue == '':
                 self.value = None
             else:
-                self.value = datetime.datetime(*(time.strptime(stringValue, self.format)[0:6]))
+                self.value = datetime.datetime(*(time.strptime(stringValue, str(self.format))[0:6]))
         except ValueError:
             self.value = None
             self.error = 'Invalid date format, expected %s got %s' \
@@ -82,4 +82,4 @@ class DateInput(Input.StringInput, Base.DirectoryServer):
     def fieldOutput(self, path):
         if self.value is None:
             return ['']
-        return [self.value.strftime(self.format)]
+        return [self.value.strftime(str(self.format))]
