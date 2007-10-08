@@ -138,7 +138,7 @@ else
 
 		for ( var n = 0 ; n < aNodes.length ; n++ )
 		{
-			var aPieces = aNodes[n].nodeValue.split( /(\[\[[^\[\]]+\]\])/g ) ;
+			var aPieces = aNodes[n].node_value.split( /(\[\[[^\[\]]+\]\])/g ) ;
 
 			for ( var i = 0 ; i < aPieces.length ; i++ )
 			{
@@ -166,7 +166,7 @@ else
 
 	FCKPlaceholders._AcceptNode = function( node )
 	{
-		if ( /\[\[[^\[\]]+\]\]/.test( node.nodeValue ) )
+		if ( /\[\[[^\[\]]+\]\]/.test( node.node_value ) )
 			return NodeFilter.FILTER_ACCEPT ;
 		else
 			return NodeFilter.FILTER_SKIP ;

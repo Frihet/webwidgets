@@ -238,7 +238,7 @@ FCKXHtml._AppendNode = function( xmlNode, htmlNode )
 
 		// Text Node.
 		case 3 :
-			return this._AppendTextNode( xmlNode, htmlNode.nodeValue.ReplaceNewLineChars(' ') ) ;
+			return this._AppendTextNode( xmlNode, htmlNode.node_value.ReplaceNewLineChars(' ') ) ;
 
 		// Comment
 		case 8 :
@@ -247,7 +247,7 @@ FCKXHtml._AppendNode = function( xmlNode, htmlNode )
 			if ( FCKBrowserInfo.IsIE && !htmlNode.innerHTML )
 				break ;
 
-			try { xmlNode.appendChild( this.XML.createComment( htmlNode.nodeValue ) ) ; }
+			try { xmlNode.appendChild( this.XML.createComment( htmlNode.node_value ) ) ; }
 			catch (e) { /* Do nothing... probably this is a wrong format comment. */ }
 			break ;
 
@@ -312,14 +312,14 @@ FCKXHtml._RemoveAttribute = function( xmlNode, regX, sAttribute )
 {
 	var oAtt = xmlNode.attributes.getNamedItem( sAttribute ) ;
 
-	if ( oAtt && regX.test( oAtt.nodeValue ) )
+	if ( oAtt && regX.test( oAtt.node_value ) )
 	{
-		var sValue = oAtt.nodeValue.replace( regX, '' ) ;
+		var sValue = oAtt.node_value.replace( regX, '' ) ;
 
 		if ( sValue.length == 0 )
 			xmlNode.attributes.removeNamedItem( sAttribute ) ;
 		else
-			oAtt.nodeValue = sValue ;
+			oAtt.node_value = sValue ;
 	}
 }
 

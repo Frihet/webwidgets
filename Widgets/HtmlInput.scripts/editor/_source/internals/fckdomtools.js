@@ -48,8 +48,8 @@ var FCKDomTools =
 		{
 			if ( eChildNode.nodeType == 3 )
 			{
-				var sTrimmed = eChildNode.nodeValue.LTrim() ;
-				var iOriginalLength = eChildNode.nodeValue.length ;
+				var sTrimmed = eChildNode.node_value.LTrim() ;
+				var iOriginalLength = eChildNode.node_value.length ;
 
 				if ( sTrimmed.length == 0 )
 				{
@@ -84,8 +84,8 @@ var FCKDomTools =
 					break ;
 
 				case 3 :
-					var sTrimmed = eChildNode.nodeValue.RTrim() ;
-					var iOriginalLength = eChildNode.nodeValue.length ;
+					var sTrimmed = eChildNode.node_value.RTrim() ;
+					var iOriginalLength = eChildNode.node_value.length ;
 
 					if ( sTrimmed.length == 0 )
 					{
@@ -197,7 +197,7 @@ var FCKDomTools =
 				if ( !ignoreElements || !currentNode.nodeName.IEquals( ignoreElements ) )
 					return currentNode ;
 			}
-			else if ( ignoreSpaceTextOnly && currentNode.nodeType == 3 && currentNode.nodeValue.RTrim().length > 0 )
+			else if ( ignoreSpaceTextOnly && currentNode.nodeType == 3 && currentNode.node_value.RTrim().length > 0 )
 				break ;
 
 			if ( currentNode.lastChild )
@@ -244,7 +244,7 @@ var FCKDomTools =
 				if ( !ignoreElements || !currentNode.nodeName.IEquals( ignoreElements ) )
 					return currentNode ;
 			}
-			else if ( ignoreSpaceTextOnly && currentNode.nodeType == 3 && currentNode.nodeValue.RTrim().length > 0 )
+			else if ( ignoreSpaceTextOnly && currentNode.nodeType == 3 && currentNode.node_value.RTrim().length > 0 )
 				break ;
 
 			if ( currentNode.firstChild )

@@ -472,13 +472,13 @@ class Program(WebKit.Page.Page):
             url_arg_list = []
             for key, value in arguments.iteritems():
                 if not isinstance(value, list): value = [value]
-                for valuePart in value:
-                    url_arg_list.append((key, valuePart))
+                for value_part in value:
+                    url_arg_list.append((key, value_part))
             for key, value in output_options.iteritems():
                 if key not in ('widget_class', 'win_id', 'widget', 'location'):
                     if not isinstance(value, list): value = [value]
-                    for valuePart in value:
-                        url_arg_list.append(('_' + key, valuePart))
+                    for value_part in value:
+                        url_arg_list.append(('_' + key, value_part))
 
             args = ''
             if url_arg_list:

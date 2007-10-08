@@ -139,7 +139,7 @@ FCKFlashProcessor.ProcessDocument = function( document )
 
 		// Check the extension and the type. Now it should be enough with just the type
 		// Opera doesn't return oEmbed.src so oEmbed.src.EndsWith will fail
-		if ( (oEmbed.src && oEmbed.src.EndsWith( '.swf', true )) || ( oType && oType.nodeValue == 'application/x-shockwave-flash' ) )
+		if ( (oEmbed.src && oEmbed.src.EndsWith( '.swf', true )) || ( oType && oType.node_value == 'application/x-shockwave-flash' ) )
 		{
 			var oCloned = oEmbed.cloneNode( true ) ;
 
@@ -154,7 +154,7 @@ FCKFlashProcessor.ProcessDocument = function( document )
 					if ( oAtt ) oCloned.setAttribute( aAttributes[iAtt], oAtt ) ;
 				}
 				// It magically gets lost after reading it in oType
-				oCloned.setAttribute( 'type', oType.nodeValue ) ;
+				oCloned.setAttribute( 'type', oType.node_value ) ;
 			}
 
 			var oImg = FCKDocumentProcessor_CreateFakeImage( 'FCK__Flash', oCloned ) ;

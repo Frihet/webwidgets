@@ -51,10 +51,10 @@ function ReplaceTextNodes( parentNode, regex, replaceValue, replaceAll, hasFound
 		var oNode = parentNode.childNodes[i] ;
 		if ( oNode.nodeType == 3 )
 		{
-			var sReplaced = oNode.nodeValue.replace( regex, replaceValue ) ;
-			if ( oNode.nodeValue != sReplaced )
+			var sReplaced = oNode.node_value.replace( regex, replaceValue ) ;
+			if ( oNode.node_value != sReplaced )
 			{
-				oNode.nodeValue = sReplaced ;
+				oNode.node_value = sReplaced ;
 				if ( ! replaceAll )
 					return true ;
 				hasFound = true ;

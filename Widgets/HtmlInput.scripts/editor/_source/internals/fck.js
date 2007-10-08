@@ -165,7 +165,7 @@ var FCK =
 				// Text Node.
 				case 3 :
 					// Ignore space only or empty text.
-					if ( oNewBlock || oNode.nodeValue.Trim().length > 0 )
+					if ( oNewBlock || oNode.node_value.Trim().length > 0 )
 						bMoveNode = true ;
 			}
 

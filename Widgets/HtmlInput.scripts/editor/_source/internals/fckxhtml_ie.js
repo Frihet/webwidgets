@@ -44,18 +44,18 @@ FCKXHtml._AppendAttributes = function( xmlNode, htmlNode, node, nodeName )
 			if ( sAttName.StartsWith( '_fck' ) )
 				continue ;
 			// The following must be done because of a bug on IE regarding the style
-			// attribute. It returns "null" for the nodeValue.
+			// attribute. It returns "null" for the node_value.
 			else if ( sAttName == 'style' )
 				sAttValue = htmlNode.style.cssText.replace( FCKRegexLib.StyleProperties, FCKTools.ToLowerCase ) ;
-			// There are two cases when the oAttribute.nodeValue must be used:
+			// There are two cases when the oAttribute.node_value must be used:
 			//		- for the "class" attribute
 			//		- for events attributes (on IE only).
 			else if ( sAttName == 'class' || sAttName.indexOf('on') == 0 )
-				sAttValue = oAttribute.nodeValue ;
+				sAttValue = oAttribute.node_value ;
 			else if ( nodeName == 'body' && sAttName == 'contenteditable' )
 				continue ;
 			// XHTML doens't support attribute minimization like "CHECKED". It must be trasformed to cheched="checked".
-			else if ( oAttribute.nodeValue === true )
+			else if ( oAttribute.node_value === true )
 				sAttValue = sAttName ;
 			else
 			{
@@ -67,7 +67,7 @@ FCKXHtml._AppendAttributes = function( xmlNode, htmlNode, node, nodeName )
 				}
 				catch (e) {}
 			}
-			this._AppendAttribute( node, sAttName, sAttValue || oAttribute.nodeValue ) ;
+			this._AppendAttribute( node, sAttName, sAttValue || oAttribute.node_value ) ;
 		}
 	}
 }

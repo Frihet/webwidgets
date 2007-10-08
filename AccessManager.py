@@ -40,9 +40,9 @@ class AccessManager(object):
 class ListAccessManager(AccessManager):
     debugLists = False
     
-    def debug_print_path(self, opPath, result):
+    def debug_print_path(self, operation_path, result):
         if self.debug:
-            print "AccessManager: %s: %s" % (result, '.'.join([str(item) for item in opPath]))
+            print "AccessManager: %s: %s" % (result, '.'.join([str(item) for item in operation_path]))
 
     def __call__(self, op, win_id, path):
         return self.call_path((op, win_id) + tuple(path))

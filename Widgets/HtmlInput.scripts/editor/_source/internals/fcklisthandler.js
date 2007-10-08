@@ -140,7 +140,7 @@ var FCKListHandler =
 					break ;
 
 				case 3 :
-					if ( eChildNode.nodeValue.Trim().length > 0 )
+					if ( eChildNode.node_value.Trim().length > 0 )
 						return true ;
 			}
 

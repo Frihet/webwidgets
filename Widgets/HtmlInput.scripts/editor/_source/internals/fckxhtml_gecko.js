@@ -50,12 +50,12 @@ FCKXHtml._AppendAttributes = function( xmlNode, htmlNode, node )
 			// There is a bug in Mozilla that returns '_moz_xxx' attributes as specified.
 			else if ( sAttName.indexOf( '_moz' ) == 0 )
 				continue ;
-			// There are one cases (on Gecko) when the oAttribute.nodeValue must be used:
+			// There are one cases (on Gecko) when the oAttribute.node_value must be used:
 			//		- for the "class" attribute
 			else if ( sAttName == 'class' )
-				sAttValue = oAttribute.nodeValue ;
+				sAttValue = oAttribute.node_value ;
 			// XHTML doens't support attribute minimization like "CHECKED". It must be trasformed to cheched="checked".
-			else if ( oAttribute.nodeValue === true )
+			else if ( oAttribute.node_value === true )
 				sAttValue = sAttName ;
 			else
 				sAttValue = htmlNode.getAttribute( sAttName, 2 ) ;	// We must use getAttribute to get it exactly as it is defined.

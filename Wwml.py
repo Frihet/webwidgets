@@ -182,21 +182,21 @@ def generateValueForNode(module, node, using = [], classPath = [], bindContext =
         if debugSubclass:
             print "WWML: class %s(%s, %s): pass" % (attributes['classid'], callbackName, node.localName)
             print "WWML:     using: %s" % ' '.join(using)
-        nodeValue = Utils.load_class(node.localName, using, module = module)
-        if isinstance(nodeValue, types.TypeType) and issubclass(nodeValue, Webwidgets.Widgets.Base.Widget):
-            baseCls = ()
+        node_value = Utils.load_class(node.localName, using, module = module)
+        if isinstance(node_value, types.TypeType) and issubclass(node_value, Webwidgets.Widgets.Base.Widget):
+            base_cls = ()
             try:
-                baseCls += (Utils.load_class(callbackName, using, module = module),)
+                base_cls += (Utils.load_class(callbackName, using, module = module),)
             except ImportError, e:
                 pass
-            baseCls += (nodeValue,)
+            base_cls += (node_value,)
 
-            if 'html' not in attributes and hasattr(nodeValue, '__wwml_html_override__') and nodeValue.__wwml_html_override__:
+            if 'html' not in attributes and hasattr(node_value, '__wwml_html_override__') and node_value.__wwml_html_override__:
                 attributes['html'] = text
 
             if ':pre' in attributes or ':post' in attributes:
                 if 'html' not in attributes:
-                    attributes['html'] = nodeValue.html
+                    attributes['html'] = node_value.html
 
                 if ':pre' in attributes:
                     attributes['html'] = attributes[':pre'] + attributes['html']
@@ -205,9 +205,9 @@ def generateValueForNode(module, node, using = [], classPath = [], bindContext =
                     attributes['html'] = attributes['html'] + attributes[':post']
                     del attributes[':post']
                     
-            if getattr(nodeValue, '__args_children__', False):
+            if getattr(node_value, '__args_children__', False):
                 __children__ = ()
-                for cls in baseCls:
+                for cls in base_cls:
                     __children__ = getattr(cls, '__children__', __children__)
                 __children__ = attributes.get('__children__', __children__)
                 __children__ = list(__children__)
@@ -222,27 +222,27 @@ def generateValueForNode(module, node, using = [], classPath = [], bindContext =
                 attributes['__wwml_html_override__'] = False
             attributes['__classPath__'] = '.'.join(classPath[1:-1]) # Remove both the wwml-tag and self
             attributes['__module__'] = module.__name__
-            #print baseCls
+            #print base_cls
             try:
                 value = types.TypeType(str(attributes['classid']),
-                                       baseCls,
+                                       base_cls,
                                        attributes)
             except TypeError, e:
                 raise TypeError("Unable to instantiate widget in %s: %s(%s): %s" % (
                     module,
                     str(attributes['classid']),
-                    ', '.join([str(cls) for cls in baseCls]),
+                    ', '.join([str(cls) for cls in base_cls]),
                     str(e)))
-        elif hasattr(nodeValue, '__iter__'):
+        elif hasattr(node_value, '__iter__'):
             value = dict(attributes)
             if 'classid' in value: del value['classid']
             if 'id' in value: del value['id']
-            if hasattr(nodeValue, 'iteritems'):
-                value = Utils.subclass_dict(nodeValue, value)
+            if hasattr(node_value, 'iteritems'):
+                value = Utils.subclass_dict(node_value, value)
             else:
-                value = Utils.subclass_list(nodeValue, value.values())
+                value = Utils.subclass_list(node_value, value.values())
         else:
-            value = nodeValue
+            value = node_value
         
     return attributes.get('id', None), attributes.get('classid', None), value
 

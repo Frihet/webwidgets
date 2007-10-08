@@ -54,7 +54,7 @@ function GetAttribute( element, attName, valueIfNull )
 	var oValue = element.getAttribute( attName, 2 ) ;
 
 	if ( oValue == null )
-		oValue = oAtt.nodeValue ;
+		oValue = oAtt.node_value ;
 
 	return ( oValue == null ? valueIfNull : oValue ) ;
 }
