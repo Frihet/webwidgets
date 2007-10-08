@@ -30,7 +30,7 @@ class LogIn(object):
     
     class logIn(object):
         def selected(self, path, value):
-            fields = self.getWidgetsByAttribute('fieldName')
+            fields = self.get_widgets_by_attribute('fieldName')
 
             if self.parent.debugLogIn: print "Log in attempt:", fields['username'].value, fields['password'].value
 

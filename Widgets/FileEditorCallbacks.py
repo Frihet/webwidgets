@@ -1,6 +1,6 @@
 import Webwidgets, cgi, traceback
 
-def mimeTypeToMethod(mimeType):
+def mime_type_to_method(mimeType):
     return mimeType.replace("/", "__").replace("-", "_")
 
 def methodToMimeType(mimeType):
@@ -19,15 +19,15 @@ class FileEditor(object):
 
     def __init__(self, session, win_id, **attr):
         Webwidgets.Html.__init__(self, session, win_id, **attr)
-        self.valueChanged(self.path, self.value)
-        self.expandedChanged(self.path, self.expanded)
+        self.value_changed(self.path, self.value)
+        self.expanded_changed(self.path, self.expanded)
 
     value = None
     error = None
     expanded = False
 
-    def mimeTypeToMethod(self, mimeType):
-        return mimeTypeToMethod(mimeType)
+    def mime_type_to_method(self, mimeType):
+        return mime_type_to_method(mimeType)
     
     def methodToMimeType(self, mimeType):
         return methodToMimeType(mimeType)
@@ -50,7 +50,7 @@ class FileEditor(object):
                 instance.parent.expanded = value
         value = Value()
 
-    def expandedChanged(self, path, value):
+    def expanded_changed(self, path, value):
         self['infoGroup'].visible = self['editors'].visible = self['upload'].visible = value
 
     class infoGroup(object):
@@ -75,8 +75,8 @@ class FileEditor(object):
             value = Value()
         class default(object):
             content = Value()
-        def pageChanged(self, path, page):
-            Webwidgets.TabbedView.pageChanged(self, path, page)
+        def page_changed(self, path, page):
+            Webwidgets.TabbedView.page_changed(self, path, page)
             if page not in (None, ['default']):
                 if page == ['none']:
                     self.parent.value = None
@@ -100,7 +100,7 @@ class FileEditor(object):
                 value = self.parent['file'].value
                 editors = self.parent.parent['editors']
                 if value is not None:
-                    editor = mimeTypeToMethod(value.type)
+                    editor = mime_type_to_method(value.type)
                     if editor not in editors.children:
                         if editors.children['default'].visible:
                             editor = 'default'
@@ -112,9 +112,9 @@ class FileEditor(object):
                         return
                 self.parent.parent.value = value
 
-    def valueChanged(self, path, value):
+    def value_changed(self, path, value):
         if path != self.path: return
-        editor = mimeTypeToMethod(getattr(value, 'type', 'none'))
+        editor = mime_type_to_method(getattr(value, 'type', 'none'))
         if editor not in self['editors'].children:
             editor = 'default'
         self['editors'].page = [editor]

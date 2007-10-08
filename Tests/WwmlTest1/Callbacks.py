@@ -27,19 +27,19 @@ class MyWindow(object):
         print "XXYZZY"
 
 #    class location(object):
-#        def valueChanged(self, path, value):
-#            Webwidgets.ArgumentInput.valueChanged(self, path, value)
+#        def value_changed(self, path, value):
+#            Webwidgets.ArgumentInput.value_changed(self, path, value)
 #            print "Location changed", path, value
 #    class extra(object):
-#        def valueChanged(self, path, value):
-#            Webwidgets.ArgumentInput.valueChanged(self, path, value)
+#        def value_changed(self, path, value):
+#            Webwidgets.ArgumentInput.value_changed(self, path, value)
 #            print "Extra arguments changed", path, value
             
     class body(object):
 
         class language(object):
             def draw(self, output_options):
-                return ', '.join(self.getLanguages(output_options))
+                return ', '.join(self.get_languages(output_options))
             
         class pwdclear(object):
             def clicked(self, path):
@@ -61,8 +61,8 @@ class MyWindow(object):
                     five='2006-05-01 23:45:00 +10',
                     six='2006-04-13 12:00:00 +10',
                     )
-            def valueChanged(self, path, value):
-                Webwidgets.ListInput.valueChanged(self, path, value)
+            def value_changed(self, path, value):
+                Webwidgets.ListInput.value_changed(self, path, value)
                 print "XXX", value
 
         class ShowDialog(object):
@@ -84,8 +84,8 @@ class MyWindow(object):
 
                     class actions(object):
                          class check(object):
-                             def valueChanged(self, path, value):
-                                 Webwidgets.Checkbox.valueChanged(self, path, value)
+                             def value_changed(self, path, value):
+                                 Webwidgets.Checkbox.value_changed(self, path, value)
                                  print "FOO", value
 
 

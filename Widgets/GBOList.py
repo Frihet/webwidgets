@@ -160,7 +160,7 @@ class GBOList(Base.ActionInput, Base.Composite):
         'sort', 'rows', 'page', 'pages', 'rowsPerPage',
         'nonMemoryStorage', 'dontMergeWidgets', 'dontMergeColumns')
     columns = {}
-    argumentName = None
+    argument_name = None
     dependentColumns = {}
     functions = {}
     groupFunctions = {}
@@ -208,12 +208,12 @@ class GBOList(Base.ActionInput, Base.Composite):
             self.rows.sort(rowCmp)
             self.oldSort = self.sort
 
-    def sortChanged(self, path, sort):
+    def sort_changed(self, path, sort):
         """Notification that the list sort order has changed."""
         if path != self.path: return
         self.reread()
 
-    def pageChanged(self, path, page):
+    def page_changed(self, path, page):
         """Notification that the user has changed page."""
         if path != self.path: return
         self.reread()
@@ -232,26 +232,26 @@ class GBOList(Base.ActionInput, Base.Composite):
             return self.pages        
         return int(math.ceil(float(len(self.rows)) / self.rowsPerPage))
 
-    def getChildren(self):
+    def get_children(self):
         raise NotImplemented
 
-    def getChild(self, name):
+    def get_child(self, name):
         dummy, row, column = name.split('_')
         row = int(row)
         return self.rows[row][column]
     
-    def getWidgetsByAttribute(self, attribute = '__name__'):
-        fields = Base.Widget.getWidgetsByAttribute(self, attribute)
+    def get_widgets_by_attribute(self, attribute = '__name__'):
+        fields = Base.Widget.get_widgets_by_attribute(self, attribute)
         for row in self.getRows():
             for column, child in row.iteritems():
                 if isinstance(child, Base.Widget):
-                    fields.update(child.getWidgetsByAttribute(attribute))
+                    fields.update(child.get_widgets_by_attribute(attribute))
         return fields
 
     def field_input(self, path, stringValue):
         widget_path = self.path
         try:
-            subWidget = self.pathToSubwidget_path(path)
+            subWidget = self.path_to_subwidget_path(path)
         except Webwidgets.Constants.NotASubwidgetException:
             return
         
@@ -270,7 +270,7 @@ class GBOList(Base.ActionInput, Base.Composite):
     
     def field_output(self, path):
         widget_path = self.path
-        subWidget = self.pathToSubwidget_path(path)
+        subWidget = self.path_to_subwidget_path(path)
         
         if subWidget == ['sort']:
             return [sortToString(self.sort)]
@@ -288,7 +288,7 @@ class GBOList(Base.ActionInput, Base.Composite):
         or not.
         """
         widget_path = self.path
-        subWidget = self.pathToSubwidget_path(path)
+        subWidget = self.path_to_subwidget_path(path)
 
         if not self.active: return False
 
@@ -368,12 +368,12 @@ class GBOList(Base.ActionInput, Base.Composite):
         return '<td rowspan="%(rowspan)s" class="%(class)s">%(content)s</td>' % {
             'rowspan': rowspan,
             'class': 'column_first_level_%s column_last_level_%s' % (firstLevel, lastLevel),
-            'content': self.drawChild(self.path + ["cell_%s_%s" % (row, column)],
+            'content': self.draw_child(self.path + ["cell_%s_%s" % (row, column)],
                                       value, output_options, True)}
 
     def drawPagingButtons(self, output_options):
-        if self.argumentName:
-            self.session.windows[self.win_id].arguments[self.argumentName + '_page'] = {
+        if self.argument_name:
+            self.session.windows[self.win_id].arguments[self.argument_name + '_page'] = {
                 'widget':self, 'path': self.path + ['_', 'page']}
 
         pageId = Webwidgets.Utils.path_to_id(self.path + ['_', 'page'])
@@ -449,8 +449,8 @@ class GBOList(Base.ActionInput, Base.Composite):
        'groupFunctions': self.drawGroupFunctions(output_options)}
 
     def drawHeadings(self, visibleColumns, reverseDependentColumns, output_options):
-        if self.argumentName:
-            self.session.windows[self.win_id].arguments[self.argumentName + '_sort'] = {
+        if self.argument_name:
+            self.session.windows[self.win_id].arguments[self.argument_name + '_sort'] = {
                 'widget':self, 'path': self.path + ['_', 'sort']}
 
         sortActive = self.get_active(self.path + ['_', 'sort'])
@@ -551,11 +551,11 @@ class GBOList(Base.ActionInput, Base.Composite):
         self.appendFunctions(renderedRows, headings, output_options)
 
         return """
-<div %(attr_htmlAttributes)s>
+<div %(attr_html_attributes)s>
  %(table)s
  %(buttons)s
 </div>
-""" % {'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
+""" % {'attr_html_attributes': self.draw_html_attributes(self.path),
        'table': self.drawTable(headings, renderedRows, output_options),
        'buttons': self.drawButtons(output_options)
        }

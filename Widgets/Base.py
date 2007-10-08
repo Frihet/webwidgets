@@ -61,11 +61,11 @@ class Widget(object):
     """Controls wether the widget class is automatically instantiated
     when the parent widget is instantiated."""
 
-    __attributes__ = ('visible', 'classes', 'title', 'htmlAttributes')
+    __attributes__ = ('visible', 'classes', 'title', 'html_attributes')
     """List of all attributes that can be set for the widget using
     either class members or arguments to __init__"""
 
-    __htmlAttributes__ = ('id', 'class',)
+    __html_attributes__ = ('id', 'class',)
 
     classes = ("Webwidgets.Widget",)
     """Read-only attribute containing a list of the names of all
@@ -97,11 +97,11 @@ class Widget(object):
             members = dict(members)
             classes = []
             if '__no_classes_name__' not in members or not members['__no_classes_name__']:
-                clsName = members['__module__']
+                cls_name = members['__module__']
                 if '__classPath__' in members and members['__classPath__']:
-                    clsName += '.' + members['__classPath__']
-                clsName += '.' + name
-                classes.append(clsName)
+                    cls_name += '.' + members['__classPath__']
+                cls_name += '.' + name
+                classes.append(cls_name)
             if '__no_classes_name__' in members:
                 del members['__no_classes_name__'] # No inheritance! This is a magic marker, not an attribute
             for base in bases:
@@ -143,17 +143,17 @@ class Widget(object):
             if isinstance(item, type) and issubclass(item, Widget) and not item.__explicit_load__:
                 setattr(self, name, item(session, win_id))
         self.__dict__.update(attrs)
-        self.__attributes__ += tuple(['html_' + name for name in self.__htmlAttributes__])
+        self.__attributes__ += tuple(['html_' + name for name in self.__html_attributes__])
         for attr in self.__attributes__:
             if not hasattr(self, attr):
                 raise TypeError('Required attribute not set:', str(self), attr)
 
-    class htmlId(object):
+    class HtmlId(object):
         def __get__(self, instance, owner):
             if instance.parent is None:
                 return None
             return Webwidgets.Utils.path_to_id(instance.path)
-    html_id = htmlId()
+    html_id = HtmlId()
 
     class HtmlClass(object):
         def __get__(self, instance, owner):
@@ -168,8 +168,8 @@ class Widget(object):
         def __get__(self, instance, owner):
             if instance.parent is None:
                 return None
-            return instance.drawHtmlAttributes(instance.path)            
-    htmlAttributes = HtmlAttributes()
+            return instance.draw_html_attributes(instance.path)            
+    html_attributes = HtmlAttributes()
 
     class Path(object):
         def __get__(self, instance, owner):
@@ -192,10 +192,10 @@ class Widget(object):
             return instance.session.windows.get(instance.win_id, None)
     window = Window()
     
-    def getVisible(self, path):
+    def get_visible(self, path):
         return self.visible and self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, path)
 
-    def getWidgetByPath(self, path):
+    def get_widget_by_path(self, path):
         path = Webwidgets.Utils.RelativePath(path)
         res = self
         for i in xrange(0, path.levels):
@@ -204,37 +204,37 @@ class Widget(object):
             res = res[name]
         return res
 
-    def getWidgetsByAttribute(self, attribute = '__name__'):
+    def get_widgets_by_attribute(self, attribute = '__name__'):
         if hasattr(self, attribute):
             return {getattr(self, attribute): self}
         return {}
 
-    def pathToSubwidget_path(self, path):
+    def path_to_subwidget_path(self, path):
         widget_path = self.path
         if not Webwidgets.Utils.is_prefix(widget_path + ['_'], path):
             raise Webwidgets.Constants.NotASubwidgetException('%s: Not a subwidget path %s' % (str(self), path,))
         return path[len(widget_path) + 1:]
 
     def notify(self, message, *args, **kw):
-        """See L{notifyKw}."""
-        self.notifyKw(message, args, kw)
+        """See L{notify_kw}."""
+        self.notify_kw(message, args, kw)
 
-    def notifyKw(self, message, args = (), kw = {}, path = None):
+    def notify_kw(self, message, args = (), kw = {}, path = None):
         """Enques a message (method name and arguments) for the
         widget. Please see the documentation for
         L{Webwidgets.Program.Program.Session.notify} for more
         information on the message passing mechanism."""        
         self.session.notify(self, message, args, kw, path)
 
-    def drawHtmlAttributes(self, path):
+    def draw_html_attributes(self, path):
         attributes = [(name, getattr(self, 'html_' + name))
-                      for name in self.__htmlAttributes__]
+                      for name in self.__html_attributes__]
         return ' '.join(['%s=%s' % (name, xml.sax.saxutils.quoteattr(value))
                          for (name, value)
                          in attributes
                          if value])
 
-    def drawAttributes(self, output_options):
+    def draw_attributes(self, output_options):
         return Webwidgets.Utils.OrderedDict([('attr_' + key, self._(getattr(self, key), output_options))
                                              for key in self.__attributes__])
 
@@ -245,82 +245,82 @@ class Widget(object):
         L{Webwidgets.Utils.path_to_id} for this purpose. Any extra
         sub-widget id:s should be constructed by appending an
         underscore followed by any string."""
-        self.registerStyles(output_options)
+        self.register_styles(output_options)
         return ''
 
-    def registerStyles(self, output_options):
+    def register_styles(self, output_options):
         cls = type(self)
-        def registerClassStyles(cls):
+        def register_class_styles(cls):
             bases = list(cls.__bases__)
             bases.reverse()
             for base in bases:
-                registerClassStyles(base)
-            if cls.__dict__.get('widgetStyle', None):
-                self.registerStyleLink(self.calculate_url({'widget_class': cls.__module__ + '.' + cls.__name__,
+                register_class_styles(base)
+            if cls.__dict__.get('widget_style', None):
+                self.register_style_link(self.calculate_url({'widget_class': cls.__module__ + '.' + cls.__name__,
                                                           'aspect': 'style'},
                                                          {}))
-            if cls.__dict__.get('widgetScript', None):
-                self.registerScriptLink(self.calculate_url({'widget_class': cls.__module__ + '.' + cls.__name__,
+            if cls.__dict__.get('widget_script', None):
+                self.register_script_link(self.calculate_url({'widget_class': cls.__module__ + '.' + cls.__name__,
                                                            'aspect': 'script'},
                                                           {}))
-        registerClassStyles(cls)
-        if self.__dict__.get('widgetStyle', None):
-            self.registerStyleLink(self.calculate_url({'widget': Webwidgets.Utils.path_to_id(self.path),
+        register_class_styles(cls)
+        if self.__dict__.get('widget_style', None):
+            self.register_style_link(self.calculate_url({'widget': Webwidgets.Utils.path_to_id(self.path),
                                                       'aspect': 'style'},
                                                      {}))
-        if self.__dict__.get('widgetScript', None):
-            self.registerScriptLink(self.calculate_url({'widget': Webwidgets.Utils.path_to_id(self.path),
+        if self.__dict__.get('widget_script', None):
+            self.register_script_link(self.calculate_url({'widget': Webwidgets.Utils.path_to_id(self.path),
                                                        'aspect': 'script'},
                                                       {}))
 
     def class_output_style(cls, session, arguments, output_options):
-        return cls.widgetStyle
+        return cls.widget_style
     class_output_style = classmethod(class_output_style)
 
     def output_style(self, output_options):
-        return self.widgetStyle
+        return self.widget_style
 
     def class_output_script(cls, session, arguments, output_options):
-        return cls.widgetScript
+        return cls.widget_script
     class_output_script = classmethod(class_output_script)
 
     def output_script(self, output_options):
-        return self.widgetScript
+        return self.widget_script
 
-    def getTitle(self, path):
+    def get_title(self, path):
         return self.title or Webwidgets.Utils.path_to_id(path)
 
-    def registerHeadContent(self, contentName, content):        
-        self.session.windows[self.win_id].headContent[contentName] = content
+    def register_head_content(self, content_name, content):        
+        self.session.windows[self.win_id].head_content[content_name] = content
 
-    def registerScriptLink(self, *uris):
-        contentName = 'script: ' + ' '.join(uris)
-        self.registerHeadContent(
-            contentName,
+    def register_script_link(self, *uris):
+        content_name = 'script: ' + ' '.join(uris)
+        self.register_head_content(
+            content_name,
             '\n'.join(["<script src='%s' type='text/javascript' ></script>" % (cgi.escape(uri),)
                        for uri in uris]))
         
-    def registerStyleLink(self, *uris):
-        contentName = 'style: ' + ' '.join(uris)
-        self.registerHeadContent(
-            contentName,
+    def register_style_link(self, *uris):
+        content_name = 'style: ' + ' '.join(uris)
+        self.register_head_content(
+            content_name,
             '\n'.join(["<link href='%s' rel='stylesheet' type='text/css' />" % (cgi.escape(uri),)
                        for uri in uris]))
 
-    def registerScript(self, name, script):
-        self.registerHeadContent(
+    def register_script(self, name, script):
+        self.register_head_content(
             name,
             "<script language='javascript'>%s</script>" % (script,))
 
-    def registerStyle(self, name, style):
-        self.registerHeadContent(
+    def register_style(self, name, style):
+        self.register_head_content(
             name,
             "<style>%s</style>" % (style,))
 
-    def registerSubmitAction(self, path, event):
+    def register_submit_action(self, path, event):
         info = {'id': Webwidgets.Utils.path_to_id(path),
                 'event': event}
-        self.registerScript('submitAction: %(id)s: %(event)s' % info,
+        self.register_script('submit_action: %(id)s: %(event)s' % info,
                             """
                             webwidgets_add_event_handler_once_loaded(
                              '%(id)s',
@@ -331,8 +331,8 @@ class Widget(object):
                              });
                             """ % info)
 
-    def registerValue(self, name, value):
-        self.registerHeadContent('value: ' + name,
+    def register_value(self, name, value):
+        self.register_head_content('value: ' + name,
                                  """<script language="javascript">webwidgets_values['%(name)s'] = '%(value)s';</script>""" % {'name': name,
                                                                                                                               'value': value})
 
@@ -349,30 +349,30 @@ class Widget(object):
         return self.session.calculate_url(output_options,
                                          arguments)
         
-    def getLanguages(self, output_options):
-        def parseLanguages(languages):
+    def get_languages(self, output_options):
+        def parse_languages(languages):
             return tuple([item.split(';')[0]
                           for item in languages.split(',')])
         
         if 'languages' in output_options:
-            return parseLanguages(output_options['languages'])
+            return parse_languages(output_options['languages'])
         if self.window is not None:
             if self.window.languages is not None:
                 return self.window.languages
         if hasattr(self, 'session'):
             if self.session.languages is not None:
                 return self.session.languages
-            return parseLanguages(self.session.program.request().environ().get('HTTP_ACCEPT_LANGUAGE', 'en'))
+            return parse_languages(self.session.program.request().environ().get('HTTP_ACCEPT_LANGUAGE', 'en'))
 
         return ()
 
-    def __getTranslations__(cls, languages, fallback = False):
+    def __get_translations__(cls, languages, fallback = False):
         if not hasattr(cls, '__translations__'): cls.__translations__ = {}
         if languages not in cls.__translations__:
             obj = Webwidgets.Utils.Gettext.NullTranslations()
             for base in cls.__bases__:
-                if hasattr(base, '__getTranslations__'):
-                    obj = base.__getTranslations__(languages, fallback = obj)
+                if hasattr(base, '__get_translations__'):
+                    obj = base.__get_translations__(languages, fallback = obj)
             module = sys.modules[cls.__module__]
             if hasattr(module, '__file__'):
                 localedir = os.path.splitext(module.__file__)[0] + '.translations'
@@ -383,15 +383,15 @@ class Widget(object):
                     fallback = obj)
             cls.__translations__[languages] = obj
         return cls.__translations__[languages]
-    __getTranslations__ = classmethod(__getTranslations__)
+    __get_translations__ = classmethod(__get_translations__)
 
-    def getTranslations(self, output_options, languages = None):
+    def get_translations(self, output_options, languages = None):
         if languages is None:
-            languages = self.getLanguages(output_options)
-        return self.__getTranslations__(languages)
+            languages = self.get_languages(output_options)
+        return self.__get_translations__(languages)
 
     def _(self, message, output_options):
-        return self.getTranslations(output_options)._(message)
+        return self.get_translations(output_options)._(message)
 
     def __unicode__(self):
         return "<%(module)s.%(name)s/%(path)s at %(id)s>" % {'module': type(self).__module__,
@@ -406,13 +406,13 @@ class Widget(object):
         return str(self)
 
     def __add__(self, other):
-        return self.getWidgetByPath(other)
+        return self.get_widget_by_path(other)
 
     def __setattr__(self, name, value):
         if not hasattr(self, name) or value is not getattr(self, name):
             object.__setattr__(self, name, value)    
             if name in self.__attributes__:
-                self.notify('%sChanged' % name, value)
+                self.notify('%s_changed' % name, value)
 
 class ChildNodes(Webwidgets.Utils.OrderedDict):
     """Dictionary of child widgets to a widget; any widgets inserted
@@ -454,21 +454,21 @@ class Composite(Widget):
         super(Composite, self).__init__(
             session, win_id, **attrs)
 
-    def drawChild(self, path, child, output_options, invisibleAsEmpty = False):
+    def draw_child(self, path, child, output_options, invisible_as_empty = False):
         """Renders a child widget to HTML using its draw() method.
-        Also handles visibility of the child: if invisibleAsEmpty is
+        Also handles visibility of the child: if invisible_as_empty is
         False, rendering an invisible child will yeild None, otherwize
         it will yield the empty string."""
-        invisible = [None, ''][invisibleAsEmpty]
+        invisible = [None, ''][invisible_as_empty]
         if isinstance(child, Widget):
-            if not child.getVisible(path): return invisible
+            if not child.get_visible(path): return invisible
             return child.draw(output_options)
         else:
             if not self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, path):
                 return invisible
             return self._(child, output_options)
 
-    def drawChildren(self, output_options, invisibleAsEmpty = False, includeAttributes = False):
+    def draw_children(self, output_options, invisible_as_empty = False, include_attributes = False):
         """Renders all child widgets to HTML using their draw methods.
         Also handles visibility of the children - invisible children
         are not included in the output.
@@ -479,38 +479,38 @@ class Composite(Widget):
         
         res = Webwidgets.Utils.OrderedDict()
 
-        for name, child in self.getChildren():
-            child = self.drawChild(self.path + [name], child, output_options, invisibleAsEmpty)
+        for name, child in self.get_children():
+            child = self.draw_child(self.path + [name], child, output_options, invisible_as_empty)
             if child is not None:
                 res[name] = child
 
-        if includeAttributes:
-            res.update(self.drawAttributes(output_options))
+        if include_attributes:
+            res.update(self.draw_attributes(output_options))
         return res
 
-    def getChildren(self):
+    def get_children(self):
         """@return: a dictionary of child widget names and their
         respective widgets.
         """
         raise NotImplemented
 
-    def getChild(self, name):
+    def get_child(self, name):
         """@return: a child widget."""
         raise NotImplemented
 
-    def getWidgetsByAttribute(self, attribute = '__name__'):
-        fields = Widget.getWidgetsByAttribute(self, attribute)
+    def get_widgets_by_attribute(self, attribute = '__name__'):
+        fields = Widget.get_widgets_by_attribute(self, attribute)
         for name, child in self:
             if isinstance(child, Widget):
-                fields.update(child.getWidgetsByAttribute(attribute))
+                fields.update(child.get_widgets_by_attribute(attribute))
         return fields
 
     def __getitem__(self, name):
         """@return: a child widget."""
-        return self.getChild(name)
+        return self.get_child(name)
 
     def __iter__(self):
-        return self.getChildren()
+        return self.get_children()
         
 class StaticComposite(Composite):
     """Base class for all composite widgets, handling children
@@ -519,10 +519,12 @@ class StaticComposite(Composite):
     gotten from arguments if __args_children__ is true) are put in the
     children member variable. This class also handles drawing of
     children and the visibility attribute of children."""
+
     __no_classes_name__ = True
     __children__ = ()
     __args_children__ = True
     __widget_children__ = True
+    
     def __init__(self, session, win_id, **attrs):
         __attributes__ = '__attributes__' in attrs and attrs['__attributes__'] or self.__attributes__
         __children__ = '__children__' in attrs and attrs['__children__'] or self.__children__
@@ -540,10 +542,10 @@ class StaticComposite(Composite):
         for childname in __children__:
             self.children[childname] = getattr(self, childname)
 
-    def getChildren(self):
+    def get_children(self):
         return self.children.iteritems()
 
-    def getChild(self, name):
+    def get_child(self, name):
         try:
             return self.children[name]
         except:
@@ -560,52 +562,52 @@ class StaticComposite(Composite):
 class Input(Widget):
     """Base class for all input widgets, providing input field registration"""
     class __metaclass__(Widget.__metaclass__):
-        debugInputOrder = False
+        debug_input_order = False
         
         def __new__(cls, name, bases, members):
             subordinates = set()
             dominants = set()
-            if '__inputSubordinates__' in members:
-                subordinates = subordinates.union(set(members['__inputSubordinates__']))
-            if '__inputDominants__' in members:
-                dominants = dominants.union(set(members['__inputDominants__']))
+            if '__input_subordinates__' in members:
+                subordinates = subordinates.union(set(members['__input_subordinates__']))
+            if '__input_dominants__' in members:
+                dominants = dominants.union(set(members['__input_dominants__']))
             for base in bases:
-                if hasattr(base, '__inputSubordinates__'):
-                    subordinates = subordinates.union(base.__inputSubordinates__)
-                if hasattr(base, '__inputDominants__'):
-                    dominants = dominants.union(base.__inputDominants__)
-            members['_inputLevel'] = max([0] + [sub._inputLevel
+                if hasattr(base, '__input_subordinates__'):
+                    subordinates = subordinates.union(base.__input_subordinates__)
+                if hasattr(base, '__input_dominants__'):
+                    dominants = dominants.union(base.__input_dominants__)
+            members['_input_level'] = max([0] + [sub._input_level
                                                 for sub in subordinates]) + 1
-            def raiseDominants(dominants, inputLevel):
+            def raise_dominants(dominants, inputLevel):
                 for dom in dominants:
-                    if dom._inputLevel <= inputLevel:
-                        dom._inputLevel = inputLevel + 1
-                        raiseDominants(dom.__inputDominants__, dom._inputLevel)
-            raiseDominants(dominants, members['_inputLevel'])
-            members['__inputSubordinates__'] = subordinates
-            members['__inputDominants__'] = dominants
+                    if dom._input_level <= inputLevel:
+                        dom._input_level = inputLevel + 1
+                        raise_dominants(dom.__input_dominants__, dom._input_level)
+            raise_dominants(dominants, members['_input_level'])
+            members['__input_subordinates__'] = subordinates
+            members['__input_dominants__'] = dominants
 
-            if cls.debugInputOrder:
+            if cls.debug_input_order:
                 print "Registering input widget:", name
                 print "    Subordinates:", ', '.join([sub.__name__ for sub in subordinates])
                 print "    Dominants:", ', '.join([sub.__name__ for sub in dominants])
-                print "    Level:", members['_inputLevel']
+                print "    Level:", members['_input_level']
             
             return Widget.__metaclass__.__new__(cls, name, bases, members)
 
     def input_order(cls, other):
         if isinstance(other, Input):
             other = type(other)
-        return cmp(cls._inputLevel, other._inputLevel) or cmp(cls, other) or cmp(id(cls), id(other))
+        return cmp(cls._input_level, other._input_level) or cmp(cls, other) or cmp(id(cls), id(other))
     input_order = classmethod(input_order)
 
-    __attributes__ = Widget.__attributes__ + ('active', 'argumentName', 'error',
-                                              '__inputSubordinates__', '__inputDominants__')
+    __attributes__ = Widget.__attributes__ + ('active', 'argument_name', 'error',
+                                              '__input_subordinates__', '__input_dominants__')
 
     active = True
     """Enables the user to actually use this input field."""
 
-    argumentName = None
+    argument_name = None
     """'Publishes' the value of this input field as a parameter in the
     URL to the page if set to non-None.
 
@@ -620,11 +622,11 @@ class Input(Widget):
     """Displayed by a corresponding L{Label} if set to non-None.
     See that widget for further information."""
 
-    __inputSubordinates__ = ()
+    __input_subordinates__ = ()
     """Other input widgets that should handle simultaneous input from
     the user _before_ this widget."""    
 
-    __inputDominants__ = ()
+    __input_dominants__ = ()
     """Other input widgets that should handle simultaneous input from
     the user _after_ this widget."""    
 
@@ -636,14 +638,14 @@ class Input(Widget):
             return Widget.HtmlClass.__get__(self, instance, owner) + err
     html_class = HtmlClass()
 
-    def registerInput(self, path = None, argumentName = None, field = True):
+    def register_input(self, path = None, argument_name = None, field = True):
         if path is None: path = self.path
         active = self.get_active(path)
         if active:
             if field:
                 self.session.windows[self.win_id].fields[Webwidgets.Utils.path_to_id(path)] = self
-            if argumentName:
-                self.session.windows[self.win_id].arguments[argumentName] = {'widget':self, 'path': path}
+            if argument_name:
+                self.session.windows[self.win_id].arguments[argument_name] = {'widget':self, 'path': path}
         return active
 
     def field_input(self, path, *stringValues):
@@ -653,7 +655,7 @@ class Input(Widget):
         raise NotImplementedError(self, "field_output")
     
     def draw(self, output_options):
-        self.registerInput(self.path, self.argumentName)
+        self.register_input(self.path, self.argument_name)
         return ''
 
     def get_active(self, path):
@@ -676,7 +678,7 @@ class ValueInput(Input):
     def field_output(self, path):
         return [unicode(self.value)]
 
-    def valueChanged(self, path, value):
+    def value_changed(self, path, value):
         """This notification is sent to notify the widget that its value,
         as entered by the user, has changed. If you override this,
         make sure to call the base class implementation, as the value
@@ -691,7 +693,7 @@ class ActionInput(Input):
     """Base class for all input widgets that only fires some
     notification and don't hold a value of some kind."""
 
-    __inputSubordinates__ = (ValueInput,)
+    __input_subordinates__ = (ValueInput,)
 
     def field_input(self, path, stringValue):
         if stringValue != '':
@@ -709,7 +711,7 @@ class DirectoryServer(Widget):
         def __get__(self, instance, owner):
             filePath = sys.modules[owner.__module__].__file__
             return os.path.splitext(filePath)[0] + '.scripts'
-    baseDirectory = BaseDirectory()
+    base_directory = BaseDirectory()
     
     def class_output(cls, session, arguments, output_options):
         path = output_options['location']
@@ -717,7 +719,7 @@ class DirectoryServer(Widget):
             assert item != '..'
 
         ext = os.path.splitext(path[-1])[1][1:]
-        file = open(os.path.join(cls.baseDirectory,
+        file = open(os.path.join(cls.base_directory,
                                  *path))
         try:
             return {Webwidgets.Constants.FINAL_OUTPUT: file.read(),
@@ -731,6 +733,7 @@ class Window(Widget):
     """Window is the main widget and should allways be the top-level
     widget of any application. It has an attribute for the HTTP
     headers and handles form submission values and URL arguments."""
+
     __attributes__ = ('headers', 'languages')
     headers = {'Status': '404 Page not implemented'}
     languages = None
@@ -755,12 +758,12 @@ class Window(Widget):
 
 file = open(os.path.join(os.path.dirname(os.path.dirname(__file__)),
                          'Widgets.css'))
-genericStyle = file.read()
+generic_style = file.read()
 file.close()
 
 file = open(os.path.join(os.path.dirname(os.path.dirname(__file__)),
                          'Widgets.js'))
-genericScript = file.read()
+generic_script = file.read()
 file.close()
 
 class HtmlWindow(Window, StaticComposite):
@@ -776,11 +779,11 @@ class HtmlWindow(Window, StaticComposite):
     encoding = 'UTF-8'
     doctype = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
 
-    widgetStyle = {Webwidgets.Constants.FINAL_OUTPUT: genericStyle,
+    widget_style = {Webwidgets.Constants.FINAL_OUTPUT: generic_style,
                    'Content-type': 'text/css',
                    'Cache-Control': 'public; max-age=3600',
                    }
-    widgetScript = {Webwidgets.Constants.FINAL_OUTPUT: genericScript,
+    widget_script = {Webwidgets.Constants.FINAL_OUTPUT: generic_script,
                    'Content-type': 'application/x-javascript',
                    'Cache-Control': 'public; max-age=3600',
                    }
@@ -796,18 +799,18 @@ class HtmlWindow(Window, StaticComposite):
 
     def draw(self, output_options, body = None, title = None):
         Window.draw(self, output_options)
-        self.headContent = Webwidgets.Utils.OrderedDict()
+        self.head_content = Webwidgets.Utils.OrderedDict()
 
-        self.registerStyles(output_options)
+        self.register_styles(output_options)
 
-        result = self.drawChildren(
+        result = self.draw_children(
             output_options,
-            invisibleAsEmpty = True,
-            includeAttributes = True)
+            invisible_as_empty = True,
+            include_attributes = True)
 
         if body is not None:
             result['body'] = body
-        if title is None: title = self.getTitle(self.path)
+        if title is None: title = self.get_title(self.path)
         result['title'] = '<title>' + title + '</title>'
         result['doctype'] = self.doctype
         result['uri'] = cgi.escape(self.session.program.request()._environ['REQUEST_URI'])
@@ -815,20 +818,20 @@ class HtmlWindow(Window, StaticComposite):
         result['base'] = self.session.program.request_base()
 
         for (all1, name1, value1, all2, value2, name2) in self.findallvalues.findall(result['body']):
-            self.registerValue('fieldValue' + '_' + (name1 or name2), (value1 or value2))
+            self.register_value('fieldValue' + '_' + (name1 or name2), (value1 or value2))
 
-        result['headContent'] = '\n'.join(self.headContent.values())
+        result['head_content'] = '\n'.join(self.head_content.values())
         
         return ("""
 %(doctype)s
 <html xmlns="http://www.w3.org/1999/xhtml">
  <head>
   <base href='%(base)s' />
-  %(headContent)s
+  %(head_content)s
   %(title)s
   %(head)s
  </head>
- <body %(attr_htmlAttributes)s>
+ <body %(attr_html_attributes)s>
   <form name="%(name)s" method='post' enctype='multipart/form-data' action='%(uri)s' id="%(attr_html_id)s-_-body-form">
    %(body)s
   </form>

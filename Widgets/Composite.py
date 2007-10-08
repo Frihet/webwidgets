@@ -32,7 +32,7 @@ class LanguageInput(Input.ListInput):
     __attributes__ = Input.ListInput.__attributes__ + ('languages',)
     languages = {'en':u'English', 'sv':u'Svenska', 'no':u'Norsk'}
     
-    def getChildren(self):
+    def get_children(self):
         return self.languages.iteritems()
 
 class LanguageSelector(LanguageInput):
@@ -41,7 +41,7 @@ class LanguageSelector(LanguageInput):
             if not hasattr(instance, 'session'):
                 return None
             if instance.session.languages is None:
-                return instance.getLanguages({})[0]
+                return instance.get_languages({})[0]
             return instance.session.languages[0]
         def __set__(self, instance, value):
             instance.session.languages = (value,)
@@ -57,7 +57,7 @@ class Dialog(Formatting.Html):
     __children__ = Formatting.Html.__children__ + ('head', 'body')
     buttons = {'Cancel': '0', 'Ok': '1'}
     html = """
-    <div %(attr_htmlAttributes)s>
+    <div %(attr_html_attributes)s>
      <div class="dialog-head" id="%(attr_html_id)s-head">
       %(head)s
      </div>
@@ -143,7 +143,7 @@ class Tree(Base.Input):
                             'attr_html_id': Webwidgets.Utils.path_to_id(nodePath + ['expand']),
                             'path': nodePath + ['expand']}
             if subNodes or not node.updated:
-                self.registerInput(expandParams[path])
+                self.register_input(expandParams[path])
                 res += '<input type="image" name="%(attr_html_id)s" value="%(attr_html_id)s" src="%(src)s" alt="%(alt)s" id="%(attr_html_id)s" />' % expandParams
             else:
                 res += '<img src="%(src)s" alt="%(alt)s" id="%(attr_html_id)s" />' % expandParams
@@ -163,8 +163,8 @@ class Tree(Base.Input):
                 selectParams['labelText'] = str(unicode(getattr(self.tree, 'rootName', 'Root')))
                 
             if node.leaf:
-                self.registerInput(selectParams['imgPath'])
-                self.registerInput(selectParams['labelPath'])
+                self.register_input(selectParams['imgPath'])
+                self.register_input(selectParams['labelPath'])
                 res += ('<input type="image" name="%(imgId)s" value="%(imgId)s" src="%(imgSrc)s" alt="%(imgAlt)s" id="%(imgId)s" />' +
                         '<input type="submit" name="%(labelId)s" value="%(labelText)s" id="%(labelId)s" />') % selectParams
             else:
@@ -183,7 +183,7 @@ class Tree(Base.Input):
             Webwidgets.Utils.path_to_id(path),
             self.tree.renderTree(renderEntry, '    '))
 
-    def valueChanged(self, path, value):
+    def value_changed(self, path, value):
         if path != self.path: return
         if value is '': return
         subPath = path[path.index('node')+1:-1]
@@ -200,13 +200,13 @@ class Tree(Base.Input):
 class Tabset(Base.StaticComposite):
     def getPages(self, path = []):
         tabs = Webwidgets.Utils.OrderedDict()
-        for name, child in self.getChildren():
+        for name, child in self.get_children():
             #### fixme ####
             # name = "Child must be widget"
             # description = """If child is not a widget
             # but a string, this fails..."""
             #### end ####
-            if not child.getVisible(child.path): continue
+            if not child.get_visible(child.path): continue
 
             page = path + [name]
 
@@ -222,7 +222,7 @@ class Tabset(Base.StaticComposite):
             res = Webwidgets.Utils.OrderedDict()
             for name, (page, widget, children) in pages.iteritems():
                 res[name] = (page,
-                             widget._(widget.getTitle(widget.path), output_options),
+                             widget._(widget.get_title(widget.path), output_options),
                              drawPageTitles(children))
             return res
         return drawPageTitles(self.getPages())
@@ -231,8 +231,8 @@ class TabbedView(Base.ActionInput, Tabset):
     """Provides a set of overlapping 'pages' with tabs, each tab
     holding some other widget, through wich a user can browse using
     the tabs."""
-    __attributes__ = Base.StaticComposite.__attributes__ + ('page', 'argumentName')
-    argumentName = None
+    __attributes__ = Base.StaticComposite.__attributes__ + ('page', 'argument_name')
+    argument_name = None
     oldPage = None
     page = None
 
@@ -249,17 +249,17 @@ class TabbedView(Base.ActionInput, Tabset):
         """
         return self.active and self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, path)
 
-    def pageChanged(self, path, page):
+    def page_changed(self, path, page):
         """Notification that the user has changed page."""
         if path != self.path: return
         if self.oldPage is not None:
-            self.getWidgetByPath(self.oldPage).notify('tabBlur')
+            self.get_widget_by_path(self.oldPage).notify('tabBlur')
         if self.page is not None:
-            self.getWidgetByPath(self.page).notify('tabFocus')
+            self.get_widget_by_path(self.page).notify('tabFocus')
         self.oldPage = self.page
 
     def drawTabs(self, output_options):
-        active = self.registerInput(self.path, self.argumentName)
+        active = self.register_input(self.path, self.argument_name)
         widgetId = Webwidgets.Utils.path_to_id(self.path)
 
         def drawTabs(pages):
@@ -290,14 +290,14 @@ class TabbedView(Base.ActionInput, Tabset):
         
     def draw(self, output_options):
         return """
-               <div %(attr_htmlAttributes)s>
+               <div %(attr_html_attributes)s>
                 %(tabs)s
                 <div class="page">
                  %(page)s
                 </div>
                </div>
-               """ % {'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
-                      'page': self.drawChild(self.getWidgetByPath(self.page).path, self.getWidgetByPath(self.page), output_options, True),
+               """ % {'attr_html_attributes': self.draw_html_attributes(self.path),
+                      'page': self.draw_child(self.get_widget_by_path(self.page).path, self.get_widget_by_path(self.page), output_options, True),
                       'tabs': self.drawTabs(output_options)}
 
 class Hide(Base.StaticComposite):
@@ -316,6 +316,6 @@ class Hide(Base.StaticComposite):
 
     def draw(self, path):
         self['child'].visible = self['hideButton'].value
-        children = self.drawChildren(path, invisibleAsEmpty=True, includeAttributes=True)
-        return """<div %(attr_htmlAttributes)s>%(hideButton)s %(child)s</div>""" % children
+        children = self.draw_children(path, invisible_as_empty=True, include_attributes=True)
+        return """<div %(attr_html_attributes)s>%(hideButton)s %(child)s</div>""" % children
  

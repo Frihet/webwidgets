@@ -30,7 +30,7 @@ import Base, Formatting
 
 class ArgumentInput(Base.ValueInput):
     """This input widget does not actually renders into any HTML but
-    instead represents a parameter in the URL. L{argumentName} is
+    instead represents a parameter in the URL. L{argument_name} is
     mandatory for this widget to be usefull.
 
     Special note: The two special URL argument names '__location__'
@@ -45,7 +45,7 @@ class ArgumentInput(Base.ValueInput):
     """
     
     def draw(self, output_options):
-        self.registerInput(self.path, self.argumentName, False)
+        self.register_input(self.path, self.argument_name, False)
         return ''
 
 class HiddenInput(Base.ValueInput):
@@ -53,8 +53,8 @@ class HiddenInput(Base.ValueInput):
     with some JavaScript."""
     def draw(self, output_options):
         super(HiddenInput, self).draw(output_options)
-        return '<input %(attr_htmlAttributes)s type="hidden" name="%(name)s" value="%(value)s" %(disabled)s />' % {
-            'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
+        return '<input %(attr_html_attributes)s type="hidden" name="%(name)s" value="%(value)s" %(disabled)s />' % {
+            'attr_html_attributes': self.draw_html_attributes(self.path),
             'name': Webwidgets.Utils.path_to_id(self.path),
             'value': self.field_output(self.path)[0],
             'disabled': ['', 'disabled="disabled"'][not self.get_active(self.path)]}
@@ -67,7 +67,7 @@ class StringInput(Base.ValueInput):
 
     def draw(self, output_options):
         super(StringInput, self).draw(output_options)
-	info = {'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
+	info = {'attr_html_attributes': self.draw_html_attributes(self.path),
                 'name': Webwidgets.Utils.path_to_id(self.path),
                 'value': self.field_output(self.path)[0],
                 'disabled': ['', 'disabled="disabled"'][not self.get_active(self.path)],
@@ -76,16 +76,16 @@ class StringInput(Base.ValueInput):
                 'size': ['', 'size="%s"' % self.cols][self.cols is not None]}
 
         if self.rows > 1:
-            return '<textarea %(attr_htmlAttributes)s rows="%(rows)s" %(cols)s name="%(name)s" %(disabled)s>%(value)s</textarea>' % info
+            return '<textarea %(attr_html_attributes)s rows="%(rows)s" %(cols)s name="%(name)s" %(disabled)s>%(value)s</textarea>' % info
         else:
-            return '<input %(attr_htmlAttributes)s %(size)s type="text" name="%(name)s" value="%(value)s" %(disabled)s />' % info
+            return '<input %(attr_html_attributes)s %(size)s type="text" name="%(name)s" value="%(value)s" %(disabled)s />' % info
 
 class PasswordInput(Base.ValueInput):
     """Like StringInput, but hides the user input"""
     def draw(self, output_options):
         super(PasswordInput, self).draw(output_options)
-        return '<input %(attr_htmlAttributes)s type="password" name="%(name)s" value="%(value)s" %(disabled)s />' % {
-            'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
+        return '<input %(attr_html_attributes)s type="password" name="%(name)s" value="%(value)s" %(disabled)s />' % {
+            'attr_html_attributes': self.draw_html_attributes(self.path),
             'name': Webwidgets.Utils.path_to_id(self.path),
             'value': self.field_output(self.path)[0],
             'disabled': ['', 'disabled="disabled"'][not self.get_active(self.path)]}
@@ -93,12 +93,12 @@ class PasswordInput(Base.ValueInput):
 class NewPasswordInput(Formatting.Html, Base.ValueInput):
     """Used for entering new passwords - the password has to be
     repeated twice and the two values entered are compared. A
-    valueChanged is only propagated if the two values matches"""
+    value_changed is only propagated if the two values matches"""
     __wwml_html_override__ = False
     __attributes__ = Formatting.Html.__attributes__ + ('value',)
     value = ''
     html = """
-    <span %(attr_htmlAttributes)s>
+    <span %(attr_html_attributes)s>
      %(input1)s
      %(input2)s
     </span>
@@ -113,7 +113,7 @@ class NewPasswordInput(Formatting.Html, Base.ValueInput):
     class Input(PasswordInput):
         __explicit_load__ = True
         
-        def valueChanged(self, path, value):
+        def value_changed(self, path, value):
             if self.parent['input1'].value == self.parent['input2'].value:
                 print "Passwords matches", self.parent['input1'].value, self.parent['input2'].value
                 self.parent.value = value
@@ -125,7 +125,7 @@ class NewPasswordInput(Formatting.Html, Base.ValueInput):
         def get_active(self, path):
             return self.parent.get_active(path[:-1])
 
-    def valueChanged(self, path, value):
+    def value_changed(self, path, value):
         if path != self.path: return
         if value is None: return
         # If we get this from anywhere else than input1 and input2, we
@@ -140,8 +140,8 @@ class Button(Base.ActionInput):
 
     def draw(self, output_options):
         super(Button, self).draw(output_options)
-        return '<input %(attr_htmlAttributes)s type="submit" %(disabled)s name="%(name)s" value="%(title)s" />' % {
-            'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
+        return '<input %(attr_html_attributes)s type="submit" %(disabled)s name="%(name)s" value="%(title)s" />' % {
+            'attr_html_attributes': self.draw_html_attributes(self.path),
             'name': Webwidgets.Utils.path_to_id(self.path),
             'title': self._(self.title, output_options),
             'disabled': ['', 'disabled="disabled"'][not self.get_active(self.path)]}
@@ -150,15 +150,15 @@ class UpdateButton(Base.ActionInput):
     """This is a special kind of button that only submits the form and
     causes other widgets to get their input. In addition, it
     dissapears if JavaScript is enabled. It is intended to be used in
-    conjunction with registerSubmitAction() on other widgets."""
+    conjunction with register_submit_action() on other widgets."""
 
     def draw(self, output_options):
         Base.ActionInput.draw(self, output_options)
-        info = {'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
+        info = {'attr_html_attributes': self.draw_html_attributes(self.path),
                 'id': Webwidgets.Utils.path_to_id(self.path),
                 'title': self._("Update", output_options),
                 'disabled': ['', 'disabled="disabled"'][not self.get_active(self.path)]}
-        self.registerScript('updateButton: %(id)s' % info,
+        self.register_script('updateButton: %(id)s' % info,
                             """
                             webwidgets_add_event_handler(window, 'load',
                              'webwidgets_update_button: %(id)s',
@@ -166,7 +166,7 @@ class UpdateButton(Base.ActionInput):
                               document.getElementById('%(id)s').style.display = 'none';
                              });
                             """ % info)
-        return '<input %(attr_htmlAttributes)s type="submit" %(disabled)s name="%(id)s" value="%(title)s" />' % info
+        return '<input %(attr_html_attributes)s type="submit" %(disabled)s name="%(id)s" value="%(title)s" />' % info
 
     def field_input(self, path, stringValue):
         pass
@@ -201,14 +201,14 @@ class RadioInput(Base.ValueInput, Base.StaticComposite):
         return [Utils.path_to_id(self.group.members[self.group.value].path)]
 
     def draw(self, output_options):
-        self.registerInput(self.group.path, self.argumentName)
-        result = self.drawChildren(output_options, includeAttributes = True)
+        self.register_input(self.group.path, self.argument_name)
+        result = self.draw_children(output_options, include_attributes = True)
         result['name'] = Webwidgets.Utils.path_to_id(self.group.path)
         result['value'] = result['id']
         result['checked'] = ['', 'checked'][self.value == self.group.value]
         result['disabled'] = ['', 'disabled="disabled"'][not self.get_active(self.path)],
         return """<input
-                   %(attr_htmlAttributes)s
+                   %(attr_html_attributes)s
                    type="radio"
                    name="%(name)s"
                    value="%(value)s"
@@ -222,8 +222,8 @@ class Checkbox(Base.ValueInput):
     def draw(self, output_options):
         super(Checkbox, self).draw(output_options)
         checked = ["", 'checked="checked"'][not not self.value]
-        return '<input %(attr_htmlAttributes)s type="checkbox" name="%(name)s" value="checked" %(checked)s %(disabled)s />' % {
-            'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
+        return '<input %(attr_html_attributes)s type="checkbox" name="%(name)s" value="checked" %(checked)s %(disabled)s />' % {
+            'attr_html_attributes': self.draw_html_attributes(self.path),
             'name': Webwidgets.Utils.path_to_id(self.path),
             'checked': checked,
             'disabled': ['', 'disabled="disabled"'][not self.get_active(self.path)]}
@@ -249,7 +249,7 @@ class ListInput(Base.ValueInput, Base.StaticComposite):
 
     def draw(self, output_options):
         Base.ValueInput.draw(self, output_options)
-        children = self.drawChildren(output_options)
+        children = self.draw_children(output_options)
         childnames = children.keys()
         childnames.sort()
         values = self.value
@@ -264,10 +264,10 @@ class ListInput(Base.ValueInput, Base.StaticComposite):
             for childname
             in childnames])
 
-        return """<select %(attr_htmlAttributes)s %(multiple)s %(size)s name="%(name)s" %(disabled)s>
+        return """<select %(attr_html_attributes)s %(multiple)s %(size)s name="%(name)s" %(disabled)s>
          %(options)s
          </select>""" % {
-            'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
+            'attr_html_attributes': self.draw_html_attributes(self.path),
             'multiple': self.multiple and 'multiple' or '',
             'size': self.size != 0 and 'size="%s"' % self.size or '',
             'name': Webwidgets.Utils.path_to_id(self.path),
@@ -313,17 +313,17 @@ class FileInput(Base.ValueInput, Base.StaticComposite):
     def draw(self, output_options):
         super(FileInput, self).draw(output_options)
         if self.get_active(self.path):
-            self.registerInput(self.path, self.argumentName)
+            self.register_input(self.path, self.argument_name)
             if self.value is not None:
-                argumentName = self.argumentName
-                if argumentName: argumentName = argumentName + '_clear'
-                self.registerInput(self.path + ['_', 'clear'], argumentName)
+                argument_name = self.argument_name
+                if argument_name: argument_name = argument_name + '_clear'
+                self.register_input(self.path + ['_', 'clear'], argument_name)
 
-        result = self.drawChildren(output_options, includeAttributes = True)
+        result = self.draw_children(output_options, include_attributes = True)
         result['disabled'] = ['', 'disabled="disabled"'][not self.get_active(self.path)],
         result['clearable'] = ['', 'disabled="disabled"'][not self.get_active(self.path) or self.value is None],
 
-        return """<span %(attr_htmlAttributes)s>
+        return """<span %(attr_html_attributes)s>
                    %(preview)s
                    <input type="file" name="%(attr_html_id)s" %(disabled)s id="%(attr_html_id)s-_-input" />
                    %(clear)s

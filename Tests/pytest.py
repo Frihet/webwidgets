@@ -104,7 +104,7 @@ class pytest(Webwidgets.Program):
                 class pwdclear(Webwidgets.Button):
                     title = 'Clear new password'
                     def clicked(self, path):
-                        self.parent.children['newpwd'].notify('valueChanged', '')
+                        self.parent.children['newpwd'].notify('value_changed', '')
 
                 class pwdset(Webwidgets.Button):
                     title = 'Set new password'
@@ -124,8 +124,8 @@ class pytest(Webwidgets.Program):
                             five='2006-05-01 23:45:00 +10',
                             six='2006-04-13 12:00:00 +10',
                             )
-                    def valueChanged(self, path, value):
-                        Webwidgets.ListInput.valueChanged(self, path, value)
+                    def value_changed(self, path, value):
+                        Webwidgets.ListInput.value_changed(self, path, value)
                         print "List input changed", value
 
                 class Filter(Webwidgets.Button): title = 'Filter'
@@ -171,8 +171,8 @@ class pytest(Webwidgets.Program):
                                     target = '1/check'
                                 class check(Webwidgets.Checkbox):
                                     value = 1
-                                    def valueChanged(self, path, value):
-                                        Webwidgets.Checkbox.valueChanged(self, path, value)
+                                    def value_changed(self, path, value):
+                                        Webwidgets.Checkbox.value_changed(self, path, value)
                                         if value:
                                             self.error = "XXXXXX"
                                 

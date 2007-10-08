@@ -36,10 +36,10 @@ class DateInput(Input.StringInput, Base.DirectoryServer):
         """
         super(DateInput, self).draw(output_options)
 
-        self.registerStyleLink(self.calculate_url({'widget_class': 'Webwidgets.DateInput',
+        self.register_style_link(self.calculate_url({'widget_class': 'Webwidgets.DateInput',
                                                   'location': ['calendar-blue.css']},
                                                  {}))
-        self.registerScriptLink(self.calculate_url({'widget_class': 'Webwidgets.DateInput',
+        self.register_script_link(self.calculate_url({'widget_class': 'Webwidgets.DateInput',
                                                    'location': ['calendar.js']},
                                                   {}),
                                 self.calculate_url({'widget_class': 'Webwidgets.DateInput',
@@ -49,7 +49,7 @@ class DateInput(Input.StringInput, Base.DirectoryServer):
                                                    'location': ['calendar-setup.js']},
                                                   {}))
 
-        return '''<input %(attr_htmlAttributes)s name="%(name)s" value="%(value)s" autocomplete="off" %(disabled)s />
+        return '''<input %(attr_html_attributes)s name="%(name)s" value="%(value)s" autocomplete="off" %(disabled)s />
        <script type="text/javascript">
          Calendar.setup(
            {
@@ -61,7 +61,7 @@ class DateInput(Input.StringInput, Base.DirectoryServer):
            }
          );
        </script>''' % {
-            'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
+            'attr_html_attributes': self.draw_html_attributes(self.path),
             'name': Webwidgets.Utils.path_to_id(self.path),
             'value': self.field_output(self.path)[0], 'format': self.format,
             'disabled': ['', 'disabled="disabled"'][not self.get_active(self.path)],

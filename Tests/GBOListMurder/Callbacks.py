@@ -37,10 +37,10 @@ class MyWindow(object):
             def getRows(self):
                 return self.rows
 
-            def valueChanged(self, path, value):
+            def value_changed(self, path, value):
                 #print "Change %s: %s" % (path, repr(value))
                 self.changed = True
-                Webwidgets.GBOList.valueChanged(self, path, value)
+                Webwidgets.GBOList.value_changed(self, path, value)
             
         class Add(object):
             def clicked(self, path):

@@ -69,7 +69,7 @@
 
    <!-- w:FileInput id="file" / -->
 
-   <w:GBOList id="ListTest" argumentName='test' rowsPerPage=":integer:20">
+   <w:GBOList id="ListTest" argument_name='test' rowsPerPage=":integer:20">
     <w:dict id="functions" copy="C" edit="E" delete="D" />
     <w:dict id="groupFunctions" new="New" delete="Delete all" />
     <w:dict id="columns" foo="Fooish foo" bar="Barbar" fie="Fiesh fish" />
@@ -99,7 +99,7 @@
    <w:AddressInput id="xzy" />
 
    <div id="header">
-    <span id="search">Search: <w:StringInput id="Search" argumentName="search" value="/foo/bar/fie"/></span>
+    <span id="search">Search: <w:StringInput id="Search" argument_name="search" value="/foo/bar/fie"/></span>
     <span id="dir">
      <w:Html id="CurrentDirectory" html="/foo/bar/fie" />
     </span>

@@ -307,7 +307,7 @@ Then there is the JavaScript code that sets up the calendar into the
 <p>
 </p>
 <pre class=verbatim>&lt;script type=&quot;text/javascript&quot;&gt;
-  function dateChanged(calendar) {
+  function date_changed(calendar) {
     // Beware that this function is called even if the end-user only
     // changed the month/year.  In order to determine if a date was
     // clicked you can use the dateClicked property of the calendar:
@@ -324,7 +324,7 @@ Then there is the JavaScript code that sets up the calendar into the
   Calendar.setup(
     {
       flat         : &quot;calendar-container&quot;, // ID of the parent element
-      flatCallback : dateChanged           // our callback function
+      flatCallback : date_changed           // our callback function
     }
   );
 &lt;/script&gt;
@@ -669,7 +669,7 @@ field such that it keeps a one week difference between the two.  Enjoy! :-)</p>
 <p>This sample can be found in “<tt>simple-2.html</tt>”.  It will configure a
 flat calendar that is always displayed in the page, in the DIV having the
 id=“calendar-container”.  When a date is clicked our function hander gets
-called (<tt>dateChanged</tt>) and it will compute an URL to jump to based on
+called (<tt>date_changed</tt>) and it will compute an URL to jump to based on
 the selected date, then use <tt>window.location</tt> to visit the new link.</p>
 <p>
 </p>
@@ -677,7 +677,7 @@ the selected date, then use <tt>window.location</tt> to visit the new link.</p>
 id=&quot;calendar-container&quot;&gt;&lt;/div&gt;
 
 &lt;script type=&quot;text/javascript&quot;&gt;
-  function dateChanged(calendar) {
+  function date_changed(calendar) {
     // Beware that this function is called even if the end-user only
     // changed the month/year.  In order to determine if a date was
     // clicked you can use the dateClicked property of the calendar:
@@ -694,7 +694,7 @@ id=&quot;calendar-container&quot;&gt;&lt;/div&gt;
   Calendar.setup(
     {
       flat         : &quot;calendar-container&quot;, // ID of the parent element
-      flatCallback : dateChanged           // our callback function
+      flatCallback : date_changed           // our callback function
     }
   );
 &lt;/script&gt;
@@ -737,7 +737,7 @@ id=&quot;calendar-container&quot;&gt;&lt;/div&gt;
     return false;
   };
 
-  function dateChanged(calendar) {
+  function date_changed(calendar) {
     // Beware that this function is called even if the end-user only
     // changed the month/year.  In order to determine if a date was
     // clicked you can use the dateClicked property of the calendar:
@@ -762,7 +762,7 @@ id=&quot;calendar-container&quot;&gt;&lt;/div&gt;
   Calendar.setup(
     {
       flat         : &quot;calendar-container&quot;, // ID of the parent element
-      flatCallback : dateChanged,          // our callback function
+      flatCallback : date_changed,          // our callback function
       dateStatusFunc : ourDateStatusFunc
     }
   );

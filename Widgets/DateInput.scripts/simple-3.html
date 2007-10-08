@@ -64,7 +64,7 @@ id="calendar-container"></div>
     return false;
   };
 
-  function dateChanged(calendar) {
+  function date_changed(calendar) {
     // Beware that this function is called even if the end-user only
     // changed the month/year.  In order to determine if a date was
     // clicked you can use the dateClicked property of the calendar:
@@ -81,7 +81,7 @@ id="calendar-container"></div>
   Calendar.setup(
     {
       flat         : "calendar-container", // ID of the parent element
-      flatCallback : dateChanged,          // our callback function
+      flatCallback : date_changed,          // our callback function
       dateStatusFunc : function(date, y, m, d) {
                          if (dateIsSpecial(y, m, d)) return "special";
                          else return false; // other dates are enabled
@@ -104,7 +104,7 @@ in the <a href="doc/html/reference.html">calendar documenation</a>.</p>
 id="calendar-container"&gt;&lt;/div&gt;
 
 &lt;script type="text/javascript"&gt;
-  function dateChanged(calendar) {
+  function date_changed(calendar) {
     // Beware that this function is called even if the end-user only
     // changed the month/year.  In order to determine if a date was
     // clicked you can use the dateClicked property of the calendar:
@@ -121,7 +121,7 @@ id="calendar-container"&gt;&lt;/div&gt;
   Calendar.setup(
     {
       flat         : "calendar-container", // ID of the parent element
-      flatCallback : dateChanged           // our callback function
+      flatCallback : date_changed           // our callback function
     }
   );
 &lt;/script&gt;</pre>
