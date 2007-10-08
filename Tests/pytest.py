@@ -86,7 +86,7 @@ class pytest(Webwidgets.Program):
                           
                 class upload(Webwidgets.FileInput): pass
 
-                class table(Webwidgets.Table):
+                class table(Webwidgets.GridLayout):
                     hiddenCols = set((1,))
                     class cell_0_0_1_1(Webwidgets.Html): html='Foo'
                     class cell_1_0_1_1(Webwidgets.Html): html='Bar'

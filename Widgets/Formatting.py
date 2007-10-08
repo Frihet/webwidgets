@@ -25,7 +25,7 @@
 
 import types, StringIO, cgi
 import Webwidgets.Utils, Webwidgets.Constants
-import Base, TableModel
+import Base, GridLayoutModel
 
 class List(Base.StaticComposite):
     """Concatenates all children in name order, drawing the "sep"
@@ -357,33 +357,33 @@ class Fieldgroup(List):
     pre = "<div %(attr_html_attributes)s>"
     post = "</div>\n"
 
-class Table(Base.StaticComposite, TableModel.Table):
-    """Table that works similar to a GtkTable in Gtk - child widgets
+class GridLayout(Base.StaticComposite, GridLayoutModel.GridLayout):
+    """GridLayout that works similar to a GtkTable in Gtk - child widgets
     are attatched to cells by coordinates."""
     __attributes__ = Base.StaticComposite.__attributes__ + ('row_widths', 'col_widths')
 
-    class Cell(TableModel.Table.Cell):
+    class Cell(GridLayoutModel.GridLayout.Cell):
         def name(self):
             return 'cell_' + str(self.x) + '_' + str(self.y) + '_' + str(self.w) + '_' + str(self.h)
 
     def __init__(self, session, win_id, **attrs):
         Base.StaticComposite.__init__(self, session, win_id, **attrs)
-        TableModel.Table.__init__(self)
+        GridLayoutModel.GridLayout.__init__(self)
         for name, child in self.children.iteritems():
             if name.startswith('cell_'):
                 x, y, w, h = self.child_name_to_coord(name)
-                TableModel.Table.insert(self, child, x, y, w, h)
+                GridLayoutModel.GridLayout.insert(self, child, x, y, w, h)
                 
     def child_name_to_coord(self, name):
         dummy, x, y, w, h = name.split('_')
         return (int(x), int(y), int(w), int(h))
     
     def insert(self, content, x, y, w = 1, h = 1):
-        cell = TableModel.Table.insert(self, content, x, y, w, h)
+        cell = GridLayoutModel.GridLayout.insert(self, content, x, y, w, h)
         self.children[cell.name()] = content
         
     def remove(self, x, y):
-        cell = TableModel.Table.remove(self, x, y)
+        cell = GridLayoutModel.GridLayout.remove(self, x, y)
         if cell: del self.children[cell.name()]
     
     def draw(self, output_options):

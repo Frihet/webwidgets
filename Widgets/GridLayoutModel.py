@@ -21,7 +21,7 @@
 
 import operator
 
-class Table(object):
+class GridLayout(object):
     row_widths = {}
     col_widths = {}
 

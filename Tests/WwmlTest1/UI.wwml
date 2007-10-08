@@ -117,14 +117,14 @@
     </w:Dialog>
     <br />
 
-    <w:Table id="table">
+    <w:GridLayout id="table">
      <w:Html id="cell_0_0_1_1" html="Foo" />
      <w:Html id="cell_1_0_1_1" html="Bar" />
      <w:Html id="cell_0_1_2_1" html="Fie" />
      <w:Html id="cell_0_2_1_1" html="Ma" />
      <w:Html id="cell_1_2_1_1" html="Ba" />
      <w:Html id="cell_2_0_1_3" html="Foo" />
-    </w:Table>
+    </w:GridLayout>
     <br />
 
     <w:Html id="Dirlisting">
