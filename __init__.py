@@ -52,7 +52,7 @@ from Widgets.Base import *
 from Widgets.Formatting import *
 from Widgets.Input import *
 from Widgets.Composite import *
-from Widgets.GBOList import *
+from Widgets.Table import *
 from Widgets.InputCombinations import *
 from Widgets.DateInput import *
 from Widgets.LogIn import *

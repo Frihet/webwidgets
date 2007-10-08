@@ -18,19 +18,19 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-.Webwidgets-Widgets-GBOList-GBOList table {
+.Webwidgets-Widgets-Table-Table table {
  width: 100%;
  border: solid 1px black;
  font-size: 8pt;
  border-spacing: 0px;
 }
 
-.Webwidgets-Widgets-GBOList-GBOList .buttons {
+.Webwidgets-Widgets-Table-Table .buttons {
  padding-top: 2px;
  padding-bottom: 2px;
 }
 
-.Webwidgets-Widgets-GBOList-GBOList .buttons a {
+.Webwidgets-Widgets-Table-Table .buttons a {
  border: solid 1px black;
  margin: 0;
  padding: 3px;
@@ -40,21 +40,21 @@
  text-decoration: none;
 }
 
-.Webwidgets-Widgets-GBOList-GBOList .buttons button,
-.Webwidgets-Widgets-GBOList-GBOList .buttons a {
+.Webwidgets-Widgets-Table-Table .buttons button,
+.Webwidgets-Widgets-Table-Table .buttons a {
  background: #000000;
  color: #ffffff;
 }
-.Webwidgets-Widgets-GBOList-GBOList .buttons button[disabled=true] {
+.Webwidgets-Widgets-Table-Table .buttons button[disabled=true] {
  background: #555555;
  color: #999999;
 }
 
-.Webwidgets-Widgets-GBOList-GBOList th {
+.Webwidgets-Widgets-Table-Table th {
  border-bottom: solid 2px black;
  padding: 0px;
 }
-.Webwidgets-Widgets-GBOList-GBOList th * {
+.Webwidgets-Widgets-Table-Table th * {
  display: block;
  background: inherit;
  border: inherit;
@@ -67,72 +67,72 @@
  font-weight: normal;
  background: #00ff00;
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_order_desc *:after {
+.Webwidgets-Widgets-Table-Table th.column_sort_order_desc *:after {
  content: "(desc)";
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_order_asc *:after {
+.Webwidgets-Widgets-Table-Table th.column_sort_order_asc *:after {
  content: "(asc)";
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_0 * {
+.Webwidgets-Widgets-Table-Table th.column_sort_level_0 * {
  background: #ffffff;
  font-weight: bold;
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_1 * {
+.Webwidgets-Widgets-Table-Table th.column_sort_level_1 * {
  background: #eeffee;
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_2 * {
+.Webwidgets-Widgets-Table-Table th.column_sort_level_2 * {
  background: #ddffdd;
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_3 * {
+.Webwidgets-Widgets-Table-Table th.column_sort_level_3 * {
  background: #ccffcc;
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_4 * {
+.Webwidgets-Widgets-Table-Table th.column_sort_level_4 * {
  background: #bbffbb;
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_5 * {
+.Webwidgets-Widgets-Table-Table th.column_sort_level_5 * {
  background: #aaffaa;
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_6 * {
+.Webwidgets-Widgets-Table-Table th.column_sort_level_6 * {
  background: #99ff99;
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_7 * {
+.Webwidgets-Widgets-Table-Table th.column_sort_level_7 * {
  background: #88ff88;
 }
-.Webwidgets-Widgets-GBOList-GBOList th.column_sort_level_8 * {
+.Webwidgets-Widgets-Table-Table th.column_sort_level_8 * {
  background: #77ff77;
 }
 
-.Webwidgets-Widgets-GBOList-GBOList td {
+.Webwidgets-Widgets-Table-Table td {
  vertical-align: top;
 }
-.Webwidgets-Widgets-GBOList-GBOList td.column_last_level_1 {
+.Webwidgets-Widgets-Table-Table td.column_last_level_1 {
  border-bottom: solid 8px black;
 }
-.Webwidgets-Widgets-GBOList-GBOList td.column_last_level_2 {
+.Webwidgets-Widgets-Table-Table td.column_last_level_2 {
  border-bottom: solid 4px black;
 }
-.Webwidgets-Widgets-GBOList-GBOList td.column_last_level_3 {
+.Webwidgets-Widgets-Table-Table td.column_last_level_3 {
  border-bottom: solid 2px black;
 }
-.Webwidgets-Widgets-GBOList-GBOList td.column_last_level_4 {
+.Webwidgets-Widgets-Table-Table td.column_last_level_4 {
  border-bottom: solid 1px black;
 }
-.Webwidgets-Widgets-GBOList-GBOList td.column_last_level_5 {
+.Webwidgets-Widgets-Table-Table td.column_last_level_5 {
  border-bottom: solid 1px #555555;
 }
-.Webwidgets-Widgets-GBOList-GBOList td.column_last_level_6 {
+.Webwidgets-Widgets-Table-Table td.column_last_level_6 {
  border-bottom: solid 1px #666666;
 }
-.Webwidgets-Widgets-GBOList-GBOList td.column_last_level_7 {
+.Webwidgets-Widgets-Table-Table td.column_last_level_7 {
  border-bottom: solid 1px #777777;
 }
-.Webwidgets-Widgets-GBOList-GBOList td.column_last_level_8 {
+.Webwidgets-Widgets-Table-Table td.column_last_level_8 {
  border-bottom: solid 1px #888888;
 }
-.Webwidgets-Widgets-GBOList-GBOList td.functions {
+.Webwidgets-Widgets-Table-Table td.functions {
  vertical-align: top;
 }
-.Webwidgets-Widgets-GBOList-GBOList td.functions button {
+.Webwidgets-Widgets-Table-Table td.functions button {
  padding: 0px;
  margin: 0px;
  border: 0px;
