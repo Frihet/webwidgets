@@ -22,15 +22,15 @@
 import operator
 
 class Table(object):
-    rowWidths = {}
-    colWidths = {}
+    row_widths = {}
+    col_widths = {}
 
     def __init__(self):
         self.cells = []
         self.w = 0
         self.h = 0
-        self.rowWidths = dict(self.rowWidths)
-        self.colWidths = dict(self.colWidths)
+        self.row_widths = dict(self.row_widths)
+        self.col_widths = dict(self.col_widths)
 
     class Cell(object):
         def __init__(self, content, x, y, w, h):
@@ -40,12 +40,12 @@ class Table(object):
             self.w = w
             self.h = h
 
-    def isTopLeft(self, x, y):
+    def is_top_left(self, x, y):
         return (    self.cells[y][x]
                 and self.cells[y][x].x == x
                 and self.cells[y][x].y == y)
 
-    def isEdge(self, x, y):
+    def is_edge(self, x, y):
         "Return a tuple of booleans (left, right, top, bottom)"
         if not self.cells[y][x]:
             return (True, True, True, True)
@@ -55,7 +55,7 @@ class Table(object):
                 self.cells[y][x].y + self.cells[y][x].h - 1 == y)
             
 
-    def visibleSize(self, x, y):
+    def visible_size(self, x, y):
         if self.cells[y][x]:
             cx = self.cells[y][x].x
             cy = self.cells[y][x].y
@@ -69,11 +69,11 @@ class Table(object):
         xs = set(range(cx, cx + cw))
         ys = set(range(cy, cy + ch))
 
-        rowWidths = set(self.rowWidths.keys())
-        colWidths = set(self.colWidths.keys())
+        row_widths = set(self.row_widths.keys())
+        col_widths = set(self.col_widths.keys())
         
-        w = len(xs - colWidths) + reduce(operator.add, [self.colWidths[col] for col in xs.intersection(colWidths)], 0)
-        h = len(ys - rowWidths) + reduce(operator.add, [self.rowWidths[row] for row in xs.intersection(rowWidths)], 0)
+        w = len(xs - col_widths) + reduce(operator.add, [self.col_widths[col] for col in xs.intersection(col_widths)], 0)
+        h = len(ys - row_widths) + reduce(operator.add, [self.row_widths[row] for row in xs.intersection(row_widths)], 0)
 
         return (w, h)
         
@@ -105,7 +105,7 @@ class Table(object):
         res = ''
         for y in xrange(0, self.h):
             for x in xrange(0, self.w):
-                left, right, top, bottom = self.isEdge(x, y)            
+                left, right, top, bottom = self.is_edge(x, y)            
                 if top:
                     if left:
                         res += '+'
@@ -128,7 +128,7 @@ class Table(object):
                         res += ' '
             res += '\n'
             for x in xrange(0, self.w):
-                left, right, top, bottom = self.isEdge(x, y)            
+                left, right, top, bottom = self.is_edge(x, y)            
                 if left:
                     res += '|'
                 else:
@@ -146,7 +146,7 @@ class Table(object):
                     res += ' '
             res += '\n'
             for x in xrange(0, self.w):
-                left, right, top, bottom = self.isEdge(x, y)            
+                left, right, top, bottom = self.is_edge(x, y)            
                 if bottom:
                     if left:
                         res += '+'

@@ -31,10 +31,10 @@ class MyWindow(object):
         class GreencycleList(object):
             nextId = 0
 
-            def getPages(self):
+            def get_pages(self):
                 return 1
             
-            def getRows(self):
+            def get_rows(self):
                 return self.rows
 
             def value_changed(self, path, value):

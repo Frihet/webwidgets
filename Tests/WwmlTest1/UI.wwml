@@ -69,11 +69,11 @@
 
    <!-- w:FileInput id="file" / -->
 
-   <w:GBOList id="ListTest" argument_name='test' rowsPerPage=":integer:20">
+   <w:GBOList id="ListTest" argument_name='test' rows_per_page=":integer:20">
     <w:dict id="functions" copy="C" edit="E" delete="D" />
-    <w:dict id="groupFunctions" new="New" delete="Delete all" />
+    <w:dict id="group_functions" new="New" delete="Delete all" />
     <w:dict id="columns" foo="Fooish foo" bar="Barbar" fie="Fiesh fish" />
-    <w:list id="dontMergeColumns"><w:string id="bar">bar</w:string></w:list>
+    <w:list id="dont_merge_columns"><w:string id="bar">bar</w:string></w:list>
     <w:list id="rows">
      <w:dict id="row1" foo="47" bar="11" fie="56" />
      <w:dict id="row2" foo="47" bar="11" fie="56" />

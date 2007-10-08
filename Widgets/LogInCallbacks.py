@@ -22,53 +22,53 @@
 import Webwidgets, traceback
 
 class LogIn(object):
-    __attributes__ = Webwidgets.Html.__attributes__ + ('globalSession', 'userInfo')
-    globalSession = True
-    userInfo = None
-    debugLogIn = False
-    debugErrors = False
+    __attributes__ = Webwidgets.Html.__attributes__ + ('global_session', 'user_info')
+    global_session = True
+    user_info = None
+    debug_log_in = False
+    debug_errors = False
     
-    class logIn(object):
+    class log_in(object):
         def selected(self, path, value):
-            fields = self.get_widgets_by_attribute('fieldName')
+            fields = self.get_widgets_by_attribute('field_name')
 
-            if self.parent.debugLogIn: print "Log in attempt:", fields['username'].value, fields['password'].value
+            if self.parent.debug_log_in: print "Log in attempt:", fields['username'].value, fields['password'].value
 
             try:
-                self.parent.userInfo = self.parent.authenticate(
+                self.parent.user_info = self.parent.authenticate(
                     fields['username'].value,
                     fields['password'].value)
             except Exception, e:
-                if self.parent.debugErrors: traceback.print_exc()
+                if self.parent.debug_errors: traceback.print_exc()
                 fields['username'].error = unicode(e)
                 
             else:
-                if self.parent.debugLogIn: print "User logged in:", self.parent.userInfo
+                if self.parent.debug_log_in: print "User logged in:", self.parent.user_info
                 
     def authenticate(self, username, password):
         raise Exception("You must override the authenticate() method of this widget!")
 
-    def userInfoChanged(self, path, value):
-        if self.globalSession:
-            self.session.logIn = self
-        if self.userInfo is None:
+    def user_info_changed(self, path, value):
+        if self.global_session:
+            self.session.log_in = self
+        if self.user_info is None:
             self['application'] = Webwidgets.Html(self.session, self.win_id)
-            self['logIn'].visible = True
+            self['log_in'].visible = True
         else:
             self['application'] = self.Application(self.session, self.win_id)
-            self['logIn'].visible = False
+            self['log_in'].visible = False
 
 class LogOut(object):
     debug = True
-    __attributes__ = Webwidgets.Dialog.__attributes__ + ('logIn',)
-    logIn = None
+    __attributes__ = Webwidgets.Dialog.__attributes__ + ('log_in',)
+    log_in = None
     
     def selected(self, path, value):
-        if self.logIn is None:
-            logIn = self.session.logIn
-        elif isinstance(self.logIn, Webwidgets.Widget):
-            logIn = self.logIn
+        if self.log_in is None:
+            log_in = self.session.log_in
+        elif isinstance(self.log_in, Webwidgets.Widget):
+            log_in = self.log_in
         else:
-            logIn = self + self.logIn
-        logIn.userInfo = None
+            log_in = self + self.log_in
+        log_in.user_info = None
             

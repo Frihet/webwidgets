@@ -21,7 +21,7 @@
  * Dialog windows operations. (Gecko specific implementations)
  */
 
-FCKDialog.Show = function( dialogInfo, dialogName, pageUrl, dialogWidth, dialogHeight, parentWindow, resizable )
+FCKDialog.Show = function( dialog_info, dialogName, pageUrl, dialogWidth, dialogHeight, parentWindow, resizable )
 {
 	var iTop  = (FCKConfig.ScreenHeight - dialogHeight) / 2 ;
 	var iLeft = (FCKConfig.ScreenWidth  - dialogWidth)  / 2 ;
@@ -52,12 +52,12 @@ FCKDialog.Show = function( dialogInfo, dialogName, pageUrl, dialogWidth, dialogH
 	oWindow.focus() ;
 	oWindow.location.href = pageUrl ;
 
-	oWindow.dialogArguments = dialogInfo ;
+	oWindow.dialogArguments = dialog_info ;
 
 	// On some Gecko browsers (probably over slow connections) the
 	// "dialogArguments" are not set to the target window so we must
 	// put it in the opener window so it can be used by the target one.
-	parentWindow.FCKLastDialogInfo = dialogInfo ;
+	parentWindow.FCKLastDialog_info = dialog_info ;
 
 	this.Window = oWindow ;
 

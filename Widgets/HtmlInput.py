@@ -36,19 +36,19 @@ class HtmlInput(Input.StringInput, Base.DirectoryServer):
         self.register_script_link(self.calculate_url({'widget_class': 'Webwidgets.HtmlInput',
                                                    'location': ['fckeditor.js']},
                                                   {}))
-        widgetId = Webwidgets.Utils.path_to_id(self.path)
-        self.register_script('fckeditor: ' + widgetId,
+        widget_id = Webwidgets.Utils.path_to_id(self.path)
+        self.register_script('fckeditor: ' + widget_id,
                             """
 webwidgets_add_event_handler(
  window,
  'load',
- 'webwidgets_fckeditor_load_%(widgetId)s',
+ 'webwidgets_fckeditor_load_%(widget_id)s',
  function()
   {
-   var oFCKeditor = new FCKeditor('%(widgetId)s');
+   var oFCKeditor = new FCKeditor('%(widget_id)s');
    oFCKeditor.BasePath = "%(widgetUrl)s/" ;
    oFCKeditor.ReplaceTextarea() ;
   });
-  """ % {'widgetId': widgetId,
+  """ % {'widget_id': widget_id,
          'widgetUrl': self.calculate_url({'widget_class': 'Webwidgets.HtmlInput'})})
         return super(HtmlInput, self).draw(output_options)

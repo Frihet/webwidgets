@@ -28,17 +28,17 @@
   bind="LogInCallbacks.LogIn"
   >
   <w:Dialog
-   id="logIn"
+   id="log_in"
    head="Please log in:"
    >
    <w:Html id="body">
     <w:Message id="message" />
     <w:Fieldgroup id="credentialsGroup">
      <w:Field id="username" label="Username">
-      <w:StringInput id="field" fieldName="username" />
+      <w:StringInput id="field" field_name="username" />
      </w:Field>
      <w:Field id="password" label="Password">
-      <w:PasswordInput id="field" fieldName="password" />
+      <w:PasswordInput id="field" field_name="password" />
      </w:Field>
     </w:Fieldgroup>
    </w:Html>

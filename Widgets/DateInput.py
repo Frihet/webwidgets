@@ -68,16 +68,16 @@ class DateInput(Input.StringInput, Base.DirectoryServer):
             'attr_html_id': Webwidgets.Utils.path_to_id(self.path)}
 
 
-    def field_input(self, path, stringValue):
+    def field_input(self, path, string_value):
         try:
-            if stringValue == '':
+            if string_value == '':
                 self.value = None
             else:
-                self.value = datetime.datetime(*(time.strptime(stringValue, str(self.format))[0:6]))
+                self.value = datetime.datetime(*(time.strptime(string_value, str(self.format))[0:6]))
         except ValueError:
             self.value = None
             self.error = 'Invalid date format, expected %s got %s' \
-                % (self.format, stringValue)
+                % (self.format, string_value)
                 
     def field_output(self, path):
         if self.value is None:

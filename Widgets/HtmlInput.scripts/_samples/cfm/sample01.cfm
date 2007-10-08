@@ -70,7 +70,7 @@ This sample displays a normal HTML form with a FCKeditor with full features enab
 	</tr>
 	<tr>
 		<td bgcolor="lightskyblue">FieldNames</td>
-		<td>#FORM.fieldNames#</td>
+		<td>#FORM.field_names#</td>
 	</tr>
 	<cfloop list="#FORM.fieldnames#" index="key">
 	<tr>

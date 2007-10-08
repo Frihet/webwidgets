@@ -24,10 +24,10 @@
  bind="Webwidgets.Widgets.FileEditorCallbacks">
  >
 
- <w:Html id="FileEditor" topLevel="div" expanded=":false">
+ <w:Html id="FileEditor" top_level="div" expanded=":false">
   <div class="top">
    <w:DownloadLink id="downloadLink" />
-   <w:ToggleButton id="hide" falseTitle="Edit file" trueTitle="Hide editor" />
+   <w:ToggleButton id="hide" false_title="Edit file" true_title="Hide editor" />
   </div>
 
   <w:Fieldgroup id="infoGroup">
@@ -51,7 +51,7 @@
    </w:Media>
   </w:TabbedView>
 
-  <w:Html id="upload" topLevel="div">
+  <w:Html id="upload" top_level="div">
    <w:Label id="fileLabel" target="1/file" label="Upload file: " />
    <w:FileInput id="file">
     <w:Html id="preview" />

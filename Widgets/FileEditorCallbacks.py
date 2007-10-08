@@ -1,10 +1,10 @@
 import Webwidgets, cgi, traceback
 
-def mime_type_to_method(mimeType):
-    return mimeType.replace("/", "__").replace("-", "_")
+def mime_type_to_method(mime_type):
+    return mime_type.replace("/", "__").replace("-", "_")
 
-def methodToMimeType(mimeType):
-    return mimeType.replace("__", "/").replace("_", "-")
+def method_to_mime_type(mime_type):
+    return mime_type.replace("__", "/").replace("_", "-")
 
 class Value(object):
     def __get__(self, instance, owner):
@@ -26,11 +26,11 @@ class FileEditor(object):
     error = None
     expanded = False
 
-    def mime_type_to_method(self, mimeType):
-        return mime_type_to_method(mimeType)
+    def mime_type_to_method(self, mime_type):
+        return mime_type_to_method(mime_type)
     
-    def methodToMimeType(self, mimeType):
-        return methodToMimeType(mimeType)
+    def method_to_mime_type(self, mime_type):
+        return method_to_mime_type(mime_type)
 
     class downloadLink(object):
         class Content(object):
@@ -81,17 +81,17 @@ class FileEditor(object):
                 if page == ['none']:
                     self.parent.value = None
                 else:
-                    mimeType = methodToMimeType(page[0])
+                    mime_type = method_to_mime_type(page[0])
                     value = self.parent.value
-                    if value is None or mimeType != value.type:
+                    if value is None or mime_type != value.type:
                         if value is None:
                             value = cgi.FieldStorage()
-                        value.type = mimeType
+                        value.type = mime_type
                         if value.file is None:
                             value.file = value.make_file()
                         value.file.seek(0)
                         value.file.truncate()
-                        value.filename = "new %s file" % mimeType
+                        value.filename = "new %s file" % mime_type
                         self.parent.value = value
             
     class upload(object):

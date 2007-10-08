@@ -1,9 +1,9 @@
 import Input
 
 class TextFileEditor(Input.FieldStorageInput, Input.StringInput):
-    __attributes__  = Input.StringInput.__attributes__ + ('mimeType',)
+    __attributes__  = Input.StringInput.__attributes__ + ('mime_type',)
     
     cols = 40
     rows = 15
 
-    mimeType = 'text/plain'
+    mime_type = 'text/plain'

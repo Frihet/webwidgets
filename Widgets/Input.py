@@ -168,7 +168,7 @@ class UpdateButton(Base.ActionInput):
                             """ % info)
         return '<input %(attr_html_attributes)s type="submit" %(disabled)s name="%(id)s" value="%(title)s" />' % info
 
-    def field_input(self, path, stringValue):
+    def field_input(self, path, string_value):
         pass
 
 class RadioButtonGroup(Base.ValueInput):
@@ -192,8 +192,8 @@ class RadioInput(Base.ValueInput, Base.StaticComposite):
         if self.default:
             self.group.value = self.value
 
-    def field_input(self, path, stringValue):
-        value = Utils.id_to_path(stringValue)
+    def field_input(self, path, string_value):
+        value = Utils.id_to_path(string_value)
         if value == path:
             self.group.value = self.value
 
@@ -228,8 +228,8 @@ class Checkbox(Base.ValueInput):
             'checked': checked,
             'disabled': ['', 'disabled="disabled"'][not self.get_active(self.path)]}
 
-    def field_input(self, path, stringValue):
-        self.value = (stringValue == "checked")
+    def field_input(self, path, string_value):
+        self.value = (string_value == "checked")
 
     def field_output(self, path):
         return [['', 'checked'][not not self.value]]
@@ -250,19 +250,19 @@ class ListInput(Base.ValueInput, Base.StaticComposite):
     def draw(self, output_options):
         Base.ValueInput.draw(self, output_options)
         children = self.draw_children(output_options)
-        childnames = children.keys()
-        childnames.sort()
+        child_names = children.keys()
+        child_names.sort()
         values = self.value
         if not isinstance(values, types.ListType):
             values = [values]
         options = '\n'.join([
             """<option %(selected)s value="%(value)s">
              %(description)s
-            </option>""" % {'selected': childname in values and 'selected="selected"' or '',
-                           'value': childname,
-                           'description': children[childname]}
-            for childname
-            in childnames])
+            </option>""" % {'selected': child_name in values and 'selected="selected"' or '',
+                           'value': child_name,
+                           'description': children[child_name]}
+            for child_name
+            in child_names])
 
         return """<select %(attr_html_attributes)s %(multiple)s %(size)s name="%(name)s" %(disabled)s>
          %(options)s
@@ -335,10 +335,10 @@ class ToggleButton(Base.ValueInput, Button):
     rendered as a normal button, and instantly cause a page-load when
     clicked, just as a Button.
     """
-    __attributes__ = Base.ValueInput.__attributes__ + ('trueTitle', 'falseTitle')
+    __attributes__ = Base.ValueInput.__attributes__ + ('true_title', 'false_title')
 
-    trueTitle = 'True'
-    falseTitle = 'False'
+    true_title = 'True'
+    false_title = 'False'
     value=False
 
     class HtmlClass(object):
@@ -353,16 +353,16 @@ class ToggleButton(Base.ValueInput, Button):
     class Title(object):
         def __get__(self, instance, owner):
             if instance.value:
-                return instance.trueTitle
-            return instance.falseTitle
+                return instance.true_title
+            return instance.false_title
     title = Title()
 
     def __init__(self,session,win_id,**attrs):
         setattr(type(self), 'html_class', self.HtmlClass())
         super(ToggleButton, self).__init__(session,win_id,**attrs)
 
-    def field_input(self, path, stringValue):
-        if stringValue != '':
+    def field_input(self, path, string_value):
+        if string_value != '':
             self.value = not self.value
 
     def field_output(self, path):
@@ -371,17 +371,17 @@ class ToggleButton(Base.ValueInput, Button):
 class FieldStorageInput(Base.ValueInput):
     value = None
 
-    def field_input(self, path, stringValue):
+    def field_input(self, path, string_value):
         if self.value is None:
             self.value = cgi.FieldStorage()
-            self.value.filename = '%s file' % (self.mimeType,)
+            self.value.filename = '%s file' % (self.mime_type,)
         if hasattr(self.value, 'original'):
             del self.value.original
-        self.value.type = self.mimeType
+        self.value.type = self.mime_type
         if self.value.file is None:
             self.value.file = self.value.make_file()
         self.value.file.seek(0)
-        self.value.file.write(stringValue.encode('utf-8'))
+        self.value.file.write(string_value.encode('utf-8'))
         self.value.file.truncate()
         self.value.file.seek(0)
 

@@ -23,8 +23,8 @@
  xmlns:h="http://www.w3.org/TR/REC-html40"
  bind="Webwidgets.Widgets.CssFileEditorCallbacks">
  >
- <w:Html id="CssFileEditor" topLevel="div">
-  <div><w:TextFileEditor id="input" mimeType="text/css" /></div>
+ <w:Html id="CssFileEditor" top_level="div">
+  <div><w:TextFileEditor id="input" mime_type="text/css" /></div>
   <div><w:Button id="update" title="Update" /></div>
   <div><w:Media id="preview" /></div>
  </w:Html>

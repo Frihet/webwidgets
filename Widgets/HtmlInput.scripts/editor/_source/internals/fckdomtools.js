@@ -123,16 +123,16 @@ var FCKDomTools =
 		return node.parentNode.removeChild( node ) ;
 	},
 
-	GetFirstChild : function( node, childNames )
+	GetFirstChild : function( node, child_names )
 	{
-		// If childNames is a string, transform it in a Array.
-		if ( typeof ( childNames ) == 'string' )
-			childNames = [ childNames ] ;
+		// If child_names is a string, transform it in a Array.
+		if ( typeof ( child_names ) == 'string' )
+			child_names = [ child_names ] ;
 
 		var eChild = node.firstChild ;
 		while( eChild )
 		{
-			if ( eChild.nodeType == 1 && eChild.tagName.Equals.apply( eChild.tagName, childNames ) )
+			if ( eChild.nodeType == 1 && eChild.tagName.Equals.apply( eChild.tagName, child_names ) )
 				return eChild ;
 
 			eChild = eChild.nextSibling ;
@@ -141,16 +141,16 @@ var FCKDomTools =
 		return null ;
 	},
 
-	GetLastChild : function( node, childNames )
+	GetLastChild : function( node, child_names )
 	{
-		// If childNames is a string, transform it in a Array.
-		if ( typeof ( childNames ) == 'string' )
-			childNames = [ childNames ] ;
+		// If child_names is a string, transform it in a Array.
+		if ( typeof ( child_names ) == 'string' )
+			child_names = [ child_names ] ;
 
 		var eChild = node.lastChild ;
 		while( eChild )
 		{
-			if ( eChild.nodeType == 1 && ( !childNames || eChild.tagName.Equals( childNames ) ) )
+			if ( eChild.nodeType == 1 && ( !child_names || eChild.tagName.Equals( child_names ) ) )
 				return eChild ;
 
 			eChild = eChild.previousSibling ;

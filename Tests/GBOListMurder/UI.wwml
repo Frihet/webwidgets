@@ -33,7 +33,7 @@ USA
 
   <w:Html id="body">
 
-   <w:GBOList id="GreencycleList" rowsPerPage=":integer:8">
+   <w:GBOList id="GreencycleList" rows_per_page=":integer:8">
     <w:odict id="columns">
      <w:string id="idd">ID</w:string>
      <w:string id="currency">Currency</w:string>

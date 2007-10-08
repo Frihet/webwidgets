@@ -21,7 +21,7 @@
  * Dialog windows operations. (IE specific implementations)
  */
 
-FCKDialog.Show = function( dialogInfo, dialogName, pageUrl, dialogWidth, dialogHeight, parentWindow, resizable )
+FCKDialog.Show = function( dialog_info, dialogName, pageUrl, dialogWidth, dialogHeight, parentWindow, resizable )
 {
 	if ( !parentWindow )
 		parentWindow = window ;
@@ -37,7 +37,7 @@ FCKDialog.Show = function( dialogInfo, dialogName, pageUrl, dialogWidth, dialogH
 
 	try
 	{
-		oReturn = parentWindow.showModalDialog( pageUrl, dialogInfo, sOptions ) ;
+		oReturn = parentWindow.showModalDialog( pageUrl, dialog_info, sOptions ) ;
 	}
 	catch( e ) {}
 

@@ -27,12 +27,12 @@ var FCKDialog = new Object() ;
 FCKDialog.OpenDialog = function( dialogName, dialogTitle, dialogPage, width, height, customValue, parentWindow, resizable )
 {
 	// Setup the dialog info.
-	var oDialogInfo = new Object() ;
-	oDialogInfo.Title = dialogTitle ;
-	oDialogInfo.Page = dialogPage ;
-	oDialogInfo.Editor = window ;
-	oDialogInfo.CustomValue = customValue ;		// Optional
+	var oDialog_info = new Object() ;
+	oDialog_info.Title = dialogTitle ;
+	oDialog_info.Page = dialogPage ;
+	oDialog_info.Editor = window ;
+	oDialog_info.CustomValue = customValue ;		// Optional
 
 	var sUrl = FCKConfig.BasePath + 'fckdialog.html' ;
-	this.Show( oDialogInfo, dialogName, sUrl, width, height, parentWindow, resizable ) ;
+	this.Show( oDialog_info, dialogName, sUrl, width, height, parentWindow, resizable ) ;
 }

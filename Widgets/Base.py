@@ -473,7 +473,7 @@ class Composite(Widget):
         Also handles visibility of the children - invisible children
         are not included in the output.
 
-        @return: dictionary of childnames and HTML for the respective
+        @return: dictionary of child_names and HTML for the respective
                  children.
         """
         
@@ -539,8 +539,8 @@ class StaticComposite(Composite):
             for name, item in self.__dict__.iteritems():
                 if isinstance(item, Widget):
                     __children__ += (name,)
-        for childname in __children__:
-            self.children[childname] = getattr(self, childname)
+        for child_name in __children__:
+            self.children[child_name] = getattr(self, child_name)
 
     def get_children(self):
         return self.children.iteritems()
@@ -648,7 +648,7 @@ class Input(Widget):
                 self.session.windows[self.win_id].arguments[argument_name] = {'widget':self, 'path': path}
         return active
 
-    def field_input(self, path, *stringValues):
+    def field_input(self, path, *string_values):
         raise NotImplementedError(self, "field_input")
     
     def field_output(self, path):
@@ -672,8 +672,8 @@ class ValueInput(Input):
     __attributes__ = Input.__attributes__ + ('value',)
     value = ''
 
-    def field_input(self, path, stringValue):
-        self.value = stringValue
+    def field_input(self, path, string_value):
+        self.value = string_value
 
     def field_output(self, path):
         return [unicode(self.value)]
@@ -695,8 +695,8 @@ class ActionInput(Input):
 
     __input_subordinates__ = (ValueInput,)
 
-    def field_input(self, path, stringValue):
-        if stringValue != '':
+    def field_input(self, path, string_value):
+        if string_value != '':
             self.notify('clicked')
 
     def field_output(self, path):

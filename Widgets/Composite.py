@@ -100,18 +100,18 @@ class Tree(Base.Input):
     """Expandable tree widget similar to the tree-view in Nautilus or
     Windows Explorer. The tree must support the renderTree() protocol."""
     
-    __attributes__ = Base.StaticComposite.__attributes__ + ('tree', 'pictIcon', 'pictExpander', 'pictIndent')
+    __attributes__ = Base.StaticComposite.__attributes__ + ('tree', 'pictIcon', 'pict_expander', 'pict_indent')
     def __init__(self, session, win_id, **attrs):
         Base.Widget.__init__(self, session, win_id, **attrs)
 
     # FIXME: Hardcoded URL!
-    pictUrl = 'pictures/'
-    pictPattern = 'grime.%(name)s.png'
+    pict_url = 'pictures/'
+    pict_pattern = 'grime.%(name)s.png'
     pictIcon = ((('doc', '[=]'),
                  ('doc', '[=]')),
                 (('dir', '\\_\\'),
                  ('dir.open', '\\_/')))            
-    pictExpander = (((('middle', '|--'),
+    pict_expander = (((('middle', '|--'),
                       ('end', '`--')),
                      (('middle', '|--'),
                       ('end', '`--'))),
@@ -120,7 +120,7 @@ class Tree(Base.Input):
                      (('middle.expanded', '|--'),
                       ('end.expanded', '`--'))))
 
-    pictIndent = (('vertical', '|&nbsp;&nbsp;'),
+    pict_indent = (('vertical', '|&nbsp;&nbsp;'),
                   ('empty', '&nbsp;&nbsp;&nbsp;'))
 
     def draw(self, output_options):
@@ -133,51 +133,51 @@ class Tree(Base.Input):
             res = (res or '') + '<div class="Tree-Row">' + indent
             res += '<span class="%s">' % ['Tree-ShadedNode', 'Tree-Node'][node.leaf]
 
-            nodePath = path + ['node'] + node.path
+            node_path = path + ['node'] + node.path
             
-            expanderImg, expanderAlt = self.pictExpander[subNodes > 0 or not node.updated
+            expander_img, expander_alt = self.pict_expander[subNodes > 0 or not node.updated
                                                          ][node.expanded
                                                            ][sibling == siblings - 1]
-            expandParams = {'src': self.pictUrl + self.pictPattern % {'name':expanderImg},
-                            'alt': expanderAlt,
-                            'attr_html_id': Webwidgets.Utils.path_to_id(nodePath + ['expand']),
-                            'path': nodePath + ['expand']}
+            expand_params = {'src': self.pict_url + self.pict_pattern % {'name':expander_img},
+                            'alt': expander_alt,
+                            'attr_html_id': Webwidgets.Utils.path_to_id(node_path + ['expand']),
+                            'path': node_path + ['expand']}
             if subNodes or not node.updated:
-                self.register_input(expandParams[path])
-                res += '<input type="image" name="%(attr_html_id)s" value="%(attr_html_id)s" src="%(src)s" alt="%(alt)s" id="%(attr_html_id)s" />' % expandParams
+                self.register_input(expand_params[path])
+                res += '<input type="image" name="%(attr_html_id)s" value="%(attr_html_id)s" src="%(src)s" alt="%(alt)s" id="%(attr_html_id)s" />' % expand_params
             else:
-                res += '<img src="%(src)s" alt="%(alt)s" id="%(attr_html_id)s" />' % expandParams
+                res += '<img src="%(src)s" alt="%(alt)s" id="%(attr_html_id)s" />' % expand_params
 
-            selectImg, selectAlt = self.pictIcon[subNodes > 0][node.expanded]
-            selectParams = {'imgPath': nodePath + ['selectImg'],
-                            'imgId': Webwidgets.Utils.path_to_id(nodePath + ['selectImg']),
-                            'imgSrc': self.pictUrl + self.pictPattern % {'name':selectImg},
-                            'imgAlt': selectAlt,
-                            'labelPath': nodePath + ['selectLabel'],
-                            'labelId': Webwidgets.Utils.path_to_id(nodePath + ['selectLabel'])}
+            select_img, select_alt = self.pictIcon[subNodes > 0][node.expanded]
+            select_params = {'img_path': node_path + ['select_img'],
+                            'img_id': Webwidgets.Utils.path_to_id(node_path + ['select_img']),
+                            'img_src': self.pict_url + self.pict_pattern % {'name':select_img},
+                            'img_alt': select_alt,
+                            'label_path': node_path + ['selectLabel'],
+                            'label_id': Webwidgets.Utils.path_to_id(node_path + ['selectLabel'])}
             if node.translation is not None:
-                selectParams['labelText'] = str(unicode(node.translation))
+                select_params['label_text'] = str(unicode(node.translation))
             elif node.path:
-                selectParams['labelText'] = str(unicode(node.path[-1]))
+                select_params['label_text'] = str(unicode(node.path[-1]))
             else:
-                selectParams['labelText'] = str(unicode(getattr(self.tree, 'rootName', 'Root')))
+                select_params['label_text'] = str(unicode(getattr(self.tree, 'rootName', 'Root')))
                 
             if node.leaf:
-                self.register_input(selectParams['imgPath'])
-                self.register_input(selectParams['labelPath'])
-                res += ('<input type="image" name="%(imgId)s" value="%(imgId)s" src="%(imgSrc)s" alt="%(imgAlt)s" id="%(imgId)s" />' +
-                        '<input type="submit" name="%(labelId)s" value="%(labelText)s" id="%(labelId)s" />') % selectParams
+                self.register_input(select_params['img_path'])
+                self.register_input(select_params['label_path'])
+                res += ('<input type="image" name="%(img_id)s" value="%(img_id)s" src="%(img_src)s" alt="%(img_alt)s" id="%(img_id)s" />' +
+                        '<input type="submit" name="%(label_id)s" value="%(label_text)s" id="%(label_id)s" />') % select_params
             else:
-                res += '<img src="%(imgSrc)s" alt="%(imgAlt)s" id="%(imgId)s" />%(labelText)s' % selectParams
+                res += '<img src="%(img_src)s" alt="%(img_alt)s" id="%(img_id)s" />%(label_text)s' % select_params
 
             res += "</span></div>\n"
 
-            indentImg, indentAlt = self.pictIndent[sibling == siblings - 1]
-            subIndent = ' ' + indent + '<img src="%(imgSrc)s" alt="%(imgAlt)s" />' % {
-                'imgSrc': self.pictUrl + self.pictPattern % {'name':indentImg},
-                'imgAlt': indentAlt}
+            indent_img, indent_alt = self.pict_indent[sibling == siblings - 1]
+            sub_indent = ' ' + indent + '<img src="%(img_src)s" alt="%(img_alt)s" />' % {
+                'img_src': self.pict_url + self.pict_pattern % {'name':indent_img},
+                'img_alt': indent_alt}
 
-            return (res, (subIndent,), {})
+            return (res, (sub_indent,), {})
 
         return '<div class="Tree" id="%s">%s\n</div>\n' % (
             Webwidgets.Utils.path_to_id(path),
@@ -191,14 +191,14 @@ class Tree(Base.Input):
         
         if action == 'expand':
             self.tree.expandPath(subPath, 1)
-        elif action in ('selectLabel', 'selectImg'):
+        elif action in ('selectLabel', 'select_img'):
             self.notify('selected', subPath)
 
     def selected(self, path, item):
         print '%s.selected(%s, %s)' % ('.'.join([str(x) for x in self.path]), '.'.join(path), '.'.join(item))
 
 class Tabset(Base.StaticComposite):
-    def getPages(self, path = []):
+    def get_pages(self, path = []):
         tabs = Webwidgets.Utils.OrderedDict()
         for name, child in self.get_children():
             #### fixme ####
@@ -211,21 +211,21 @@ class Tabset(Base.StaticComposite):
             page = path + [name]
 
             if isinstance(child, Tabset):
-                tabs[name] = (page, child, child.getPages(page))
+                tabs[name] = (page, child, child.get_pages(page))
             else:
                 tabs[name] = (page, child, None)
         return tabs
 
-    def drawPageTitles(self, output_options):
-        def drawPageTitles(pages):
+    def draw_page_titles(self, output_options):
+        def draw_page_titles(pages):
             if pages is None: return None
             res = Webwidgets.Utils.OrderedDict()
             for name, (page, widget, children) in pages.iteritems():
                 res[name] = (page,
                              widget._(widget.get_title(widget.path), output_options),
-                             drawPageTitles(children))
+                             draw_page_titles(children))
             return res
-        return drawPageTitles(self.getPages())
+        return draw_page_titles(self.get_pages())
 
 class TabbedView(Base.ActionInput, Tabset):
     """Provides a set of overlapping 'pages' with tabs, each tab
@@ -236,9 +236,9 @@ class TabbedView(Base.ActionInput, Tabset):
     oldPage = None
     page = None
 
-    def field_input(self, path, stringValue):
-        if stringValue != '':
-            self.page = Webwidgets.Utils.id_to_path(stringValue, True)
+    def field_input(self, path, string_value):
+        if string_value != '':
+            self.page = Webwidgets.Utils.id_to_path(string_value, True)
 
     def field_output(self, path):
         return [unicode(Webwidgets.Utils.path_to_id(self.page, True))]
@@ -258,15 +258,15 @@ class TabbedView(Base.ActionInput, Tabset):
             self.get_widget_by_path(self.page).notify('tabFocus')
         self.oldPage = self.page
 
-    def drawTabs(self, output_options):
+    def draw_tabs(self, output_options):
         active = self.register_input(self.path, self.argument_name)
-        widgetId = Webwidgets.Utils.path_to_id(self.path)
+        widget_id = Webwidgets.Utils.path_to_id(self.path)
 
-        def drawTabs(pages):
+        def draw_tabs(pages):
             tabs = []
             for name, (page, title, children) in pages.iteritems():
                 info = {'disabled': ['', 'disabled="disabled"'][page == self.page or not active],
-                        'attr_html_id': widgetId,
+                        'attr_html_id': widget_id,
                         'page': Webwidgets.Utils.path_to_id(page),
                         'caption': title}
                 if children is None:
@@ -279,14 +279,14 @@ class TabbedView(Base.ActionInput, Tabset):
                                       value="%(page)s">%(caption)s</button></li>
                                 """ % info)
                 else:
-                    info['children'] = drawTabs(children)
+                    info['children'] = draw_tabs(children)
                     tabs.append("<li><span>%(caption)s</span>%(children)s</li>" % info)
             return """
                     <ul class="tabs">
                      %(tabs)s
                     </ul>
                    """ % {'tabs': '\n'.join(tabs)}
-        return drawTabs(self.drawPageTitles(output_options))
+        return draw_tabs(self.draw_page_titles(output_options))
         
     def draw(self, output_options):
         return """
@@ -298,7 +298,7 @@ class TabbedView(Base.ActionInput, Tabset):
                </div>
                """ % {'attr_html_attributes': self.draw_html_attributes(self.path),
                       'page': self.draw_child(self.get_widget_by_path(self.page).path, self.get_widget_by_path(self.page), output_options, True),
-                      'tabs': self.drawTabs(output_options)}
+                      'tabs': self.draw_tabs(output_options)}
 
 class Hide(Base.StaticComposite):
     """
@@ -311,8 +311,8 @@ class Hide(Base.StaticComposite):
     """
 
     class hideButton(Input.ToggleButton):
-        trueTitle = "Hide"
-        falseTitle = "Show"
+        true_title = "Hide"
+        false_title = "Show"
 
     def draw(self, path):
         self['child'].visible = self['hideButton'].value

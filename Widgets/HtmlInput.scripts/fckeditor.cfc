@@ -224,7 +224,7 @@
 				sParams = sParams & "&amp;";
 
 			fieldValue = this.config[key];
-			fieldName = listGetAt( lConfigKeys, iPos );
+			field_name = listGetAt( lConfigKeys, iPos );
 
 			// set all boolean possibilities in CFML to true/false values
 			if( isBoolean( fieldValue) and fieldValue )
@@ -232,7 +232,7 @@
 			else if( isBoolean( fieldValue) )
 				fieldValue = "false";
 
-			sParams = sParams & HTMLEditFormat( fieldName ) & '=' & HTMLEditFormat( fieldValue );
+			sParams = sParams & HTMLEditFormat( field_name ) & '=' & HTMLEditFormat( fieldValue );
 		}
 	}
 	return sParams;

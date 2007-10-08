@@ -44,7 +44,7 @@ class FileEditorList(object):
             attribute = 'description'
         value = DescriptionValue()
 
-    def addRow(self, file = None):
+    def add_row(self, file = None):
         fileEditor = self.FileEditor(self.session, self.win_id, value = file)
         self.rows.append({
             'name': self.NameInput(self.session, self.win_id, fileEditor = fileEditor),
@@ -52,10 +52,10 @@ class FileEditorList(object):
             'file': fileEditor
             })
 
-    def groupFunction(self, path, function):
+    def group_function(self, path, function):
         if path != self.path: return
         if function == 'add':
-            self.addRow()
+            self.add_row()
 
     def function(self, path, function, row):
         if path != self.path: return
@@ -76,5 +76,5 @@ class FileEditorList(object):
                 del instance.rows[:]
                 for file in value:
                     if file is not None:
-                        instance.addRow(file)
+                        instance.add_row(file)
     value = FileListValue()

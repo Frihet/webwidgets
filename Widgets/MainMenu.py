@@ -26,47 +26,47 @@ import Webwidgets.Utils, Webwidgets.Constants
 import Composite, Base
 
 class MainMenu(Base.DirectoryServer, Composite.TabbedView):
-    def drawTabs(self, output_options):
+    def draw_tabs(self, output_options):
         active = self.register_input(self.path, self.argument_name)
-        widgetId = Webwidgets.Utils.path_to_id(self.path)
+        widget_id = Webwidgets.Utils.path_to_id(self.path)
 
-        def drawTabs(pages):
+        def draw_tabs(pages):
             tabs = []
             for name, (page, title, children) in pages.iteritems():
-                info = {'childId': Webwidgets.Utils.path_to_id(page),
-                        'childName': '_'.join(['menuBar'] + page),
-                        'parentName': '_'.join(['menuBar'] + page[:-1]),
+                info = {'child_id': Webwidgets.Utils.path_to_id(page),
+                        'child_name': '_'.join(['menuBar'] + page),
+                        'parent_name': '_'.join(['menuBar'] + page[:-1]),
                         'caption': title}
                 if children is None:
                     tabs.append("""
-var %(childName)s_item = new dhtmlXMenuItemObject("%(childId)s","%(caption)s","");
-menuBar_menu.addItem(%(parentName)s_menu,%(childName)s_item);
+var %(child_name)s_item = new dhtmlXMenuItemObject("%(child_id)s","%(caption)s","");
+menuBar_menu.addItem(%(parent_name)s_menu,%(child_name)s_item);
 """ % info)
                 else:
                     tabs.append("""
-var %(childName)s_item = new dhtmlXMenuItemObject("%(childId)s","%(caption)s","");
-menuBar_menu.addItem(%(parentName)s_menu,%(childName)s_item);
-var %(childName)s_menu = new dhtmlXMenuBarPanelObject(%(parentName)s_menu,%(childName)s_item,false,120,true);
+var %(child_name)s_item = new dhtmlXMenuItemObject("%(child_id)s","%(caption)s","");
+menuBar_menu.addItem(%(parent_name)s_menu,%(child_name)s_item);
+var %(child_name)s_menu = new dhtmlXMenuBarPanelObject(%(parent_name)s_menu,%(child_name)s_item,false,120,true);
 """ % info)
-                    tabs.extend(drawTabs(children))
+                    tabs.extend(draw_tabs(children))
             return tabs
 
         return """
-                <div id="%(widgetId)s-_-menu" />
-                <input type="hidden" id="%(widgetId)s-_-value" name="%(widgetId)s" value="" />
+                <div id="%(widget_id)s-_-menu" />
+                <input type="hidden" id="%(widget_id)s-_-value" name="%(widget_id)s" value="" />
                 <script language="javascript">
 function onButtonClick(itemId, itemValue) {
- document.getElementById("%(widgetId)s-_-value").value = itemId;
+ document.getElementById("%(widget_id)s-_-value").value = itemId;
  document.getElementById("root-_-body-form").submit();
 }
-menuBar_menu = new dhtmlXMenuBarObject('%(widgetId)s-_-menu','100%%',30,"%(title)s");
+menuBar_menu = new dhtmlXMenuBarObject('%(widget_id)s-_-menu','100%%',30,"%(title)s");
 menuBar_menu.setOnClickHandler(onButtonClick);
 %(tabs)s
 
                 </script>
-               """ % {'widgetId': widgetId,
+               """ % {'widget_id': widget_id,
                       'title': self._(self.title, output_options),
-                      'tabs': '\n'.join(drawTabs(self.drawPageTitles(output_options)))}
+                      'tabs': '\n'.join(draw_tabs(self.draw_page_titles(output_options)))}
  
     def draw(self, output_options):
         self.register_style_link(self.calculate_url({'widget_class': 'Webwidgets.MainMenu',

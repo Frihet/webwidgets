@@ -30,7 +30,7 @@ import Base
 
 column_allowed_name_re = re.compile("^[a-z_]*$")
 
-def setSort(sort, key):
+def set_sort(sort, key):
     if sort and sort[0][0] == key:
         res = [list(key) for key in sort]
         res[0][1] = ['desc', 'asc'][res[0][1] == 'desc']
@@ -39,14 +39,14 @@ def setSort(sort, key):
                                  if orig_key[0] != key]
     return res
 
-def stringToSort(str):
+def string_to_sort(str):
     if str == '': return []
     return [key.split('-') for key in str.split('.')]
 
-def sortToString(sort):
+def sort_to_string(sort):
     return '.'.join(['-'.join(key) for key in sort])
 
-def sortToClasses(sort, column):
+def sort_to_classes(sort, column):
     classes = []
     for level, (key, order) in enumerate(sort):
         if key == column:
@@ -55,7 +55,7 @@ def sortToClasses(sort, column):
             break
     return ' '.join(classes)
 
-def sortToOrderBy(sort, quote = "`"):
+def sort_to_orderBy(sort, quote = "`"):
     order = []
     for key, dir in sort:
         assert column_allowed_name_re.match(key) is not None
@@ -64,15 +64,15 @@ def sortToOrderBy(sort, quote = "`"):
         return 'order by ' + ', '.join(order)
     return ''
 
-def extendToDependentColumns(columns, dependentColumns):
+def extend_to_dependent_columns(columns, dependent_columns):
     res = []
     for column in columns:
-        res.extend([column] + dependentColumns.get(column, []))
+        res.extend([column] + dependent_columns.get(column, []))
     return res
 
-def reverseDependency(dependentColumns):
+def reverse_dependency(dependent_columns):
     res = {}
-    for main, dependent in dependentColumns.iteritems():
+    for main, dependent in dependent_columns.iteritems():
         for dependentColumn in dependent:
             res[dependentColumn] = main
     return res
@@ -155,26 +155,26 @@ class GBOList(Base.ActionInput, Base.Composite):
     """
     
     __attributes__ = Base.Composite.__attributes__ + (
-        'dependentColumns', 'columns', 'dependentColumns',
-        'functions', 'groupFunctions', 'disabledFunctions', 'functionPosition',
-        'sort', 'rows', 'page', 'pages', 'rowsPerPage',
-        'nonMemoryStorage', 'dontMergeWidgets', 'dontMergeColumns')
+        'dependent_columns', 'columns', 'dependent_columns',
+        'functions', 'group_functions', 'disabled_functions', 'function_position',
+        'sort', 'rows', 'page', 'pages', 'rows_per_page',
+        'non_memory_storage', 'dont_merge_widgets', 'dont_merge_columns')
     columns = {}
     argument_name = None
-    dependentColumns = {}
+    dependent_columns = {}
     functions = {}
-    groupFunctions = {}
-    disabledFunctions = []
-    functionPosition = 0
+    group_functions = {}
+    disabled_functions = []
+    function_position = 0
     sort = []
     rows = []
     page = 1
     pages = 1
-    nonMemoryStorage = False
-    dontMergeWidgets = True
-    dontMergeColumns = ()
+    non_memory_storage = False
+    dont_merge_widgets = True
+    dont_merge_columns = ()
     oldSort = []
-    rowsPerPage = 10
+    rows_per_page = 10
     """This attribute is not used internally by the widget, but is
     intended to be used by the user-provide reread() method."""
 
@@ -186,14 +186,14 @@ class GBOList(Base.ActionInput, Base.Composite):
 #     def function(self, path, function, row):
 #         raise Exception('%s: Function %s not implemented (called for row %s)' % (Webwidgets.Utils.path_to_id(path), function, row))
 
-#     def groupFunction(self, path, function):
+#     def group_function(self, path, function):
 #         raise Exception('%s: Function %s not implemented' % (Webwidgets.Utils.path_to_id(path), function))
 
     def reread(self):
         """Reload the list after a repaging/resorting here. This is
         not a notification to allow for it to be called from __init__.
 
-        If you set nonMemoryStorage to True, you _must_ override this
+        If you set non_memory_storage to True, you _must_ override this
         method with your own sorter/loader function.
         """
         def rowCmp(row1, row2):
@@ -218,19 +218,19 @@ class GBOList(Base.ActionInput, Base.Composite):
         if path != self.path: return
         self.reread()
 
-    def getAllRows(self):
+    def get_all_rows(self):
         return self.rows
     
-    def getRows(self):
-        if self.nonMemoryStorage:
+    def get_rows(self):
+        if self.non_memory_storage:
             return self.rows
-        return self.rows[(self.page - 1) * self.rowsPerPage:
-                         self.page * self.rowsPerPage]
+        return self.rows[(self.page - 1) * self.rows_per_page:
+                         self.page * self.rows_per_page]
 
-    def getPages(self):
-        if self.nonMemoryStorage:
+    def get_pages(self):
+        if self.non_memory_storage:
             return self.pages        
-        return int(math.ceil(float(len(self.rows)) / self.rowsPerPage))
+        return int(math.ceil(float(len(self.rows)) / self.rows_per_page))
 
     def get_children(self):
         raise NotImplemented
@@ -242,13 +242,13 @@ class GBOList(Base.ActionInput, Base.Composite):
     
     def get_widgets_by_attribute(self, attribute = '__name__'):
         fields = Base.Widget.get_widgets_by_attribute(self, attribute)
-        for row in self.getRows():
+        for row in self.get_rows():
             for column, child in row.iteritems():
                 if isinstance(child, Base.Widget):
                     fields.update(child.get_widgets_by_attribute(attribute))
         return fields
 
-    def field_input(self, path, stringValue):
+    def field_input(self, path, string_value):
         widget_path = self.path
         try:
             subWidget = self.path_to_subwidget_path(path)
@@ -256,29 +256,29 @@ class GBOList(Base.ActionInput, Base.Composite):
             return
         
         if subWidget == ['sort']:
-            if stringValue != '':
-                self.sort = stringToSort(stringValue)
+            if string_value != '':
+                self.sort = string_to_sort(string_value)
         elif subWidget == ['page']:
-            if stringValue != '':
-                self.page = int(stringValue)
+            if string_value != '':
+                self.page = int(string_value)
         elif subWidget[0] == 'function':
-            if stringValue != '':
-                self.notify('function', subWidget[1], int(stringValue))
-        elif subWidget[0] == 'groupFunction':
-            if stringValue != '':
-                self.notify('groupFunction', subWidget[1])
+            if string_value != '':
+                self.notify('function', subWidget[1], int(string_value))
+        elif subWidget[0] == 'group_function':
+            if string_value != '':
+                self.notify('group_function', subWidget[1])
     
     def field_output(self, path):
         widget_path = self.path
         subWidget = self.path_to_subwidget_path(path)
         
         if subWidget == ['sort']:
-            return [sortToString(self.sort)]
+            return [sort_to_string(self.sort)]
         elif subWidget == ['page']:
             return [unicode(self.page)]
         elif subWidget[0] == 'function':
             return []
-        elif subWidget[0] == 'groupFunction':
+        elif subWidget[0] == 'group_function':
             return []
         else:
             raise Exception('Unknown sub-widget %s in %s' %(subWidget, widget_path))
@@ -297,38 +297,38 @@ class GBOList(Base.ActionInput, Base.Composite):
         elif subWidget[0] == 'column':
             return self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, path)
         elif subWidget[0] == 'function':
-            if subWidget[1] in self.disabledFunctions: return False
+            if subWidget[1] in self.disabled_functions: return False
             return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, path)
-        elif subWidget[0] == 'groupFunction':
-            if subWidget[1] in self.disabledFunctions: return False
+        elif subWidget[0] == 'group_function':
+            if subWidget[1] in self.disabled_functions: return False
             return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, path)
         else:
             raise Exception('Unknown sub-widget %s in %s' %(subWidget, widget_path))
 
-    def visibleColumns(self):
+    def visible_columns(self):
         # Optimisation: we could have used get_active and constructed a path...
         return Webwidgets.Utils.OrderedDict([(name, description) for (name, description) in self.columns.iteritems()
                                   if self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id,
                                                                 self.path + ['_', 'column', name])])
 
-    def rowsToTree(self, rows, groupOrder):
+    def rows_to_tree(self, rows, group_order):
         tree = {'level': 0,
                 'rows': 0,
                 'children':[]}
-        for rowNum in xrange(0, len(rows)):
-            row = rows[rowNum]
+        for row_num in xrange(0, len(rows)):
+            row = rows[row_num]
             node = tree
             node['rows'] += 1
-            for column in groupOrder:
-                merge = (    column not in self.dontMergeColumns
+            for column in group_order:
+                merge = (    column not in self.dont_merge_columns
                          and node['children']
-                         and (   not self.dontMergeWidgets
+                         and (   not self.dont_merge_widgets
                               or (    not isinstance(node['children'][-1]['value'], Base.Widget)
                                   and not isinstance(row[column], Base.Widget)))
                          and node['children'][-1]['value'] == row[column])
                 if not merge:
                     node['children'].append({'level': node['level'] + 1,
-                                             'top': rowNum,
+                                             'top': row_num,
                                              'rows': 0,
                                              'value': row[column],
                                              'children':[]})
@@ -336,91 +336,91 @@ class GBOList(Base.ActionInput, Base.Composite):
                 node['rows'] += 1
         return tree
 
-    def drawTree(self, node, output_options, groupOrder, visibleColumns, firstLevel = 0, lastLevel = 0):
+    def draw_tree(self, node, output_options, group_order, visible_columns, first_level = 0, last_level = 0):
         if node['children']:
             rows = []
             children = len(node['children'])
             for child in xrange(0, children):
-                subFirst = firstLevel
-                subLast = lastLevel
+                subFirst = first_level
+                subLast = last_level
                 if child != 0:
                     subFirst += 1
                 if child != children - 1:
                     subLast += 1
-                rows.extend(self.drawTree(node['children'][child],
+                rows.extend(self.draw_tree(node['children'][child],
                                           output_options,
-                                          groupOrder, visibleColumns,
+                                          group_order, visible_columns,
                                           subFirst, subLast))
         else:
             rows = []
             for row in xrange(0, node['rows']):
-                rows.append([''] * len(visibleColumns))
+                rows.append([''] * len(visible_columns))
         if 'value' in node:
-            column = groupOrder[node['level'] - 1]
-            rows[0][visibleColumns.keys().index(column)
-                    ] = self.drawNode(output_options, node, column, firstLevel, lastLevel)
+            column = group_order[node['level'] - 1]
+            rows[0][visible_columns.keys().index(column)
+                    ] = self.draw_node(output_options, node, column, first_level, last_level)
         return rows
 
-    def drawNode(self, output_options, node, column, firstLevel, lastLevel):
-        return self.drawCell(output_options, node['value'], node['top'], column, node['rows'], firstLevel, lastLevel)
+    def draw_node(self, output_options, node, column, first_level, last_level):
+        return self.draw_cell(output_options, node['value'], node['top'], column, node['rows'], first_level, last_level)
         
-    def drawCell(self, output_options, value, row, column, rowspan, firstLevel, lastLevel):
+    def draw_cell(self, output_options, value, row, column, rowspan, first_level, last_level):
         return '<td rowspan="%(rowspan)s" class="%(class)s">%(content)s</td>' % {
             'rowspan': rowspan,
-            'class': 'column_first_level_%s column_last_level_%s' % (firstLevel, lastLevel),
+            'class': 'column_first_level_%s column_last_level_%s' % (first_level, last_level),
             'content': self.draw_child(self.path + ["cell_%s_%s" % (row, column)],
                                       value, output_options, True)}
 
-    def drawPagingButtons(self, output_options):
+    def draw_paging_buttons(self, output_options):
         if self.argument_name:
             self.session.windows[self.win_id].arguments[self.argument_name + '_page'] = {
                 'widget':self, 'path': self.path + ['_', 'page']}
 
         pageId = Webwidgets.Utils.path_to_id(self.path + ['_', 'page'])
-        pageActive = self.get_active(self.path + ['_', 'page'])
-        if pageActive:
+        page_active = self.get_active(self.path + ['_', 'page'])
+        if page_active:
             self.session.windows[self.win_id].fields[pageId] = self
         info = {'attr_html_id': pageId,
                 'first': 1,
                 'previous': self.page - 1,
                 'page': self.page,
-                'pages': self.getPages(),
+                'pages': self.get_pages(),
                 'next': self.page + 1,
-                'last': self.getPages(),
-                'backActive': ['', 'disabled="disabled"'][not pageActive or self.page <= 1],
-                'forwardActive': ['', 'disabled="disabled"'][not pageActive or self.page >= self.getPages()],
+                'last': self.get_pages(),
+                'back_active': ['', 'disabled="disabled"'][not page_active or self.page <= 1],
+                'forward_active': ['', 'disabled="disabled"'][not page_active or self.page >= self.get_pages()],
                 }
             
         return """
 <span class="left">
- <button type="submit" %(backActive)s id="%(attr_html_id)s-_-first" name="%(attr_html_id)s" value="%(first)s">&lt;&lt;</button>
- <button type="submit" %(backActive)s id="%(attr_html_id)s-_-previous" name="%(attr_html_id)s" value="%(previous)s">&lt;</button>
+ <button type="submit" %(back_active)s id="%(attr_html_id)s-_-first" name="%(attr_html_id)s" value="%(first)s">&lt;&lt;</button>
+ <button type="submit" %(back_active)s id="%(attr_html_id)s-_-previous" name="%(attr_html_id)s" value="%(previous)s">&lt;</button>
 </span>
 <span class="center">
  %(page)s/%(pages)s
 </span>
 <span class="right">
- <button type="submit" %(forwardActive)s id="%(attr_html_id)s-_-next" name="%(attr_html_id)s" value="%(next)s">&gt;</button>
- <button type="submit" %(forwardActive)s id="%(attr_html_id)s-_-last" name="%(attr_html_id)s" value="%(last)s">&gt;&gt;</button>
+ <button type="submit" %(forward_active)s id="%(attr_html_id)s-_-next" name="%(attr_html_id)s" value="%(next)s">&gt;</button>
+ <button type="submit" %(forward_active)s id="%(attr_html_id)s-_-last" name="%(attr_html_id)s" value="%(last)s">&gt;&gt;</button>
 </span>
 """ % info
 
-    def drawPrintableLink(self, output_options):
+    def draw_printable_link(self, output_options):
         location = self.calculate_url({'widget': Webwidgets.Utils.path_to_id(self.path),
-                                      'printableVersion': 'yes'})
+                                      'printable_version': 'yes'})
         return """<a class="printable" href="%(location)s">%(caption)s</a>""" % {
             'caption': self._("Printable version", output_options),
             'location': cgi.escape(location),
             }
 
-    def drawGroupFunctions(self, output_options):
-        functionActive = {}
-        for function in self.groupFunctions:
-            functionActive[function] = self.get_active(self.path + ['_', 'groupFunction', function])
+    def draw_group_functions(self, output_options):
+        function_active = {}
+        for function in self.group_functions:
+            function_active[function] = self.get_active(self.path + ['_', 'group_function', function])
 
-        for function in self.groupFunctions:
-            if functionActive[function]:
-                self.session.windows[self.win_id].fields[Webwidgets.Utils.path_to_id(self.path + ['_', 'groupFunction', function])] = self
+        for function in self.group_functions:
+            if function_active[function]:
+                self.session.windows[self.win_id].fields[Webwidgets.Utils.path_to_id(self.path + ['_', 'group_function', function])] = self
 
         return '\n'.join([
             """<button
@@ -429,46 +429,46 @@ class GBOList(Base.ActionInput, Base.Composite):
                 class="%(attr_html_class)s"
                 %(disabled)s
                 name="%(attr_html_id)s"
-                value="selected">%(title)s</button>""" % {'attr_html_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'groupFunction', function]),
+                value="selected">%(title)s</button>""" % {'attr_html_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'group_function', function]),
                                                           'attr_html_class': function,
-                                                          'disabled': ['disabled="disabled"', ''][functionActive[function]],
+                                                          'disabled': ['disabled="disabled"', ''][function_active[function]],
                                                           'title': self._(title, output_options)}
-            for function, title in self.groupFunctions.iteritems()])
+            for function, title in self.group_functions.iteritems()])
 
-    def drawButtons(self, output_options):
-        if 'printableVersion' in output_options:
+    def draw_buttons(self, output_options):
+        if 'printable_version' in output_options:
             return ''
         return """
 <div class="buttons">
- %(pagingButtons)s
- %(printableLink)s
- %(groupFunctions)s
+ %(paging_puttons)s
+ %(printable_link)s
+ %(group_functions)s
 </div>
-""" % {'pagingButtons': self.drawPagingButtons(output_options),
-       'printableLink': self.drawPrintableLink(output_options),
-       'groupFunctions': self.drawGroupFunctions(output_options)}
+""" % {'paging_puttons': self.draw_paging_buttons(output_options),
+       'printable_link': self.draw_printable_link(output_options),
+       'group_functions': self.draw_group_functions(output_options)}
 
-    def drawHeadings(self, visibleColumns, reverseDependentColumns, output_options):
+    def draw_headings(self, visible_columns, reverse_dependent_columns, output_options):
         if self.argument_name:
             self.session.windows[self.win_id].arguments[self.argument_name + '_sort'] = {
                 'widget':self, 'path': self.path + ['_', 'sort']}
 
-        sortActive = self.get_active(self.path + ['_', 'sort'])
+        sort_active = self.get_active(self.path + ['_', 'sort'])
         headings = []
-        inputId = Webwidgets.Utils.path_to_id(self.path + ['_', 'sort'])
-        widgetId = Webwidgets.Utils.path_to_id(self.path)
-        if sortActive:
-            self.session.windows[self.win_id].fields[inputId] = self
-        for column, title in visibleColumns.iteritems():
-            info = {'inputId': inputId,
-                    'attr_html_id': widgetId,
+        input_id = Webwidgets.Utils.path_to_id(self.path + ['_', 'sort'])
+        widget_id = Webwidgets.Utils.path_to_id(self.path)
+        if sort_active:
+            self.session.windows[self.win_id].fields[input_id] = self
+        for column, title in visible_columns.iteritems():
+            info = {'input_id': input_id,
+                    'attr_html_id': widget_id,
                     'column': column,
-                    'disabled': ['disabled="disabled"', ''][sortActive],
+                    'disabled': ['disabled="disabled"', ''][sort_active],
                     'caption': self._(title, output_options),
-                    'classes': sortToClasses(self.sort, reverseDependentColumns.get(column, column)),
-                    'sort': sortToString(setSort(self.sort, reverseDependentColumns.get(column, column)))
+                    'classes': sort_to_classes(self.sort, reverse_dependent_columns.get(column, column)),
+                    'sort': sort_to_string(set_sort(self.sort, reverse_dependent_columns.get(column, column)))
                     }
-            if 'printableVersion' in output_options:
+            if 'printable_version' in output_options:
                 headings.append("""
 <th id="%(attr_html_id)s-_-head-%(column)s" class="column %(classes)s">
  <span id="%(attr_html_id)s-_-sort-%(column)s">%(caption)s</span>
@@ -482,22 +482,22 @@ class GBOList(Base.ActionInput, Base.Composite):
 """ % info)
         return headings
 
-    def appendFunctions(self, rows, headings, output_options):
-        if 'printableVersion' not in output_options and self.functions:
-            functionPosition = self.functionPosition
-            if functionPosition < 0:
-                functionPosition += 1
-                if functionPosition == 0: 
-                    functionPosition = len(headings)
+    def append_functions(self, rows, headings, output_options):
+        if 'printable_version' not in output_options and self.functions:
+            function_position = self.function_position
+            if function_position < 0:
+                function_position += 1
+                if function_position == 0: 
+                    function_position = len(headings)
             
-            functionActive = {}
+            function_active = {}
             for function in self.functions:
-                functionActive[function] = self.get_active(self.path + ['_', 'function', function])
+                function_active[function] = self.get_active(self.path + ['_', 'function', function])
 
             for function in self.functions:
-                if functionActive[function]:
+                if function_active[function]:
                     self.session.windows[self.win_id].fields[Webwidgets.Utils.path_to_id(self.path + ['_', 'function', function])] = self
-            for rowNum in xrange(0, len(rows)):
+            for row_num in xrange(0, len(rows)):
                 functions = '<td class="functions">%s</td>' % ''.join([
                     """<button
                         type="submit"
@@ -507,48 +507,48 @@ class GBOList(Base.ActionInput, Base.Composite):
                         name="%(attr_html_id)s"
                         value="%(row)s">%(title)s</button>""" % {'attr_html_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'function', function]),
                                                                  'attr_html_class': function,
-                                                                 'disabled': ['disabled="disabled"', ''][functionActive[function]],
+                                                                 'disabled': ['disabled="disabled"', ''][function_active[function]],
                                                                  'title': self._(title, output_options),
-                                                                 'row': rowNum}
+                                                                 'row': row_num}
                     for function, title in self.functions.iteritems()])
-                rows[rowNum].insert(functionPosition, functions)
+                rows[row_num].insert(function_position, functions)
     
-            headings.insert(functionPosition, '<th></th>')
+            headings.insert(function_position, '<th></th>')
 
-    def drawTable(self, headings, rows, output_options):
+    def draw_table(self, headings, rows, output_options):
         return "<table>%(headings)s%(content)s</table>" % {
             'headings': '<tr>%s</tr>' % (' '.join(headings),),
             'content': '\n'.join(['<tr>%s</tr>' % (''.join(row),) for row in rows])}
             
     def draw(self, output_options):
-        widgetId = Webwidgets.Utils.path_to_id(self.path)
+        widget_id = Webwidgets.Utils.path_to_id(self.path)
 
-        reverseDependentColumns = reverseDependency(self.dependentColumns)
-        visibleColumns = self.visibleColumns()
+        reverse_dependent_columns = reverse_dependency(self.dependent_columns)
+        visible_columns = self.visible_columns()
 
-        groupOrder = extendToDependentColumns(
+        group_order = extend_to_dependent_columns(
             [column for column, dir in self.sort],
-            self.dependentColumns)
-        groupOrder = [column for column in groupOrder
-                      if column in visibleColumns] + [column for column in visibleColumns
-                                                     if column not in groupOrder]
+            self.dependent_columns)
+        group_order = [column for column in group_order
+                      if column in visible_columns] + [column for column in visible_columns
+                                                     if column not in group_order]
 
-        headings = self.drawHeadings(visibleColumns, reverseDependentColumns, output_options)
-        # Why we need this test here: rowsToTree would create an empty
-        # top-node for an empty set of rows, which drawTree would
+        headings = self.draw_headings(visible_columns, reverse_dependent_columns, output_options)
+        # Why we need this test here: rows_to_tree would create an empty
+        # top-node for an empty set of rows, which draw_tree would
         # render into a single row...
-        if 'printableVersion' in output_options:
-            rows = self.getAllRows()
+        if 'printable_version' in output_options:
+            rows = self.get_all_rows()
         else:
-            rows = self.getRows()
+            rows = self.get_rows()
         if rows:
-            renderedRows = self.drawTree(self.rowsToTree(rows, groupOrder),
+            renderedRows = self.draw_tree(self.rows_to_tree(rows, group_order),
                                          output_options,
-                                         groupOrder, visibleColumns)
+                                         group_order, visible_columns)
         else:
             renderedRows = []
 
-        self.appendFunctions(renderedRows, headings, output_options)
+        self.append_functions(renderedRows, headings, output_options)
 
         return """
 <div %(attr_html_attributes)s>
@@ -556,16 +556,16 @@ class GBOList(Base.ActionInput, Base.Composite):
  %(buttons)s
 </div>
 """ % {'attr_html_attributes': self.draw_html_attributes(self.path),
-       'table': self.drawTable(headings, renderedRows, output_options),
-       'buttons': self.drawButtons(output_options)
+       'table': self.draw_table(headings, renderedRows, output_options),
+       'buttons': self.draw_buttons(output_options)
        }
 
     def output(self, output_options):
-        return {Webwidgets.Constants.OUTPUT: self.drawPrintableversion(output_options),
+        return {Webwidgets.Constants.OUTPUT: self.draw_printable_version(output_options),
                'Content-type': 'text/html'
                }
 
-    def drawPrintableversion(self, output_options):
+    def draw_printable_version(self, output_options):
         return self.session.windows[self.win_id].draw(output_options,
                                                      body = self.draw(output_options),
                                                      title = self.title)

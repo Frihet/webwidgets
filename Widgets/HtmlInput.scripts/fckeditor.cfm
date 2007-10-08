@@ -149,9 +149,9 @@ else
 					sConfig = sConfig & "&amp;";
 
 				fieldValue = attributes.config[key];
-				fieldName = listGetAt( lConfigKeys, iPos );
+				field_name = listGetAt( lConfigKeys, iPos );
 
-				sConfig = sConfig & urlEncodedFormat( fieldName ) & '=' & urlEncodedFormat( fieldValue );
+				sConfig = sConfig & urlEncodedFormat( field_name ) & '=' & urlEncodedFormat( fieldValue );
 			}
 		}
 	</cfscript>

@@ -30,7 +30,7 @@
    <w:string id="delete">Delete</w:string>
    <w:string id="edit">Edit</w:string>
   </w:odict>
-  <w:dict id="groupFunctions" add="Add new file" />
+  <w:dict id="group_functions" add="Add new file" />
   <w:odict id="columns">
    <w:string id="name">Filename</w:string>
    <w:string id="description">Description</w:string>
