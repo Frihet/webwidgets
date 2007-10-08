@@ -134,7 +134,7 @@ class ChildNodeRows(list):
         super(ChildNodeRows, self).sort(*arg, **kw)
         self.__ensure__()
   
-class GBOList(Base.ActionInput, Base.Composite):
+class Table(Base.ActionInput, Base.Composite):
     """Group By Ordering List is a special kind of table view that
     allows the user to sort the rows and simultaneously group the rows
     according to their content and the sorting.

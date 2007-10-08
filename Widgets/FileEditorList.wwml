@@ -24,7 +24,7 @@
  bind="Webwidgets.Widgets.FileEditorListCallbacks">
  >
 
- <w:GBOList
+ <w:Table
   id="FileEditorList">
   <w:odict id="functions">
    <w:string id="delete">Delete</w:string>
@@ -45,6 +45,6 @@
    </w:FileEditor.editors>
   </w:FileEditor>
 
- </w:GBOList>
+ </w:Table>
 
 </w:wwml>
