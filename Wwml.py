@@ -205,17 +205,18 @@ def generateValueForNode(module, node, using = [], classPath = [], bindContext =
                     attributes['html'] = attributes['html'] + attributes[':post']
                     del attributes[':post']
                     
-            if getattr(node_value, '__args_children__', False):
-                __children__ = ()
-                for cls in base_cls:
-                    __children__ = getattr(cls, '__children__', __children__)
-                __children__ = attributes.get('__children__', __children__)
-                __children__ = list(__children__)
-                for name, value in attributes.iteritems():
-                    if isinstance(value, type) and issubclass(value, Webwidgets.Widgets.Base.Widget) and not value.__explicit_load__:
-                        if name not in __children__:
-                            __children__.append(name)
-                attributes['__children__'] = tuple(__children__)
+            # Handle argument children
+            __children__ = ()
+            for cls in base_cls:
+                __children__ = getattr(cls, '__children__', __children__)
+            __children__ = attributes.get('__children__', __children__)
+            __children__ = list(__children__)
+            for name, value in attributes.iteritems():
+                if isinstance(value, type) and issubclass(value, Webwidgets.Widgets.Base.Widget) and not value.__explicit_load__:
+                    if name not in __children__:
+                        __children__.append(name)
+            attributes['__children__'] = tuple(__children__)
+
             if 'id' not in attributes:
                 attributes['__explicit_load__'] = True
             if '__wwml_html_override__' not in attributes:

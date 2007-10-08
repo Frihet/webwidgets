@@ -42,7 +42,7 @@ class Widget(object):
     Attributes are special class variables that can also be overridden
     by instance variables set using keyword arguments to L{__init__}..
     Attributes for a class must be listed in the L{__attributes__}
-    member. They are used 
+    member.
 
     The class name collection system gathers the names of all
     base-classes for a class and uses these to construct a string
@@ -514,16 +514,13 @@ class Composite(Widget):
         
 class StaticComposite(Composite):
     """Base class for all composite widgets, handling children
-    instantiation of children classes explicitly named in __children__
-    (or all if __widget_children__ is true). Children instantiated (or
-    gotten from arguments if __args_children__ is true) are put in the
-    children member variable. This class also handles drawing of
-    children and the visibility attribute of children."""
+    instantiation of children classes. Children instantiated (or
+    gotten from arguments) are put in the children member variable.
+    This class also handles drawing of children and the visibility
+    attribute of children."""
 
     __no_classes_name__ = True
     __children__ = ()
-    __args_children__ = True
-    __widget_children__ = True
     
     def __init__(self, session, win_id, **attrs):
         __attributes__ = '__attributes__' in attrs and attrs['__attributes__'] or self.__attributes__
@@ -533,12 +530,10 @@ class StaticComposite(Composite):
             __attributes__ = __attributes__ + __children__,
             **attrs)
         self.children = ChildNodes(self)
-        if self.__args_children__:
-            __children__ = __children__ + tuple(set(attrs.keys()) - set(__attributes__))
-        if self.__widget_children__:
-            for name, item in self.__dict__.iteritems():
-                if isinstance(item, Widget):
-                    __children__ += (name,)
+        __children__ = __children__ + tuple(set(attrs.keys()) - set(__attributes__))
+        for name, item in self.__dict__.iteritems():
+            if isinstance(item, Widget):
+                __children__ += (name,)
         for child_name in __children__:
             self.children[child_name] = getattr(self, child_name)
 
