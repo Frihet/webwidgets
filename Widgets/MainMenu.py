@@ -26,14 +26,14 @@ import Webwidgets.Utils, Webwidgets.Constants
 import Composite, Base
 
 class MainMenu(Base.DirectoryServer, Composite.TabbedView):
-    def drawTabs(self, outputOptions):
+    def drawTabs(self, output_options):
         active = self.registerInput(self.path, self.argumentName)
-        widgetId = Webwidgets.Utils.pathToId(self.path)
+        widgetId = Webwidgets.Utils.path_to_id(self.path)
 
         def drawTabs(pages):
             tabs = []
             for name, (page, title, children) in pages.iteritems():
-                info = {'childId': Webwidgets.Utils.pathToId(page),
+                info = {'childId': Webwidgets.Utils.path_to_id(page),
                         'childName': '_'.join(['menuBar'] + page),
                         'parentName': '_'.join(['menuBar'] + page[:-1]),
                         'caption': title}
@@ -65,20 +65,20 @@ menuBar_menu.setOnClickHandler(onButtonClick);
 
                 </script>
                """ % {'widgetId': widgetId,
-                      'title': self._(self.title, outputOptions),
-                      'tabs': '\n'.join(drawTabs(self.drawPageTitles(outputOptions)))}
+                      'title': self._(self.title, output_options),
+                      'tabs': '\n'.join(drawTabs(self.drawPageTitles(output_options)))}
  
-    def draw(self, outputOptions):
-        self.registerStyleLink(self.calculateUrl({'widgetClass': 'Webwidgets.MainMenu',
+    def draw(self, output_options):
+        self.registerStyleLink(self.calculate_url({'widget_class': 'Webwidgets.MainMenu',
                                                   'location': ['css/dhtmlXMenu.css']},
                                                  {}))
-        self.registerScriptLink(self.calculateUrl({'widgetClass': 'Webwidgets.MainMenu',
+        self.registerScriptLink(self.calculate_url({'widget_class': 'Webwidgets.MainMenu',
                                                    'location': ['js', 'dhtmlXProtobar.js']},
                                                   {}))
-        self.registerScriptLink(self.calculateUrl({'widgetClass': 'Webwidgets.MainMenu',
+        self.registerScriptLink(self.calculate_url({'widget_class': 'Webwidgets.MainMenu',
                                                    'location': ['js', 'dhtmlXMenuBar.js']},
                                                   {}))
-        self.registerScriptLink(self.calculateUrl({'widgetClass': 'Webwidgets.MainMenu',
+        self.registerScriptLink(self.calculate_url({'widget_class': 'Webwidgets.MainMenu',
                                                    'location': ['js', 'dhtmlXCommon.js']},
                                                   {}))
-        return Composite.TabbedView.draw(self, outputOptions)
+        return Composite.TabbedView.draw(self, output_options)

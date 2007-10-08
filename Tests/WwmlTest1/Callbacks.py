@@ -22,8 +22,8 @@
 import Webwidgets
 
 class MyWindow(object):
-    def __init__(self, session, winId, *arg, **kw):
-        Webwidgets.HtmlWindow.__init__(self, session, winId, *arg, **kw)
+    def __init__(self, session, win_id, *arg, **kw):
+        Webwidgets.HtmlWindow.__init__(self, session, win_id, *arg, **kw)
         print "XXYZZY"
 
 #    class location(object):
@@ -38,8 +38,8 @@ class MyWindow(object):
     class body(object):
 
         class language(object):
-            def draw(self, outputOptions):
-                return ', '.join(self.getLanguages(outputOptions))
+            def draw(self, output_options):
+                return ', '.join(self.getLanguages(output_options))
             
         class pwdclear(object):
             def clicked(self, path):
@@ -51,9 +51,9 @@ class MyWindow(object):
                     self.parent['lastpwd'].html = self.parent['newpwd']['field'].value
 
         class SelectDate(object):
-            def __init__(self, session, winId):
+            def __init__(self, session, win_id):
                 Webwidgets.ListInput.__init__(
-                    self, session, winId,
+                    self, session, win_id,
                     one='2006-06-20 10:11:12 +10',
                     two='2006-06-15 10:11:12 +10',
                     three='2006-06-15 10:11:12 +10',
@@ -75,11 +75,11 @@ class MyWindow(object):
                 __explicit_load__ = True
                 class Entry(object):
                     __explicit_load__ = True
-                    def __init__(self, session, winId, type, name, dates):
+                    def __init__(self, session, win_id, type, name, dates):
                         Webwidgets.Html.__init__(
                             self,
-                            session, winId, type=type, name=name,
-                            dates = Webwidgets.ListInput(session, winId, **dict([(str(nr), date)
+                            session, win_id, type=type, name=name,
+                            dates = Webwidgets.ListInput(session, win_id, **dict([(str(nr), date)
                                                                                        for nr, date in enumerate(dates)])))
 
                     class actions(object):
@@ -89,22 +89,22 @@ class MyWindow(object):
                                  print "FOO", value
 
 
-                def __init__(self, session, winId, files):
+                def __init__(self, session, win_id, files):
                     Webwidgets.List.__init__(
-                        self, session, winId,
+                        self, session, win_id,
                         pre='', sep='\n', post='',
-                        **dict([(str(nr), self.Entry(session, winId, *file))
+                        **dict([(str(nr), self.Entry(session, win_id, *file))
                                 for nr, file in enumerate(files)]))
 
             class UpdateFiles(object):
                 def clicked(self, path):
                     print path
                     import time
-                    self.parent['Listing'][time.strftime('%s')] = self.parent.Listing.Entry(self.session, self.winId, 'bar', 'foo', ('2007', '2008'))
+                    self.parent['Listing'][time.strftime('%s')] = self.parent.Listing.Entry(self.session, self.win_id, 'bar', 'foo', ('2007', '2008'))
 
-            def __init__(self, session, winId):
-                Webwidgets.Html.__init__(self, session, winId, Listing = self.Listing(
-                    session, winId, [('doc', 'foo', ('2006-06-20 10:11:12 +10','2006-06-20 10:11:12 +10')),
+            def __init__(self, session, win_id):
+                Webwidgets.Html.__init__(self, session, win_id, Listing = self.Listing(
+                    session, win_id, [('doc', 'foo', ('2006-06-20 10:11:12 +10','2006-06-20 10:11:12 +10')),
                                      ('gif', 'bar', ('2006-06-20 10:11:12 +10',)),
                                      ('jpg', 'muahehe', ('2006-06-20 10:11:12 +10','2006-06-20 10:11:12 +10','2006-06-20 10:11:12 +10')),
                                      ('doc', 'gnaga', ('2006-06-20 10:11:12 +10',)),

@@ -21,15 +21,15 @@
 
 import Webwidgets
 
-Webwidgets.Program.Session.debugFields = False
-Webwidgets.Program.Session.debugFieldInput = False
-Webwidgets.Program.Session.debugReceiveNotification = False
-Webwidgets.Program.Session.debugArguments = False
+Webwidgets.Program.Session.debug_fields = False
+Webwidgets.Program.Session.debug_field_input = False
+Webwidgets.Program.Session.debug_receive_notification = False
+Webwidgets.Program.Session.debug_arguments = False
 Webwidgets.Wwml.debugImport = True
 
 import UI
 
 class index(Webwidgets.Program):
     class Session(Webwidgets.Program.Session):
-        def newWindow(self, winId):
-            return UI.MyWindow(self, winId)
+        def new_window(self, win_id):
+            return UI.MyWindow(self, win_id)

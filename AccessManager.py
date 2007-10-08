@@ -29,43 +29,43 @@ class AccessManager(object):
     def __init__(self, session):
         self.session = session
 
-    def debugPrint(self, op, winId, path, result):
+    def debug_print(self, op, win_id, path, result):
         if self.debug:
-            print "AccessManager: %s: %s: %s:%s" % (result, op, winId, '.'.join(path))
+            print "AccessManager: %s: %s: %s:%s" % (result, op, win_id, '.'.join(path))
 
-    def __call__(self, op, winId, path):
-        self.debugPrint(op, winId, path, True)
+    def __call__(self, op, win_id, path):
+        self.debug_print(op, win_id, path, True)
         return True
 
 class ListAccessManager(AccessManager):
     debugLists = False
     
-    def debugPrintPath(self, opPath, result):
+    def debug_print_path(self, opPath, result):
         if self.debug:
             print "AccessManager: %s: %s" % (result, '.'.join([str(item) for item in opPath]))
 
-    def __call__(self, op, winId, path):
-        return self.callPath((op, winId) + tuple(path))
+    def __call__(self, op, win_id, path):
+        return self.call_path((op, win_id) + tuple(path))
 
-    def callPath(self, opPath):
-        lst = self.getAccessList()
+    def call_path(self, operation_path):
+        lst = self.get_access_list()
         result = None
-        for ruleResult, ruleScope, rulePath in lst:
+        for rule_result, rule_scope, rule_path in lst:
             marker = '   '
-            if (   (ruleScope is Constants.SUBTREE and Utils.isPrefix(rulePath, opPath))
-                or (ruleScope is Constants.ONE and rulePath == opPath)):
+            if (   (rule_scope is Constants.SUBTREE and Utils.is_prefix(rule_path, operation_path))
+                or (rule_scope is Constants.ONE and rule_path == operation_path)):
                 marker = ' ->'
                 if result is None:
                     marker = '==>'
-                    result = ruleResult
+                    result = rule_result
             if self.debugLists:
                 scope = ''
-                if ruleScope is Constants.SUBTREE: scope = '.*'
+                if rule_scope is Constants.SUBTREE: scope = '.*'
                 print "AccessManager:  %s %s: %s%s" % (
-                    marker, ruleResult, '.'.join([str(item) for item in rulePath]), scope)
+                    marker, rule_result, '.'.join([str(item) for item in rule_path]), scope)
         if result is None: result = False
-        self.debugPrintPath(opPath, result)
+        self.debug_print_path(operation_path, result)
         return result
 
-    def getAccessList(self):
-        return self.session.getAccessList()
+    def get_access_list(self):
+        return self.session.get_access_list()

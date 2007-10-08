@@ -197,9 +197,9 @@ FCKTools.RestoreStyles = function( element, savedStyles )
 	element.style.cssText	= savedStyles.Inline || '' ;
 }
 
-FCKTools.RegisterDollarFunction = function( targetWindow )
+FCKTools.RegisterDollarFunction = function( target_window )
 {
-	targetWindow.$ = targetWindow.document.getElementById ;
+	target_window.$ = target_window.document.getElementById ;
 }
 
 FCKTools.AppendElement = function( target, elementName )

@@ -52,10 +52,10 @@ class LogIn(object):
         if self.globalSession:
             self.session.logIn = self
         if self.userInfo is None:
-            self['application'] = Webwidgets.Html(self.session, self.winId)
+            self['application'] = Webwidgets.Html(self.session, self.win_id)
             self['logIn'].visible = True
         else:
-            self['application'] = self.Application(self.session, self.winId)
+            self['application'] = self.Application(self.session, self.win_id)
             self['logIn'].visible = False
 
 class LogOut(object):

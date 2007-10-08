@@ -30,22 +30,22 @@ class DateInput(Input.StringInput, Base.DirectoryServer):
     format = '%Y-%m-%d'
     value = datetime.datetime.now()
 
-    def draw(self, outputOptions):
+    def draw(self, output_options):
         """
         Draw input widget.
         """
-        super(DateInput, self).draw(outputOptions)
+        super(DateInput, self).draw(output_options)
 
-        self.registerStyleLink(self.calculateUrl({'widgetClass': 'Webwidgets.DateInput',
+        self.registerStyleLink(self.calculate_url({'widget_class': 'Webwidgets.DateInput',
                                                   'location': ['calendar-blue.css']},
                                                  {}))
-        self.registerScriptLink(self.calculateUrl({'widgetClass': 'Webwidgets.DateInput',
+        self.registerScriptLink(self.calculate_url({'widget_class': 'Webwidgets.DateInput',
                                                    'location': ['calendar.js']},
                                                   {}),
-                                self.calculateUrl({'widgetClass': 'Webwidgets.DateInput',
+                                self.calculate_url({'widget_class': 'Webwidgets.DateInput',
                                                    'location': ['lang', 'calendar-en.js']},
                                                   {}),
-                                self.calculateUrl({'widgetClass': 'Webwidgets.DateInput',
+                                self.calculate_url({'widget_class': 'Webwidgets.DateInput',
                                                    'location': ['calendar-setup.js']},
                                                   {}))
 
@@ -62,13 +62,13 @@ class DateInput(Input.StringInput, Base.DirectoryServer):
          );
        </script>''' % {
             'attr_htmlAttributes': self.drawHtmlAttributes(self.path),
-            'name': Webwidgets.Utils.pathToId(self.path),
-            'value': self.fieldOutput(self.path)[0], 'format': self.format,
-            'disabled': ['', 'disabled="disabled"'][not self.getActive(self.path)],
-            'attr_html_id': Webwidgets.Utils.pathToId(self.path)}
+            'name': Webwidgets.Utils.path_to_id(self.path),
+            'value': self.field_output(self.path)[0], 'format': self.format,
+            'disabled': ['', 'disabled="disabled"'][not self.get_active(self.path)],
+            'attr_html_id': Webwidgets.Utils.path_to_id(self.path)}
 
 
-    def fieldInput(self, path, stringValue):
+    def field_input(self, path, stringValue):
         try:
             if stringValue == '':
                 self.value = None
@@ -79,7 +79,7 @@ class DateInput(Input.StringInput, Base.DirectoryServer):
             self.error = 'Invalid date format, expected %s got %s' \
                 % (self.format, stringValue)
                 
-    def fieldOutput(self, path):
+    def field_output(self, path):
         if self.value is None:
             return ['']
         return [self.value.strftime(str(self.format))]

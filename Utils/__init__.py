@@ -26,7 +26,7 @@ Webwidgets and in implementing new widgets and other objects.
 
 import itertools
 
-debugClassLoading = False
+debug_class_loading = False
 
 class ImmutableDict(dict):
     '''A hashable dict.'''
@@ -197,21 +197,21 @@ class RelativePath(object):
         """
         if not isinstance(child, RelativePath):
             child = type(self)(child)
-        selfLevels = self.levels
-        selfPath = self.path
-        childLevels = child.levels
-        childPath = child.path
+        self_levels = self.levels
+        self_path = self.path
+        child_levels = child.levels
+        child_path = child.path
         
-        if selfLevels > childLevels:
-            selfPath = selfPath[selfLevels - childLevels:]
-        if childLevels > selfLevels:
-            childPath = childPath[childLevels - selfLevels:]
-        selfLevels = childLevels = min(selfLevels, childLevels)
+        if self_levels > child_levels:
+            self_path = self_path[self_levels - child_levels:]
+        if child_levels > self_levels:
+            child_path = child_path[child_levels - self_levels:]
+        self_levels = child_levels = min(self_levels, child_levels)
 
         # self and child paths are now rooted at the same place
-        prefixLen = len(Grimoire.Utils.commonPrefix(selfPath, childPath))
-        path = selfPath[prefixLen:]
-        levels = len(childPath) - prefixLen
+        prefix_len = len(Grimoire.Utils.commonPrefix(self_path, child_path))
+        path = self_path[prefix_len:]
+        levels = len(child_path) - prefix_len
         return type(self)(path, levels)        
     def __rsub__(self, child):
         return type(self)(child) - self
@@ -226,76 +226,76 @@ class RelativePath(object):
     def __str__(self):
         return str(unicode(self))
 
-def pathToId(path, acceptNone = False):
+def path_to_id(path, accept_None = False):
     """Converts a widget path to a string suitable for use in a HTML
     id attribute"""
-    if path is None and acceptNone:
+    if path is None and accept_None:
         return 'none'
     return '-'.join(['root'] + path)
 
-def idToPath(id, acceptNone = False):
-    """Convert a string previously created using L{pathToId} back into
+def id_to_path(id, accept_None = False):
+    """Convert a string previously created using L{path_to_id} back into
     a widget path."""
-    if id == 'none' and acceptNone:
+    if id == 'none' and accept_None:
         return None
     path = id.split('-')
     assert path[0] == 'root'
     return path[1:]
 
-def isPrefix(prefix, list):
-    prefixLen = len(prefix)
-    return prefixLen <= len(list) and prefix == list[:prefixLen]
+def is_prefix(prefix, list):
+    prefix_len = len(prefix)
+    return prefix_len <= len(list) and prefix == list[:prefix_len]
 
-def loadClass(name, using = [], imp = None, globalDict = None, localDict = None, module = None):
-    if debugClassLoading: print "loadClass: Importing %s using %s:" % (name, ' '.join(using))
+def load_class(name, using = [], imp = None, global_dict = None, local_dict = None, module = None):
+    if debug_class_loading: print "load_class: Importing %s using %s:" % (name, ' '.join(using))
 
-    globalDict = globalDict or getattr(module, '__dict__', globals())
-    localDict = localDict or locals()
+    global_dict = global_dict or getattr(module, '__dict__', globals())
+    local_dict = local_dict or locals()
     file = getattr(module, '__file__', '<Interactive>')
     
-    def loadClassAbsolute(name):
-        if debugClassLoading: print "loadClass:     Trying %s" % name
+    def load_class_absolute(name):
+        if debug_class_loading: print "load_class:     Trying %s" % name
         components = name.split('.')
         mod = None
         prefix = list(components)
         while prefix:
             try:
                 name = '.'.join(prefix)
-                if debugClassLoading: print "loadClass:         Trying %s" % name
-                mod = (imp or __import__)(name, globalDict, localDict)
+                if debug_class_loading: print "load_class:         Trying %s" % name
+                mod = (imp or __import__)(name, global_dict, local_dict)
                 break
             except ImportError, e:
-                if debugClassLoading: print "loadClass:             %s" % str(e)
+                if debug_class_loading: print "load_class:             %s" % str(e)
             del prefix[-1]
         if mod is None:
             raise ImportError("Class does not exist:", name, using, file)
         for component in components[1:]:
-            dictComponents = []
+            dict_components = []
             if '-' in component:
-                dictComponents = component.split('-')
-                component = dictComponents[0]
-                del dictComponents[0]
+                dict_components = component.split('-')
+                component = dict_components[0]
+                del dict_components[0]
             mod = getattr(mod, component)
-            for dictComponent in dictComponents:
+            for dictComponent in dict_components:
                 mod = mod[dictComponent]
         return mod
 
     for pkg in using:
         try:
-            return loadClassAbsolute(pkg + '.' + name)
+            return load_class_absolute(pkg + '.' + name)
         except (ImportError, AttributeError), e:
-            if debugClassLoading: print "loadClass:         %s" % str(e)
+            if debug_class_loading: print "load_class:         %s" % str(e)
     try:
-        return loadClassAbsolute(name)
+        return load_class_absolute(name)
     except (ImportError, AttributeError), e:
-        if debugClassLoading: print "loadClass:         %s" % str(e)
+        if debug_class_loading: print "load_class:         %s" % str(e)
         raise ImportError("Class does not exist:", name, using, file)
 
-def subclassDict(superdict, members):
+def subclass_dict(superdict, members):
     res = type(superdict)(superdict)
     res.update(members)
     return res
 
-def subclassList(superlist, members):
+def subclass_list(superlist, members):
     return superlist + members
 

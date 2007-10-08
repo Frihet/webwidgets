@@ -37,8 +37,8 @@ Example application (in test.py):
  ... 
  >>> class test(Webwidgets.Program):
  ...    class Session(Webwidgets.Program.Session):
- ...        def newWindow(self, winId):
- ...            return MyWindow(self, winId)
+ ...        def new_window(self, win_id):
+ ...            return MyWindow(self, win_id)
 
 """
 

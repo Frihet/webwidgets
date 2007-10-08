@@ -37,7 +37,7 @@ class pytest(Webwidgets.Program):
         once for each user session, and should be a subclass of
         L{Webwidgets.Program.Session}.
 
-        It should define a method called L{newWindow}.
+        It should define a method called L{new_window}.
         """
         
         class MyWindow(Webwidgets.HtmlWindow):
@@ -114,9 +114,9 @@ class pytest(Webwidgets.Program):
                 class CurrentDirectory(Webwidgets.Html): html = '/foo/bar/fie'
                 class Search(Webwidgets.StringInput): value = '/foo/bar/fie'
                 class SelectDate(Webwidgets.ListInput):
-                    def __init__(self, session, winId):
+                    def __init__(self, session, win_id):
                         Webwidgets.ListInput.__init__(
-                            self, session, winId,
+                            self, session, win_id,
                             one='2006-06-20 10:11:12 +10',
                             two='2006-06-15 10:11:12 +10',
                             three='2006-06-15 10:11:12 +10',
@@ -176,29 +176,29 @@ class pytest(Webwidgets.Program):
                                         if value:
                                             self.error = "XXXXXX"
                                 
-                            def __init__(self, session, winId, type, name, dates):
+                            def __init__(self, session, win_id, type, name, dates):
                                 Webwidgets.Html.__init__(
                                     self,
-                                    session, winId, type=type, name=name,
-                                    dates = Webwidgets.ListInput(session, winId, **dict([(str(nr), date)
+                                    session, win_id, type=type, name=name,
+                                    dates = Webwidgets.ListInput(session, win_id, **dict([(str(nr), date)
                                                                                                for nr, date in enumerate(dates)])))
-                        def __init__(self, session, winId, files):
+                        def __init__(self, session, win_id, files):
                             Webwidgets.List.__init__(
-                                self, session, winId,
+                                self, session, win_id,
                                 pre='', sep='\n', post='',
-                                **dict([(str(nr), self.Entry(session, winId, *file))
+                                **dict([(str(nr), self.Entry(session, win_id, *file))
                                         for nr, file in enumerate(files)]))
 
-                    def __init__(self, session, winId):
-                        Webwidgets.Html.__init__(self, session, winId, Listing = self.Listing(
-                            session, winId, [('doc', 'foo', ('2006-06-20 10:11:12 +10','2006-06-20 10:11:12 +10')),
+                    def __init__(self, session, win_id):
+                        Webwidgets.Html.__init__(self, session, win_id, Listing = self.Listing(
+                            session, win_id, [('doc', 'foo', ('2006-06-20 10:11:12 +10','2006-06-20 10:11:12 +10')),
                                              ('gif', 'bar', ('2006-06-20 10:11:12 +10',)),
                                              ('jpg', 'muahehe', ('2006-06-20 10:11:12 +10','2006-06-20 10:11:12 +10','2006-06-20 10:11:12 +10')),
                                              ('doc', 'gnaga', ('2006-06-20 10:11:12 +10',)),
                                              ('xslt', 'apsfnana', ('2006-06-20 10:11:12 +10','2006-04-10 10:11:12 +10')),
                                              ]))
 
-        def newWindow(self, winId):
+        def new_window(self, win_id):
             """This method is called to create new windows for the
             user; that is every time a user enters a new URL that
             contains a new windowId. Using different windowId:s it is
@@ -206,4 +206,4 @@ class pytest(Webwidgets.Program):
 
             @return: an instance of L{Webwidgets.Widgets.Window}."""
 
-            return self.MyWindow(self, winId)
+            return self.MyWindow(self, win_id)

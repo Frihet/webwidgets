@@ -29,9 +29,9 @@
  *		@shiftEnterMode : the behavior for the <Shift>+<Enter> keystroke.
  *			May be "p", "div", "br". Defaults to "br".
  */
-var FCKEnterKey = function( targetWindow, enterMode, shiftEnterMode )
+var FCKEnterKey = function( target_window, enterMode, shiftEnterMode )
 {
-	this.Window			= targetWindow ;
+	this.Window			= target_window ;
 	this.EnterMode		= enterMode || 'p' ;
 	this.ShiftEnterMode	= shiftEnterMode || 'br' ;
 
@@ -47,7 +47,7 @@ var FCKEnterKey = function( targetWindow, enterMode, shiftEnterMode )
 		[ 46		, 'Delete' ]
 	] ) ;
 
-	oKeystrokeHandler.AttachToElement( targetWindow.document ) ;
+	oKeystrokeHandler.AttachToElement( target_window.document ) ;
 }
 
 

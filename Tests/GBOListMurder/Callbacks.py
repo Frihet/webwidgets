@@ -22,7 +22,7 @@
 import Webwidgets
 import datetime
 
-Webwidgets.Program.Session.debugFields = False
+Webwidgets.Program.Session.debug_fields = False
 Webwidgets.Program.Session.debugSendNotification = False
 
 class MyWindow(object):
@@ -44,11 +44,11 @@ class MyWindow(object):
             
         class Add(object):
             def clicked(self, path):
-                kg=Webwidgets.Html(self.session, self.winId, html="kg")
-                count=Webwidgets.Html(self.session, self.winId, html="count")
+                kg=Webwidgets.Html(self.session, self.win_id, html="kg")
+                count=Webwidgets.Html(self.session, self.win_id, html="count")
 
                 self.parent['GreencycleList'].nextId += 1
                 newRow = {"idd": self.parent['GreencycleList'].nextId,
-                          "currency" : Webwidgets.StringInput(self.session, self.winId, value=""),
-                          "name": Webwidgets.StringInput(self.session, self.winId, value="")}
+                          "currency" : Webwidgets.StringInput(self.session, self.win_id, value=""),
+                          "name": Webwidgets.StringInput(self.session, self.win_id, value="")}
                 self.parent['GreencycleList'].rows.append(newRow)

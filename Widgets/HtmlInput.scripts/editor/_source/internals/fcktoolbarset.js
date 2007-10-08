@@ -43,7 +43,7 @@ function FCKToolbarSet_Create( overhideLocation )
 
 			var eToolbarTarget ;
 
-			// Out:[TargetWindow]([TargetId])
+			// Out:[Target_window]([TargetId])
 			var oOutMatch = sLocation.match( /^Out:(.+)\((\w+)\)$/ ) ;
 			if ( oOutMatch )
 			{

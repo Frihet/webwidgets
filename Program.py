@@ -31,12 +31,12 @@ import cgi, urllib, types, os
 import Utils, Widgets, AccessManager, Constants
 import hotshot, pdb
 
-def decodeField(value):
+def decode_field(value):
     if isinstance(value, types.StringType):
         return value.decode('utf-8')
     return value
 
-def normalizeFields(fields):
+def normalize_fields(fields):
     fields = dict(fields)
     for fieldname in fields.keys():
         if isinstance(fields[fieldname], list):
@@ -46,26 +46,26 @@ def normalizeFields(fields):
             del fields[fieldname]
     return fields
 
-def decodeFields(fields):
+def decode_fields(fields):
     fields = dict(fields)
     for fieldname in fields.keys():
         if isinstance(fields[fieldname], list):            
-            fields[fieldname] = [decodeField(item)
+            fields[fieldname] = [decode_field(item)
                                  for item in fields[fieldname]]
         else:
-            fields[fieldname] = decodeField(fields[fieldname])
+            fields[fieldname] = decode_field(fields[fieldname])
     return fields
 
-def filterArguments(arguments):
-    resArgs = dict([(key, value)
+def filter_arguments(arguments):
+    res_args = dict([(key, value)
                     for (key, value)
                     in arguments.iteritems()
                     if not key.startswith('_')])
-    outputOptions = dict([(key[1:], value)
+    output_options = dict([(key[1:], value)
                           for (key, value)
                           in arguments.iteritems()
                           if key.startswith('_')])
-    return resArgs, outputOptions
+    return res_args, output_options
 
 class Program(WebKit.Page.Page):
     """This class is the foundation of a Webwidgets application. An
@@ -75,47 +75,47 @@ class Program(WebKit.Page.Page):
 
     The application programmer should subclass this class,
     subclass/override L{Webwidgets.Program.Program.Session} and
-    implement the L{Webwidgets.Program.Program.Session.newWindow}
+    implement the L{Webwidgets.Program.Program.Session.new_window}
     method.
     """
 
     profile = True
     debug = False
     
-    requestNr = 0
+    request_nr = 0
 
     def writeHTML(self):
         """Main processing method, called by WebWare."""
 
-        type(self).requestNr += 1
+        type(self).request_nr += 1
         
         session = self.session()
         servlet = self.request().servletURI()
         if not session.hasValue(servlet):
             session[servlet] = self.Session()
         session[servlet].program = self
-        fn = session[servlet].handleRequest
+        fn = session[servlet].handle_request
 
         if self.profile:
-            nonProfiledFn = fn
-            def profileFn():
-                profiler = hotshot.Profile("webwidgets.profile.request.%s" % type(self).requestNr)
-                profiler.addinfo('url', self.requestBase() + self.request().extraURLPath() + '?' + self.request().queryString())
+            non_profiled_fn = fn
+            def profile_fn():
+                profiler = hotshot.Profile("webwidgets.profile.request.%s" % type(self).request_nr)
+                profiler.addinfo('url', self.request_base() + self.request().extraURLPath() + '?' + self.request().queryString())
                 try:
-                    return profiler.runcall(nonProfiledFn)
+                    return profiler.runcall(non_profiled_fn)
                 finally:
                     profiler.close()
-            fn = profileFn
+            fn = profile_fn
 
         if self.debug:
-            nondebuggedFn = fn
-            def debugFn():
-                return pdb.runcall(nondebuggedFn)
-            fn = debugFn
+            non_debugged_fn = fn
+            def debug_fn():
+                return pdb.runcall(non_debugged_fn)
+            fn = debug_fn
 
         return fn()
 
-    def webwareBase(self):
+    def webware_base(self):
         """@return: A URL to where the Webware installation is serving
         documents from."""
         #### fixme ####
@@ -130,20 +130,20 @@ class Program(WebKit.Page.Page):
         
         return 'http://' + req._environ['HTTP_HOST'] + adapter
 
-    def requestBase(self):
+    def request_base(self):
         """@return: A URL to this Webwidgets application."""
-        return self.webwareBase() + self.request().servletURI()
+        return self.webware_base() + self.request().servletURI()
 
     class Session(object):
         """The application programmer should subclass this class and
-        implement the L{Webwidgets.Program.Program.Session.newWindow}
+        implement the L{Webwidgets.Program.Program.Session.new_window}
         method.
         """
         
-        debugArguments = False
-        debugFields = False
-        debugFieldInput = False
-        debugReceiveNotification = False
+        debug_arguments = False
+        debug_fields = False
+        debug_field_input = False
+        debug_receive_notification = False
 
         root = True
         parent = None
@@ -173,12 +173,12 @@ class Program(WebKit.Page.Page):
                     path = instance._path
                     if isinstance(path, list):
                         return path
-                    widgetPath = instance.widget.path
+                    widget_path = instance.widget.path
                     if path is None:
-                        return widgetPath
-                    if widgetPath is None:
+                        return widget_path
+                    if widget_path is None:
                         return None
-                    return list(widgetPath + path)
+                    return list(widget_path + path)
 
                 def __set__(self, instance, value):
                     instance._path = value
@@ -190,7 +190,7 @@ class Program(WebKit.Page.Page):
                 return type(self)(self.widget.parent, self.message, self.args, self.kw, self.path)
 
             def process(self):
-                if self.widget.session.debugReceiveNotification:
+                if self.widget.session.debug_receive_notification:
                     print "Notifying %s" % self
                 try:
                     if hasattr(self.widget, self.message):
@@ -214,16 +214,16 @@ class Program(WebKit.Page.Page):
             def __str__(self):
                 return str(unicode(self))
 
-        def getWindow(self, winId):
+        def get_window(self, win_id):
             """Retrieves a window by its ID; either an existing window
             is returned, or a window created for the requested id."""
-            if winId in self.windows:
-                return self.windows[winId]
+            if win_id in self.windows:
+                return self.windows[win_id]
             else:
                 try:
-                    window = self.newWindow(winId)
+                    window = self.new_window(win_id)
                     if window is not None:
-                        self.windows[winId] = window
+                        self.windows[win_id] = window
                         # Redraw the window once, so that all input fields
                         # have generated their window.fields and
                         # window.arguments entries so that we can do
@@ -236,7 +236,7 @@ class Program(WebKit.Page.Page):
                 except Constants.OutputGiven:
                     return None
 
-        def processArguments(self, window, location, arguments):
+        def process_arguments(self, window, location, arguments):
             """Process arguments (query parameters) and location and
             generate notifications for those that have changed."""
             
@@ -254,13 +254,13 @@ class Program(WebKit.Page.Page):
             if '__extra__' in window.arguments:
                 arguments['__extra__'] = extra
 
-            if self.debugArguments: print "Arguments:", arguments
+            if self.debug_arguments: print "Arguments:", arguments
 
-            sortedArguments = window.arguments.items()
-            sortedArguments.sort(lambda (name1, argument1), (name2, argument2):
-                                 argument1['widget'].inputOrder(argument2['widget']))
+            sorted_arguments = window.arguments.items()
+            sorted_arguments.sort(lambda (name1, argument1), (name2, argument2):
+                                 argument1['widget'].input_order(argument2['widget']))
 
-            for argumentname, argument in sortedArguments:
+            for argumentname, argument in sorted_arguments:
                 path = argument['path']
                 argument = argument['widget']
                 # Check an extra time that the widget is
@@ -268,62 +268,62 @@ class Program(WebKit.Page.Page):
                 # should'nt ever be there if it isn't but some
                 # sloppy widget hacker migt have forgotten to
                 # not to add it...
-                if argument.getActive(path):
+                if argument.get_active(path):
                     value = arguments.get(argumentname, '')
                     if not isinstance(value, types.ListType):
                         value = [value]
-                    if argument.fieldOutput(path) != value:
-                        argument.fieldInput(path, *value)
+                    if argument.field_output(path) != value:
+                        argument.field_input(path, *value)
 
-        def generateArguments(self, window):
+        def generate_arguments(self, window):
             """Return a tuple of the location and arguments (query
             parameters) that the user should be at given the state of
             the widgets (this is used to trigger a redirect, would
             they not match the current URL)."""
 
-            newLocation = []
-            newArguments = {}
+            new_location = []
+            new_arguments = {}
             for argumentname, argument in window.arguments.iteritems():
-                value = argument['widget'].fieldOutput(argument['path'])
+                value = argument['widget'].field_output(argument['path'])
                 if argumentname == '__extra__':
-                    newArguments.update(value)
+                    new_arguments.update(value)
                 elif argumentname == '__location__':
-                    newLocation = value
+                    new_location = value
                 else:
-                    newArguments[argumentname] = value
-            return newLocation, newArguments
+                    new_arguments[argumentname] = value
+            return new_location, new_arguments
 
-        def processFields(self, window, fields):
+        def process_fields(self, window, fields):
             """Process fields (POST field values) and generate
             notifications for those that have changed."""
             
-            if self.debugFields:
+            if self.debug_fields:
                 print "Fields:", fields
-                print "Original:", dict([(name, value.fieldOutput(Utils.idToPath(name)))
+                print "Original:", dict([(name, value.field_output(Utils.id_to_path(name)))
                                          for (name, value)
                                          in window.fields.iteritems()])
 
-            sortedFields = window.fields.items()
-            sortedFields.sort(lambda (name1, field1), (name2, field2):
-                              field1.inputOrder(field2))
+            sorted_fields = window.fields.items()
+            sorted_fields.sort(lambda (name1, field1), (name2, field2):
+                              field1.input_order(field2))
                 
-            for fieldname, field in sortedFields:
-                path = Utils.idToPath(fieldname)
+            for fieldname, field in sorted_fields:
+                path = Utils.id_to_path(fieldname)
                 # Check an extra time that the widget is
                 # active, just for added paranoia :) The field
                 # should'nt ever be there if it isn't but some
                 # sloppy widget hacker migt have forgotten to
                 # not to add it...
-                if field.getActive(path):
+                if field.get_active(path):
                     value = fields.get(fieldname, '')
                     if not isinstance(value, types.ListType):
                         value = [value]
-                    if field.fieldOutput(path) != value:
-                        if self.debugFieldInput:
-                            print "Field input:", path, fieldname, field.fieldOutput(path), value
-                        field.fieldInput(path, *value)
+                    if field.field_output(path) != value:
+                        if self.debug_field_input:
+                            print "Field input:", path, fieldname, field.field_output(path), value
+                        field.field_input(path, *value)
 
-        def handleRequest(self):
+        def handle_request(self):
             """Main processing method, called by WebWare. This method will
             notify widgets of changed input values, process any pending
             notifications and then redraw all widgets (unless output has
@@ -338,33 +338,33 @@ class Program(WebKit.Page.Page):
             # extraURLPath begins with a /, so remove the first empty item in location
             location = req.extraURLPath().split('/')[1:]            
 
-            baseOptions = {'widgetClass': Constants.DEFAULT_WIDGET_CLASS,
-                           'winId': Constants.DEFAULT_WINDOW,
+            base_options = {'widget_class': Constants.DEFAULT_WIDGET_CLASS,
+                           'win_id': Constants.DEFAULT_WINDOW,
                            'widget': Constants.DEFAULT_WIDGET}
             if location and location[0].startswith('_'):
-                baseOptions['widgetClass'] = location[0][1:]
+                base_options['widget_class'] = location[0][1:]
                 location = location[1:]
             if location and location[0].startswith('_'):
-                baseOptions['winId'] = location[0][1:]
+                base_options['win_id'] = location[0][1:]
                 location = location[1:]
             if location and location[0].startswith('_'):
-                baseOptions['widget'] = location[0][1:]
+                base_options['widget'] = location[0][1:]
                 location = location[1:]
-            baseOptions['location'] = location
+            base_options['location'] = location
 
-            arguments = decodeFields(normalizeFields(cgi.parse_qs(req.queryString())))
-            arguments, outputOptions = filterArguments(arguments)
-            outputOptions.update(baseOptions)
+            arguments = decode_fields(normalize_fields(cgi.parse_qs(req.queryString())))
+            arguments, output_options = filter_arguments(arguments)
+            output_options.update(base_options)
 
-            obj = Utils.loadClass(outputOptions['widgetClass'])
+            obj = Utils.load_class(output_options['widget_class'])
             assert issubclass(obj, Program.Session) or issubclass(obj, Widgets.Base.Widget)
-            fnName = 'classOutput'
-            if 'aspect' in outputOptions:
-                fnName += '_' + outputOptions['aspect']
-            outputFn = getattr(obj, fnName)
+            fn_name = 'class_output'
+            if 'aspect' in output_options:
+                fn_name += '_' + output_options['aspect']
+            output_fn = getattr(obj, fn_name)
 
             try:
-                self.output = outputFn(self, arguments, outputOptions)
+                self.output = output_fn(self, arguments, output_options)
             except Constants.OutputGiven:
                 pass
 
@@ -390,45 +390,45 @@ class Program(WebKit.Page.Page):
                 for item in content:
                     self.program.write(item)
 
-        def classOutput(cls, session, arguments, outputOptions):
+        def class_output(cls, session, arguments, output_options):
             req = session.program.request()
             response = session.program.response()
 
-            window = session.getWindow(outputOptions['winId'])
+            window = session.get_window(output_options['win_id'])
             if window:
-                session.processArguments(window, outputOptions['location'], arguments)
+                session.process_arguments(window, output_options['location'], arguments)
                 if req.method() == 'POST':
-                    session.processFields(window,
-                                          decodeFields(normalizeFields(req.fields())))
+                    session.process_fields(window,
+                                          decode_fields(normalize_fields(req.fields())))
 
                 obj = window
-                fnName = 'output'
-                args = (outputOptions,)
-                if 'widget' in outputOptions:
-                    for name in Utils.idToPath(outputOptions['widget']):
+                fn_name = 'output'
+                args = (output_options,)
+                if 'widget' in output_options:
+                    for name in Utils.id_to_path(output_options['widget']):
                         obj = obj[name]
-                if 'aspect' in outputOptions:
-                    fnName += '_' + outputOptions['aspect']
-                outputFn = getattr(obj, fnName)
+                if 'aspect' in output_options:
+                    fn_name += '_' + output_options['aspect']
+                output_fn = getattr(obj, fn_name)
 
-                res = outputFn(*args)
+                res = output_fn(*args)
                 if (not res
                     or (    'Location' not in res
                         and Constants.FINAL_OUTPUT not in res)):
-                    (newLocation, newArguments) = session.generateArguments(window)
-                    newArguments = normalizeFields(newArguments)
-                    if (   newLocation != outputOptions['location']
-                        or newArguments != arguments):
-                        if session.debugArguments:
-                            print "Old: %s: %s" % (outputOptions['location'], arguments)
-                            print "New: %s: %s" % (newLocation, newArguments)
+                    (new_location, new_arguments) = session.generate_arguments(window)
+                    new_arguments = normalize_fields(new_arguments)
+                    if (   new_location != output_options['location']
+                        or new_arguments != arguments):
+                        if session.debug_arguments:
+                            print "Old: %s: %s" % (output_options['location'], arguments)
+                            print "New: %s: %s" % (new_location, new_arguments)
                         session.redirect(
-                            Utils.subclassDict(outputOptions,
-                                               {'location': newLocation}),
+                            Utils.subclass_dict(output_options,
+                                               {'location': new_location}),
 
-                            newArguments)
+                            new_arguments)
                 return res
-        classOutput = classmethod(classOutput)
+        class_output = classmethod(class_output)
 
         def notify(self, *arg, **kw):
             """Enques a message (method name and arguments) for a
@@ -447,52 +447,52 @@ class Program(WebKit.Page.Page):
             """
             self.Notification(*arg, **kw).process()
 
-        def calculateUrl(self, outputOptions, arguments):
-            path = [self.program.requestBase()]
+        def calculate_url(self, output_options, arguments):
+            path = [self.program.request_base()]
 
-            if (   (    'widgetClass' in outputOptions
-                    and outputOptions['widgetClass'] != Constants.DEFAULT_WIDGET_CLASS)
-                or (    'winId' in outputOptions
-                    and outputOptions['winId'] != Constants.DEFAULT_WINDOW)
-                or (    'widget' in outputOptions
-                    and outputOptions['widget'] != Constants.DEFAULT_WIDGET)):
-                path.append('_' + outputOptions.get('widgetClass', Constants.DEFAULT_WIDGET_CLASS))
-                if (   (    'winId' in outputOptions
-                        and outputOptions['winId'] != Constants.DEFAULT_WINDOW)
-                    or (    'widget' in outputOptions
-                        and outputOptions['widget'] != Constants.DEFAULT_WIDGET)):
-                    path.append('_' + outputOptions.get('winId', Constants.DEFAULT_WINDOW))
-                    if (    'widget' in outputOptions
-                        and outputOptions['widget'] != Constants.DEFAULT_WIDGET):
-                        path.append('_' + outputOptions['widget'])
+            if (   (    'widget_class' in output_options
+                    and output_options['widget_class'] != Constants.DEFAULT_WIDGET_CLASS)
+                or (    'win_id' in output_options
+                    and output_options['win_id'] != Constants.DEFAULT_WINDOW)
+                or (    'widget' in output_options
+                    and output_options['widget'] != Constants.DEFAULT_WIDGET)):
+                path.append('_' + output_options.get('widget_class', Constants.DEFAULT_WIDGET_CLASS))
+                if (   (    'win_id' in output_options
+                        and output_options['win_id'] != Constants.DEFAULT_WINDOW)
+                    or (    'widget' in output_options
+                        and output_options['widget'] != Constants.DEFAULT_WIDGET)):
+                    path.append('_' + output_options.get('win_id', Constants.DEFAULT_WINDOW))
+                    if (    'widget' in output_options
+                        and output_options['widget'] != Constants.DEFAULT_WIDGET):
+                        path.append('_' + output_options['widget'])
                 
-            if 'location' in outputOptions and outputOptions['location']:
-                path.extend(outputOptions['location'])
+            if 'location' in output_options and output_options['location']:
+                path.extend(output_options['location'])
 
-            urlArgList = []
+            url_arg_list = []
             for key, value in arguments.iteritems():
                 if not isinstance(value, list): value = [value]
                 for valuePart in value:
-                    urlArgList.append((key, valuePart))
-            for key, value in outputOptions.iteritems():
-                if key not in ('widgetClass', 'winId', 'widget', 'location'):
+                    url_arg_list.append((key, valuePart))
+            for key, value in output_options.iteritems():
+                if key not in ('widget_class', 'win_id', 'widget', 'location'):
                     if not isinstance(value, list): value = [value]
                     for valuePart in value:
-                        urlArgList.append(('_' + key, valuePart))
+                        url_arg_list.append(('_' + key, valuePart))
 
             args = ''
-            if urlArgList:
-                args = '?' + urllib.urlencode(urlArgList)
+            if url_arg_list:
+                args = '?' + urllib.urlencode(url_arg_list)
                 
             return '/'.join(path) + args
 
-        def redirect(self, outputOptions, arguments):
+        def redirect(self, output_options, arguments):
             self.output = {'Status': '303 See Other',
-                           'Location': self.calculateUrl(outputOptions,
+                           'Location': self.calculate_url(output_options,
                                                          arguments)}
             raise Constants.OutputGiven
         
-        def newWindow(self, winId):
+        def new_window(self, win_id):
             """You should override this to return a Window instance in
             your own application."""
             raise Constants.OutputGiven

@@ -17,8 +17,8 @@ class Value(object):
 class FileEditor(object):
     __attributes__ = Webwidgets.Html.__attributes__ + ('expanded', 'value', 'error')
 
-    def __init__(self, session, winId, **attr):
-        Webwidgets.Html.__init__(self, session, winId, **attr)
+    def __init__(self, session, win_id, **attr):
+        Webwidgets.Html.__init__(self, session, win_id, **attr)
         self.valueChanged(self.path, self.value)
         self.expandedChanged(self.path, self.expanded)
 

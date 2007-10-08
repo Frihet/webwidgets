@@ -36,15 +36,15 @@ class List(Base.StaticComposite):
     pre = sep = post = ''
     frame = '%(child)s'
     
-    def draw(self, outputOptions):
-        children = self.drawChildren(outputOptions)
-        attributes = self.drawAttributes(outputOptions)
+    def draw(self, output_options):
+        children = self.drawChildren(output_options)
+        attributes = self.drawAttributes(output_options)
 
         pre = attributes['attr_pre'] % attributes
         sep = attributes['attr_sep'] % attributes
         post = attributes['attr_post'] % attributes
 
-        return pre + sep.join([attributes['attr_frame'] % Webwidgets.Utils.subclassDict(attributes, {'child': child})
+        return pre + sep.join([attributes['attr_frame'] % Webwidgets.Utils.subclass_dict(attributes, {'child': child})
                                for name, child in children.iteritems()]) + post
 
 class BulletList(List):
@@ -72,12 +72,12 @@ class Html(Base.StaticComposite):
     __attributes__ = Base.StaticComposite.__attributes__ + ('html','topLevel')
     html = ''
     topLevel = None
-    def draw(self, outputOptions):
+    def draw(self, output_options):
         children = self.drawChildren(
-            outputOptions,
+            output_options,
             invisibleAsEmpty = True,
             includeAttributes = True)
-        html = self._(self.html, outputOptions)
+        html = self._(self.html, output_options)
         try:
             if self.topLevel is not None:
                 html = "<%(attr_topLevel)s %(attr_htmlAttributes)s>" + html + "</%(attr_topLevel)s>"
@@ -129,12 +129,12 @@ class Message(Html):
     __wwml_html_override__ = False
     __children__ = Html.__children__ + ('message',)
     message = ''
-    def draw(self, outputOptions):
+    def draw(self, output_options):
         if self.children['message']:
             self.html = '<div %(attr_htmlAttributes)s>%(message)s</div>'
         else:
             self.html = ''
-        return Html.draw(self, outputOptions)
+        return Html.draw(self, output_options)
 
 class Media(Base.Widget):
     """Media (file) viewing widget"""
@@ -196,30 +196,30 @@ class Media(Base.Widget):
         return getattr(self, resName)
 
     def calculateOutputUrl(self, part = 'content'):
-        return self.calculateUrl({'widget': Webwidgets.Utils.pathToId(self.path), 'part':part})
+        return self.calculate_url({'widget': Webwidgets.Utils.path_to_id(self.path), 'part':part})
 
-    def output(self, outputOptions):
+    def output(self, output_options):
         content = ''
         mimeType = 'text/plain'
-        if outputOptions['part'] == 'content':
+        if output_options['part'] == 'content':
             if self.content is not None:
                 self.content.file.seek(0)
                 content = self.content.file.read()
                 mimeType = self.content.type
-        elif outputOptions['part'] == 'base':
+        elif output_options['part'] == 'base':
             if self.base is not None:
                 self.base.file.seek(0)
-                content = self.base.file.read() % self.getRenderer('base_include')(outputOptions)
+                content = self.base.file.read() % self.getRenderer('base_include')(output_options)
                 mimeType = self.base.type
         return {Webwidgets.Constants.OUTPUT: content,
                 'Content-type': mimeType}
 
-    def draw(self, outputOptions):
+    def draw(self, output_options):
         if self.getOption('inline'):
             inlineRenderer = self.getRenderer('draw_inline')
         else:
             inlineRenderer = self.draw_inline_default
-        inline = inlineRenderer(outputOptions)
+        inline = inlineRenderer(output_options)
 
 
         if self.getOption('invisible'):
@@ -234,17 +234,17 @@ class Media(Base.Widget):
             'inline': inline
             }
 
-    def draw_inline_default(self, outputOptions):
+    def draw_inline_default(self, output_options):
         return getattr(self.content, 'filename', self.getOption('empty'))
 
-    def base_include_default(self, outputOptions):
+    def base_include_default(self, output_options):
         return {'content': cgi.escape(self.calculateOutputUrl())}
 
 
-    def draw_inline_image(self, outputOptions):
+    def draw_inline_image(self, output_options):
         return """<img src="%(location)s" alt="%(name)s" %(width)s %(height)s />""" % {
             'location': cgi.escape(self.calculateOutputUrl()),
-            'name': self.draw_inline_default(outputOptions),
+            'name': self.draw_inline_default(output_options),
             'width': self.getHtmlOption('width'),
             'height': self.getHtmlOption('height')
             }
@@ -253,42 +253,42 @@ class Media(Base.Widget):
     draw_inline_image__jpeg = draw_inline_image
     draw_inline_image__gif = draw_inline_image
     
-    def draw_inline_text__css(self, outputOptions):
+    def draw_inline_text__css(self, output_options):
         if self.getOption('merge'):
             self.registerStyleLink(self.calculateOutputUrl())
-            return self.draw_inline_default(outputOptions)
+            return self.draw_inline_default(output_options)
         else:
             return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>
                   %(name)s""" % {
             'location': cgi.escape(self.calculateOutputUrl('base')),
-            'name': self.draw_inline_default(outputOptions),
+            'name': self.draw_inline_default(output_options),
             'width': self.getHtmlOption('width'),
             'height': self.getHtmlOption('height')
             }
-    def base_include_text__css(self, outputOptions):
+    def base_include_text__css(self, output_options):
         return {'content':"<link href='%s' rel='stylesheet' type='text/css' />" % (cgi.escape(self.calculateOutputUrl()),)}
 
-    def draw_inline_application__x_javascript(self, outputOptions):
+    def draw_inline_application__x_javascript(self, output_options):
         if self.getOption('merge'):
             self.registerScriptLink(self.calculateOutputUrl())
-            return self.draw_inline_default(outputOptions)
+            return self.draw_inline_default(output_options)
         else:
             return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>
                   %(name)s""" % {
             'location': cgi.escape(self.calculateOutputUrl('base')),
-            'name': self.draw_inline_default(outputOptions),
+            'name': self.draw_inline_default(output_options),
             'width': self.getHtmlOption('width'),
             'height': self.getHtmlOption('height')}
         
-    def base_include_application__x_javascript(self, outputOptions):
+    def base_include_application__x_javascript(self, output_options):
         return {'content':"<script src='%s' type='text/javascript' ></script>" % (cgi.escape(self.calculateOutputUrl()),)}
 
 
-    def draw_inline_text(self, outputOptions):
+    def draw_inline_text(self, output_options):
         return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>
                   %(name)s""" % {
             'location': cgi.escape(self.calculateOutputUrl()),
-            'name': self.draw_inline_default(outputOptions),
+            'name': self.draw_inline_default(output_options),
             'width': self.getHtmlOption('width'),
             'height': self.getHtmlOption('height')
             }
@@ -311,38 +311,38 @@ class Label(Base.StaticComposite):
     the widget.
     """
 
-    def draw(self, outputOptions):
+    def draw(self, output_options):
         if isinstance(self.target, Base.Widget):
             target = self.target
         else:
             target = self + self.target
         targetPath = target.path
-        res = self.drawChildren(outputOptions, includeAttributes = True)
+        res = self.drawChildren(output_options, includeAttributes = True)
         res['error'] = ''
         if target.error is not None:
-           res['error'] = """ <span class="error">(%s)</span>""" % (target._(target.error, outputOptions),)
-        res['target'] = Webwidgets.Utils.pathToId(targetPath)
+           res['error'] = """ <span class="error">(%s)</span>""" % (target._(target.error, output_options),)
+        res['target'] = Webwidgets.Utils.path_to_id(targetPath)
         return """<label %(attr_htmlAttributes)s for="%(target)s">%(label)s%(error)s</label>""" % res
 
 class DownloadLink(Media):
-    types = {'default': Webwidgets.Utils.subclassDict(Media.types['default'],
+    types = {'default': Webwidgets.Utils.subclass_dict(Media.types['default'],
                                                       {'inline':False})}
 
 class Field(Label):
     __wwml_html_override__ = False
     __children__ = Label.__children__ + ('field',)
     
-    def draw(self, outputOptions):
+    def draw(self, output_options):
         if isinstance(self.target, Base.Widget):
             target = self.target
         else:
             target = self + ['field'] + self.target
         targetPath = target.path
-        res = self.drawChildren(outputOptions, includeAttributes = True)
+        res = self.drawChildren(output_options, includeAttributes = True)
         res['error'] = ''
         if target.error is not None:
            res['error'] = """ <span class="error">(%s)</span>""" % (target.error,)
-        res['target'] = Webwidgets.Utils.pathToId(targetPath)
+        res['target'] = Webwidgets.Utils.path_to_id(targetPath)
         return """<div %(attr_htmlAttributes)s>
                    <label for="%(target)s">
                     %(label)s%(error)s:
@@ -366,8 +366,8 @@ class Table(Base.StaticComposite, TableModel.Table):
         def name(self):
             return 'cell_' + str(self.x) + '_' + str(self.y) + '_' + str(self.w) + '_' + str(self.h)
 
-    def __init__(self, session, winId, **attrs):
-        Base.StaticComposite.__init__(self, session, winId, **attrs)
+    def __init__(self, session, win_id, **attrs):
+        Base.StaticComposite.__init__(self, session, win_id, **attrs)
         TableModel.Table.__init__(self)
         for name, child in self.children.iteritems():
             if name.startswith('cell_'):
@@ -386,8 +386,8 @@ class Table(Base.StaticComposite, TableModel.Table):
         cell = TableModel.Table.remove(self, x, y)
         if cell: del self.children[cell.name()]
     
-    def draw(self, outputOptions):
-        children = self.drawChildren(outputOptions)
+    def draw(self, output_options):
+        children = self.drawChildren(output_options)
         result = '<table border="1" %s>\n' % self.drawHtmlAttributes(self.path)
         for y in xrange(0, self.h):
             if y not in self.rowWidths or self.rowWidths[y] > 0:

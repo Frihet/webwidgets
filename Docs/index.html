@@ -186,8 +186,8 @@ import HelloWeb.UI
 
 class index(Webwidgets.Program):
     class Session(Webwidgets.Program.Session):
-	def newWindow(self, winId):
-	    return HelloWeb.UI.MyWindow(self, winId)
+	def new_window(self, win_id):
+	    return HelloWeb.UI.MyWindow(self, win_id)
   </pre></blockquote>
 
   <p>The user interface definition is the module named UI above and is
@@ -432,12 +432,12 @@ class MyWindow(object):
 
   <h3><a name="overview_design_input-handling" />Input handling</h3>
   <p>Input handling is done using two special methods,
-  <tt>fieldInput</tt> and <tt>fieldOutput</tt>. The former method is
+  <tt>field_input</tt> and <tt>field_output</tt>. The former method is
   called with a list of field values, and can update any attributes on
   the widget as it sees fit. This in turn raises notifications as
   usual. The latter method is used to query the widget for its current
   state and should return a list of the same format. This is used to
-  inhibit calls to fieldInput when the user hasn't actually changed
+  inhibit calls to field_input when the user hasn't actually changed
   anything.</p>
 
 
@@ -509,16 +509,16 @@ class MyWindow(object):
   <h3><a name="overview_implementation_output" />Output</h3>
   <p>Output to the web browser can come from one of two sources - a
   widget class or a widget instance depending on the presence of
-  <tt>_widget</tt> or <tt>_widgetClass</tt> among the output
-  parameters. In the former case, <tt>classOutput(outputOptions)</tt>
+  <tt>_widget</tt> or <tt>_widget_class</tt> among the output
+  parameters. In the former case, <tt>class_output(output_options)</tt>
   is called on the class, and in the latter
-  <tt>output(outputOptions)</tt> is called on the instance.</p>
+  <tt>output(output_options)</tt> is called on the instance.</p>
 
   <p>The default case is that output comes from the top level widget,
-  that is from the window instance. The <tt>output(outputOptions)</tt>
+  that is from the window instance. The <tt>output(output_options)</tt>
   method of the window instance then constructs the output by calling
-  <tt>draw(outputOptions)</tt>, which recurses to
-  <tt>draw(outputOptions)</tt> on its child widgets whom in their turn
+  <tt>draw(output_options)</tt>, which recurses to
+  <tt>draw(output_options)</tt> on its child widgets whom in their turn
   may call this function on their children.</p>
 
   <h4><a name="overview_implementation_output_html" />In-page HTML output</h4>
@@ -536,9 +536,9 @@ class MyWindow(object):
 
   <p>For a widget to include raw data, e.g. an image, CSS file that is
   to be referenced by a link in the HTML, it needs to provide this
-  data using one of the <tt>output()</tt> and <tt>classOutput()</tt>
+  data using one of the <tt>output()</tt> and <tt>class_output()</tt>
   methods. The widget can construct the URL using the
-  <tt>calculateUrl()</tt> method.</p> 
+  <tt>calculate_url()</tt> method.</p> 
 
   <!-- ################################################################ -->
 

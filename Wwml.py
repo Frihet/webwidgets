@@ -116,7 +116,7 @@ def mangleAttributeValue(value):
     elif type == 'true': return True
     elif type == 'none': return None
     elif type == 'string': return value
-    elif type == 'id': return Utils.idToPath(value)
+    elif type == 'id': return Utils.id_to_path(value)
     elif type == 'path': return Utils.RelativePath(value, pathAsList = True)
     elif type == 'integer': return int(value)
     elif type == 'float': return float(value)
@@ -156,7 +156,7 @@ def generateValueForNode(module, node, using = [], classPath = [], bindContext =
     elif node.localName == 'true': value = True
     elif node.localName == 'none': value = None
     elif node.localName == 'string': value = text
-    elif node.localName == 'id': value = Utils.idToPath(text)
+    elif node.localName == 'id': value = Utils.id_to_path(text)
     elif node.localName == 'path': value = Utils.RelativePath(text, pathAsList = True)
     elif node.localName == 'integer': value = int(text)
     elif node.localName == 'float': value = float(text)
@@ -182,11 +182,11 @@ def generateValueForNode(module, node, using = [], classPath = [], bindContext =
         if debugSubclass:
             print "WWML: class %s(%s, %s): pass" % (attributes['classid'], callbackName, node.localName)
             print "WWML:     using: %s" % ' '.join(using)
-        nodeValue = Utils.loadClass(node.localName, using, module = module)
+        nodeValue = Utils.load_class(node.localName, using, module = module)
         if isinstance(nodeValue, types.TypeType) and issubclass(nodeValue, Webwidgets.Widgets.Base.Widget):
             baseCls = ()
             try:
-                baseCls += (Utils.loadClass(callbackName, using, module = module),)
+                baseCls += (Utils.load_class(callbackName, using, module = module),)
             except ImportError, e:
                 pass
             baseCls += (nodeValue,)
@@ -238,9 +238,9 @@ def generateValueForNode(module, node, using = [], classPath = [], bindContext =
             if 'classid' in value: del value['classid']
             if 'id' in value: del value['id']
             if hasattr(nodeValue, 'iteritems'):
-                value = Utils.subclassDict(nodeValue, value)
+                value = Utils.subclass_dict(nodeValue, value)
             else:
-                value = Utils.subclassList(nodeValue, value.values())
+                value = Utils.subclass_list(nodeValue, value.values())
         else:
             value = nodeValue
         

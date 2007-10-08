@@ -75,12 +75,12 @@ FCKTools.GetDocumentWindow = function( document )
 	This is a Safari specific function that fix the reference to the parent
 	window from the document object.
 */
-FCKTools.FixDocumentParentWindow = function( targetWindow )
+FCKTools.FixDocumentParentWindow = function( target_window )
 {
-	targetWindow.document.parentWindow = targetWindow ;
+	target_window.document.parentWindow = target_window ;
 
-	for ( var i = 0 ; i < targetWindow.frames.length ; i++ )
-		FCKTools.FixDocumentParentWindow( targetWindow.frames[i] ) ;
+	for ( var i = 0 ; i < target_window.frames.length ; i++ )
+		FCKTools.FixDocumentParentWindow( target_window.frames[i] ) ;
 }
 
 FCKTools.HTMLEncode = function( text )

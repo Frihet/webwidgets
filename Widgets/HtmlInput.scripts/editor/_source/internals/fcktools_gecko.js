@@ -173,9 +173,9 @@ FCKTools.RestoreStyles = function( element, savedStyles )
 		element.removeAttribute( 'style', 0 ) ;
 }
 
-FCKTools.RegisterDollarFunction = function( targetWindow )
+FCKTools.RegisterDollarFunction = function( target_window )
 {
-	targetWindow.$ = function( id )
+	target_window.$ = function( id )
 	{
 		return this.document.getElementById( id ) ;
 	} ;

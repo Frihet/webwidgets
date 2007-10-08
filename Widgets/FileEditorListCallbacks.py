@@ -45,10 +45,10 @@ class FileEditorList(object):
         value = DescriptionValue()
 
     def addRow(self, file = None):
-        fileEditor = self.FileEditor(self.session, self.winId, value = file)
+        fileEditor = self.FileEditor(self.session, self.win_id, value = file)
         self.rows.append({
-            'name': self.NameInput(self.session, self.winId, fileEditor = fileEditor),
-            'description': self.DescriptionInput(self.session, self.winId, fileEditor = fileEditor),
+            'name': self.NameInput(self.session, self.win_id, fileEditor = fileEditor),
+            'description': self.DescriptionInput(self.session, self.win_id, fileEditor = fileEditor),
             'file': fileEditor
             })
 

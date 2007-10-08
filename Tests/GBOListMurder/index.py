@@ -24,5 +24,5 @@ import UI
 
 class index(Webwidgets.Program):
     class Session(Webwidgets.Program.Session):
-        def newWindow(self, winId):
-            return UI.MyWindow(self, winId)
+        def new_window(self, win_id):
+            return UI.MyWindow(self, win_id)
