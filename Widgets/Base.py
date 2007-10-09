@@ -102,7 +102,14 @@ class Widget(object):
 
             members['class_order_nr'] = cls.class_order_nr.next()
 
-            return type.__new__(cls, name, bases, members)
+            def set_class_path(widget, path = ()):
+                widget.__class_path__ = '.'.join(path)
+                for key, value in widget.__dict__.iteritems():
+                    if isinstance(value, cls):
+                        set_class_path(value, path + (key,))
+                return widget
+
+            return set_class_path(type.__new__(cls, name, bases, members))
 
     def derive(cls, name = None, **members):
         return types.TypeType(name or 'anonymous', (cls,), members)
@@ -395,10 +402,13 @@ class Widget(object):
         return self.get_translations(output_options)._(message)
 
     def __unicode__(self):
-        return "<%(module)s.%(name)s/%(path)s at %(id)s>" % {'module': type(self).__module__,
-                                                             'name': type(self).__name__,
-                                                             'path': self.path and Webwidgets.Utils.path_to_id(self.path) or 'None',
-                                                             'id': id(self)}
+        class_path = type(self).__module__
+        if getattr(type(self), '__class_path__', ''):
+            class_path += '.' + type(self).__class_path__
+        class_path += '.' + type(self).__name__
+        return "<%(class_path)s/%(path)s at %(id)s>" % {'class_path': class_path,
+                                                        'path': self.path and Webwidgets.Utils.path_to_id(self.path) or 'None',
+                                                        'id': id(self)}
 
     def __str__(self):
         return str(unicode(self))

@@ -161,9 +161,7 @@ def generate_value(type_name, text, attributes, module, using, class_path, bind_
                 attributes['__explicit_load__'] = True
             if '__wwml_html_override__' not in attributes:
                 attributes['__wwml_html_override__'] = False
-            attributes['__class_path__'] = '.'.join(class_path[1:-1]) # Remove both the wwml-tag and self
             attributes['__module__'] = module.__name__
-            #print base_cls
             try:
                 value = types.TypeType(str(attributes['classid']),
                                        base_cls,
