@@ -34,18 +34,18 @@ class MainMenu(Base.DirectoryServer, Composite.TabbedView):
             tabs = []
             for name, (page, title, children) in pages.iteritems():
                 info = {'child_id': Webwidgets.Utils.path_to_id(page),
-                        'child_name': '_'.join(['menuBar'] + page),
-                        'parent_name': '_'.join(['menuBar'] + page[:-1]),
+                        'child_name': '_'.join(['menu_bar'] + page),
+                        'parent_name': '_'.join(['menu_bar'] + page[:-1]),
                         'caption': title}
                 if children is None:
                     tabs.append("""
 var %(child_name)s_item = new dhtmlXMenuItemObject("%(child_id)s","%(caption)s","");
-menuBar_menu.addItem(%(parent_name)s_menu,%(child_name)s_item);
+menu_bar_menu.addItem(%(parent_name)s_menu,%(child_name)s_item);
 """ % info)
                 else:
                     tabs.append("""
 var %(child_name)s_item = new dhtmlXMenuItemObject("%(child_id)s","%(caption)s","");
-menuBar_menu.addItem(%(parent_name)s_menu,%(child_name)s_item);
+menu_bar_menu.addItem(%(parent_name)s_menu,%(child_name)s_item);
 var %(child_name)s_menu = new dhtmlXMenuBarPanelObject(%(parent_name)s_menu,%(child_name)s_item,false,120,true);
 """ % info)
                     tabs.extend(draw_tabs(children))
@@ -59,8 +59,8 @@ function onButtonClick(itemId, itemValue) {
  document.getElementById("%(widget_id)s-_-value").value = itemId;
  document.getElementById("root-_-body-form").submit();
 }
-menuBar_menu = new dhtmlXMenuBarObject('%(widget_id)s-_-menu','100%%',30,"%(title)s");
-menuBar_menu.setOnClickHandler(onButtonClick);
+menu_bar_menu = new dhtmlXMenuBarObject('%(widget_id)s-_-menu','100%%',30,"%(title)s");
+menu_bar_menu.setOnClickHandler(onButtonClick);
 %(tabs)s
 
                 </script>
