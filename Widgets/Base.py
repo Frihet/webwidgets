@@ -31,6 +31,7 @@ widgets.
 import types, xml.sax.saxutils, os.path, cgi, re, sys
 import Webwidgets.Utils, Webwidgets.Utils.Gettext, Webwidgets.Constants
 import Webwidgets.Utils.FileHandling
+import Webwidgets.Utils.Threads
 
 debugNotifications = False
 
@@ -93,9 +94,12 @@ class Widget(object):
     name = None
 
     class __metaclass__(type):
+        class_order_nr = Webwidgets.Utils.Threads.Counter()
+        
         def __new__(cls, name, bases, members):
             members = dict(members)
             classes = []
+
             if '__no_classes_name__' not in members or not members['__no_classes_name__']:
                 cls_name = []
                 if '__module__' in members:
@@ -106,10 +110,14 @@ class Widget(object):
                 classes.append('.'.join(cls_name))
             if '__no_classes_name__' in members:
                 del members['__no_classes_name__'] # No inheritance! This is a magic marker, not an attribute
+            
             for base in bases:
                 if hasattr(base, 'classes'):
                     classes.extend(base.classes)
             members['classes'] = tuple(classes)
+
+            members['class_order_nr'] = cls.class_order_nr.next()
+
             return type.__new__(cls, name, bases, members)
 
     def derive(cls, name = None, **members):
@@ -544,20 +552,24 @@ class StaticComposite(Composite):
             session, win_id,
             **attrs)
         self.children = ChildNodes(self)
+
+        # Class members have no intrinsic order, so we sort them on
+        # their order of creation, which if created through the Python
+        # class statement, is the same as their textual order :)
         
-        for name, value in attrs.iteritems():
-            if isinstance(value, Widget):
-                self.children[name] = value
-                
-        for name, value in self.__dict__.iteritems():
-            if isinstance(value, Widget):
-                self.children[name] = value
-                
-        for name in dir(type(self)):
+        child_classes = []
+        for name in dir(self):
             if name == '__class__': continue
             value = getattr(self, name)
             if isinstance(value, type) and issubclass(value, Widget) and not value.__explicit_load__:
-                self.children[name] = value(session, win_id)
+                child_classes.append((name, value))
+            elif isinstance(value, Widget):
+                self.children[name] = value
+                
+        child_classes.sort(lambda x, y: cmp(x[1].class_order_nr, y[1].class_order_nr))
+        
+        for (name, value) in child_classes:
+            self.children[name] = value(session, win_id)
 
     def get_children(self):
         return self.children.iteritems()
