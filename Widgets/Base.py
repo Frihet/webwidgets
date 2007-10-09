@@ -551,7 +551,7 @@ class StaticComposite(Composite):
         super(StaticComposite, self).__init__(
             session, win_id,
             **attrs)
-        self.children = ChildNodes(self)
+        self.children = ChildNodes(self, getattr(self, 'children', {}))
 
         # Class members have no intrinsic order, so we sort them on
         # their order of creation, which if created through the Python
