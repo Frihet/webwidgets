@@ -226,7 +226,8 @@ class Widget(object):
         res = Webwidgets.Utils.OrderedDict()
         for key in dir(self):
             value = getattr(self, key)
-            if isinstance(value, type): continue
+            if isinstance(value, (type, types.MethodType)):
+                continue
             try:
                 res['attr_' + key] = self._(value, output_options)
             except:
@@ -386,6 +387,11 @@ class Widget(object):
         return self.__get_translations__(languages)
 
     def _(self, message, output_options):
+        # Optimize a bit...
+        if isinstance(message, (types.IntType, types.FloatType,
+                                types.BooleanType, types.NoneType,
+                                types.DictType, types.TupleType, types.ListType)):
+            return str(message)
         return self.get_translations(output_options)._(message)
 
     def __unicode__(self):
