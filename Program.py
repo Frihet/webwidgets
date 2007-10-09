@@ -199,6 +199,8 @@ class Program(WebKit.Page.Page):
                                    )(self.path, *self.args, **self.kw):
                             # FIXME: Workaround to support the old API!
                             raise StopIteration()
+                    if self.widget.session.debug_receive_notification:
+                        print "Notifying parent %s" % self.widget.parent
                     return self.parent().process()
                 except StopIteration:
                     # Notification consumed

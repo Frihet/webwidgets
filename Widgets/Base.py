@@ -33,8 +33,6 @@ import Webwidgets.Utils, Webwidgets.Utils.Gettext, Webwidgets.Constants
 import Webwidgets.Utils.FileHandling
 import Webwidgets.Utils.Threads
 
-debugNotifications = False
-
 class Type(type):
     class_order_nr = Webwidgets.Utils.Threads.Counter()
 
@@ -141,7 +139,7 @@ class Widget(Object):
 
     root = False
     parent = None
-    name = None
+    name = 'anonymous'
 
     def __init__(self, session, win_id, **attrs):
         """Creates a new widget
@@ -435,7 +433,7 @@ class Widget(Object):
             class_path += '.' + type(self).__class_path__
         class_path += '.' + type(self).__name__
         return "<%(class_path)s/%(path)s at %(id)s>" % {'class_path': class_path,
-                                                        'path': self.path and Webwidgets.Utils.path_to_id(self.path) or 'None',
+                                                        'path': Webwidgets.Utils.path_to_id(self.path, accept_None = True),
                                                         'id': id(self)}
 
     def __str__(self):
@@ -483,6 +481,8 @@ class ChildNodes(Webwidgets.Utils.OrderedDict):
     def __ensure__(self):
         for name, value in self.iteritems():
             if isinstance(value, Widget):
+                if self.node is value:
+                    raise Exception("Object's parent set to itself!", value)
                 value.parent = self.node
                 value.name = name
 
@@ -590,7 +590,7 @@ class StaticComposite(Composite):
         
         child_classes = []
         for name in dir(self):
-            if name == '__class__': continue
+            if name in ('__class__', 'parent', 'window'): continue
             value = getattr(self, name)
             if isinstance(value, type) and issubclass(value, Widget) and not value.__explicit_load__:
                 child_classes.append((name, value))
@@ -600,6 +600,7 @@ class StaticComposite(Composite):
         child_classes.sort(lambda x, y: cmp(x[1].class_order_nr, y[1].class_order_nr))
         
         for (name, value) in child_classes:
+            print "NANANANANA", name
             self.children[name] = value(session, win_id)
 
     def get_children(self):

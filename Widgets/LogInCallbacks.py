@@ -40,7 +40,6 @@ class LogIn(object):
             except Exception, e:
                 if self.parent.debug_errors: traceback.print_exc()
                 fields['username'].error = unicode(e)
-                
             else:
                 if self.parent.debug_log_in: print "User logged in:", self.parent.user_info
                 

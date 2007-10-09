@@ -74,7 +74,7 @@ class Dialog(Formatting.Html):
             __explicit_load__ = True
             def clicked(self, path):
                 self.parent.parent.notify('selected', self.value)
-                return True
+                raise StopIteration
             
         def __init__(self, session, win_id, buttons):
             super(Dialog.Buttons, self).__init__(
