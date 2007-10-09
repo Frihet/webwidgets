@@ -29,7 +29,7 @@
   >
   <w:Dialog
    id="log_in"
-   head="Please log in:"
+   head=":Text:Please log in:"
    >
    <w:Html id="body">
     <w:Message id="message" />
