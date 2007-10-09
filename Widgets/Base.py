@@ -35,7 +35,82 @@ import Webwidgets.Utils.Threads
 
 debugNotifications = False
 
-class Widget(object):
+class Type(type):
+    class_order_nr = Webwidgets.Utils.Threads.Counter()
+
+    def __new__(cls, name, bases, members):
+        members = dict(members)
+        classes = []
+
+        if '__no_classes_name__' not in members or not members['__no_classes_name__']:
+            cls_name = []
+            if '__module__' in members:
+                cls_name.append(members['__module__'])
+            if '__class_path__' in members and members['__class_path__']:
+                cls_name.append(members['__class_path__'])
+            cls_name.append(name)
+            classes.append('.'.join(cls_name))
+        if '__no_classes_name__' in members:
+            del members['__no_classes_name__'] # No inheritance! This is a magic marker, not an attribute
+
+        for base in bases:
+            if hasattr(base, 'classes'):
+                classes.extend(base.classes)
+        members['classes'] = tuple(classes)
+
+        members['class_order_nr'] = cls.class_order_nr.next()
+
+        def set_class_path(widget, path = ()):
+            widget.__class_path__ = '.'.join(path)
+            for key, value in widget.__dict__.iteritems():
+                if isinstance(value, cls):
+                    set_class_path(value, path + (key,))
+            return widget
+
+        return set_class_path(type.__new__(cls, name, bases, members))
+
+class Object(object):
+    """Object is a more elaborate version of object, providing a few
+    extra utility methods, and some extra "magic" class attributes -
+    L{classes}, L{class_order_nr} and L{__class_path__}."""
+    
+    __metaclass__ = Type
+
+    __no_classes_name__ = False
+    """Do not include the name of this particular class in L{classes}
+    for subclasses of this class (and for this class itself)."""
+
+    classes = ("Webwidgets.Widget",)
+    """Read-only attribute containing a list of the names of all
+    inherited classes except ones with L{__no_classes_name__} set to
+    True. This is mainly usefull for automatic CSS class generation."""
+
+    class_order_nr = 0
+    """Read-only attribute containing a sequence number for the class,
+    similar too id(class), but guaranteed to be monotonically
+    increasing, so that a class created after another one will have a
+    greater number than the other one."""
+
+    __class_path__ = ''
+    """The path between the module (__module__) and the class
+    (__name__). For classes that are created directly in the module
+    scope, this is the empty string. For classes created as members of
+    some ther class, this is the __class_path__ and __name__ of that
+    other class joined. The path is dot-separated."""
+
+    def __init__(self, **attrs):
+        """Creates a new widget
+
+        @param attrs: Any attributes to set for the object.
+        """
+        
+        self.__dict__.update(attrs)
+
+    def derive(cls, name = None, **members):
+        return types.TypeType(name or 'anonymous', (cls,), members)
+    derive = classmethod(derive)
+
+class Widget(Object):
     """Widget is the base class for all widgets. It manages class name
     collection, attribute handling, child instantiation and
     notifications.
@@ -47,24 +122,15 @@ class Widget(object):
     See L{Webwidgets.Program.Program.Session.notify} for an
     explanation of notifications.
     """
-
+    
     __explicit_load__ = False
     """Controls wether the widget class is automatically instantiated
     when the parent widget is instantiated."""
-
-    classes = ("Webwidgets.Widget",)
-    """Read-only attribute containing a list of the names of all
-    inherited classes except ones with L{__no_classes_name__} set to
-    True. This is mainly usefull for automatic CSS class generation."""
 
     html_class = 'Webwidgets-Widget'
     """Read-only attribute containing the information in L{classes}
     but in a format suitable for inclusion in the 'class' attribute in
     HTML."""
-
-    __no_classes_name__ = False
-    """Do not include the name of this particular class in L{classes}
-    for subclasses of this class (and for this class itself)."""
 
     visible = True
     """Whether the widget is shown on screen or not."""
@@ -76,44 +142,6 @@ class Widget(object):
     root = False
     parent = None
     name = None
-
-    class __metaclass__(type):
-        class_order_nr = Webwidgets.Utils.Threads.Counter()
-        
-        def __new__(cls, name, bases, members):
-            members = dict(members)
-            classes = []
-
-            if '__no_classes_name__' not in members or not members['__no_classes_name__']:
-                cls_name = []
-                if '__module__' in members:
-                    cls_name.append(members['__module__'])
-                if '__class_path__' in members and members['__class_path__']:
-                    cls_name.append(members['__class_path__'])
-                cls_name.append(name)
-                classes.append('.'.join(cls_name))
-            if '__no_classes_name__' in members:
-                del members['__no_classes_name__'] # No inheritance! This is a magic marker, not an attribute
-            
-            for base in bases:
-                if hasattr(base, 'classes'):
-                    classes.extend(base.classes)
-            members['classes'] = tuple(classes)
-
-            members['class_order_nr'] = cls.class_order_nr.next()
-
-            def set_class_path(widget, path = ()):
-                widget.__class_path__ = '.'.join(path)
-                for key, value in widget.__dict__.iteritems():
-                    if isinstance(value, cls):
-                        set_class_path(value, path + (key,))
-                return widget
-
-            return set_class_path(type.__new__(cls, name, bases, members))
-
-    def derive(cls, name = None, **members):
-        return types.TypeType(name or 'anonymous', (cls,), members)
-    derive = classmethod(derive)
 
     def __init__(self, session, win_id, **attrs):
         """Creates a new widget
@@ -140,7 +168,7 @@ class Widget(object):
         
         self.session = session
         self.win_id = win_id
-        self.__dict__.update(attrs)
+        Object.__init__(self, **attrs)
 
     class HtmlId(object):
         def __get__(self, instance, owner):
