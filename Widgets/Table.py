@@ -154,11 +154,6 @@ class Table(Base.ActionInput, Base.Composite):
     be done by e.g a database back-end.
     """
     
-    __attributes__ = Base.Composite.__attributes__ + (
-        'dependent_columns', 'columns', 'dependent_columns',
-        'functions', 'group_functions', 'disabled_functions', 'function_position',
-        'sort', 'rows', 'page', 'pages', 'rows_per_page',
-        'non_memory_storage', 'dont_merge_widgets', 'dont_merge_columns')
     columns = {}
     argument_name = None
     dependent_columns = {}

@@ -61,7 +61,6 @@ class HiddenInput(Base.ValueInput):
 
 class StringInput(Base.ValueInput):
     """Text input box"""
-    __attributes__ = Base.ValueInput.__attributes__ + ('rows', 'cols')
     rows = 1
     cols = None
 
@@ -95,7 +94,6 @@ class NewPasswordInput(Formatting.Html, Base.ValueInput):
     repeated twice and the two values entered are compared. A
     value_changed is only propagated if the two values matches"""
     __wwml_html_override__ = False
-    __attributes__ = Formatting.Html.__attributes__ + ('value',)
     value = ''
     html = """
     <span %(attr_html_attributes)s>
@@ -135,7 +133,6 @@ class NewPasswordInput(Formatting.Html, Base.ValueInput):
 
 class Button(Base.ActionInput):
     """Button widget - throws a "clicked" notification when clicked"""
-    __attributes__ = Base.ActionInput.__attributes__ + ('title',)
     title = ''
 
     def draw(self, output_options):
@@ -185,7 +182,6 @@ class RadioInput(Base.ValueInput, Base.StaticComposite):
     L{RadioButtonGroup} instance and set the 'group' attribute to that
     instance so that all radio buttons in the group knows about each
     other."""
-    __attributes__ = Base.StaticComposite.__attributes__ + ('group', 'title', 'value', 'default')
     def __init__(self, session, win_id, **attrs):
         Base.StaticComposite.__init__(self, session, win_id, **attrs)
         self.group.members[self.value] = self
@@ -238,7 +234,6 @@ class ListInput(Base.ValueInput, Base.StaticComposite):
     """Scrollable list of selectable items. The list can optionally
     allow the user to select multiple items."""
     
-    __attributes__ = Base.ValueInput.__attributes__ + ('multiple', 'size')
     multiple = False
     """Allow the user to select multiple items."""
     
@@ -334,7 +329,6 @@ class ToggleButton(Base.ValueInput, Button):
     rendered as a normal button, and instantly cause a page-load when
     clicked, just as a Button.
     """
-    __attributes__ = Base.ValueInput.__attributes__ + ('true_title', 'false_title')
 
     true_title = 'True'
     false_title = 'False'

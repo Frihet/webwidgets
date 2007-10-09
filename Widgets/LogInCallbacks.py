@@ -22,7 +22,6 @@
 import Webwidgets, traceback
 
 class LogIn(object):
-    __attributes__ = Webwidgets.Html.__attributes__ + ('global_session', 'user_info')
     global_session = True
     user_info = None
     debug_log_in = False
@@ -60,7 +59,6 @@ class LogIn(object):
 
 class LogOut(object):
     debug = True
-    __attributes__ = Webwidgets.Dialog.__attributes__ + ('log_in',)
     log_in = None
     
     def selected(self, path, value):

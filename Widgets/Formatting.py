@@ -32,7 +32,6 @@ class List(Base.StaticComposite):
     string inbetween each and the "pre" and "post" strings before and
     after the whole list, respectively."""
     __no_classes_name__ = True
-    __attributes__ = Base.StaticComposite.__attributes__ + ('pre', 'sep', 'frame', 'post')
     pre = sep = post = ''
     frame = '%(child)s'
     
@@ -65,7 +64,6 @@ class Html(Base.TextWidget, Base.StaticComposite):
     the special name"id" will insert the widget id (path) of the current widget, which is usefull
     for CSS styling).
     """
-    __attributes__ = Base.TextWidget.__attributes__ + Base.StaticComposite.__attributes__ + ('top_level',)
     
     __no_classes_name__ = True
     """Don't include the classname of this class in L{classes}."""
@@ -113,7 +111,6 @@ class StyleLink(Html):
     """Includes the css style from the URL specified with the
     attribute "style"
     """
-    __attributes__ = Base.Widget.__attributes__ + ('style', 'title')
     __wwml_html_override__ = False
     style = ''
     """URI to the stylesheet to include."""
@@ -134,7 +131,6 @@ class Message(Html):
 
 class Media(Base.Widget):
     """Media (file) viewing widget"""
-    __attributes__ = ('content', 'base', 'types')
     content = None
     class Base(object): pass
     base = Base()
@@ -298,7 +294,6 @@ class Label(Base.StaticComposite):
     specified either as the widget itself, or a
     L{Webwidgets.Utils.RelativePath} to the widget"""
     
-    __attributes__ = Base.StaticComposite.__attributes__ + ('target',)
 
     target = []
     """The widget this widget is a label for. This is either the
@@ -361,7 +356,6 @@ class Fieldgroup(List):
 class GridLayout(Base.StaticComposite, GridLayoutModel.GridLayout):
     """GridLayout that works similar to a GtkTable in Gtk - child widgets
     are attatched to cells by coordinates."""
-    __attributes__ = Base.StaticComposite.__attributes__ + ('row_widths', 'col_widths')
 
     class Cell(GridLayoutModel.GridLayout.Cell):
         def name(self):

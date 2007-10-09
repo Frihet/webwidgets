@@ -29,7 +29,6 @@ import Webwidgets.Utils, Webwidgets.Constants
 import Base, Input, Formatting
 
 class LanguageInput(Input.ListInput):
-    __attributes__ = Input.ListInput.__attributes__ + ('languages',)
     languages = {'en':u'English', 'sv':u'Svenska', 'no':u'Norsk'}
     
     def get_children(self):
@@ -53,7 +52,6 @@ class Dialog(Formatting.Html):
     explanation/description of the options. Options are described
     using a dictionary of description-value pairs."""
     __wwml_html_override__ = False
-    __attributes__ = Formatting.Html.__attributes__ + ('buttons',)
     buttons = {'Cancel': '0', 'Ok': '1'}
     html = """
     <div %(attr_html_attributes)s>
@@ -74,7 +72,6 @@ class Dialog(Formatting.Html):
 
         class Button(Input.Button):
             __explicit_load__ = True
-            __attributes__ = Input.Button.__attributes__ + ('value',)
             def clicked(self, path):
                 self.parent.parent.notify('selected', self.value)
                 return True
@@ -99,7 +96,6 @@ class Tree(Base.Input):
     """Expandable tree widget similar to the tree-view in Nautilus or
     Windows Explorer. The tree must support the renderTree() protocol."""
     
-    __attributes__ = Base.StaticComposite.__attributes__ + ('tree', 'pictIcon', 'pict_expander', 'pict_indent')
     def __init__(self, session, win_id, **attrs):
         Base.Widget.__init__(self, session, win_id, **attrs)
 
@@ -230,7 +226,6 @@ class TabbedView(Base.ActionInput, Tabset):
     """Provides a set of overlapping 'pages' with tabs, each tab
     holding some other widget, through wich a user can browse using
     the tabs."""
-    __attributes__ = Base.StaticComposite.__attributes__ + ('page', 'argument_name')
     argument_name = None
     oldPage = None
     page = None

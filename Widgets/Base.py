@@ -40,19 +40,9 @@ class Widget(object):
     collection, attribute handling, child instantiation and
     notifications.
 
-    Attributes are special class variables that can also be overridden
-    by instance variables set using keyword arguments to L{__init__}..
-    Attributes for a class must be listed in the L{__attributes__}
-    member.
-
     The class name collection system gathers the names of all
     base-classes for a class and uses these to construct a string
     suitable for use in an HTML 'class' attribute.
-
-    When a widget is instantiated, any class variables themselves
-    holding widget classes (that do not have L{__explicit_load__} set
-    to False) are instantiated automatically, and the instances
-    assigned to instance variables with the same names.
 
     See L{Webwidgets.Program.Program.Session.notify} for an
     explanation of notifications.
@@ -61,12 +51,6 @@ class Widget(object):
     __explicit_load__ = False
     """Controls wether the widget class is automatically instantiated
     when the parent widget is instantiated."""
-
-    __attributes__ = ('visible', 'classes', 'title', 'html_attributes')
-    """List of all attributes that can be set for the widget using
-    either class members or arguments to __init__"""
-
-    __html_attributes__ = ('id', 'class',)
 
     classes = ("Webwidgets.Widget",)
     """Read-only attribute containing a list of the names of all
@@ -143,19 +127,13 @@ class Widget(object):
 
                      ('MyContext/MyPage', 'popup')
 
-        @param attrs: Any attributes to set for the widget. The list
-        of keywords are documented (and this is enforced) in
-        L{__attributes__}.
+        @param attrs: Any attributes to set for the widget.
         
         """
         
         self.session = session
         self.win_id = win_id
         self.__dict__.update(attrs)
-        self.__attributes__ += tuple(['html_' + name for name in self.__html_attributes__])
-        for attr in self.__attributes__:
-            if not hasattr(self, attr):
-                raise TypeError('Required attribute not set:', str(self), attr)
 
     class HtmlId(object):
         def __get__(self, instance, owner):
@@ -236,16 +214,24 @@ class Widget(object):
         self.session.notify(self, message, args, kw, path)
 
     def draw_html_attributes(self, path):
-        attributes = [(name, getattr(self, 'html_' + name))
-                      for name in self.__html_attributes__]
+        attributes = [(name[5:], getattr(self, name))
+                      for name in dir(self)
+                      if name.startswith('html_') and name != 'html_attributes']
         return ' '.join(['%s=%s' % (name, xml.sax.saxutils.quoteattr(value))
                          for (name, value)
                          in attributes
                          if value])
 
     def draw_attributes(self, output_options):
-        return Webwidgets.Utils.OrderedDict([('attr_' + key, self._(getattr(self, key), output_options))
-                                             for key in self.__attributes__])
+        res = Webwidgets.Utils.OrderedDict()
+        for key in dir(self):
+            value = getattr(self, key)
+            if isinstance(value, type): continue
+            try:
+                res['attr_' + key] = self._(value, output_options)
+            except:
+                res['attr_' + key] = str(value)
+        return res
 
     def draw(self, output_options):
         """Renders the widget to HTML. Path is where the full path to
@@ -420,8 +406,7 @@ class Widget(object):
     def __setattr__(self, name, value):
         if not hasattr(self, name) or value is not getattr(self, name):
             object.__setattr__(self, name, value)    
-            if name in self.__attributes__:
-                self.notify('%s_changed' % name, value)
+            self.notify('%s_changed' % name, value)
 
 class TextWidget(Widget):
     """This widget is a simple string output widget.
@@ -429,7 +414,6 @@ class TextWidget(Widget):
     @cvar html: The "html" attribute should contain HTML code.
     """
 
-    __attributes__ = ('html',)
     __wwml_html_override__ = True
     """Let Wwml-defined subclasses override the html attribute"""
 
@@ -537,17 +521,20 @@ class Composite(Widget):
         return self.get_children()
         
 class StaticComposite(Composite):
-    """Base class for all composite widgets, handling children
-    instantiation of children classes. Children instantiated (or
-    gotten from arguments) are put in the children member variable.
-    This class also handles drawing of children and the visibility
-    attribute of children."""
+    """Base class for all composite widgets, handling child class
+    instantiation, drawing of children and the visibility attribute of
+    children.
+
+    When instantiated, any class variables holding widget instances
+    are added to the instance member variable L{children}. In
+    addition, any class variables holding widget classes (that do not
+    have L{__explicit_load__} set to False) are instantiated
+    automatically and then added to L{children}.
+    """
 
     __no_classes_name__ = True
     
     def __init__(self, session, win_id, **attrs):
-        __attributes__ = set(attrs.get('__attributes__', self.__attributes__))
-
         super(StaticComposite, self).__init__(
             session, win_id,
             **attrs)
@@ -630,9 +617,6 @@ class Input(Widget):
         return cmp(cls._input_level, other._input_level) or cmp(cls, other) or cmp(id(cls), id(other))
     input_order = classmethod(input_order)
 
-    __attributes__ = Widget.__attributes__ + ('active', 'argument_name', 'error',
-                                              '__input_subordinates__', '__input_dominants__')
-
     active = True
     """Enables the user to actually use this input field."""
 
@@ -698,7 +682,6 @@ class ValueInput(Input):
     (e.g. all butt buttons). It defines a notification for changing
     the value hold by the widget."""
     
-    __attributes__ = Input.__attributes__ + ('value',)
     value = ''
 
     def field_input(self, path, string_value):
@@ -763,7 +746,6 @@ class Window(Widget):
     widget of any application. It has an attribute for the HTTP
     headers and handles form submission values and URL arguments."""
 
-    __attributes__ = ('headers', 'languages')
     headers = {'Status': '404 Page not implemented'}
     languages = None
 
@@ -799,7 +781,7 @@ class HtmlWindow(Window, StaticComposite):
     """HtmlWindow is the main widget for any normal application window
     displaying HTML. It has two children - head and body aswell as
     attributes for title, encoding and doctype"""
-    __attributes__ = StaticComposite.__attributes__ + ('headers', 'encoding', 'doctype')
+
     headers = {'Status': '200 OK'}
     title = 'Page not available'
     body = TextWidget.derive(html = 'Page not available')

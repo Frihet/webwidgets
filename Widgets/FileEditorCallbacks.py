@@ -15,8 +15,6 @@ class Value(object):
         instance.parent.parent.value = value
         
 class FileEditor(object):
-    __attributes__ = Webwidgets.Html.__attributes__ + ('expanded', 'value', 'error')
-
     def __init__(self, session, win_id, **attr):
         Webwidgets.Html.__init__(self, session, win_id, **attr)
         self.value_changed(self.path, self.value)

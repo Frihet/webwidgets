@@ -26,7 +26,6 @@ class DateInput(Input.StringInput, Base.DirectoryServer):
     """
     Date Selector Widget.
     """
-    __attributes__ = Input.StringInput.__attributes__ + ('format',)
     format = '%Y-%m-%d'
     value = datetime.datetime.now()
 
