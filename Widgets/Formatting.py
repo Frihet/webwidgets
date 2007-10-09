@@ -52,7 +52,7 @@ class BulletList(List):
     frame= "<li>%(child)s</li>"
     post = "</ul>"
 
-class Html(Base.TextWidget, Base.StaticComposite):
+class Html(Base.Text, Base.StaticComposite):
     """This widget is the base widget for most output widgets and the
     main method of concatenating and grouping widgets. It provides a
     way to "format" together other widgets with some custom HTML
@@ -104,7 +104,7 @@ class Style(Html):
     """Includes the css style from the child "style"
     """
     __wwml_html_override__ = False
-    class style(Base.TextWidget): html = ''
+    class style(Base.Text): html = ''
     html = """<style %(attr_html_attributes)s type='text/css'>%(style)s</style>"""
     
 class StyleLink(Html):
@@ -121,7 +121,7 @@ class Message(Html):
     """Informative message display. If no message is set, this widget
     is invisible."""
     __wwml_html_override__ = False
-    class message(Base.TextWidget): html = ''
+    class message(Base.Text): html = ''
     def draw(self, output_options):
         if self.children['message']:
             self.html = '<div %(attr_html_attributes)s>%(message)s</div>'

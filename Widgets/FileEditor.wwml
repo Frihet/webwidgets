@@ -31,7 +31,7 @@
   </div>
 
   <w:Fieldgroup id="infoGroup">
-   <w:Field id="name" label=":TextWidget:Filename">
+   <w:Field id="name" label=":Text:Filename">
     <w:StringInput id="field" />
    </w:Field>
   </w:Fieldgroup>
@@ -52,7 +52,7 @@
   </w:TabbedView>
 
   <w:Html id="upload" top_level="div">
-   <w:Label id="fileLabel" target="1/file" label=":TextWidget:Upload file: " />
+   <w:Label id="fileLabel" target="1/file" label=":Text:Upload file: " />
    <w:FileInput id="file">
     <w:Html id="preview" />
     <w:Html id="clear" />

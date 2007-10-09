@@ -26,12 +26,12 @@
  <w:Fieldgroup id="AddressInput"
   using="Webwidgets"
   bind="Webwidgets.Widgets.InputCombinationsCallbacks">
-  <w:Field id="co" label=":TextWidget:c/o"><w:StringInput id="field" field_name="co" /></w:Field>
-  <w:Field id="street" label=":TextWidget:Street"><w:StringInput id="field" field_name="street" /></w:Field>
-  <w:Field id="zip" label=":TextWidget:Post-code/zip code"><w:StringInput id="field" field_name="zip" /></w:Field>
-  <w:Field id="city" label=":TextWidget:City"><w:StringInput id="field" field_name="street" /></w:Field>
-  <w:Field id="county" label=":TextWidget:County/State"><w:StringInput id="field" field_name="county" /></w:Field>
-  <w:Field id="country" label=":TextWidget:Country"><w:StringInput id="field" field_name="country" /></w:Field>
+  <w:Field id="co" label=":Text:c/o"><w:StringInput id="field" field_name="co" /></w:Field>
+  <w:Field id="street" label=":Text:Street"><w:StringInput id="field" field_name="street" /></w:Field>
+  <w:Field id="zip" label=":Text:Post-code/zip code"><w:StringInput id="field" field_name="zip" /></w:Field>
+  <w:Field id="city" label=":Text:City"><w:StringInput id="field" field_name="street" /></w:Field>
+  <w:Field id="county" label=":Text:County/State"><w:StringInput id="field" field_name="county" /></w:Field>
+  <w:Field id="country" label=":Text:Country"><w:StringInput id="field" field_name="country" /></w:Field>
  </w:Fieldgroup>
 
 </w:wwml>

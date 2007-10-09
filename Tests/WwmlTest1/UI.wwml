@@ -58,7 +58,7 @@
    </w:MainMenu>
 
    Last password: <w:Html id="lastpwd" /><br />
-   <w:Field id='newpwd' label=':TextWidget:New password'><w:NewPasswordInput id="field" value="foo" /></w:Field>
+   <w:Field id='newpwd' label=':Text:New password'><w:NewPasswordInput id="field" value="foo" /></w:Field>
    <w:Button id="pwdclear" title="Clear new password" />
    <w:Button id="pwdset" title="Set new password" /><br />
 

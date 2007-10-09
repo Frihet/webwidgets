@@ -79,9 +79,9 @@ class MyWindow(object):
                         Webwidgets.Html.__init__(
                             self,
                             session, win_id,
-                            type = Webwidgets.TextWidget(session, win_id, html = type),
-                            name = Webwidgets.TextWidget(session, win_id, html = name),
-                            dates = Webwidgets.ListInput(session, win_id, **dict([(str(nr), Webwidgets.TextWidget(session, win_id, html = date))
+                            type = Webwidgets.Text(session, win_id, html = type),
+                            name = Webwidgets.Text(session, win_id, html = name),
+                            dates = Webwidgets.ListInput(session, win_id, **dict([(str(nr), Webwidgets.Text(session, win_id, html = date))
                                                                                   for nr, date in enumerate(dates)])))
 
                     class actions(object):

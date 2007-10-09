@@ -452,7 +452,7 @@ class Widget(Object):
             object.__setattr__(self, name, value)    
             self.notify('%s_changed' % name, value)
 
-class TextWidget(Widget):
+class Text(Widget):
     """This widget is a simple string output widget.
 
     @cvar html: The "html" attribute should contain HTML code.
@@ -828,8 +828,8 @@ class HtmlWindow(Window, StaticComposite):
 
     headers = {'Status': '200 OK'}
     title = 'Page not available'
-    body = TextWidget.derive(html = 'Page not available')
-    head = TextWidget.derive(html = '')
+    body = Text.derive(html = 'Page not available')
+    head = Text.derive(html = '')
     encoding = 'UTF-8'
     doctype = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
 

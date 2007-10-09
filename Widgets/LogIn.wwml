@@ -34,10 +34,10 @@
    <w:Html id="body">
     <w:Message id="message" />
     <w:Fieldgroup id="credentialsGroup">
-     <w:Field id="username" label="Username">
+     <w:Field id="username" label=":Text:Username">
       <w:StringInput id="field" field_name="username" />
      </w:Field>
-     <w:Field id="password" label="Password">
+     <w:Field id="password" label=":Text:Password">
       <w:PasswordInput id="field" field_name="password" />
      </w:Field>
     </w:Fieldgroup>
