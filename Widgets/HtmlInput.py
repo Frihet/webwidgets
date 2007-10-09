@@ -50,5 +50,5 @@ webwidgets_add_event_handler(
    oFCKeditor.ReplaceTextarea() ;
   });
   """ % {'widget_id': widget_id,
-         'widgetUrl': self.calculate_url({'widget_class': 'Webwidgets.HtmlInput'})})
+         'widgetUrl': self.calculate_url({'widget_class': 'Webwidgets.HtmlInput'}, {})})
         return super(HtmlInput, self).draw(output_options)

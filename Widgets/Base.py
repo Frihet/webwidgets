@@ -97,11 +97,13 @@ class Widget(object):
             members = dict(members)
             classes = []
             if '__no_classes_name__' not in members or not members['__no_classes_name__']:
-                cls_name = members['__module__']
+                cls_name = []
+                if '__module__' in members:
+                    cls_name.append(members['__module__'])
                 if '__classPath__' in members and members['__classPath__']:
-                    cls_name += '.' + members['__classPath__']
-                cls_name += '.' + name
-                classes.append(cls_name)
+                    cls_name.append(members['__classPath__'])
+                cls_name.append(name)
+                classes.append('.'.join(cls_name))
             if '__no_classes_name__' in members:
                 del members['__no_classes_name__'] # No inheritance! This is a magic marker, not an attribute
             for base in bases:
@@ -109,6 +111,10 @@ class Widget(object):
                     classes.extend(base.classes)
             members['classes'] = tuple(classes)
             return type.__new__(cls, name, bases, members)
+
+    def derive(cls, name = None, **members):
+        return types.TypeType(name or 'anonymous', (cls,), members)
+    derive = classmethod(derive)
 
     def __init__(self, session, win_id, **attrs):
         """Creates a new widget
@@ -137,11 +143,6 @@ class Widget(object):
         
         self.session = session
         self.win_id = win_id
-        for name in dir(type(self)):
-            if name == '__class__': continue
-            item = getattr(self, name)
-            if isinstance(item, type) and issubclass(item, Widget) and not item.__explicit_load__:
-                setattr(self, name, item(session, win_id))
         self.__dict__.update(attrs)
         self.__attributes__ += tuple(['html_' + name for name in self.__html_attributes__])
         for attr in self.__attributes__:
@@ -414,6 +415,21 @@ class Widget(object):
             if name in self.__attributes__:
                 self.notify('%s_changed' % name, value)
 
+class TextWidget(Widget):
+    """This widget is a simple string output widget.
+
+    @cvar html: The "html" attribute should contain HTML code.
+    """
+
+    __attributes__ = ('html',)
+    __wwml_html_override__ = True
+    """Let Wwml-defined subclasses override the html attribute"""
+
+    html = ""
+
+    def draw(self, output_options):
+        return self._(self.html, output_options)
+
 class ChildNodes(Webwidgets.Utils.OrderedDict):
     """Dictionary of child widgets to a widget; any widgets inserted
     in the dictionary will automatically have their name and parentn
@@ -520,22 +536,28 @@ class StaticComposite(Composite):
     attribute of children."""
 
     __no_classes_name__ = True
-    __children__ = ()
     
     def __init__(self, session, win_id, **attrs):
-        __attributes__ = '__attributes__' in attrs and attrs['__attributes__'] or self.__attributes__
-        __children__ = '__children__' in attrs and attrs['__children__'] or self.__children__
+        __attributes__ = set(attrs.get('__attributes__', self.__attributes__))
+
         super(StaticComposite, self).__init__(
             session, win_id,
-            __attributes__ = __attributes__ + __children__,
             **attrs)
         self.children = ChildNodes(self)
-        __children__ = __children__ + tuple(set(attrs.keys()) - set(__attributes__))
-        for name, item in self.__dict__.iteritems():
-            if isinstance(item, Widget):
-                __children__ += (name,)
-        for child_name in __children__:
-            self.children[child_name] = getattr(self, child_name)
+        
+        for name, value in attrs.iteritems():
+            if isinstance(value, Widget):
+                self.children[name] = value
+                
+        for name, value in self.__dict__.iteritems():
+            if isinstance(value, Widget):
+                self.children[name] = value
+                
+        for name in dir(type(self)):
+            if name == '__class__': continue
+            value = getattr(self, name)
+            if isinstance(value, type) and issubclass(value, Widget) and not value.__explicit_load__:
+                self.children[name] = value(session, win_id)
 
     def get_children(self):
         return self.children.iteritems()
@@ -766,11 +788,10 @@ class HtmlWindow(Window, StaticComposite):
     displaying HTML. It has two children - head and body aswell as
     attributes for title, encoding and doctype"""
     __attributes__ = StaticComposite.__attributes__ + ('headers', 'encoding', 'doctype')
-    __children__ = ('head', 'body')
     headers = {'Status': '200 OK'}
     title = 'Page not available'
-    body = 'Page not available'
-    head = ''
+    body = TextWidget.derive(html = 'Page not available')
+    head = TextWidget.derive(html = '')
     encoding = 'UTF-8'
     doctype = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
 

@@ -103,76 +103,39 @@ def generatePartsForNode(module, node, using = [], classPath = [], bindContext =
                 attributes.extend(childAttributes)
     return attributes, ''.join(texts)
 
-def mangleAttributeValue(value):
-    if not value.startswith(':'):
-        return value
-    value = value[1:]
-    if ':' in value:
-        type, value = value.split(':', 1)
+def mangleAttributeValue(attribute, text, module, using, classPath, bindContext):
+    if not text.startswith(':'):
+        return text
+    text = text[1:]
+    if ':' in text:
+        type_name, text = text.split(':', 1)
     else:
-        type = value
-        value = None
-    if type == 'false': return False
-    elif type == 'true': return True
-    elif type == 'none': return None
-    elif type == 'string': return value
-    elif type == 'id': return Utils.id_to_path(value)
-    elif type == 'path': return Utils.RelativePath(value, pathAsList = True)
-    elif type == 'integer': return int(value)
-    elif type == 'float': return float(value)
-    elif type == 'time': return datetime.datetime(*(time.strptime(value, '%Y-%m-%d %H:%M:%S')[0:6]))
-    raise Exception("Unknown type: %s for value '%s'" % (type, value))
+        type_name = text
+        text = None
+    return generateValue(type_name, text, {'id': attribute, 'classid': attribute}, module, using, classPath, bindContext + [attribute])
 
-def generateValueForNode(module, node, using = [], classPath = [], bindContext = []):
-    if not node.nodeType == node.ELEMENT_NODE:
-        raise Exception('Non element node given to generateValueForNode: %s' % str(node))
-    # Yes, ordered dict here, since we mix it with child nodes further
-    # down, and they _do_ have order... A pity really XMl doesn't
-    # preserve the order of attributes...
-    attributes = Utils.OrderedDict([(key, mangleAttributeValue(value))
-                                    for (key, value)
-                                    in node.attributes.items()])
-
-    if 'id' in attributes:
-        if 'classid' not in attributes:
-            attributes['classid'] = attributes['id']
-        else:
-            raise Exception('Both classid and id can not be set for an object')
-
-    if 'using' in attributes:
-        using = attributes['using'].split(' ') + using
-
-    if 'bind' in attributes:
-        bindContext = attributes['bind'].split('.')
-    else:
-        bindContext = bindContext + [attributes.get('classid', '__unknown__')]
-
-    classPath = classPath + [attributes.get('classid', '__unknown__')]
-
-    children, text = generatePartsForNode(module, node, using, classPath, bindContext)
-    attributes.update(children)
-
-    if node.localName == 'false': value = False
-    elif node.localName == 'true': value = True
-    elif node.localName == 'none': value = None
-    elif node.localName == 'string': value = text
-    elif node.localName == 'id': value = Utils.id_to_path(text)
-    elif node.localName == 'path': value = Utils.RelativePath(text, pathAsList = True)
-    elif node.localName == 'integer': value = int(text)
-    elif node.localName == 'float': value = float(text)
-    elif node.localName == 'time': value = datetime.datetime(*(time.strptime(text, '%Y-%m-%d %H:%M:%S')[0:6]))
-    elif node.localName == 'odict':
+def generateValue(type_name, text, attributes, module, using, classPath, bindContext):
+    if type_name == 'false': value = False
+    elif type_name == 'true': value = True
+    elif type_name == 'none': value = None
+    elif type_name == 'string': value = text
+    elif type_name == 'id': value = Utils.id_to_path(text)
+    elif type_name == 'path': value = Utils.RelativePath(text, pathAsList = True)
+    elif type_name == 'integer': value = int(text)
+    elif type_name == 'float': value = float(text)
+    elif type_name == 'time': value = datetime.datetime(*(time.strptime(text, '%Y-%m-%d %H:%M:%S')[0:6]))
+    elif type_name == 'odict':
         value = Utils.OrderedDict(attributes)
         if 'classid' in value: del value['classid']
         if 'id' in value: del value['id']
-    elif node.localName == 'dict':
+    elif type_name == 'dict':
         value = dict(attributes)
         if 'classid' in value: del value['classid']
         if 'id' in value: del value['id']
-    elif node.localName == 'list':
+    elif type_name == 'list':
         value = [value for name, value in attributes.iteritems()
                  if name not in ('classid', 'id')]
-    elif node.localName == 'wwml':
+    elif type_name == 'wwml':
         value = module
         for k, v in attributes.iteritems():
             setattr(value, k, v)
@@ -180,9 +143,9 @@ def generateValueForNode(module, node, using = [], classPath = [], bindContext =
     else:
         callbackName = '.'.join(bindContext)
         if debugSubclass:
-            print "WWML: class %s(%s, %s): pass" % (attributes['classid'], callbackName, node.localName)
+            print "WWML: class %s(%s, %s): pass" % (attributes['classid'], callbackName, type_name)
             print "WWML:     using: %s" % ' '.join(using)
-        node_value = Utils.load_class(node.localName, using, module = module)
+        node_value = Utils.load_class(type_name, using, module = module)
         if isinstance(node_value, types.TypeType) and issubclass(node_value, Webwidgets.Widgets.Base.Widget):
             base_cls = ()
             try:
@@ -205,18 +168,6 @@ def generateValueForNode(module, node, using = [], classPath = [], bindContext =
                     attributes['html'] = attributes['html'] + attributes[':post']
                     del attributes[':post']
                     
-            # Handle argument children
-            __children__ = ()
-            for cls in base_cls:
-                __children__ = getattr(cls, '__children__', __children__)
-            __children__ = attributes.get('__children__', __children__)
-            __children__ = list(__children__)
-            for name, value in attributes.iteritems():
-                if isinstance(value, type) and issubclass(value, Webwidgets.Widgets.Base.Widget) and not value.__explicit_load__:
-                    if name not in __children__:
-                        __children__.append(name)
-            attributes['__children__'] = tuple(__children__)
-
             if 'id' not in attributes:
                 attributes['__explicit_load__'] = True
             if '__wwml_html_override__' not in attributes:
@@ -244,8 +195,47 @@ def generateValueForNode(module, node, using = [], classPath = [], bindContext =
                 value = Utils.subclass_list(node_value, value.values())
         else:
             value = node_value
-        
-    return attributes.get('id', None), attributes.get('classid', None), value
+
+    return value
+
+def generateValueForNode(module, node, using = [], classPath = [], bindContext = []):
+    if not node.nodeType == node.ELEMENT_NODE:
+        raise Exception('Non element node given to generateValueForNode: %s' % str(node))
+    # Yes, ordered dict here, since we mix it with child nodes further
+    # down, and they _do_ have order... A pity really XMl doesn't
+    # preserve the order of attributes...
+    attributes = Utils.OrderedDict([(key, mangleAttributeValue(key, value, module, using, classPath, bindContext))
+                                    for (key, value)
+                                    in node.attributes.items()])
+
+    if 'id' in attributes:
+        if 'classid' not in attributes:
+            attributes['classid'] = attributes['id']
+        else:
+            raise Exception('Both classid and id can not be set for an object')
+
+    if 'using' in attributes:
+        using = attributes['using'].split(' ') + using
+
+    if 'bind' in attributes:
+        bindContext = attributes['bind'].split('.')
+    else:
+        bindContext = bindContext + [attributes.get('classid', '__unknown__')]
+
+    classPath = classPath + [attributes.get('classid', '__unknown__')]
+
+    children, text = generatePartsForNode(module, node, using, classPath, bindContext)
+    attributes.update(children)
+
+    return (attributes.get('id', None),
+            attributes.get('classid', None),
+            generateValue(node.localName,
+                          text,
+                          attributes,
+                          module,
+                          using,
+                          classPath,
+                          bindContext))
 
 
 def generateWidgetsFromFile(modulename, filename, file, path = None, bindContext = ''):

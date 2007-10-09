@@ -54,7 +54,6 @@ class Dialog(Formatting.Html):
     using a dictionary of description-value pairs."""
     __wwml_html_override__ = False
     __attributes__ = Formatting.Html.__attributes__ + ('buttons',)
-    __children__ = Formatting.Html.__children__ + ('head', 'body')
     buttons = {'Cancel': '0', 'Ok': '1'}
     html = """
     <div %(attr_html_attributes)s>

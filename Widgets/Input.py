@@ -320,8 +320,7 @@ class FileInput(Base.ValueInput, Base.StaticComposite):
                 self.register_input(self.path + ['_', 'clear'], argument_name)
 
         result = self.draw_children(output_options, include_attributes = True)
-        result['disabled'] = ['', 'disabled="disabled"'][not self.get_active(self.path)],
-        result['clearable'] = ['', 'disabled="disabled"'][not self.get_active(self.path) or self.value is None],
+        result['disabled'] = ['', 'disabled="disabled"'][not self.get_active(self.path)]
 
         return """<span %(attr_html_attributes)s>
                    %(preview)s

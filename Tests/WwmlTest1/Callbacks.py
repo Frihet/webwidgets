@@ -78,9 +78,11 @@ class MyWindow(object):
                     def __init__(self, session, win_id, type, name, dates):
                         Webwidgets.Html.__init__(
                             self,
-                            session, win_id, type=type, name=name,
-                            dates = Webwidgets.ListInput(session, win_id, **dict([(str(nr), date)
-                                                                                       for nr, date in enumerate(dates)])))
+                            session, win_id,
+                            type = Webwidgets.TextWidget(session, win_id, html = type),
+                            name = Webwidgets.TextWidget(session, win_id, html = name),
+                            dates = Webwidgets.ListInput(session, win_id, **dict([(str(nr), Webwidgets.TextWidget(session, win_id, html = date))
+                                                                                  for nr, date in enumerate(dates)])))
 
                     class actions(object):
                          class check(object):
@@ -105,8 +107,8 @@ class MyWindow(object):
             def __init__(self, session, win_id):
                 Webwidgets.Html.__init__(self, session, win_id, Listing = self.Listing(
                     session, win_id, [('doc', 'foo', ('2006-06-20 10:11:12 +10','2006-06-20 10:11:12 +10')),
-                                     ('gif', 'bar', ('2006-06-20 10:11:12 +10',)),
-                                     ('jpg', 'muahehe', ('2006-06-20 10:11:12 +10','2006-06-20 10:11:12 +10','2006-06-20 10:11:12 +10')),
-                                     ('doc', 'gnaga', ('2006-06-20 10:11:12 +10',)),
-                                     ('xslt', 'apsfnana', ('2006-06-20 10:11:12 +10','2006-04-10 10:11:12 +10')),
-                                     ]))
+                                      ('gif', 'bar', ('2006-06-20 10:11:12 +10',)),
+                                      ('jpg', 'muahehe', ('2006-06-20 10:11:12 +10','2006-06-20 10:11:12 +10','2006-06-20 10:11:12 +10')),
+                                      ('doc', 'gnaga', ('2006-06-20 10:11:12 +10',)),
+                                      ('xslt', 'apsfnana', ('2006-06-20 10:11:12 +10','2006-04-10 10:11:12 +10')),
+                                      ]))

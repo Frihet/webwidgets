@@ -66,3 +66,5 @@ callPath call_path
 calculateUrl calculate_url
 baseOptions base_options
 baseCls base_cls
+accessLists access_lists
+getAccessList get_access_list

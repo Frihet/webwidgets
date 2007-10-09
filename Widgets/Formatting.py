@@ -53,7 +53,7 @@ class BulletList(List):
     frame= "<li>%(child)s</li>"
     post = "</ul>"
 
-class Html(Base.StaticComposite):
+class Html(Base.TextWidget, Base.StaticComposite):
     """This widget is the base widget for most output widgets and the
     main method of concatenating and grouping widgets. It provides a
     way to "format" together other widgets with some custom HTML
@@ -65,13 +65,13 @@ class Html(Base.StaticComposite):
     the special name"id" will insert the widget id (path) of the current widget, which is usefull
     for CSS styling).
     """
+    __attributes__ = Base.TextWidget.__attributes__ + Base.StaticComposite.__attributes__ + ('top_level',)
+    
     __no_classes_name__ = True
     """Don't include the classname of this class in L{classes}."""
-    __wwml_html_override__ = True
-    """Let Wwml-defined subclasses override the html attribute"""
-    __attributes__ = Base.StaticComposite.__attributes__ + ('html','top_level')
-    html = ''
+
     top_level = None
+
     def draw(self, output_options):
         children = self.draw_children(
             output_options,
@@ -92,7 +92,6 @@ class Div(Html):
     """
     __no_classes_name__ = True
     __wwml_html_override__ = False
-    __children__ = Html.__children__ + ('child',)
     html = """<div %(attr_html_attributes)s>%(child)s</div>"""
 
 class Span(Html):
@@ -101,15 +100,13 @@ class Span(Html):
     """
     __no_classes_name__ = True
     __wwml_html_override__ = False
-    __children__ = Html.__children__ + ('child',)
     html = """<span %(attr_html_attributes)s>%(child)s</span>"""
 
 class Style(Html):
     """Includes the css style from the child "style"
     """
-    __children__ = Html.__children__ + ('style',)
     __wwml_html_override__ = False
-    style = ''
+    class style(Base.TextWidget): html = ''
     html = """<style %(attr_html_attributes)s type='text/css'>%(style)s</style>"""
     
 class StyleLink(Html):
@@ -127,8 +124,7 @@ class Message(Html):
     """Informative message display. If no message is set, this widget
     is invisible."""
     __wwml_html_override__ = False
-    __children__ = Html.__children__ + ('message',)
-    message = ''
+    class message(Base.TextWidget): html = ''
     def draw(self, output_options):
         if self.children['message']:
             self.html = '<div %(attr_html_attributes)s>%(message)s</div>'
@@ -303,7 +299,6 @@ class Label(Base.StaticComposite):
     L{Webwidgets.Utils.RelativePath} to the widget"""
     
     __attributes__ = Base.StaticComposite.__attributes__ + ('target',)
-    __children__ = ('label',)
 
     target = []
     """The widget this widget is a label for. This is either the
@@ -322,16 +317,18 @@ class Label(Base.StaticComposite):
         if target.error is not None:
            res['error'] = """ <span class="error">(%s)</span>""" % (target._(target.error, output_options),)
         res['target'] = Webwidgets.Utils.path_to_id(targetPath)
-        return """<label %(attr_html_attributes)s for="%(target)s">%(label)s%(error)s</label>""" % res
-
+        try:
+            return """<label %(attr_html_attributes)s for="%(target)s">%(label)s%(error)s</label>""" % res
+        except KeyError, e:
+            e.args = (self, self.path) + e.args
+            raise e
+        
 class DownloadLink(Media):
     types = {'default': Webwidgets.Utils.subclass_dict(Media.types['default'],
                                                       {'inline':False})}
 
 class Field(Label):
     __wwml_html_override__ = False
-    __children__ = Label.__children__ + ('field',)
-    
     def draw(self, output_options):
         if isinstance(self.target, Base.Widget):
             target = self.target
@@ -343,15 +340,19 @@ class Field(Label):
         if target.error is not None:
            res['error'] = """ <span class="error">(%s)</span>""" % (target.error,)
         res['target'] = Webwidgets.Utils.path_to_id(targetPath)
-        return """<div %(attr_html_attributes)s>
-                   <label for="%(target)s">
-                    %(label)s%(error)s:
-                   </label>
-                   <span class="field">
-                    %(field)s
-                   </span>
-                  </div>
-                  """ % res
+        try:
+            return """<div %(attr_html_attributes)s>
+                       <label for="%(target)s">
+                        %(label)s%(error)s:
+                       </label>
+                       <span class="field">
+                        %(field)s
+                       </span>
+                      </div>
+                      """ % res
+        except KeyError, e:
+            e.args = (self, self.path) + e.args
+            raise e
 
 class Fieldgroup(List):
     pre = "<div %(attr_html_attributes)s>"
