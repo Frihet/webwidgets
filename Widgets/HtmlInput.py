@@ -46,9 +46,9 @@ webwidgets_add_event_handler(
  function()
   {
    var oFCKeditor = new FCKeditor('%(widget_id)s');
-   oFCKeditor.BasePath = "%(widgetUrl)s/" ;
+   oFCKeditor.BasePath = "%(widget_url)s/" ;
    oFCKeditor.ReplaceTextarea() ;
   });
   """ % {'widget_id': widget_id,
-         'widgetUrl': self.calculate_url({'widget_class': 'Webwidgets.HtmlInput'}, {})})
+         'widget_url': self.calculate_url({'widget_class': 'Webwidgets.HtmlInput'}, {})})
         return super(HtmlInput, self).draw(output_options)

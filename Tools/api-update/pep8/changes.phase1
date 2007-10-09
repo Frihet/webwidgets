@@ -68,3 +68,15 @@ baseOptions base_options
 baseCls base_cls
 accessLists access_lists
 getAccessList get_access_list
+debugImport debug_import
+debugSendNotification debug_send_notification
+hiddenCols hidden_cols
+fieldValue field_value
+resName res_name
+inputLevel input_level
+fileEditor file_editor
+rowsExpanded rows_expanded
+rowsCollapsed rows_collapsed
+pageId page_id
+dictComponent dict_component
+commonPrefix common_prefix

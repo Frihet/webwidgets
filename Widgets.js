@@ -53,7 +53,7 @@ function webwidgets_submit_button_iefix() {
   if (buttons[i].type == "submit")
    if (buttons[i] != event.srcElement)
     buttons[i].parentNode.removeChild(buttons[i]);
- event.srcElement.innerText = webwidgets_values['fieldValue_' + event.srcElement.id];
+ event.srcElement.innerText = webwidgets_values['field_value_' + event.srcElement.id];
 }
 
 function webwidgets_iefix_load() {

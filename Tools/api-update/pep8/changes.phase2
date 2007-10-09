@@ -150,3 +150,5 @@ __inputSubordinates__ __input_subordinates__
 __inputDominants__ __input_dominants__
 __htmlAttributes__ __html_attributes__
 GBOList Table
+tabBlur tab_blur
+tabFocus tab_focus

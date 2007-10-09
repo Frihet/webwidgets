@@ -275,10 +275,10 @@ class FileInput(Base.ValueInput, Base.StaticComposite):
     """File upload box"""
     value = None
     
-    def field_input(self, path, fieldValue):
+    def field_input(self, path, field_value):
         if path == self.path:
-            if fieldValue != '':
-                self.value = fieldValue
+            if field_value != '':
+                self.value = field_value
                 
     def field_output(self, path):
         return [self.value]

@@ -94,7 +94,7 @@ class Dialog(Formatting.Html):
 
 class Tree(Base.Input):
     """Expandable tree widget similar to the tree-view in Nautilus or
-    Windows Explorer. The tree must support the renderTree() protocol."""
+    Windows Explorer. The tree must support the render_tree() protocol."""
     
     def __init__(self, session, win_id, **attrs):
         Base.Widget.__init__(self, session, win_id, **attrs)
@@ -102,7 +102,7 @@ class Tree(Base.Input):
     # FIXME: Hardcoded URL!
     pict_url = 'pictures/'
     pict_pattern = 'grime.%(name)s.png'
-    pictIcon = ((('doc', '[=]'),
+    pict_icon = ((('doc', '[=]'),
                  ('doc', '[=]')),
                 (('dir', '\\_\\'),
                  ('dir.open', '\\_/')))            
@@ -121,41 +121,41 @@ class Tree(Base.Input):
     def draw(self, output_options):
         path = self.path
         
-        def renderEntry(node, sibling, res, indent=''):
-            siblings = node.parent and len(node.parent.subNodes) or 1
-            subNodes = len(node.subNodes)
+        def render_entry(node, sibling, res, indent=''):
+            siblings = node.parent and len(node.parent.sub_nodes) or 1
+            sub_nodes = len(node.sub_nodes)
 
             res = (res or '') + '<div class="Tree-Row">' + indent
             res += '<span class="%s">' % ['Tree-ShadedNode', 'Tree-Node'][node.leaf]
 
             node_path = path + ['node'] + node.path
             
-            expander_img, expander_alt = self.pict_expander[subNodes > 0 or not node.updated
+            expander_img, expander_alt = self.pict_expander[sub_nodes > 0 or not node.updated
                                                          ][node.expanded
                                                            ][sibling == siblings - 1]
             expand_params = {'src': self.pict_url + self.pict_pattern % {'name':expander_img},
                             'alt': expander_alt,
                             'attr_html_id': Webwidgets.Utils.path_to_id(node_path + ['expand']),
                             'path': node_path + ['expand']}
-            if subNodes or not node.updated:
+            if sub_nodes or not node.updated:
                 self.register_input(expand_params[path])
                 res += '<input type="image" name="%(attr_html_id)s" value="%(attr_html_id)s" src="%(src)s" alt="%(alt)s" id="%(attr_html_id)s" />' % expand_params
             else:
                 res += '<img src="%(src)s" alt="%(alt)s" id="%(attr_html_id)s" />' % expand_params
 
-            select_img, select_alt = self.pictIcon[subNodes > 0][node.expanded]
+            select_img, select_alt = self.pict_icon[sub_nodes > 0][node.expanded]
             select_params = {'img_path': node_path + ['select_img'],
                             'img_id': Webwidgets.Utils.path_to_id(node_path + ['select_img']),
                             'img_src': self.pict_url + self.pict_pattern % {'name':select_img},
                             'img_alt': select_alt,
-                            'label_path': node_path + ['selectLabel'],
-                            'label_id': Webwidgets.Utils.path_to_id(node_path + ['selectLabel'])}
+                            'label_path': node_path + ['select_label'],
+                            'label_id': Webwidgets.Utils.path_to_id(node_path + ['select_label'])}
             if node.translation is not None:
                 select_params['label_text'] = str(unicode(node.translation))
             elif node.path:
                 select_params['label_text'] = str(unicode(node.path[-1]))
             else:
-                select_params['label_text'] = str(unicode(getattr(self.tree, 'rootName', 'Root')))
+                select_params['label_text'] = str(unicode(getattr(self.tree, 'root_name', 'Root')))
                 
             if node.leaf:
                 self.register_input(select_params['img_path'])
@@ -176,18 +176,18 @@ class Tree(Base.Input):
 
         return '<div class="Tree" id="%s">%s\n</div>\n' % (
             Webwidgets.Utils.path_to_id(path),
-            self.tree.renderTree(renderEntry, '    '))
+            self.tree.render_tree(render_entry, '    '))
 
     def value_changed(self, path, value):
         if path != self.path: return
         if value is '': return
-        subPath = path[path.index('node')+1:-1]
+        sub_path = path[path.index('node')+1:-1]
         action = path[-1]
         
         if action == 'expand':
-            self.tree.expandPath(subPath, 1)
-        elif action in ('selectLabel', 'select_img'):
-            self.notify('selected', subPath)
+            self.tree.expand_path(sub_path, 1)
+        elif action in ('select_label', 'select_img'):
+            self.notify('selected', sub_path)
 
     def selected(self, path, item):
         print '%s.selected(%s, %s)' % ('.'.join([str(x) for x in self.path]), '.'.join(path), '.'.join(item))
@@ -227,7 +227,7 @@ class TabbedView(Base.ActionInput, Tabset):
     holding some other widget, through wich a user can browse using
     the tabs."""
     argument_name = None
-    oldPage = None
+    old_page = None
     page = None
 
     def field_input(self, path, string_value):
@@ -246,11 +246,11 @@ class TabbedView(Base.ActionInput, Tabset):
     def page_changed(self, path, page):
         """Notification that the user has changed page."""
         if path != self.path: return
-        if self.oldPage is not None:
-            self.get_widget_by_path(self.oldPage).notify('tabBlur')
+        if self.old_page is not None:
+            self.get_widget_by_path(self.old_page).notify('tab_blur')
         if self.page is not None:
-            self.get_widget_by_path(self.page).notify('tabFocus')
-        self.oldPage = self.page
+            self.get_widget_by_path(self.page).notify('tab_focus')
+        self.old_page = self.page
 
     def draw_tabs(self, output_options):
         active = self.register_input(self.path, self.argument_name)

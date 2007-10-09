@@ -55,7 +55,7 @@ def sort_to_classes(sort, column):
             break
     return ' '.join(classes)
 
-def sort_to_orderBy(sort, quote = "`"):
+def sort_to_order_by(sort, quote = "`"):
     order = []
     for key, dir in sort:
         assert column_allowed_name_re.match(key) is not None
@@ -73,8 +73,8 @@ def extend_to_dependent_columns(columns, dependent_columns):
 def reverse_dependency(dependent_columns):
     res = {}
     for main, dependent in dependent_columns.iteritems():
-        for dependentColumn in dependent:
-            res[dependentColumn] = main
+        for dependent_column in dependent:
+            res[dependent_column] = main
     return res
 
 class ChildNodeCells(Base.ChildNodes):
@@ -168,7 +168,7 @@ class Table(Base.ActionInput, Base.Composite):
     non_memory_storage = False
     dont_merge_widgets = True
     dont_merge_columns = ()
-    oldSort = []
+    old_sort = []
     rows_per_page = 10
     """This attribute is not used internally by the widget, but is
     intended to be used by the user-provide reread() method."""
@@ -191,7 +191,7 @@ class Table(Base.ActionInput, Base.Composite):
         If you set non_memory_storage to True, you _must_ override this
         method with your own sorter/loader function.
         """
-        def rowCmp(row1, row2):
+        def row_cmp(row1, row2):
             for col, order in self.sort:
                 diff = cmp(row1[col], row2[col])
                 if diff:
@@ -199,9 +199,9 @@ class Table(Base.ActionInput, Base.Composite):
                 return diff
             return 0
         
-        if self.sort != self.oldSort:
-            self.rows.sort(rowCmp)
-            self.oldSort = self.sort
+        if self.sort != self.old_sort:
+            self.rows.sort(row_cmp)
+            self.old_sort = self.sort
 
     def sort_changed(self, path, sort):
         """Notification that the list sort order has changed."""
@@ -246,59 +246,59 @@ class Table(Base.ActionInput, Base.Composite):
     def field_input(self, path, string_value):
         widget_path = self.path
         try:
-            subWidget = self.path_to_subwidget_path(path)
+            sub_widget = self.path_to_subwidget_path(path)
         except Webwidgets.Constants.NotASubwidgetException:
             return
         
-        if subWidget == ['sort']:
+        if sub_widget == ['sort']:
             if string_value != '':
                 self.sort = string_to_sort(string_value)
-        elif subWidget == ['page']:
+        elif sub_widget == ['page']:
             if string_value != '':
                 self.page = int(string_value)
-        elif subWidget[0] == 'function':
+        elif sub_widget[0] == 'function':
             if string_value != '':
-                self.notify('function', subWidget[1], int(string_value))
-        elif subWidget[0] == 'group_function':
+                self.notify('function', sub_widget[1], int(string_value))
+        elif sub_widget[0] == 'group_function':
             if string_value != '':
-                self.notify('group_function', subWidget[1])
+                self.notify('group_function', sub_widget[1])
     
     def field_output(self, path):
         widget_path = self.path
-        subWidget = self.path_to_subwidget_path(path)
+        sub_widget = self.path_to_subwidget_path(path)
         
-        if subWidget == ['sort']:
+        if sub_widget == ['sort']:
             return [sort_to_string(self.sort)]
-        elif subWidget == ['page']:
+        elif sub_widget == ['page']:
             return [unicode(self.page)]
-        elif subWidget[0] == 'function':
+        elif sub_widget[0] == 'function':
             return []
-        elif subWidget[0] == 'group_function':
+        elif sub_widget[0] == 'group_function':
             return []
         else:
-            raise Exception('Unknown sub-widget %s in %s' %(subWidget, widget_path))
+            raise Exception('Unknown sub-widget %s in %s' %(sub_widget, widget_path))
 
     def get_active(self, path):
         """@return: Whether the widget is allowing input from the user
         or not.
         """
         widget_path = self.path
-        subWidget = self.path_to_subwidget_path(path)
+        sub_widget = self.path_to_subwidget_path(path)
 
         if not self.active: return False
 
-        if subWidget == ['sort'] or subWidget == ['page']:
+        if sub_widget == ['sort'] or sub_widget == ['page']:
             return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, path)
-        elif subWidget[0] == 'column':
+        elif sub_widget[0] == 'column':
             return self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, path)
-        elif subWidget[0] == 'function':
-            if subWidget[1] in self.disabled_functions: return False
+        elif sub_widget[0] == 'function':
+            if sub_widget[1] in self.disabled_functions: return False
             return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, path)
-        elif subWidget[0] == 'group_function':
-            if subWidget[1] in self.disabled_functions: return False
+        elif sub_widget[0] == 'group_function':
+            if sub_widget[1] in self.disabled_functions: return False
             return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, path)
         else:
-            raise Exception('Unknown sub-widget %s in %s' %(subWidget, widget_path))
+            raise Exception('Unknown sub-widget %s in %s' %(sub_widget, widget_path))
 
     def visible_columns(self):
         # Optimisation: we could have used get_active and constructed a path...
@@ -336,16 +336,16 @@ class Table(Base.ActionInput, Base.Composite):
             rows = []
             children = len(node['children'])
             for child in xrange(0, children):
-                subFirst = first_level
-                subLast = last_level
+                sub_first = first_level
+                sub_last = last_level
                 if child != 0:
-                    subFirst += 1
+                    sub_first += 1
                 if child != children - 1:
-                    subLast += 1
+                    sub_last += 1
                 rows.extend(self.draw_tree(node['children'][child],
                                           output_options,
                                           group_order, visible_columns,
-                                          subFirst, subLast))
+                                          sub_first, sub_last))
         else:
             rows = []
             for row in xrange(0, node['rows']):
@@ -371,11 +371,11 @@ class Table(Base.ActionInput, Base.Composite):
             self.session.windows[self.win_id].arguments[self.argument_name + '_page'] = {
                 'widget':self, 'path': self.path + ['_', 'page']}
 
-        pageId = Webwidgets.Utils.path_to_id(self.path + ['_', 'page'])
+        page_id = Webwidgets.Utils.path_to_id(self.path + ['_', 'page'])
         page_active = self.get_active(self.path + ['_', 'page'])
         if page_active:
-            self.session.windows[self.win_id].fields[pageId] = self
-        info = {'attr_html_id': pageId,
+            self.session.windows[self.win_id].fields[page_id] = self
+        info = {'attr_html_id': page_id,
                 'first': 1,
                 'previous': self.page - 1,
                 'page': self.page,
@@ -537,13 +537,13 @@ class Table(Base.ActionInput, Base.Composite):
         else:
             rows = self.get_rows()
         if rows:
-            renderedRows = self.draw_tree(self.rows_to_tree(rows, group_order),
+            rendered_rows = self.draw_tree(self.rows_to_tree(rows, group_order),
                                          output_options,
                                          group_order, visible_columns)
         else:
-            renderedRows = []
+            rendered_rows = []
 
-        self.append_functions(renderedRows, headings, output_options)
+        self.append_functions(rendered_rows, headings, output_options)
 
         return """
 <div %(attr_html_attributes)s>
@@ -551,7 +551,7 @@ class Table(Base.ActionInput, Base.Composite):
  %(buttons)s
 </div>
 """ % {'attr_html_attributes': self.draw_html_attributes(self.path),
-       'table': self.draw_table(headings, renderedRows, output_options),
+       'table': self.draw_table(headings, rendered_rows, output_options),
        'buttons': self.draw_buttons(output_options)
        }
 

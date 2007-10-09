@@ -183,7 +183,7 @@
 	<cfscript>
 	var sParams = "";
 	var key = "";
-	var fieldValue = "";
+	var field_value = "";
 	var fieldLabel = "";
 	var lConfigKeys = "";
 	var iPos = "";
@@ -223,16 +223,16 @@
 			if( len( sParams ) )
 				sParams = sParams & "&amp;";
 
-			fieldValue = this.config[key];
+			field_value = this.config[key];
 			field_name = listGetAt( lConfigKeys, iPos );
 
 			// set all boolean possibilities in CFML to true/false values
-			if( isBoolean( fieldValue) and fieldValue )
-				fieldValue = "true";
-			else if( isBoolean( fieldValue) )
-				fieldValue = "false";
+			if( isBoolean( field_value) and field_value )
+				field_value = "true";
+			else if( isBoolean( field_value) )
+				field_value = "false";
 
-			sParams = sParams & HTMLEditFormat( field_name ) & '=' & HTMLEditFormat( fieldValue );
+			sParams = sParams & HTMLEditFormat( field_name ) & '=' & HTMLEditFormat( field_value );
 		}
 	}
 	return sParams;

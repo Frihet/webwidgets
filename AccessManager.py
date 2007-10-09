@@ -38,7 +38,7 @@ class AccessManager(object):
         return True
 
 class ListAccessManager(AccessManager):
-    debugLists = False
+    debug_lists = False
     
     def debug_print_path(self, operation_path, result):
         if self.debug:
@@ -58,7 +58,7 @@ class ListAccessManager(AccessManager):
                 if result is None:
                     marker = '==>'
                     result = rule_result
-            if self.debugLists:
+            if self.debug_lists:
                 scope = ''
                 if rule_scope is Constants.SUBTREE: scope = '.*'
                 print "AccessManager:  %s %s: %s%s" % (

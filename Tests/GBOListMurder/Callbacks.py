@@ -23,7 +23,7 @@ import Webwidgets
 import datetime
 
 Webwidgets.Program.Session.debug_fields = False
-Webwidgets.Program.Session.debugSendNotification = False
+Webwidgets.Program.Session.debug_send_notification = False
 
 class MyWindow(object):
     class body(object):
@@ -40,7 +40,7 @@ class MyWindow(object):
             def value_changed(self, path, value):
                 #print "Change %s: %s" % (path, repr(value))
                 self.changed = True
-                Webwidgets.GBOList.value_changed(self, path, value)
+                Webwidgets.Table.value_changed(self, path, value)
             
         class Add(object):
             def clicked(self, path):

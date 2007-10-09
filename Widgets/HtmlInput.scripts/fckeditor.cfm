@@ -148,10 +148,10 @@ else
 				if( len( sConfig ) )
 					sConfig = sConfig & "&amp;";
 
-				fieldValue = attributes.config[key];
+				field_value = attributes.config[key];
 				field_name = listGetAt( lConfigKeys, iPos );
 
-				sConfig = sConfig & urlEncodedFormat( field_name ) & '=' & urlEncodedFormat( fieldValue );
+				sConfig = sConfig & urlEncodedFormat( field_name ) & '=' & urlEncodedFormat( field_value );
 			}
 		}
 	</cfscript>

@@ -610,10 +610,10 @@ class Input(Widget):
                     dominants = dominants.union(base.__input_dominants__)
             members['_input_level'] = max([0] + [sub._input_level
                                                 for sub in subordinates]) + 1
-            def raise_dominants(dominants, inputLevel):
+            def raise_dominants(dominants, input_level):
                 for dom in dominants:
-                    if dom._input_level <= inputLevel:
-                        dom._input_level = inputLevel + 1
+                    if dom._input_level <= input_level:
+                        dom._input_level = input_level + 1
                         raise_dominants(dom.__input_dominants__, dom._input_level)
             raise_dominants(dominants, members['_input_level'])
             members['__input_subordinates__'] = subordinates
@@ -844,7 +844,7 @@ class HtmlWindow(Window, StaticComposite):
         result['base'] = self.session.program.request_base()
 
         for (all1, name1, value1, all2, value2, name2) in self.findallvalues.findall(result['body']):
-            self.register_value('fieldValue' + '_' + (name1 or name2), (value1 or value2))
+            self.register_value('field_value' + '_' + (name1 or name2), (value1 or value2))
 
         result['head_content'] = '\n'.join(self.head_content.values())
         

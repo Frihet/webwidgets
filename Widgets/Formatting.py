@@ -180,12 +180,12 @@ class Media(Base.Widget):
 
     def get_renderer(self, renderer):
         mime_type = getattr(self.content, 'type', None)
-        resName = renderer + '_default'
+        res_name = renderer + '_default'
         if mime_type is not None:
             name = renderer + "_" + mime_type.replace("/", "__").replace("-", "_")
             if hasattr(self, name):
-                resName = name
-        return getattr(self, resName)
+                res_name = name
+        return getattr(self, res_name)
 
     def calculate_output_url(self, part = 'content'):
         return self.calculate_url({'widget': Webwidgets.Utils.path_to_id(self.path), 'part':part})
@@ -306,12 +306,12 @@ class Label(Base.StaticComposite):
             target = self.target
         else:
             target = self + self.target
-        targetPath = target.path
+        target_path = target.path
         res = self.draw_children(output_options, include_attributes = True)
         res['error'] = ''
         if target.error is not None:
            res['error'] = """ <span class="error">(%s)</span>""" % (target._(target.error, output_options),)
-        res['target'] = Webwidgets.Utils.path_to_id(targetPath)
+        res['target'] = Webwidgets.Utils.path_to_id(target_path)
         try:
             return """<label %(attr_html_attributes)s for="%(target)s">%(label)s%(error)s</label>""" % res
         except KeyError, e:
@@ -329,12 +329,12 @@ class Field(Label):
             target = self.target
         else:
             target = self + ['field'] + self.target
-        targetPath = target.path
+        target_path = target.path
         res = self.draw_children(output_options, include_attributes = True)
         res['error'] = ''
         if target.error is not None:
            res['error'] = """ <span class="error">(%s)</span>""" % (target.error,)
-        res['target'] = Webwidgets.Utils.path_to_id(targetPath)
+        res['target'] = Webwidgets.Utils.path_to_id(target_path)
         try:
             return """<div %(attr_html_attributes)s>
                        <label for="%(target)s">

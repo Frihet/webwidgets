@@ -209,7 +209,7 @@ class RelativePath(object):
         self_levels = child_levels = min(self_levels, child_levels)
 
         # self and child paths are now rooted at the same place
-        prefix_len = len(Grimoire.Utils.commonPrefix(self_path, child_path))
+        prefix_len = len(Grimoire.Utils.common_prefix(self_path, child_path))
         path = self_path[prefix_len:]
         levels = len(child_path) - prefix_len
         return type(self)(path, levels)        
@@ -276,8 +276,8 @@ def load_class(name, using = [], imp = None, global_dict = None, local_dict = No
                 component = dict_components[0]
                 del dict_components[0]
             mod = getattr(mod, component)
-            for dictComponent in dict_components:
-                mod = mod[dictComponent]
+            for dict_component in dict_components:
+                mod = mod[dict_component]
         return mod
 
     for pkg in using:

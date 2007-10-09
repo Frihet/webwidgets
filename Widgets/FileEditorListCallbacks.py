@@ -3,21 +3,21 @@ import Webwidgets
 class Value(object):
     empty = ''
     def __get__(self, instance, owner):
-        if not instance or instance.fileEditor is None:
+        if not instance or instance.file_editor is None:
             return None
-        if instance.fileEditor.value is None:
+        if instance.file_editor.value is None:
             return self.empty
-        if not hasattr(instance.fileEditor.value, self.attribute):
-            setattr(instance.fileEditor.value, self.attribute, '')
-        return getattr(instance.fileEditor.value, self.attribute)
+        if not hasattr(instance.file_editor.value, self.attribute):
+            setattr(instance.file_editor.value, self.attribute, '')
+        return getattr(instance.file_editor.value, self.attribute)
     def __set__(self, instance, value):
-        if instance.fileEditor.value is not None :
-            setattr(instance.fileEditor.value, self.attribute, value)
+        if instance.file_editor.value is not None :
+            setattr(instance.file_editor.value, self.attribute, value)
 
 class FileEditorList(object):
     class NameInput(Webwidgets.StringInput):
         __explicit_load__ = True
-        fileEditor = None
+        file_editor = None
         
         class NameValue(Value):
             attribute = 'filename'
@@ -26,16 +26,16 @@ class FileEditorList(object):
 
     class DescriptionInput(Webwidgets.StringInput):
         __explicit_load__ = True
-        fileEditor = None
+        file_editor = None
         cols = 40
-        rowsExpanded = 10
-        rowsCollapsed = 1
+        rows_expanded = 10
+        rows_collapsed = 1
 
         class Rows(object):
             def __get__(self, instance, owner):
-                if not instance or instance.fileEditor is None:
+                if not instance or instance.file_editor is None:
                     return None
-                return [instance.rowsCollapsed, instance.rowsExpanded][instance.fileEditor.expanded]
+                return [instance.rows_collapsed, instance.rows_expanded][instance.file_editor.expanded]
         rows = Rows()
         
         class DescriptionValue(Value):
@@ -43,11 +43,11 @@ class FileEditorList(object):
         value = DescriptionValue()
 
     def add_row(self, file = None):
-        fileEditor = self.FileEditor(self.session, self.win_id, value = file)
+        file_editor = self.FileEditor(self.session, self.win_id, value = file)
         self.rows.append({
-            'name': self.NameInput(self.session, self.win_id, fileEditor = fileEditor),
-            'description': self.DescriptionInput(self.session, self.win_id, fileEditor = fileEditor),
-            'file': fileEditor
+            'name': self.NameInput(self.session, self.win_id, file_editor = file_editor),
+            'description': self.DescriptionInput(self.session, self.win_id, file_editor = file_editor),
+            'file': file_editor
             })
 
     def group_function(self, path, function):

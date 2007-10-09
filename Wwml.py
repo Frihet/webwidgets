@@ -53,13 +53,13 @@ def generate_parts_for_node(module, node, using = [], class_path = [], bind_cont
                 if child.localName == 'variable':
                      texts.append("%(" + child.attributes.get('id').value + ")s")
                 elif child.localName == 'pre':
-                    subAttrs, subText = generate_parts_for_node(module, child, using, class_path, bind_context, html_context)
-                    attributes.extend(subAttrs)
-                    attributes.append((':pre', subText))
+                    sub_attrs, sub_text = generate_parts_for_node(module, child, using, class_path, bind_context, html_context)
+                    attributes.extend(sub_attrs)
+                    attributes.append((':pre', sub_text))
                 elif child.localName == 'post':
-                    subAttrs, subText = generate_parts_for_node(module, child, using, class_path, bind_context, html_context)
-                    attributes.extend(subAttrs)
-                    attributes.append((':post', subText))
+                    sub_attrs, sub_text = generate_parts_for_node(module, child, using, class_path, bind_context, html_context)
+                    attributes.extend(sub_attrs)
+                    attributes.append((':post', sub_text))
                 else:
                     id, classid, value = generate_value_for_node(module, child, using, class_path, bind_context)
                     if isinstance(value, types.TypeType):
@@ -70,7 +70,7 @@ def generate_parts_for_node(module, node, using = [], class_path = [], bind_cont
                     attributes.append((classid, value))
             elif child.namespaceURI == 'http://www.w3.org/TR/REC-html40':
                 child_attributes_values = dict(child.attributes.items())
-                childAttributes, childTexts = generate_parts_for_node(
+                child_attributes, child_texts = generate_parts_for_node(
                     module,
                     child,
                     using,
@@ -96,11 +96,11 @@ def generate_parts_for_node(module, node, using = [], class_path = [], bind_cont
                                   for item
                                   in child_attributes_values.iteritems()])
                     texts.append(">\n")
-                    texts.append(childTexts)
+                    texts.append(child_texts)
                     texts.append("</")
                     texts.append(child.localName)
                     texts.append(">\n")
-                attributes.extend(childAttributes)
+                attributes.extend(child_attributes)
     return attributes, ''.join(texts)
 
 def generate_value(type_name, text, attributes, module, using, class_path, bind_context):
