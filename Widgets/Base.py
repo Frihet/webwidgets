@@ -88,8 +88,8 @@ class Widget(object):
                 cls_name = []
                 if '__module__' in members:
                     cls_name.append(members['__module__'])
-                if '__classPath__' in members and members['__classPath__']:
-                    cls_name.append(members['__classPath__'])
+                if '__class_path__' in members and members['__class_path__']:
+                    cls_name.append(members['__class_path__'])
                 cls_name.append(name)
                 classes.append('.'.join(cls_name))
             if '__no_classes_name__' in members:
