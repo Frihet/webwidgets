@@ -129,7 +129,7 @@ class RelativePath(object):
     Example: 3/foo/bar/fie means go three levels up, then down along
     the branch foo and bar and end up at the node fie.
     """
-    def __new__(cls, path, levels = 0, pathAsList = False):
+    def __new__(cls, path, levels = 0, path_as_list = False):
         """Create a new RelativePath instance. There are three formats
         for creating RelativePath instances:
 
@@ -162,7 +162,7 @@ class RelativePath(object):
         self.levels = levels
         self.path = list(path)
 
-        if pathAsList and self.levels == 0:
+        if path_as_list and self.levels == 0:
             return self.path
         return self
         
