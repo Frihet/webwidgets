@@ -146,9 +146,9 @@ class pytest(Webwidgets.Program):
                     </table>"""
 
                     class Listing(Webwidgets.List):
-                        __explicit_load__ = True
+                        ww_explicit_load = True
                         class Entry(Webwidgets.Html):
-                            __explicit_load__ = True
+                            ww_explicit_load = True
                             html = """
                             <tr>
                              <td>

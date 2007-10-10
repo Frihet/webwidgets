@@ -109,7 +109,7 @@ class NewPasswordInput(Formatting.Html, Base.ValueInput):
         self.children['input2'] = self.Input(session, win_id, value=self.value)
 
     class Input(PasswordInput):
-        __explicit_load__ = True
+        ww_explicit_load = True
         
         def value_changed(self, path, value):
             if self.parent['input1'].value == self.parent['input2'].value:

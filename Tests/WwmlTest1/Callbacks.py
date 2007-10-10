@@ -72,9 +72,9 @@ class MyWindow(object):
 
         class Dirlisting(object):
             class Listing(object):
-                __explicit_load__ = True
+                ww_explicit_load = True
                 class Entry(object):
-                    __explicit_load__ = True
+                    ww_explicit_load = True
                     def __init__(self, session, win_id, type, name, dates):
                         Webwidgets.Html.__init__(
                             self,

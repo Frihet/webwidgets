@@ -68,10 +68,10 @@ class Dialog(Formatting.Html):
     """
 
     class Buttons(Formatting.List):
-        __explicit_load__ = True
+        ww_explicit_load = True
 
         class Button(Input.Button):
-            __explicit_load__ = True
+            ww_explicit_load = True
             def clicked(self, path):
                 self.parent.parent.notify('selected', self.value)
                 raise StopIteration

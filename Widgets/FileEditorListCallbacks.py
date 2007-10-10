@@ -16,7 +16,7 @@ class Value(object):
 
 class FileEditorList(object):
     class NameInput(Webwidgets.StringInput):
-        __explicit_load__ = True
+        ww_explicit_load = True
         file_editor = None
         
         class NameValue(Value):
@@ -25,7 +25,7 @@ class FileEditorList(object):
         value = NameValue()
 
     class DescriptionInput(Webwidgets.StringInput):
-        __explicit_load__ = True
+        ww_explicit_load = True
         file_editor = None
         cols = 40
         rows_expanded = 10

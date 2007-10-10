@@ -141,7 +141,7 @@ class Widget(Object):
     explanation of notifications.
     """
     
-    __explicit_load__ = False
+    ww_explicit_load = False
     """Controls wether the widget class is automatically instantiated
     when the parent widget is instantiated."""
 
@@ -590,7 +590,7 @@ class StaticComposite(Composite):
     When instantiated, any class variables holding widget instances
     are added to the instance member variable L{children}. In
     addition, any class variables holding widget ww_classes (that do not
-    have L{__explicit_load__} set to False) are instantiated
+    have L{ww_explicit_load} set to False) are instantiated
     automatically and then added to L{children}.
     """
 
@@ -610,7 +610,7 @@ class StaticComposite(Composite):
         for name in dir(self):
             if name in ('__class__', 'parent', 'window'): continue
             value = getattr(self, name)
-            if isinstance(value, type) and issubclass(value, Widget) and not value.__explicit_load__:
+            if isinstance(value, type) and issubclass(value, Widget) and not value.ww_explicit_load:
                 child_classes.append((name, value))
             elif isinstance(value, Widget):
                 self.children[name] = value

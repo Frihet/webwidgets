@@ -158,7 +158,7 @@ def generate_value(type_name, text, attributes, module, using, class_path, bind_
                     del attributes[':post']
                     
             if 'id' not in attributes:
-                attributes['__explicit_load__'] = True
+                attributes['ww_explicit_load'] = True
             if '__wwml_html_override__' not in attributes:
                 attributes['__wwml_html_override__'] = False
             attributes['__module__'] = module.__name__
