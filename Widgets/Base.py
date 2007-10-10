@@ -40,32 +40,45 @@ class Type(type):
         members = dict(members)
         classes = []
 
-        if '__no_classes_name__' not in members or not members['__no_classes_name__']:
-            cls_name = []
-            if '__module__' in members:
-                cls_name.append(members['__module__'])
-            if '__class_path__' in members and members['__class_path__']:
-                cls_name.append(members['__class_path__'])
-            cls_name.append(name)
-            classes.append('.'.join(cls_name))
-        if '__no_classes_name__' in members:
-            del members['__no_classes_name__'] # No inheritance! This is a magic marker, not an attribute
+        # This dictionary contains data specific to this class, that
+        # can not be inherited.
+        if '__class_data__' not in members:
+            members['__class_data__'] = {}
+        members['__class_data__'] = {}
 
+        if members.get('__no_classes_name__', False):
+            members['__class_data__']['__no_classes_name__'] = True
+            del members['__no_classes_name__']
+
+        members['classes'] = []
+        if not members['__class_data__'].get('__no_classes_name__', False):
+            members['classes'].append(None) # Our own one is set later on
         for base in bases:
             if hasattr(base, 'classes'):
-                classes.extend(base.classes)
-        members['classes'] = tuple(classes)
+                members['classes'].extend(base.classes)
 
         members['class_order_nr'] = cls.class_order_nr.next()
 
         def set_class_path(widget, path = ()):
             widget.__class_path__ = '.'.join(path)
+            widget.update_classes()
+            sub_path = path + (widget.__name__,)
             for key, value in widget.__dict__.iteritems():
                 if isinstance(value, cls):
-                    set_class_path(value, path + (key,))
+                    set_class_path(value, sub_path)
             return widget
 
         return set_class_path(type.__new__(cls, name, bases, members))
+
+    def update_classes(self):
+        if not self.__class_data__.get('__no_classes_name__', False):
+            cls_name = []
+            if hasattr(self, '__module__'):
+                cls_name.append(self.__module__)
+            if getattr(self, '__class_path__', ''):
+                cls_name.append(self.__class_path__)
+            cls_name.append(self.__name__)
+            self.classes[0] = '.'.join(cls_name)
 
 class Object(object):
     """Object is a more elaborate version of object, providing a few
@@ -600,7 +613,6 @@ class StaticComposite(Composite):
         child_classes.sort(lambda x, y: cmp(x[1].class_order_nr, y[1].class_order_nr))
         
         for (name, value) in child_classes:
-            print "NANANANANA", name
             self.children[name] = value(session, win_id)
 
     def get_children(self):
