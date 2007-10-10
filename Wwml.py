@@ -20,7 +20,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 """This module implements a new, XML-based syntax for defining widgets
-- Wwml. It has no public classes, functions or members. Instead, when
+- Wwml. It has no public ww_classes, functions or members. Instead, when
 loaded, Wwml-files can be imported using the ordinary Python methods
 of importing modules, e.g.
 

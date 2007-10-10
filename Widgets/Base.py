@@ -24,7 +24,7 @@
 
 This module contains a set of base widgets that can be usedv to define
 the user-interface of an application. In addition, it contains some
-generic base classes that can be used when implementing more elaborate
+generic base ww_classes that can be used when implementing more elaborate
 widgets.
 """
 
@@ -34,34 +34,35 @@ import Webwidgets.Utils.FileHandling
 import Webwidgets.Utils.Threads
 
 class Type(type):
-    class_order_nr = Webwidgets.Utils.Threads.Counter()
+    ww_class_order_nr = Webwidgets.Utils.Threads.Counter()
 
     def __new__(cls, name, bases, members):
         members = dict(members)
-        classes = []
+        ww_classes = []
 
         # This dictionary contains data specific to this class, that
         # can not be inherited.
-        if '__class_data__' not in members:
-            members['__class_data__'] = {}
-        members['__class_data__'] = {}
+        if 'ww_class_data' not in members:
+            members['ww_class_data'] = {}
+        members['ww_class_data'] = {}
 
-        if members.get('__no_classes_name__', False):
-            members['__class_data__']['__no_classes_name__'] = True
-            del members['__no_classes_name__']
+        for key in members.keys():
+            if key.startswith('class_data_'):
+                members['ww_class_data'][key[len('class_data_'):]] = members[key]
+                del members[key]
 
-        members['classes'] = []
-        if not members['__class_data__'].get('__no_classes_name__', False):
-            members['classes'].append(None) # Our own one is set later on
+        members['ww_classes'] = []
+        if not members['ww_class_data'].get('ww_class_data__no_classes_name', False):
+            members['ww_classes'].append(None) # Our own one is set later on
         for base in bases:
-            if hasattr(base, 'classes'):
-                members['classes'].extend(base.classes)
+            if hasattr(base, 'ww_classes'):
+                members['ww_classes'].extend(base.ww_classes)
 
-        members['class_order_nr'] = cls.class_order_nr.next()
+        members['ww_class_order_nr'] = cls.ww_class_order_nr.next()
 
         def set_class_path(widget, path = ()):
-            widget.__class_path__ = '.'.join(path)
-            widget.update_classes()
+            widget.ww_class_path = '.'.join(path)
+            widget.update_ww_classes()
             sub_path = path + (widget.__name__,)
             for key, value in widget.__dict__.iteritems():
                 if isinstance(value, cls):
@@ -70,43 +71,43 @@ class Type(type):
 
         return set_class_path(type.__new__(cls, name, bases, members))
 
-    def update_classes(self):
-        if not self.__class_data__.get('__no_classes_name__', False):
+    def update_ww_classes(self):
+        if not self.ww_class_data.get('ww_class_data__no_classes_name', False):
             cls_name = []
             if hasattr(self, '__module__'):
                 cls_name.append(self.__module__)
-            if getattr(self, '__class_path__', ''):
-                cls_name.append(self.__class_path__)
+            if getattr(self, 'ww_class_path', ''):
+                cls_name.append(self.ww_class_path)
             cls_name.append(self.__name__)
-            self.classes[0] = '.'.join(cls_name)
+            self.ww_classes[0] = '.'.join(cls_name)
 
 class Object(object):
     """Object is a more elaborate version of object, providing a few
     extra utility methods, and some extra "magic" class attributes -
-    L{classes}, L{class_order_nr} and L{__class_path__}."""
+    L{ww_classes}, L{ww_class_order_nr} and L{ww_class_path}."""
     
     __metaclass__ = Type
 
-    __no_classes_name__ = False
-    """Do not include the name of this particular class in L{classes}
-    for subclasses of this class (and for this class itself)."""
+    ww_class_data__no_classes_name = False
+    """Do not include the name of this particular class in L{ww_classes}
+    for subww_classes of this class (and for this class itself)."""
 
-    classes = ("Webwidgets.Widget",)
+    ww_classes = ("Webwidgets.Widget",)
     """Read-only attribute containing a list of the names of all
-    inherited classes except ones with L{__no_classes_name__} set to
+    inherited ww_classes except ones with L{ww_class_data__no_classes_name} set to
     True. This is mainly usefull for automatic CSS class generation."""
 
-    class_order_nr = 0
+    ww_class_order_nr = 0
     """Read-only attribute containing a sequence number for the class,
     similar too id(class), but guaranteed to be monotonically
     increasing, so that a class created after another one will have a
     greater number than the other one."""
 
-    __class_path__ = ''
+    ww_class_path = ''
     """The path between the module (__module__) and the class
-    (__name__). For classes that are created directly in the module
-    scope, this is the empty string. For classes created as members of
-    some ther class, this is the __class_path__ and __name__ of that
+    (__name__). For ww_classes that are created directly in the module
+    scope, this is the empty string. For ww_classes created as members of
+    some ther class, this is the ww_class_path and __name__ of that
     other class joined. The path is dot-separated."""
 
     def __init__(self, **attrs):
@@ -127,7 +128,7 @@ class Widget(Object):
     notifications.
 
     The class name collection system gathers the names of all
-    base-classes for a class and uses these to construct a string
+    base-ww_classes for a class and uses these to construct a string
     suitable for use in an HTML 'class' attribute.
 
     See L{Webwidgets.Program.Program.Session.notify} for an
@@ -139,7 +140,7 @@ class Widget(Object):
     when the parent widget is instantiated."""
 
     html_class = 'Webwidgets-Widget'
-    """Read-only attribute containing the information in L{classes}
+    """Read-only attribute containing the information in L{ww_classes}
     but in a format suitable for inclusion in the 'class' attribute in
     HTML."""
 
@@ -190,11 +191,11 @@ class Widget(Object):
 
     class HtmlClass(object):
         def __get__(self, instance, owner):
-            classes = owner.classes
+            ww_classes = owner.ww_classes
             if instance:
-                classes = instance.classes
+                ww_classes = instance.ww_classes
             return ' '.join([c.replace('.', '-')
-                             for c in classes])
+                             for c in ww_classes])
     html_class = HtmlClass()
 
     class HtmlAttributes(object):
@@ -442,8 +443,8 @@ class Widget(Object):
 
     def __unicode__(self):
         class_path = type(self).__module__
-        if getattr(type(self), '__class_path__', ''):
-            class_path += '.' + type(self).__class_path__
+        if getattr(type(self), 'ww_class_path', ''):
+            class_path += '.' + type(self).ww_class_path
         class_path += '.' + type(self).__name__
         return "<%(class_path)s/%(path)s at %(id)s>" % {'class_path': class_path,
                                                         'path': Webwidgets.Utils.path_to_id(self.path, accept_None = True),
@@ -470,7 +471,7 @@ class Text(Widget):
     """
 
     __wwml_html_override__ = True
-    """Let Wwml-defined subclasses override the html attribute"""
+    """Let Wwml-defined subww_classes override the html attribute"""
 
     html = ""
 
@@ -514,7 +515,7 @@ class ChildNodes(Webwidgets.Utils.OrderedDict):
 class Composite(Widget):
     """Base class for all composite widgets, handling the drawing of
     children and the visibility attribute of children."""
-    __no_classes_name__ = True
+    ww_class_data__no_classes_name = True
     def __init__(self, session, win_id, **attrs):
         super(Composite, self).__init__(
             session, win_id, **attrs)
@@ -584,12 +585,12 @@ class StaticComposite(Composite):
 
     When instantiated, any class variables holding widget instances
     are added to the instance member variable L{children}. In
-    addition, any class variables holding widget classes (that do not
+    addition, any class variables holding widget ww_classes (that do not
     have L{__explicit_load__} set to False) are instantiated
     automatically and then added to L{children}.
     """
 
-    __no_classes_name__ = True
+    ww_class_data__no_classes_name = True
     
     def __init__(self, session, win_id, **attrs):
         super(StaticComposite, self).__init__(
@@ -601,18 +602,18 @@ class StaticComposite(Composite):
         # their order of creation, which if created through the Python
         # class statement, is the same as their textual order :)
         
-        child_classes = []
+        child_ww_classes = []
         for name in dir(self):
             if name in ('__class__', 'parent', 'window'): continue
             value = getattr(self, name)
             if isinstance(value, type) and issubclass(value, Widget) and not value.__explicit_load__:
-                child_classes.append((name, value))
+                child_ww_classes.append((name, value))
             elif isinstance(value, Widget):
                 self.children[name] = value
                 
-        child_classes.sort(lambda x, y: cmp(x[1].class_order_nr, y[1].class_order_nr))
+        child_ww_classes.sort(lambda x, y: cmp(x[1].ww_class_order_nr, y[1].ww_class_order_nr))
         
-        for (name, value) in child_classes:
+        for (name, value) in child_ww_classes:
             self.children[name] = value(session, win_id)
 
     def get_children(self):

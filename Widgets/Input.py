@@ -38,7 +38,7 @@ class ArgumentInput(Base.ValueInput):
     not named by any other input field, respectively.
 
     As those two fields have to be defined, L{Window} defines two
-    children that are subclasses of this class for this purpose. If
+    children that are subww_classes of this class for this purpose. If
     you need to implement these two widgets somwhere else in the
     widget tree, you must replace those two widgets with something
     else, e.g. the empty string.

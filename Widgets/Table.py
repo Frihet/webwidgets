@@ -46,14 +46,14 @@ def string_to_sort(str):
 def sort_to_string(sort):
     return '.'.join(['-'.join(key) for key in sort])
 
-def sort_to_classes(sort, column):
-    classes = []
+def sort_to_ww_classes(sort, column):
+    ww_classes = []
     for level, (key, order) in enumerate(sort):
         if key == column:
-            classes.append('column_sort_order_' + order)
-            classes.append('column_sort_level_' + str(level))
+            ww_classes.append('column_sort_order_' + order)
+            ww_classes.append('column_sort_level_' + str(level))
             break
-    return ' '.join(classes)
+    return ' '.join(ww_classes)
 
 def sort_to_order_by(sort, quote = "`"):
     order = []
@@ -460,18 +460,18 @@ class Table(Base.ActionInput, Base.Composite):
                     'column': column,
                     'disabled': ['disabled="disabled"', ''][sort_active],
                     'caption': self._(title, output_options),
-                    'classes': sort_to_classes(self.sort, reverse_dependent_columns.get(column, column)),
+                    'ww_classes': sort_to_ww_classes(self.sort, reverse_dependent_columns.get(column, column)),
                     'sort': sort_to_string(set_sort(self.sort, reverse_dependent_columns.get(column, column)))
                     }
             if 'printable_version' in output_options:
                 headings.append("""
-<th id="%(attr_html_id)s-_-head-%(column)s" class="column %(classes)s">
+<th id="%(attr_html_id)s-_-head-%(column)s" class="column %(ww_classes)s">
  <span id="%(attr_html_id)s-_-sort-%(column)s">%(caption)s</span>
 </th>
 """ % info)
             else:
                 headings.append("""
-<th id="%(attr_html_id)s-_-head-%(column)s" class="column %(classes)s">
+<th id="%(attr_html_id)s-_-head-%(column)s" class="column %(ww_classes)s">
  <button type="submit" id="%(attr_html_id)s-_-sort-%(column)s" %(disabled)s name="%(attr_html_id)s-_-sort" value="%(sort)s">%(caption)s</button>
 </th>
 """ % info)

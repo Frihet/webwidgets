@@ -1,0 +1,17 @@
+function replace () {
+ grep -rl "$1" . |
+ grep -v "\.svn" |
+ grep -v "\.scripts" |
+ grep -v "api-update" |
+ while read name; do
+  echo $name
+  sed -e "s+$1+$2+g" < "$name" > "$name.new"
+  mv "$name.new" "$name"
+ done
+}
+
+function replace_all () {
+ while read old new; do
+  replace "$old" "$new"
+ done
+}

@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 A webwidgets application consists of a subclass of
 L{Webwidgets.Program.Program}, in a file named as the subclass, in a
-Webware context, and an interface defined using subclasses of the
+Webware context, and an interface defined using subww_classes of the
 various widgets from L{Webwidgets.Widgets}.
 
 Example application (in test.py):

@@ -20,7 +20,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-"""Miscelanous classes and functions needed to implement the rest of
+"""Miscelanous ww_classes and functions needed to implement the rest of
 Webwidgets and in implementing new widgets and other objects.
 """
 

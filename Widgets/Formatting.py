@@ -31,7 +31,7 @@ class List(Base.StaticComposite):
     """Concatenates all children in name order, drawing the "sep"
     string inbetween each and the "pre" and "post" strings before and
     after the whole list, respectively."""
-    __no_classes_name__ = True
+    ww_class_data__no_classes_name = True
     pre = sep = post = ''
     frame = '%(child)s'
     
@@ -65,8 +65,8 @@ class Html(Base.Text, Base.StaticComposite):
     for CSS styling).
     """
     
-    __no_classes_name__ = True
-    """Don't include the classname of this class in L{classes}."""
+    ww_class_data__no_classes_name = True
+    """Don't include the classname of this class in L{ww_classes}."""
 
     top_level = None
 
@@ -88,7 +88,7 @@ class Div(Html):
     """Adds a single div with the widget id as id around the single
     child "child"
     """
-    __no_classes_name__ = True
+    ww_class_data__no_classes_name = True
     __wwml_html_override__ = False
     html = """<div %(attr_html_attributes)s>%(child)s</div>"""
 
@@ -96,7 +96,7 @@ class Span(Html):
     """Adds a single span with the widget id as id around the single
     child "child"
     """
-    __no_classes_name__ = True
+    ww_class_data__no_classes_name = True
     __wwml_html_override__ = False
     html = """<span %(attr_html_attributes)s>%(child)s</span>"""
 

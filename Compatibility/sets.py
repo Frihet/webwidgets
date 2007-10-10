@@ -14,7 +14,7 @@ their elements have a definite order; sets on the other hand don't
 record multiple occurrences and don't remember the order of element
 insertion (which is why they don't support s[i]).
 
-The following classes are provided:
+The following ww_classes are provided:
 
 BaseSet -- All the operations common to both mutable and immutable
     sets. This is an abstract class, not meant to be directly
