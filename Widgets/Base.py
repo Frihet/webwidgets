@@ -62,7 +62,7 @@ class Type(type):
 
         def set_class_path(widget, path = ()):
             widget.ww_class_path = '.'.join(path)
-            widget.update_ww_classes()
+            widget.ww_update_classes()
             sub_path = path + (widget.__name__,)
             for key, value in widget.__dict__.iteritems():
                 if isinstance(value, cls):
@@ -71,7 +71,7 @@ class Type(type):
 
         return set_class_path(type.__new__(cls, name, bases, members))
 
-    def update_ww_classes(self):
+    def ww_update_classes(self):
         if not self.ww_class_data.get('ww_class_data__no_classes_name', False):
             cls_name = []
             if hasattr(self, '__module__'):
@@ -121,6 +121,12 @@ class Object(object):
     def derive(cls, name = None, **members):
         return types.TypeType(name or 'anonymous', (cls,), members)
     derive = classmethod(derive)
+
+    def __str__(self):
+        return str(unicode(self))
+
+    def __repr__(self):
+        return str(self)
 
 class Widget(Object):
     """Widget is the base class for all widgets. It manages class name
@@ -409,13 +415,13 @@ class Widget(Object):
 
         return ()
 
-    def __get_translations__(cls, languages, fallback = False):
+    def _get_translations(cls, languages, fallback = False):
         if not hasattr(cls, '__translations__'): cls.__translations__ = {}
         if languages not in cls.__translations__:
             obj = Webwidgets.Utils.Gettext.NullTranslations()
             for base in cls.__bases__:
-                if hasattr(base, '__get_translations__'):
-                    obj = base.__get_translations__(languages, fallback = obj)
+                if hasattr(base, '_get_translations'):
+                    obj = base._get_translations(languages, fallback = obj)
             module = sys.modules[cls.__module__]
             if hasattr(module, '__file__'):
                 localedir = os.path.splitext(module.__file__)[0] + '.translations'
@@ -426,12 +432,12 @@ class Widget(Object):
                     fallback = obj)
             cls.__translations__[languages] = obj
         return cls.__translations__[languages]
-    __get_translations__ = classmethod(__get_translations__)
+    _get_translations = classmethod(_get_translations)
 
     def get_translations(self, output_options, languages = None):
         if languages is None:
             languages = self.get_languages(output_options)
-        return self.__get_translations__(languages)
+        return self._get_translations(languages)
 
     def _(self, message, output_options):
         # Optimize a bit...
@@ -449,12 +455,6 @@ class Widget(Object):
         return "<%(class_path)s/%(path)s at %(id)s>" % {'class_path': class_path,
                                                         'path': Webwidgets.Utils.path_to_id(self.path, accept_None = True),
                                                         'id': id(self)}
-
-    def __str__(self):
-        return str(unicode(self))
-
-    def __repr__(self):
-        return str(self)
 
     def __add__(self, other):
         return self.get_widget_by_path(other)
@@ -490,9 +490,9 @@ class ChildNodes(Webwidgets.Utils.OrderedDict):
         """
         self.node = node
         super(ChildNodes, self).__init__(*arg, **kw)
-        self.__ensure__()
+        self.ensure()
 
-    def __ensure__(self):
+    def ensure(self):
         for name, value in self.iteritems():
             if isinstance(value, Widget):
                 if self.node is value:
@@ -502,15 +502,15 @@ class ChildNodes(Webwidgets.Utils.OrderedDict):
 
     def __setitem__(self, *arg, **kw):
         super(ChildNodes, self).__setitem__(*arg, **kw)
-        self.__ensure__()
+        self.ensure()
 
     def update(self, *arg, **kw):
         super(ChildNodes, self).update(*arg, **kw)
-        self.__ensure__()
+        self.ensure()
 
     def setdefault(self, *arg, **kw):
         super(ChildNodes, self).setdefault(*arg, **kw)
-        self.__ensure__()
+        self.ensure()
 
 class Composite(Widget):
     """Base class for all composite widgets, handling the drawing of
@@ -602,18 +602,18 @@ class StaticComposite(Composite):
         # their order of creation, which if created through the Python
         # class statement, is the same as their textual order :)
         
-        child_ww_classes = []
+        child_classes = []
         for name in dir(self):
             if name in ('__class__', 'parent', 'window'): continue
             value = getattr(self, name)
             if isinstance(value, type) and issubclass(value, Widget) and not value.__explicit_load__:
-                child_ww_classes.append((name, value))
+                child_classes.append((name, value))
             elif isinstance(value, Widget):
                 self.children[name] = value
                 
-        child_ww_classes.sort(lambda x, y: cmp(x[1].ww_class_order_nr, y[1].ww_class_order_nr))
+        child_classes.sort(lambda x, y: cmp(x[1].ww_class_order_nr, y[1].ww_class_order_nr))
         
-        for (name, value) in child_ww_classes:
+        for (name, value) in child_classes:
             self.children[name] = value(session, win_id)
 
     def get_children(self):

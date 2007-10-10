@@ -46,7 +46,7 @@ def string_to_sort(str):
 def sort_to_string(sort):
     return '.'.join(['-'.join(key) for key in sort])
 
-def sort_to_ww_classes(sort, column):
+def sort_to_classes(sort, column):
     ww_classes = []
     for level, (key, order) in enumerate(sort):
         if key == column:
@@ -82,7 +82,7 @@ class ChildNodeCells(Base.ChildNodes):
         self.row = row
         super(ChildNodeCells, self).__init__(node, *arg, **kw)
 
-    def __ensure__(self):
+    def ensure(self):
         for name in self.iterkeys():
             value = self[name]
             if isinstance(value, type) and issubclass(value, Base.Widget):
@@ -95,44 +95,44 @@ class ChildNodeRows(list):
     def __init__(self, node, *arg, **kw):
         super(ChildNodeRows, self).__init__(*arg, **kw)
         self.node = node
-        self.__ensure__()
+        self.ensure()
     
-    def __ensure__(self):
+    def ensure(self):
         for index in xrange(0, len(self)):
             if not isinstance(self[index], ChildNodeCells) or self[index].row != index:
                 self[index] = ChildNodeCells(self.node, index, self[index])
 
     def __setitem__(self, *arg, **kw):
         super(ChildNodeRows, self).__setitem__(*arg, **kw)
-        self.__ensure__()
+        self.ensure()
 
     def __delitem__(self, *arg, **kw):
         super(ChildNodeRows, self).__delitem__(*arg, **kw)
-        self.__ensure__()
+        self.ensure()
 
     def __setslice__(self, *arg, **kw):
         super(ChildNodeRows, self).__setslice__(*arg, **kw)
-        self.__ensure__()
+        self.ensure()
 
     def extend(self, *arg, **kw):
         super(ChildNodeRows, self).extend(*arg, **kw)
-        self.__ensure__()
+        self.ensure()
 
     def append(self, *arg, **kw):
         super(ChildNodeRows, self).append(*arg, **kw)
-        self.__ensure__()
+        self.ensure()
 
     def insert(self, *arg, **kw):
         super(ChildNodeRows, self).insert(*arg, **kw)
-        self.__ensure__()
+        self.ensure()
 
     def reverse(self, *arg, **kw):
         super(ChildNodeRows, self).reverse(*arg, **kw)
-        self.__ensure__()
+        self.ensure()
     
     def sort(self, *arg, **kw):
         super(ChildNodeRows, self).sort(*arg, **kw)
-        self.__ensure__()
+        self.ensure()
   
 class Table(Base.ActionInput, Base.Composite):
     """Group By Ordering List is a special kind of table view that
@@ -460,7 +460,7 @@ class Table(Base.ActionInput, Base.Composite):
                     'column': column,
                     'disabled': ['disabled="disabled"', ''][sort_active],
                     'caption': self._(title, output_options),
-                    'ww_classes': sort_to_ww_classes(self.sort, reverse_dependent_columns.get(column, column)),
+                    'ww_classes': sort_to_classes(self.sort, reverse_dependent_columns.get(column, column)),
                     'sort': sort_to_string(set_sort(self.sort, reverse_dependent_columns.get(column, column)))
                     }
             if 'printable_version' in output_options:
