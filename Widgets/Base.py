@@ -445,8 +445,12 @@ class Widget(Object):
                                 types.BooleanType, types.NoneType,
                                 types.DictType, types.TupleType, types.ListType)):
             return str(message)
-        return self.get_translations(output_options)._(message)
-
+        try:
+            return self.get_translations(output_options)._(message)
+        except TypeError, e:
+            e.args = (self, str(message)) + e.args
+            raise e
+        
     def __unicode__(self):
         class_path = type(self).__module__
         if getattr(type(self), 'ww_class_path', ''):

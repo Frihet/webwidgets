@@ -51,9 +51,9 @@
   using="Webwidgets"
   bind="LogInCallbacks.LogOut"
   id="LogOut"
-  head="Really log out?"
+  head=":Text:Really log out?"
+  body=":Html:"
   >
-  <w:Html id="body" />
   <w:dict id="buttons">
    <w:string id="Log out">logout</w:string>
   </w:dict>
