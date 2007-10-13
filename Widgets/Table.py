@@ -508,7 +508,7 @@ class Table(Base.ActionInput, Base.Composite):
                     for function, title in self.functions.iteritems()])
                 rows[row_num].insert(function_position, functions)
     
-            headings.insert(function_position, '<th></th>')
+            headings.insert(function_position, '<th class="column">&nbsp;</th>')
 
     def draw_table(self, headings, rows, output_options):
         return "<table>%(headings)s%(content)s</table>" % {
