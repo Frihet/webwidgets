@@ -34,7 +34,6 @@
  border: solid 1px black;
  margin: 0;
  padding: 3px;
- background: #ffffff;
  font-size: 10pt;
  font-family: serif; 
  text-decoration: none;
@@ -42,12 +41,12 @@
 
 .Webwidgets-Widgets-Table-Table .buttons button,
 .Webwidgets-Widgets-Table-Table .buttons a {
- background: #000000;
- color: #ffffff;
+ background: #dd55ff;
+ color: #000000;
 }
 .Webwidgets-Widgets-Table-Table .buttons button[disabled=true] {
- background: #555555;
- color: #999999;
+ background: #bfbfff;
+ color: #000000;
 }
 
 .Webwidgets-Widgets-Table-Table th {
@@ -65,7 +64,7 @@
  height: 100%;
  font-variant: small-caps;
  font-weight: normal;
- background: #00ff00;
+ background: #ffffff;
 }
 .Webwidgets-Widgets-Table-Table th.column_sort_order_desc *:after {
  content: "(desc)";
@@ -74,60 +73,60 @@
  content: "(asc)";
 }
 .Webwidgets-Widgets-Table-Table th.column_sort_level_0 * {
- background: #ffffff;
+ background: #dd55ff;
  font-weight: bold;
 }
 .Webwidgets-Widgets-Table-Table th.column_sort_level_1 * {
- background: #eeffee;
+ background: #5555ff;
 }
 .Webwidgets-Widgets-Table-Table th.column_sort_level_2 * {
- background: #ddffdd;
+ background: #8dd35f;
 }
 .Webwidgets-Widgets-Table-Table th.column_sort_level_3 * {
- background: #ccffcc;
+ background: #f2bfff;
 }
 .Webwidgets-Widgets-Table-Table th.column_sort_level_4 * {
- background: #bbffbb;
+ background: #bfbfff;
 }
 .Webwidgets-Widgets-Table-Table th.column_sort_level_5 * {
- background: #aaffaa;
+ background: #b3d39e;
 }
 .Webwidgets-Widgets-Table-Table th.column_sort_level_6 * {
- background: #99ff99;
+ background: #ffffff;
 }
 .Webwidgets-Widgets-Table-Table th.column_sort_level_7 * {
- background: #88ff88;
+ background: #ffffff;
 }
 .Webwidgets-Widgets-Table-Table th.column_sort_level_8 * {
- background: #77ff77;
+ background: #ffffff;
 }
 
 .Webwidgets-Widgets-Table-Table td {
  vertical-align: top;
 }
 .Webwidgets-Widgets-Table-Table td.column_last_level_1 {
- border-bottom: solid 8px black;
+ border-bottom: solid 2px #dd55ff;
 }
 .Webwidgets-Widgets-Table-Table td.column_last_level_2 {
- border-bottom: solid 4px black;
+ border-bottom: solid 2px #5555ff;
 }
 .Webwidgets-Widgets-Table-Table td.column_last_level_3 {
- border-bottom: solid 2px black;
+ border-bottom: solid 2px #8dd35f;
 }
 .Webwidgets-Widgets-Table-Table td.column_last_level_4 {
- border-bottom: solid 1px black;
+ border-bottom: solid 1px #dd55ff;
 }
 .Webwidgets-Widgets-Table-Table td.column_last_level_5 {
- border-bottom: solid 1px #555555;
+ border-bottom: solid 1px #5555ff;
 }
 .Webwidgets-Widgets-Table-Table td.column_last_level_6 {
- border-bottom: solid 1px #666666;
+ border-bottom: solid 1px #8dd35f;
 }
 .Webwidgets-Widgets-Table-Table td.column_last_level_7 {
- border-bottom: solid 1px #777777;
+ border-bottom: dashed 1px #dd55ff;
 }
 .Webwidgets-Widgets-Table-Table td.column_last_level_8 {
- border-bottom: solid 1px #888888;
+ border-bottom: dashed 1px #5555ff;
 }
 .Webwidgets-Widgets-Table-Table td.functions {
  vertical-align: top;
@@ -137,6 +136,7 @@
  margin: 0px;
  border: 0px;
  font: inherit;
+ background: #ffffff;
 }
 
 
@@ -176,9 +176,18 @@ textarea {
 
 button {
  border: solid 1px black;
- margin: 0;
+ margin: 2;
  padding: 2px;
- background: #ffffff;
+ background: #f2bfff;
+ font-size: 10pt;
+ font-family: serif;
+}
+
+input[type=submit] {
+ border: solid 1px black;
+ margin: 2;
+ padding: 2px;
+ background: #f2bfff;
  font-size: 10pt;
  font-family: serif;
 }
@@ -193,14 +202,14 @@ select {
  font-family: serif;
 }
 
-.Webwidgets-Widgets-Input-NewPasswordInput {
+.Webwidgets-Widgets-Input-NewPasswordInput,
+.Webwidgets-Widgets-InputCombinations-AddressInput {
  display: block;
- width: 20%;
  border: solid;
  border-width: 1px;
  margin: 2px;
  padding: 2px;
- background-color: #ffffff;
+ background-color: #f2bfff;
 }
 
 .Webwidgets-Widgets-Input-NewPasswordInput input {
@@ -237,25 +246,25 @@ input.error {
  right: 20%;
  top: 20%;
  bottom: 20%;
- padding: 10px;
- border-top: 2px solid #666;
- border-left: 2px solid #666;
- border-bottom: 2px solid #333;
- border-right: 2px solid #333;
+ border: 1px solid black;
  position: asbolute;
  color: #000000;
- background-color: #eeeeee;
+ background-color: #ffffff;
 }
 
 .Webwidgets-Widgets-Composite-Dialog .dialog-head {
- border-bottom: 1px solid black;
+ background: #f2bfff;
+ border-bottom: 2px solid #dd55ff;
+ padding: 2px;
 }
 
 .Webwidgets-Widgets-Composite-Dialog .dialog-body {
+ padding: 10px;
 }
 
 .Webwidgets-Widgets-Composite-Dialog .dialog-buttons {
- border-top: 1px solid black;
+ border-top: 2px solid #dd55ff;
+ padding: 10px;
 }
 
 .Webwidgets-Widgets-CssFileEditor-CssFileEditor {
