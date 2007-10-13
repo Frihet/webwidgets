@@ -78,7 +78,7 @@ def generate_parts_for_node(module, node, using = [], class_path = [], bind_cont
                     bind_context,
                     html_context = html_context + [child_attributes_values.get('id', child.localName)])
                 if 'id' in child_attributes_values:
-                    child_attributes_values['id'] = "%(attr_html_id)s_" + "-".join(html_context + [child_attributes_values['id']])
+                    child_attributes_values['id'] = "%(html_id)s_" + "-".join(html_context + [child_attributes_values['id']])
                 if child.localName in ('br', ):
                     texts.append("<")
                     texts.append(child.localName)

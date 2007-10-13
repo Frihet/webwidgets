@@ -48,23 +48,23 @@ class DateInput(Input.StringInput, Base.DirectoryServer):
                                                    'location': ['calendar-setup.js']},
                                                   {}))
 
-        return '''<input %(attr_html_attributes)s name="%(name)s" value="%(value)s" autocomplete="off" %(disabled)s />
+        return '''<input %(html_attributes)s name="%(name)s" value="%(value)s" autocomplete="off" %(disabled)s />
        <script type="text/javascript">
          Calendar.setup(
            {
-             inputField  : "%(attr_html_id)s",
-             displayArea : "%(attr_html_id)s",
+             inputField  : "%(html_id)s",
+             displayArea : "%(html_id)s",
              ifFormat    : "%(format)s",
              daFormat    : "%(format)s",
-             button      : "%(attr_html_id)s"
+             button      : "%(html_id)s"
            }
          );
        </script>''' % {
-            'attr_html_attributes': self.draw_html_attributes(self.path),
+            'html_attributes': self.draw_html_attributes(self.path),
             'name': Webwidgets.Utils.path_to_id(self.path),
             'value': self.field_output(self.path)[0], 'format': self.format,
             'disabled': ['', 'disabled="disabled"'][not self.get_active(self.path)],
-            'attr_html_id': Webwidgets.Utils.path_to_id(self.path)}
+            'html_id': Webwidgets.Utils.path_to_id(self.path)}
 
 
     def field_input(self, path, string_value):

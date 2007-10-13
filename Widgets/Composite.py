@@ -54,14 +54,14 @@ class Dialog(Formatting.Html):
     __wwml_html_override__ = False
     buttons = {'Cancel': '0', 'Ok': '1'}
     html = """
-    <div %(attr_html_attributes)s>
-     <div class="dialog-head" id="%(attr_html_id)s-head">
+    <div %(html_attributes)s>
+     <div class="dialog-head" id="%(html_id)s-head">
       %(head)s
      </div>
-     <div class="dialog-body" id="%(attr_html_id)s-body">
+     <div class="dialog-body" id="%(html_id)s-body">
       %(body)s
      </div>
-     <div class="dialog-buttons" id="%(attr_html_id)s-buttons">
+     <div class="dialog-buttons" id="%(html_id)s-buttons">
       %(buttons)s
      </div>
     </div>
@@ -135,13 +135,13 @@ class Tree(Base.Input):
                                                            ][sibling == siblings - 1]
             expand_params = {'src': self.pict_url + self.pict_pattern % {'name':expander_img},
                             'alt': expander_alt,
-                            'attr_html_id': Webwidgets.Utils.path_to_id(node_path + ['expand']),
+                            'html_id': Webwidgets.Utils.path_to_id(node_path + ['expand']),
                             'path': node_path + ['expand']}
             if sub_nodes or not node.updated:
                 self.register_input(expand_params[path])
-                res += '<input type="image" name="%(attr_html_id)s" value="%(attr_html_id)s" src="%(src)s" alt="%(alt)s" id="%(attr_html_id)s" />' % expand_params
+                res += '<input type="image" name="%(html_id)s" value="%(html_id)s" src="%(src)s" alt="%(alt)s" id="%(html_id)s" />' % expand_params
             else:
-                res += '<img src="%(src)s" alt="%(alt)s" id="%(attr_html_id)s" />' % expand_params
+                res += '<img src="%(src)s" alt="%(alt)s" id="%(html_id)s" />' % expand_params
 
             select_img, select_alt = self.pict_icon[sub_nodes > 0][node.expanded]
             select_params = {'img_path': node_path + ['select_img'],
@@ -260,7 +260,7 @@ class TabbedView(Base.ActionInput, Tabset):
             tabs = []
             for name, (page, title, children) in pages.iteritems():
                 info = {'disabled': ['', 'disabled="disabled"'][page == self.page or not active],
-                        'attr_html_id': widget_id,
+                        'html_id': widget_id,
                         'page': Webwidgets.Utils.path_to_id(page),
                         'caption': title}
                 if children is None:
@@ -268,8 +268,8 @@ class TabbedView(Base.ActionInput, Tabset):
                                  <li><button
                                       type="submit"
                                       %(disabled)s
-                                      id="%(attr_html_id)s-_-%(page)s"
-                                      name="%(attr_html_id)s"
+                                      id="%(html_id)s-_-%(page)s"
+                                      name="%(html_id)s"
                                       value="%(page)s">%(caption)s</button></li>
                                 """ % info)
                 else:
@@ -284,13 +284,13 @@ class TabbedView(Base.ActionInput, Tabset):
         
     def draw(self, output_options):
         return """
-               <div %(attr_html_attributes)s>
+               <div %(html_attributes)s>
                 %(tabs)s
                 <div class="page">
                  %(page)s
                 </div>
                </div>
-               """ % {'attr_html_attributes': self.draw_html_attributes(self.path),
+               """ % {'html_attributes': self.draw_html_attributes(self.path),
                       'page': self.draw_child(self.get_widget_by_path(self.page).path, self.get_widget_by_path(self.page), output_options, True),
                       'tabs': self.draw_tabs(output_options)}
 
@@ -311,5 +311,5 @@ class Hide(Base.StaticComposite):
     def draw(self, path):
         self['child'].visible = self['hideButton'].value
         children = self.draw_children(path, invisible_as_empty=True, include_attributes=True)
-        return """<div %(attr_html_attributes)s>%(hideButton)s %(child)s</div>""" % children
+        return """<div %(html_attributes)s>%(hideButton)s %(child)s</div>""" % children
  

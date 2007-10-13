@@ -39,15 +39,15 @@ class List(Base.StaticComposite):
         children = self.draw_children(output_options)
         attributes = self.draw_attributes(output_options)
 
-        pre = attributes['attr_pre'] % attributes
-        sep = attributes['attr_sep'] % attributes
-        post = attributes['attr_post'] % attributes
+        pre = attributes['pre'] % attributes
+        sep = attributes['sep'] % attributes
+        post = attributes['post'] % attributes
 
-        return pre + sep.join([attributes['attr_frame'] % Webwidgets.Utils.subclass_dict(attributes, {'child': child})
+        return pre + sep.join([attributes['frame'] % Webwidgets.Utils.subclass_dict(attributes, {'child': child})
                                for name, child in children.iteritems()]) + post
 
 class BulletList(List):
-    pre = "<ul %(attr_html_attributes)s>"
+    pre = "<ul %(html_attributes)s>"
     sep = "\n"
     frame= "<li>%(child)s</li>"
     post = "</ul>"
@@ -60,7 +60,7 @@ class Html(Base.Text, Base.StaticComposite):
 
     @cvar html: The "html" attribute should contain HTML code with python format strings like
     %(name)s embedded. These should correspond to children of the html
-    widget, or if prefixed with 'attr_', to attributes. In addition
+    widget, or if prefixed with '', to attributes. In addition
     the special name"id" will insert the widget id (path) of the current widget, which is usefull
     for CSS styling).
     """
@@ -78,7 +78,7 @@ class Html(Base.Text, Base.StaticComposite):
         html = self._(self.html, output_options)
         try:
             if self.top_level is not None:
-                html = "<%(attr_top_level)s %(attr_html_attributes)s>" + html + "</%(attr_top_level)s>"
+                html = "<%(top_level)s %(html_attributes)s>" + html + "</%(top_level)s>"
             return html % children
         except KeyError, e:
             e.args = (self, self.path) + e.args + (self.html,)
@@ -90,7 +90,7 @@ class Div(Html):
     """
     ww_class_data__no_classes_name = True
     __wwml_html_override__ = False
-    html = """<div %(attr_html_attributes)s>%(child)s</div>"""
+    html = """<div %(html_attributes)s>%(child)s</div>"""
 
 class Span(Html):
     """Adds a single span with the widget id as id around the single
@@ -98,14 +98,14 @@ class Span(Html):
     """
     ww_class_data__no_classes_name = True
     __wwml_html_override__ = False
-    html = """<span %(attr_html_attributes)s>%(child)s</span>"""
+    html = """<span %(html_attributes)s>%(child)s</span>"""
 
 class Style(Html):
     """Includes the css style from the child "style"
     """
     __wwml_html_override__ = False
     class style(Base.Text): html = ''
-    html = """<style %(attr_html_attributes)s type='text/css'>%(style)s</style>"""
+    html = """<style %(html_attributes)s type='text/css'>%(style)s</style>"""
     
 class StyleLink(Html):
     """Includes the css style from the URL specified with the
@@ -115,7 +115,7 @@ class StyleLink(Html):
     style = ''
     """URI to the stylesheet to include."""
     title = ''
-    html = """<link %(attr_html_attributes)s href="%(attr_style)s" title="%(attr_title)s" rel="stylesheet" type="text/css" />"""
+    html = """<link %(html_attributes)s href="%(style)s" title="%(title)s" rel="stylesheet" type="text/css" />"""
 
 class Message(Html):
     """Informative message display. If no message is set, this widget
@@ -124,7 +124,7 @@ class Message(Html):
     class message(Base.Text): html = ''
     def draw(self, output_options):
         if self.children['message']:
-            self.html = '<div %(attr_html_attributes)s>%(message)s</div>'
+            self.html = '<div %(html_attributes)s>%(message)s</div>'
         else:
             self.html = ''
         return Html.draw(self, output_options)
@@ -220,8 +220,8 @@ class Media(Base.Widget):
         if self.content is None:
             return self.get_option('empty')
 
-        return """<a %(attr_html_attributes)s href="%(location)s">%(inline)s</a>""" % {
-            'attr_html_attributes': self.draw_html_attributes(self.path),
+        return """<a %(html_attributes)s href="%(location)s">%(inline)s</a>""" % {
+            'html_attributes': self.draw_html_attributes(self.path),
             'location': cgi.escape(self.calculate_output_url()),
             'inline': inline
             }
@@ -313,7 +313,7 @@ class Label(Base.StaticComposite):
            res['error'] = """ <span class="error">(%s)</span>""" % (target._(target.error, output_options),)
         res['target'] = Webwidgets.Utils.path_to_id(target_path)
         try:
-            return """<label %(attr_html_attributes)s for="%(target)s">%(label)s%(error)s</label>""" % res
+            return """<label %(html_attributes)s for="%(target)s">%(label)s%(error)s</label>""" % res
         except KeyError, e:
             e.args = (self, self.path) + e.args
             raise e
@@ -336,7 +336,7 @@ class Field(Label):
            res['error'] = """ <span class="error">(%s)</span>""" % (target.error,)
         res['target'] = Webwidgets.Utils.path_to_id(target_path)
         try:
-            return """<div %(attr_html_attributes)s>
+            return """<div %(html_attributes)s>
                        <label for="%(target)s">
                         %(label)s%(error)s:
                        </label>
@@ -350,7 +350,7 @@ class Field(Label):
             raise e
 
 class Fieldgroup(List):
-    pre = "<div %(attr_html_attributes)s>"
+    pre = "<div %(html_attributes)s>"
     post = "</div>\n"
 
 class GridLayout(Base.StaticComposite, GridLayoutModel.GridLayout):

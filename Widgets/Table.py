@@ -375,7 +375,7 @@ class Table(Base.ActionInput, Base.Composite):
         page_active = self.get_active(self.path + ['_', 'page'])
         if page_active:
             self.session.windows[self.win_id].fields[page_id] = self
-        info = {'attr_html_id': page_id,
+        info = {'html_id': page_id,
                 'first': 1,
                 'previous': self.page - 1,
                 'page': self.page,
@@ -388,15 +388,15 @@ class Table(Base.ActionInput, Base.Composite):
             
         return """
 <span class="left">
- <button type="submit" %(back_active)s id="%(attr_html_id)s-_-first" name="%(attr_html_id)s" value="%(first)s">&lt;&lt;</button>
- <button type="submit" %(back_active)s id="%(attr_html_id)s-_-previous" name="%(attr_html_id)s" value="%(previous)s">&lt;</button>
+ <button type="submit" %(back_active)s id="%(html_id)s-_-first" name="%(html_id)s" value="%(first)s">&lt;&lt;</button>
+ <button type="submit" %(back_active)s id="%(html_id)s-_-previous" name="%(html_id)s" value="%(previous)s">&lt;</button>
 </span>
 <span class="center">
  %(page)s/%(pages)s
 </span>
 <span class="right">
- <button type="submit" %(forward_active)s id="%(attr_html_id)s-_-next" name="%(attr_html_id)s" value="%(next)s">&gt;</button>
- <button type="submit" %(forward_active)s id="%(attr_html_id)s-_-last" name="%(attr_html_id)s" value="%(last)s">&gt;&gt;</button>
+ <button type="submit" %(forward_active)s id="%(html_id)s-_-next" name="%(html_id)s" value="%(next)s">&gt;</button>
+ <button type="submit" %(forward_active)s id="%(html_id)s-_-last" name="%(html_id)s" value="%(last)s">&gt;&gt;</button>
 </span>
 """ % info
 
@@ -420,12 +420,12 @@ class Table(Base.ActionInput, Base.Composite):
         return '\n'.join([
             """<button
                 type="submit"
-                id="%(attr_html_id)s"
-                class="%(attr_html_class)s"
+                id="%(html_id)s"
+                class="%(html_class)s"
                 %(disabled)s
-                name="%(attr_html_id)s"
-                value="selected">%(title)s</button>""" % {'attr_html_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'group_function', function]),
-                                                          'attr_html_class': function,
+                name="%(html_id)s"
+                value="selected">%(title)s</button>""" % {'html_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'group_function', function]),
+                                                          'html_class': function,
                                                           'disabled': ['disabled="disabled"', ''][function_active[function]],
                                                           'title': self._(title, output_options)}
             for function, title in self.group_functions.iteritems()])
@@ -456,7 +456,7 @@ class Table(Base.ActionInput, Base.Composite):
             self.session.windows[self.win_id].fields[input_id] = self
         for column, title in visible_columns.iteritems():
             info = {'input_id': input_id,
-                    'attr_html_id': widget_id,
+                    'html_id': widget_id,
                     'column': column,
                     'disabled': ['disabled="disabled"', ''][sort_active],
                     'caption': self._(title, output_options),
@@ -465,14 +465,14 @@ class Table(Base.ActionInput, Base.Composite):
                     }
             if 'printable_version' in output_options:
                 headings.append("""
-<th id="%(attr_html_id)s-_-head-%(column)s" class="column %(ww_classes)s">
- <span id="%(attr_html_id)s-_-sort-%(column)s">%(caption)s</span>
+<th id="%(html_id)s-_-head-%(column)s" class="column %(ww_classes)s">
+ <span id="%(html_id)s-_-sort-%(column)s">%(caption)s</span>
 </th>
 """ % info)
             else:
                 headings.append("""
-<th id="%(attr_html_id)s-_-head-%(column)s" class="column %(ww_classes)s">
- <button type="submit" id="%(attr_html_id)s-_-sort-%(column)s" %(disabled)s name="%(attr_html_id)s-_-sort" value="%(sort)s">%(caption)s</button>
+<th id="%(html_id)s-_-head-%(column)s" class="column %(ww_classes)s">
+ <button type="submit" id="%(html_id)s-_-sort-%(column)s" %(disabled)s name="%(html_id)s-_-sort" value="%(sort)s">%(caption)s</button>
 </th>
 """ % info)
         return headings
@@ -496,12 +496,12 @@ class Table(Base.ActionInput, Base.Composite):
                 functions = '<td class="functions">%s</td>' % ''.join([
                     """<button
                         type="submit"
-                        id="%(attr_html_id)s-%(row)s"
-                        class="%(attr_html_class)s"
+                        id="%(html_id)s-%(row)s"
+                        class="%(html_class)s"
                         %(disabled)s
-                        name="%(attr_html_id)s"
-                        value="%(row)s">%(title)s</button>""" % {'attr_html_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'function', function]),
-                                                                 'attr_html_class': function,
+                        name="%(html_id)s"
+                        value="%(row)s">%(title)s</button>""" % {'html_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'function', function]),
+                                                                 'html_class': function,
                                                                  'disabled': ['disabled="disabled"', ''][function_active[function]],
                                                                  'title': self._(title, output_options),
                                                                  'row': row_num}
@@ -546,11 +546,11 @@ class Table(Base.ActionInput, Base.Composite):
         self.append_functions(rendered_rows, headings, output_options)
 
         return """
-<div %(attr_html_attributes)s>
+<div %(html_attributes)s>
  %(table)s
  %(buttons)s
 </div>
-""" % {'attr_html_attributes': self.draw_html_attributes(self.path),
+""" % {'html_attributes': self.draw_html_attributes(self.path),
        'table': self.draw_table(headings, rendered_rows, output_options),
        'buttons': self.draw_buttons(output_options)
        }

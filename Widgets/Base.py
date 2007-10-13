@@ -282,9 +282,9 @@ class Widget(Object):
             if isinstance(value, (type, types.MethodType)):
                 continue
             try:
-                res['attr_' + key] = self._(value, output_options)
+                res[key] = self._(value, output_options)
             except:
-                res['attr_' + key] = str(value)
+                res[key] = str(value)
         return res
 
     def draw(self, output_options):
@@ -549,13 +549,14 @@ class Composite(Widget):
         
         res = Webwidgets.Utils.OrderedDict()
 
+        if include_attributes:
+            res.update(self.draw_attributes(output_options))
+
         for name, child in self.get_children():
             child = self.draw_child(self.path + [name], child, output_options, invisible_as_empty)
             if child is not None:
                 res[name] = child
 
-        if include_attributes:
-            res.update(self.draw_attributes(output_options))
         return res
 
     def get_children(self):
@@ -612,8 +613,6 @@ class StaticComposite(Composite):
             value = getattr(self, name)
             if isinstance(value, type) and issubclass(value, Widget) and not value.ww_explicit_load:
                 child_classes.append((name, value))
-            elif isinstance(value, Widget):
-                self.children[name] = value
                 
         child_classes.sort(lambda x, y: cmp(x[1].ww_class_order_nr, y[1].ww_class_order_nr))
         
@@ -903,8 +902,8 @@ class HtmlWindow(Window, StaticComposite):
   %(title)s
   %(head)s
  </head>
- <body %(attr_html_attributes)s>
-  <form name="%(name)s" method='post' enctype='multipart/form-data' action='%(uri)s' id="%(attr_html_id)s-_-body-form">
+ <body %(html_attributes)s>
+  <form name="%(name)s" method='post' enctype='multipart/form-data' action='%(uri)s' id="%(html_id)s-_-body-form">
    %(body)s
   </form>
  </body>
