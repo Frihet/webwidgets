@@ -190,21 +190,24 @@ class Program(WebKit.Page.Page):
                 return type(self)(self.widget.parent, self.message, self.args, self.kw, self.path)
 
             def process(self):
-                if self.widget.session.debug_receive_notification:
-                    print "Notifying %s" % self
-                try:
-                    if hasattr(self.widget, self.message):
-                        # Run the notification handler!
-                        if getattr(self.widget, self.message
-                                   )(self.path, *self.args, **self.kw):
-                            # FIXME: Workaround to support the old API!
-                            raise StopIteration()
+                if hasattr(self.widget, self.message):
                     if self.widget.session.debug_receive_notification:
-                        print "Notifying parent %s" % self.widget.parent
+                        print "Notifying %s (received)" % self
+                        print "Method: %s" % (getattr(self.widget, self.message),)
+                    try:
+                        getattr(self.widget, self.message
+                                )(self.path, *self.args, **self.kw)
+                    except StopIteration:
+                        return
+                else:
+                    if self.widget.session.debug_receive_notification:
+                        print "Notifying %s (ignored)" % self
+                if self.widget.session.debug_receive_notification:
+                    print "Notifying parent %s" % self.widget.parent
+                try:
                     return self.parent().process()
                 except StopIteration:
-                    # Notification consumed
-                    pass
+                    return
 
             def __repr__(self):
                 return "Notification(%s)" % (unicode(self),)
