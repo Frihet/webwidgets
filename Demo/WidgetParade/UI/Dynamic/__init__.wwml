@@ -22,29 +22,40 @@
  xmlns="http://www.w3.org/TR/REC-html40"
  xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
  xmlns:html="http://www.w3.org/TR/REC-html40"
- using="Webwidgets.Demo.WidgetParade.UI"
- bind="Webwidgets.Demo.WidgetParade.Callbacks"
+ using="Webwidgets.Demo.WidgetParade.UI.Dynamic"
+ bind="Webwidgets.Demo.WidgetParade.Callbacks.Dynamic"
  >
- <w:HtmlWindow
-  id="MyWindow"
-  title="RedBack Webwidgets demo application">
+ <w:Tabset id="Dynamic" title="Dynamic widgets">
+  <w:Html id="filelist" title="File list">
+   <table>
+    <tr><th>Type</th><th>Filename</th><th>Dates</th><th>Actions</th></tr>
+    <w:List id="Listing">
 
-  <w:Html id="body">
+     <w:Html classid="Entry">
+      <tr>
+       <td>
+	<w:variable id="type" />
+       </td>
+       <td>
+	<w:variable id="name" />
+       </td>
+       <td>
+	<w:variable id="dates" />
+       </td>
+       <td>
+	<w:Html id="actions">
+	 <w:Checkbox id="check" value="1" />
+	 <w:Label id="label" target="1/check">
+	  <w:Html id="label">Restore</w:Html>
+	 </w:Label>
+	</w:Html>
+       </td>
+      </tr>
+     </w:Html>
 
-   <w:Dialog id="SomeDialog" visible=":false">
-    <w:Html id="head" html="My dialog" />
-    <w:Html id="body" html="Click ok or cancel, please" />
-   </w:Dialog>
-
-   <w:MainMenu id="tabs" page=":path:home" title="Test app">
-    <w:Home.Home id="home" />
-    <w:Input.Input id="input" />
-    <w:Formatting.Formatting id="formatting" />
-    <w:Composite.Composite id="composite" />
-    <w:Dynamic.Dynamic id="dynamic" />
-    <w:Config.Config id="config" />
-   </w:MainMenu>
-
+    </w:List>
+   </table>
+   <w:Button id="UpdateFiles" title="Update Files" />
   </w:Html>
- </w:HtmlWindow>
+ </w:Tabset>
 </w:wwml>

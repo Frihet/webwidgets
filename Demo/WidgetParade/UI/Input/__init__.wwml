@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<!--
+ Webwidgets web developement framework example file
+ Copyright (C) 2006 uAnywhere, Egil Moeller <redhog@redhog.org>
+ Copyright (C) 2007 FreeCode AS, Egil Moeller <redhog@redhog.org>
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+-->
+<w:wwml
+ xmlns="http://www.w3.org/TR/REC-html40"
+ xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
+ xmlns:html="http://www.w3.org/TR/REC-html40"
+ using="Webwidgets.Demo.WidgetParade.UI.Input"
+ bind="Webwidgets.Demo.WidgetParade.Callbacks.Input"
+ >
+ <w:Tabset id="Input" title="Input">
+
+  <w:Html id="files" title="File editors">
+   <w:FileEditorList id="fileditorlisttest" />
+   <w:FileEditor id="fileditortest" />
+  </w:Html>
+
+
+  <w:Fieldgroup id="data" title="Data input">
+   <w:Field id="longtext" label=":Html:A longer text">
+    <w:StringInput id="field" cols=":integer:20" rows=":integer:10">
+     <w:string id="value">
+Hej allla barn,
+nu är det branprogram!
+Titta här skall ni få se vad farbror frej tar fram!
+     </w:string>
+    </w:StringInput>
+   </w:Field>
+   <w:Field id="lastpwd" label=":Html:Last password">
+    <w:Html id="field" error=":none" />
+   </w:Field>
+   <w:Field id='newpwd' label=':Text:New password'>
+    <w:NewPasswordInput id="field" value="foo" />
+   </w:Field>
+   <w:Field id="updatepwd" label=":Html:Update passwords">
+    <w:Html id="field" error=":none">
+     <w:Button id="pwdclear" title="Clear new password" />
+     <w:Button id="pwdset" title="Set new password" /><br />
+    </w:Html>
+   </w:Field>
+   <w:Field id="someDate" label=":Html:Some date">
+    <w:DateInput id="field" value=":time:1998-01-01 22:33:34" />
+   </w:Field>
+   <w:Field id="address" label=":Html:Some address">
+    <w:AddressInput id="field" error=":none" />
+   </w:Field>
+  </w:Fieldgroup>
+
+  <w:Tabset id="third" title="Third item">
+   <w:Html id="first" title="First sub item">
+    Mananana
+   </w:Html>
+
+   <w:Html id="second" title="Second sub item">
+    Mananana-mamanana
+   </w:Html>
+
+  </w:Tabset>
+ </w:Tabset>
+
+</w:wwml>

@@ -22,29 +22,12 @@
  xmlns="http://www.w3.org/TR/REC-html40"
  xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
  xmlns:html="http://www.w3.org/TR/REC-html40"
- using="Webwidgets.Demo.WidgetParade.UI"
- bind="Webwidgets.Demo.WidgetParade.Callbacks"
+ bind="Webwidgets.Tests.WwmlTest1.Callbacks.Config"
  >
- <w:HtmlWindow
-  id="MyWindow"
-  title="RedBack Webwidgets demo application">
-
-  <w:Html id="body">
-
-   <w:Dialog id="SomeDialog" visible=":false">
-    <w:Html id="head" html="My dialog" />
-    <w:Html id="body" html="Click ok or cancel, please" />
-   </w:Dialog>
-
-   <w:MainMenu id="tabs" page=":path:home" title="Test app">
-    <w:Home.Home id="home" />
-    <w:Input.Input id="input" />
-    <w:Formatting.Formatting id="formatting" />
-    <w:Composite.Composite id="composite" />
-    <w:Dynamic.Dynamic id="dynamic" />
-    <w:Config.Config id="config" />
-   </w:MainMenu>
-
+ <w:Tabset id="Config" title="Configuration">
+  <w:Html id="language" title="Language">
+   <div>Current language(s): <w:Widget id="language" /></div>
+   <div><w:LanguageSelector id="sel" /><w:UpdateButton id="update" /></div>
   </w:Html>
- </w:HtmlWindow>
+ </w:Tabset>
 </w:wwml>

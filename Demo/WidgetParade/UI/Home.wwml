@@ -22,29 +22,26 @@
  xmlns="http://www.w3.org/TR/REC-html40"
  xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
  xmlns:html="http://www.w3.org/TR/REC-html40"
- using="Webwidgets.Demo.WidgetParade.UI"
- bind="Webwidgets.Demo.WidgetParade.Callbacks"
+ bind="Webwidgets.Tests.WwmlTest1.Callbacks.Home"
  >
- <w:HtmlWindow
-  id="MyWindow"
-  title="RedBack Webwidgets demo application">
+ <w:Html id="Home" title="Home">
+  <w:Media id="logo" />
 
-  <w:Html id="body">
+  <h1>Welcome to the RedBack Webwidgets demo application</h1>
 
-   <w:Dialog id="SomeDialog" visible=":false">
-    <w:Html id="head" html="My dialog" />
-    <w:Html id="body" html="Click ok or cancel, please" />
-   </w:Dialog>
+  <p>This demo application shows off most of the standard widgets
+  that comes bundled with Webwidgets. It is both a good starting
+  point to shop for widgets, and to learn how to create a
+  Webwidgets application.</p>
 
-   <w:MainMenu id="tabs" page=":path:home" title="Test app">
-    <w:Home.Home id="home" />
-    <w:Input.Input id="input" />
-    <w:Formatting.Formatting id="formatting" />
-    <w:Composite.Composite id="composite" />
-    <w:Dynamic.Dynamic id="dynamic" />
-    <w:Config.Config id="config" />
-   </w:MainMenu>
+  <p>Use the menu at the top to navigate among the different kinds
+  of widgets.</p>
 
-  </w:Html>
- </w:HtmlWindow>
+  <h1>Some (helpful) links</h1>
+  <ul>
+   <li><a href="http://code.freecode.no/Projects/Webwidgets">The Webwidgets homepage</a></li>
+   <li><a href="http://freecode.no">Homepage FreeCode, the project sponsor</a></li>
+   <li><a href="http://redhog.org">Homepage RedHog, the original author</a></li>
+  </ul>
+ </w:Html>
 </w:wwml>
