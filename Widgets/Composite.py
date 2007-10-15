@@ -79,13 +79,16 @@ class Dialog(Formatting.Html):
         def __init__(self, session, win_id, buttons):
             super(Dialog.Buttons, self).__init__(
                 session, win_id,
-                **dict([(str(value), Dialog.Buttons.Button(session, win_id, title=title, value=value))
-                        for title, value in buttons.iteritems()]))
+                children = Webwidgets.Utils.OrderedDict(
+                    [(str(value),
+                      Dialog.Buttons.Button(session, win_id,
+                                            title=title, value=value))
+                     for title, value in buttons.iteritems()]))
         
     def __init__(self, session, win_id, **attrs):
         super(Formatting.Html, self).__init__(
             session, win_id,
-            buttons=self.Buttons(session, win_id, self.buttons),
+            children = {'buttons': self.Buttons(session, win_id, self.buttons)},
             **attrs)
 
     def selected(self, path, value):

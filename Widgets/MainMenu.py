@@ -52,7 +52,7 @@ var %(child_name)s_menu = new dhtmlXMenuBarPanelObject(%(parent_name)s_menu,%(ch
             return tabs
 
         return """
-                <div id="%(widget_id)s-_-menu" />
+                <div id="%(widget_id)s-_-menu"></div>
                 <input type="hidden" id="%(widget_id)s-_-value" name="%(widget_id)s" value="" />
                 <script language="javascript">
 function onButtonClick(itemId, itemValue) {

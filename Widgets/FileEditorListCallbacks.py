@@ -54,6 +54,7 @@ class FileEditorList(object):
         if path != self.path: return
         if function == 'add':
             self.add_row()
+            self.rows[-1]['file'].expanded = True
 
     def function(self, path, function, row):
         if path != self.path: return

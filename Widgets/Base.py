@@ -411,7 +411,10 @@ class Widget(Object):
         if hasattr(self, 'session'):
             if self.session.languages is not None:
                 return self.session.languages
-            return parse_languages(self.session.program.request().environ().get('HTTP_ACCEPT_LANGUAGE', 'en'))
+            try:
+                return parse_languages(self.session.program.request().environ().get('HTTP_ACCEPT_LANGUAGE', 'en'))
+            except:
+                return 'en'
 
         return ()
 

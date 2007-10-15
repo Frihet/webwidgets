@@ -28,24 +28,15 @@
 
 /*plain button state - top level*/
 .menuButton {
-	border : solid 1px #D4D0C8;
 }
 /*down button state - top level*/
 .menuButtondown {
-	background-color : #DBD8D1;
-	border-bottom : solid 1px #FFFFFF;
-	border-left : solid 1px #808080;
-	border-right : solid 1px #FFFFFF;
-	border-top : solid 1px #808080;
+	background-color : #dd55ff;
 	cursor : default;
 }
 /*mouse over button state - top level*/
 .menuButtonover {
-	background-color : #DBD8D1;
-	border-bottom : solid 1px #808080;
-	border-left : solid 1px #FFFFFF;
-	border-right : solid 1px #808080;
-	border-top : solid 1px #FFFFFF;
+	background-color: #dd55ff;
 	cursor : default;
 }
 /*plain button state - other levels*/
@@ -79,23 +70,20 @@
 
 /*manu panel - top level*/
 .menuTable{
-	background-color : #D4D0C8;
-	border-bottom : solid #808080 1px;
-	border-left : solid #FFFFFF 1px;
-	border-right : solid #808080 1px;
-	border-top : solid #d4d0c8 1px;
+	background-color : #f2bfff;
+	border-bottom : solid 2px #dd55ff;
 	margin : 0px;
 	-moz-user-select : none;
-	padding : 0px;
+	padding: 2px;
 	
 }
 /*menu panel - other levels*/
 .secondMenuTable{
-	background-color : #D4D0C8;
-	border: 2px outset #ffffff; 
+	background-color : #f2bfff;
+	border: 2px solid #dd55ff; 
 	margin : 0px;
 	-moz-user-select : none;
-	padding : 0px 1px 0px 2px;
+	padding: 2px;
 }
 
 /*devider - horizontal*/

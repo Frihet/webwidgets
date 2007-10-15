@@ -1,0 +1,16 @@
+Black: #000000
+White: #ffffff
+
+Light red: #f2bfff
+Light blue: #bfbfff
+Light green: #b3d39e
+
+Middle red: #dd55ff
+Middle blue: #5555ff
+Middle green: #8dd35f
+
+Strong red: #ff0000
+Strong blue: #0000ff
+Strong green: #00ff00
+
+Strong yellow: #ffff00
