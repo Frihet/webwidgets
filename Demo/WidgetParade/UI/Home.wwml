@@ -22,7 +22,7 @@
  xmlns="http://www.w3.org/TR/REC-html40"
  xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
  xmlns:html="http://www.w3.org/TR/REC-html40"
- bind="Webwidgets.Tests.WwmlTest1.Callbacks.Home"
+ bind="Webwidgets.Demo.WidgetParade.Callbacks.Home"
  >
  <w:Html id="Home" title="Home">
   <w:Media id="logo" />
