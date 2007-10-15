@@ -1,0 +1,175 @@
+<?xml version="1.0"?>
+<!--
+ Webwidgets web developement framework example file
+ Copyright (C) 2006 uAnywhere, Egil Moeller <redhog@redhog.org>
+ Copyright (C) 2007 FreeCode AS, Egil Moeller <redhog@redhog.org>
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+-->
+<w:wwml
+ xmlns="http://www.w3.org/TR/REC-html40"
+ xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
+ xmlns:html="http://www.w3.org/TR/REC-html40"
+ bind="Callbacks"
+ >
+ <w:HtmlWindow
+  id="MyWindow"
+  title="RedBack WebWidgets demo application">
+
+  <w:Html id="body">
+
+   <w:MainMenu id="tabs" page=":path:first" title="Test app">
+    <w:Tabset id="first" title="First menu">
+     <w:Html id="first" title="First item">
+      <w:FileEditorList id="fileditorlisttest" />
+      <w:FileEditor id="fileditortest" />
+     </w:Html>
+     <w:Html id="second" title="Second item">
+      <w:StringInput id="longtext" cols=":integer:20" rows=":integer:10">
+       <w:string id="value">
+ Hej allla barn,
+ nu är det branprogram!
+ Titta här skall ni få se vad farbror frej tar fram!
+       </w:string>
+      </w:StringInput>
+     </w:Html>
+     <w:Tabset id="third" title="Third item">
+      <w:Html id="first" title="First sub item">
+       Mananana
+      </w:Html>
+      <w:Html id="second" title="Second sub item">
+       Mananana-mamanana
+      </w:Html>
+     </w:Tabset>
+    </w:Tabset>
+    <w:Html id="second" title="Second menu">The third page</w:Html>
+   </w:MainMenu>
+
+   Last password: <w:Html id="lastpwd" /><br />
+   <w:Field id='newpwd' label=':Text:New password'><w:NewPasswordInput id="field" value="foo" /></w:Field>
+   <w:Button id="pwdclear" title="Clear new password" />
+   <w:Button id="pwdset" title="Set new password" /><br />
+
+   <div><w:Widget id="language" /></div>
+   <div><w:LanguageSelector id="sel" /></div>
+
+   <w:DateInput id="date" value=":time:1998-01-01 22:33:34" />
+
+   <!-- w:FileInput id="file" / -->
+
+   <w:Table id="ListTest" argument_name='test' rows_per_page=":integer:20">
+    <w:dict id="functions" copy="C" edit="E" delete="D" />
+    <w:dict id="group_functions" new="New" delete="Delete all" />
+    <w:odict id="columns">
+     <w:string id="foo">Fooish foo</w:string>
+     <w:string id="bar">Barbar</w:string>
+     <w:string id="fie">Fish</w:string>
+     <w:string id="x">X</w:string>
+     <w:string id="y">Y</w:string>
+     <w:string id="z">Z</w:string>
+    </w:odict>
+    <w:list id="dont_merge_columns"><w:string id="bar">bar</w:string></w:list>
+    <w:list id="rows">
+     <w:dict id="row1" foo="47" bar="11" fie="56" x="X" y="Y" z="Z" />
+     <w:dict id="row2" foo="47" bar="11" fie="56" x="X" y="Y" z="Z" />
+     <w:dict id="row3" foo="47" bar="12" fie="56" x="X" y="Y" z="Z" />
+     <w:dict id="row4" foo="47" bar="11" fie="56" x="X" y="Y" z="Z" />
+     <w:dict id="row5" foo="47" bar="11" fie="57" x="X" y="Y" z="Z" />
+     <w:dict id="row6" foo="48" bar="11" fie="57" x="X" y="Y" z="Z" />
+     <w:dict id="row7" foo="48" bar="11" fie="52" x="X" y="Y" z="Z" />
+     <w:dict id="row8" foo="Bertil" bar="Bengtsson" fie="57" x="X" y="Y" z="Z" />
+     <w:dict id="row9" x="X" y="Y" z="Z">
+      <w:StringInput id="foo" value="Anders" />
+      <w:StringInput id="bar" value="And" />
+      <w:StringInput id="fie" value="Mumum xxx" />
+     </w:dict>
+     <w:dict id="row10" x="X" y="Y" z="Z">
+      <w:StringInput id="foo" value="Cesar" />
+      <w:StringInput id="bar" value="And" />
+      <w:StringInput id="fie" value="Mumum xxx" />
+     </w:dict>
+    </w:list>
+   </w:Table>
+
+   <w:AddressInput id="xzy" />
+
+   <div id="header">
+    <span id="search">Search: <w:StringInput id="Search" argument_name="search" value="/foo/bar/fie"/></span>
+    <span id="dir">
+     <w:Html id="CurrentDirectory" html="/foo/bar/fie" />
+    </span>
+    <span id="right">
+     <span id="date">Date: <w:ListInput id="SelectDate" /></span>
+     <w:Button id="Filter" bind="w:testwwml.FilterButton" title="Filter" />
+    </span>
+   </div>
+
+   <div id="body">
+    <w:Button id="ShowDialog" title="Show dialog" /><br />
+    <w:Dialog id="SomeDialog" visible=":false">
+     <w:Html id="head" html="My dialog" />
+     <w:Html id="body" html="Click ok or cancel, please" />
+    </w:Dialog>
+    <br />
+
+    <w:GridLayout id="table">
+     <w:Html id="cell_0_0_1_1" html="Foo" />
+     <w:Html id="cell_1_0_1_1" html="Bar" />
+     <w:Html id="cell_0_1_2_1" html="Fie" />
+     <w:Html id="cell_0_2_1_1" html="Ma" />
+     <w:Html id="cell_1_2_1_1" html="Ba" />
+     <w:Html id="cell_2_0_1_3" html="Foo" />
+    </w:GridLayout>
+    <br />
+
+    <w:Html id="Dirlisting">
+     <table>
+      <tr><th>Type</th><th>Filename</th><th>Dates</th><th>Actions</th></tr>
+      <w:List id="Listing">
+
+       <w:Html classid="Entry">
+	<tr>
+	 <td>
+	  <w:variable id="type" />
+	 </td>
+	 <td>
+	  <w:variable id="name" />
+	 </td>
+	 <td>
+	  <w:variable id="dates" />
+	 </td>
+	 <td>
+	  <w:Html id="actions">
+	   <w:Checkbox id="check" value="1" />
+	   <w:Label id="label" target="1/check">
+	    <w:Html id="label">Restore</w:Html>
+	   </w:Label>
+	  </w:Html>
+	 </td>
+	</tr>
+       </w:Html>
+
+      </w:List>
+     </table>
+     <w:Button id="UpdateFiles" title="Update Files" /><br />
+    </w:Html>
+   </div>
+
+   <div id="footer">
+   xxx
+   </div>
+  </w:Html>
+ </w:HtmlWindow>
+</w:wwml>
