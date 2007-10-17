@@ -54,7 +54,7 @@ def generate_parts_for_node(module, node, using = [], class_path = [], bind_cont
                      texts.append("%(" + child.attributes.get('id').value + ")s")
                 elif child.localName == 'pre':
                     sub_attrs, sub_text = generate_parts_for_node(module, child, using, class_path, bind_context, html_context)
-                    attributes.extend(sub_attrs)
+                    attributes = sub_attrs + attributes
                     attributes.append((':pre', sub_text))
                 elif child.localName == 'post':
                     sub_attrs, sub_text = generate_parts_for_node(module, child, using, class_path, bind_context, html_context)
