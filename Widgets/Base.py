@@ -532,14 +532,21 @@ class Composite(Widget):
         Also handles visibility of the child: if invisible_as_empty is
         False, rendering an invisible child will yeild None, otherwize
         it will yield the empty string."""
-        invisible = [None, ''][invisible_as_empty]
         if isinstance(child, Widget):
-            if not child.get_visible(path): return invisible
-            return child.draw(output_options)
+            visible = child.get_visible(path)
         else:
-            if not self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, path):
-                return invisible
-            return self._(child, output_options)
+            visible = self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, path)
+
+        if visible:
+            if isinstance(child, Widget):
+                result = child.draw(output_options)
+            else:
+                result = self._(child, output_options)
+        else:
+            result = [None, ''][invisible_as_empty]
+        if 'draw_wrapper' in output_options:
+            result = output_options['draw_wrapper'](self, path, child, visible, result, output_options, invisible_as_empty)
+        return result
 
     def draw_children(self, output_options, invisible_as_empty = False, include_attributes = False):
         """Renders all child widgets to HTML using their draw methods.
