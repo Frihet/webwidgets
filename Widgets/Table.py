@@ -303,8 +303,8 @@ class Table(Base.ActionInput, Base.Composite):
     def visible_columns(self):
         # Optimisation: we could have used get_active and constructed a path...
         return Webwidgets.Utils.OrderedDict([(name, description) for (name, description) in self.columns.iteritems()
-                                  if self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id,
-                                                                self.path + ['_', 'column', name])])
+                                             if self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id,
+                                                                           self.path + ['_', 'column', name])])
 
     def rows_to_tree(self, rows, group_order):
         tree = {'level': 0,

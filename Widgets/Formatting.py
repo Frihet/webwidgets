@@ -309,7 +309,7 @@ class Label(Base.StaticComposite):
         target_path = target.path
         res = self.draw_children(output_options, include_attributes = True)
         res['error'] = ''
-        if target.error is not None:
+        if getattr(target, 'error', None) is not None:
            res['error'] = """ <span class="error">(%s)</span>""" % (target._(target.error, output_options),)
         res['target'] = Webwidgets.Utils.path_to_id(target_path)
         try:
@@ -332,7 +332,7 @@ class Field(Label):
         target_path = target.path
         res = self.draw_children(output_options, include_attributes = True)
         res['error'] = ''
-        if target.error is not None:
+        if getattr(target, 'error', None) is not None:
            res['error'] = """ <span class="error">(%s)</span>""" % (target.error,)
         res['target'] = Webwidgets.Utils.path_to_id(target_path)
         try:
