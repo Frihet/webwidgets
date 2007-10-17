@@ -31,20 +31,19 @@
 
   <w:Html id="body">
 
-   <w:Dialog id="SomeDialog" visible=":false">
-    <w:Html id="head" html="My dialog" />
-    <w:Html id="body" html="Click ok or cancel, please" />
-   </w:Dialog>
+   <w:List id="dialogs" />
 
-   <w:MainMenu id="tabs" page=":path:home" title="Test app">
-    <w:Home.Home id="home" />
-    <w:Input.Input id="input" />
-    <w:Formatting.Formatting id="formatting" />
-    <w:Composite.Composite id="composite" />
-    <w:Dynamic.Dynamic id="dynamic" />
-    <w:Config.Config id="config" />
-   </w:MainMenu>
-
+   <w:LogIn id="logIn" title="Log in/log out">
+    <w:MainMenu classid="Application" page=":path:home" title="The widget parade">
+     <w:Home.Home id="home" />
+     <w:Input.Input id="input" />
+     <w:Formatting.Formatting id="formatting" />
+     <w:Composite.Composite id="composite" />
+     <w:Dynamic.Dynamic id="dynamic" />
+     <w:Config.Config id="config" />
+     <w:LogOut id="logout" title="Log out" />
+    </w:MainMenu>
+   </w:LogIn>
   </w:Html>
  </w:HtmlWindow>
 </w:wwml>

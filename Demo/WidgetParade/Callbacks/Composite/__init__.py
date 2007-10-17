@@ -1,12 +1,11 @@
 class Composite(object):
     class dialog(object):
+        class SomeDialog(object):
+            def selected(self, path, value):
+                if path != self.path: return
+                del self.parent[self.name]
+            
         class ShowDialog(object):
             def clicked(self, path):
-                print "SHOW DIALOG CLICKED"
-                self.parent.parent.parent.parent['SomeDialog'].visible = True
-
-    class logIn(object):
-        def authenticate(self, username, password):
-            if username != password:
-                raise Exception("For this demo, the correct password is the same as the username!")
-            return True
+                dialogs = self.window['body']['dialogs']
+                dialogs[str(len(dialogs.children))] = self.parent.SomeDialog(self.session, self.win_id)

@@ -27,12 +27,14 @@
  >
  <w:Tabset id="Composite" title="Composite widgets">
   <w:Html id="dialog" title="Dialog">
+
+   <w:Dialog classid="SomeDialog">
+    <w:Html id="head" html="My dialog" />
+    <w:Html id="body" html="Click ok or cancel, please" />
+   </w:Dialog>
+
    <w:Button id="ShowDialog" title="Show dialog" />
   </w:Html>
-
-  <w:LogIn id="logIn" title="Log in/log out">
-   <w:LogOut classid="Application" />
-  </w:LogIn>
 
  </w:Tabset>
 </w:wwml>
