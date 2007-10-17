@@ -25,25 +25,23 @@
  using="Webwidgets.Demo.WidgetParade.UI"
  bind="Webwidgets.Demo.WidgetParade.Callbacks"
  >
- <w:HtmlWindow
+ <w:ApplicationWindow
   id="MyWindow"
   title="RedBack Webwidgets demo application">
 
-  <w:Html id="body">
-
-   <w:List id="dialogs" />
-
-   <w:LogIn id="logIn" title="Log in/log out">
-    <w:MainMenu classid="Application" page=":path:home" title="The widget parade">
-     <w:Home.Home id="home" />
-     <w:Input.Input id="input" />
-     <w:Formatting.Formatting id="formatting" />
-     <w:Composite.Composite id="composite" />
-     <w:Dynamic.Dynamic id="dynamic" />
-     <w:Config.Config id="config" />
-     <w:LogOut id="logout" title="Log out" />
-    </w:MainMenu>
-   </w:LogIn>
-  </w:Html>
- </w:HtmlWindow>
+  <w:ApplicationWindow.body id="body">
+   <w:ApplicationWindow.body.logIn id="logIn">
+    <w:ApplicationWindow.body.logIn.Application classid="Application" page=":path:home">
+     <w:pre>
+      <w:Home.Home id="home" />
+      <w:Input.Input id="input" />
+      <w:Formatting.Formatting id="formatting" />
+      <w:Composite.Composite id="composite" />
+      <w:Dynamic.Dynamic id="dynamic" />
+      <w:Config.Config id="config" />
+     </w:pre>
+    </w:ApplicationWindow.body.logIn.Application>
+   </w:ApplicationWindow.body.logIn>
+  </w:ApplicationWindow.body>
+ </w:ApplicationWindow>
 </w:wwml>

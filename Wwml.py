@@ -148,7 +148,7 @@ def generate_value(type_name, text, attributes, module, using, class_path, bind_
 
             if ':pre' in attributes or ':post' in attributes:
                 if 'html' not in attributes:
-                    attributes['html'] = node_value.html
+                    attributes['html'] = getattr(node_value, 'html', '')
 
                 if ':pre' in attributes:
                     attributes['html'] = attributes[':pre'] + attributes['html']

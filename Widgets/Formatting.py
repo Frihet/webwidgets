@@ -158,7 +158,8 @@ class Media(Base.Widget):
                         'empty': '&lt;No file&gt;',
                         'inline':True,
                         'merge':False,
-                        'invisible':False},
+                        'invisible':False,
+                        'include_label':False},
              'image/png':{'inline':True},
              'image/jpeg':{'inline':True},
              'image/gif':{'inline':True},
@@ -211,6 +212,7 @@ class Media(Base.Widget):
             inline_renderer = self.get_renderer('draw_inline')
         else:
             inline_renderer = self.draw_inline_default
+        is_default = inline_renderer is self.draw_inline_default
         inline = inline_renderer(output_options)
 
 
@@ -220,10 +222,15 @@ class Media(Base.Widget):
         if self.content is None:
             return self.get_option('empty')
 
+        title = ''
+        if not is_default and self.get_option('include_label'):
+            title = self.draw_inline_default(output_options)
+
         return """<a %(html_attributes)s href="%(location)s">%(inline)s</a>""" % {
             'html_attributes': self.draw_html_attributes(self.path),
             'location': cgi.escape(self.calculate_output_url()),
-            'inline': inline
+            'inline': inline,
+            'title': title
             }
 
     def draw_inline_default(self, output_options):
@@ -250,8 +257,7 @@ class Media(Base.Widget):
             self.register_style_link(self.calculate_output_url())
             return self.draw_inline_default(output_options)
         else:
-            return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>
-                  %(name)s""" % {
+            return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>""" % {
             'location': cgi.escape(self.calculate_output_url('base')),
             'name': self.draw_inline_default(output_options),
             'width': self.get_html_option('width'),
@@ -265,8 +271,7 @@ class Media(Base.Widget):
             self.register_script_link(self.calculate_output_url())
             return self.draw_inline_default(output_options)
         else:
-            return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>
-                  %(name)s""" % {
+            return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>""" % {
             'location': cgi.escape(self.calculate_output_url('base')),
             'name': self.draw_inline_default(output_options),
             'width': self.get_html_option('width'),
@@ -277,8 +282,7 @@ class Media(Base.Widget):
 
 
     def draw_inline_text(self, output_options):
-        return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>
-                  %(name)s""" % {
+        return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>""" % {
             'location': cgi.escape(self.calculate_output_url()),
             'name': self.draw_inline_default(output_options),
             'width': self.get_html_option('width'),
