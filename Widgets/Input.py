@@ -283,7 +283,7 @@ class FileInput(Base.ValueInput, Base.StaticComposite):
     def field_output(self, path):
         return [self.value]
 
-    class preview(Formatting.Media):
+    class Preview(Formatting.Media):
         class Content(object):
             def __get__(self, instance, owner):
                 if instance.parent is None:
@@ -291,7 +291,7 @@ class FileInput(Base.ValueInput, Base.StaticComposite):
                 return instance.parent.value
         content = Content()
 
-    class clear(Button):
+    class Clear(Button):
         title = 'Clear'
         def clicked(self, path):
             self.parent.value = None
@@ -318,9 +318,9 @@ class FileInput(Base.ValueInput, Base.StaticComposite):
         result['disabled'] = ['', 'disabled="disabled"'][not self.get_active(self.path)]
 
         return """<span %(html_attributes)s>
-                   %(preview)s
+                   %(Preview)s
                    <input type="file" name="%(html_id)s" %(disabled)s id="%(html_id)s-_-input" />
-                   %(clear)s
+                   %(Clear)s
                   </span>""" % result
 
 class ToggleButton(Base.ValueInput, Button):

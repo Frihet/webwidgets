@@ -56,13 +56,13 @@ class Dialog(Formatting.Html):
     html = """
     <div %(html_attributes)s>
      <div class="dialog-head" id="%(html_id)s-head">
-      %(head)s
+      %(Head)s
      </div>
      <div class="dialog-body" id="%(html_id)s-body">
-      %(body)s
+      %(Body)s
      </div>
      <div class="dialog-buttons" id="%(html_id)s-buttons">
-      %(buttons)s
+      %(Buttons)s
      </div>
     </div>
     """
@@ -88,7 +88,7 @@ class Dialog(Formatting.Html):
     def __init__(self, session, win_id, **attrs):
         super(Formatting.Html, self).__init__(
             session, win_id,
-            children = {'buttons': self.Buttons(session, win_id, self.buttons)},
+            children = {'Buttons': self.Buttons(session, win_id, self.buttons)},
             **attrs)
 
     def selected(self, path, value):

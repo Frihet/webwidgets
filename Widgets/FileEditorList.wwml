@@ -38,11 +38,11 @@
   </w:odict>
 
   <w:FileEditor classid="FileEditor">
-   <w:Html id="hide" />
-   <w:Html id="infoGroup" />
-   <w:FileEditor.editors id="editors">
-    <w:FileEditor.editors.default id="default" visible=":true" />
-   </w:FileEditor.editors>
+   <w:Html id="Hide" />
+   <w:Html id="InfoGroup" />
+   <w:FileEditor.Editors id="Editors">
+    <w:FileEditor.Editors.default id="default" visible=":true" />
+   </w:FileEditor.Editors>
   </w:FileEditor>
 
  </w:Table>

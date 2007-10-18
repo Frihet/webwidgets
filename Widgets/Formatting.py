@@ -317,7 +317,7 @@ class Label(Base.StaticComposite):
            res['error'] = """ <span class="error">(%s)</span>""" % (target._(target.error, output_options),)
         res['target'] = Webwidgets.Utils.path_to_id(target_path)
         try:
-            return """<label %(html_attributes)s for="%(target)s">%(label)s%(error)s</label>""" % res
+            return """<label %(html_attributes)s for="%(target)s">%(Label)s%(error)s</label>""" % res
         except KeyError, e:
             e.args = (self, self.path) + e.args
             raise e
@@ -332,7 +332,7 @@ class Field(Label):
         if isinstance(self.target, Base.Widget):
             target = self.target
         else:
-            target = self + ['field'] + self.target
+            target = self + ['Field'] + self.target
         target_path = target.path
         res = self.draw_children(output_options, include_attributes = True)
         res['error'] = ''
@@ -342,10 +342,10 @@ class Field(Label):
         try:
             return """<div %(html_attributes)s>
                        <label for="%(target)s">
-                        %(label)s%(error)s:
+                        %(Label)s%(error)s:
                        </label>
                        <span class="field">
-                        %(field)s
+                        %(Field)s
                        </span>
                       </div>
                       """ % res

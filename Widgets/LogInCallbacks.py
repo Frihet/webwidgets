@@ -26,8 +26,12 @@ class LogIn(object):
     user_info = None
     debug_log_in = False
     debug_errors = False
-    
-    class log_in(object):
+
+    def __init__(self, session, win_id, **attrs):
+        Webwidgets.Html.__init__(self, session, win_id, **attrs)
+        self.user_info_changed(self.path, self.user_info)
+  
+    class LogIn(object):
         def selected(self, path, value):
             fields = self.get_widgets_by_attribute('field_name')
 
@@ -50,11 +54,11 @@ class LogIn(object):
         if self.global_session:
             self.session.log_in = self
         if self.user_info is None:
-            self['application'] = Webwidgets.Html(self.session, self.win_id)
-            self['log_in'].visible = True
+            self['Application'] = Webwidgets.Html(self.session, self.win_id)
+            self['LogIn'].visible = True
         else:
-            self['application'] = self.Application(self.session, self.win_id)
-            self['log_in'].visible = False
+            self['Application'] = self.Application(self.session, self.win_id)
+            self['LogIn'].visible = False
 
 class LogOut(object):
     debug = True

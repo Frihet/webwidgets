@@ -1,7 +1,7 @@
 import Webwidgets
 
 class Dynamic(object):
-    class filelist(object):
+    class FileList(object):
         class Listing(object):
             ww_explicit_load = True
             class Entry(object):
@@ -19,12 +19,12 @@ class Dynamic(object):
                                  [(str(nr), Webwidgets.Text(session, win_id, html = date))
                                   for nr, date in enumerate(dates)])))]))
 
-                class actions(object):
-                     class check(object):
+                class Actions(object):
+                     class Check(object):
                          def value_changed(self, path, value):
                              Webwidgets.Checkbox.value_changed(self, path, value)
-                             print "FOO", value
-
+                             self.error = ['No no, and NO! You have to check this!', ''][self.value]
+                             
 
             def __init__(self, session, win_id, files):
                 Webwidgets.List.__init__(

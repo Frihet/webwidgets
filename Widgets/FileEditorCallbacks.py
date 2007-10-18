@@ -51,7 +51,7 @@ class FileEditor(object):
     def method_to_mime_type(self, mime_type):
         return method_to_mime_type(mime_type)
 
-    class downloadLink(object):
+    class DownloadLink(object):
         class Content(object):
             def __get__(self, instance, owner):
                 if instance.parent is None:
@@ -59,7 +59,7 @@ class FileEditor(object):
                 return instance.parent.value
         content = Content()
 
-    class hide(object):
+    class Hide(object):
         class Value(object):
             def __get__(self, instance, owner):
                 if instance.parent is None:
@@ -70,11 +70,11 @@ class FileEditor(object):
         value = Value()
 
     def expanded_changed(self, path, value):
-        self['infoGroup'].visible = self['editors'].visible = self['upload'].visible = value
+        self['InfoGroup'].visible = self['Editors'].visible = self['Upload'].visible = value
 
-    class infoGroup(object):
-        class name(object):
-            class field(object):
+    class InfoGroup(object):
+        class Name(object):
+            class Field(object):
                 class Value(object):
                     def __get__(self, instance, owner):
                         if instance.parent is None:
@@ -85,7 +85,7 @@ class FileEditor(object):
                             instance.parent.parent.parent.value.filename = value
                 value = Value()
 
-    class editors(object):
+    class Editors(object):
         class text__css(object):
             value = Value()
         class text__plain(object):
@@ -113,28 +113,28 @@ class FileEditor(object):
                         value.filename = "new %s file" % mime_type
                         self.parent.value = value
             
-    class upload(object):
-        class action(object):
+    class Upload(object):
+        class Action(object):
             def clicked(self, path):
-                value = self.parent['file'].value
-                editors = self.parent.parent['editors']
+                value = self.parent['File'].value
+                editors = self.parent.parent['Editors']
                 if value is not None:
                     editor = mime_type_to_method(value.type)
                     if editor not in editors.children:
-                        if editors.children['default'].visible:
+                        if editors['default'].visible:
                             editor = 'default'
                         else:
-                            self.parent['file'].error = 'Unrecognized file-type: %s' % value.type
+                            self.parent['File'].error = 'Unrecognized file-type: %s' % value.type
                             return
                     elif not editors[editor].visible:
-                        self.parent['file'].error = 'Unallowed file-type: %s' % value.type
+                        self.parent['File'].error = 'Unallowed file-type: %s' % value.type
                         return
                 self.parent.parent.value = value
 
     def value_changed(self, path, value):
         if path != self.path: return
         editor = mime_type_to_method(getattr(value, 'type', 'none'))
-        if editor not in self['editors'].children:
+        if editor not in self['Editors'].children:
             editor = 'default'
-        self['editors'].page = [editor]
+        self['Editors'].page = [editor]
         

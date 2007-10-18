@@ -26,7 +26,7 @@
  bind="Webwidgets.Demo.WidgetParade.Callbacks.Dynamic"
  >
  <w:Tabset id="Dynamic" title="Dynamic widgets">
-  <w:Html id="filelist" title="File list">
+  <w:Html id="FileList" title="File list">
    <table>
     <tr><th>Type</th><th>Filename</th><th>Dates</th><th>Actions</th></tr>
     <w:List id="Listing">
@@ -43,10 +43,10 @@
 	<w:variable id="dates" />
        </td>
        <td>
-	<w:Html id="actions">
-	 <w:Checkbox id="check" value="1" />
-	 <w:Label id="label" target="1/check">
-	  <w:Html id="label">Restore</w:Html>
+	<w:Html id="Actions">
+	 <w:Checkbox id="Check" value="1" />
+	 <w:Label id="Label" target="1/Check">
+	  <w:Html id="Label">Restore</w:Html>
 	 </w:Label>
 	</w:Html>
        </td>

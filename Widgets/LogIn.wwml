@@ -28,31 +28,31 @@
   bind="LogInCallbacks.LogIn"
   >
   <w:Dialog
-   id="log_in"
-   head=":Text:Please log in:"
+   id="LogIn"
+   Head=":Text:Please log in:"
    >
-   <w:Html id="body">
-    <w:Message id="message" />
-    <w:Fieldgroup id="credentialsGroup">
-     <w:Field id="username" label=":Text:Username">
-      <w:StringInput id="field" field_name="username" />
+   <w:Html id="Body">
+    <w:Message id="Message" />
+    <w:Fieldgroup id="CredentialsGroup">
+     <w:Field id="Username" Label=":Text:Username">
+      <w:StringInput id="Field" field_name="username" />
      </w:Field>
-     <w:Field id="password" label=":Text:Password">
-      <w:PasswordInput id="field" field_name="password" />
+     <w:Field id="Password" Label=":Text:Password">
+      <w:PasswordInput id="Field" field_name="password" />
      </w:Field>
     </w:Fieldgroup>
    </w:Html>
    <w:dict id="buttons" login="login" />
   </w:Dialog>
-  <w:Html id="application" />
+  <w:variable id="Application" />
  </w:Html>
 
  <w:Dialog
   using="Webwidgets"
   bind="LogInCallbacks.LogOut"
   id="LogOut"
-  head=":Text:Really log out?"
-  body=":Html:"
+  Head=":Text:Really log out?"
+  Body=":Html:"
   >
   <w:dict id="buttons">
    <w:string id="Log out">logout</w:string>

@@ -27,15 +27,15 @@
  >
  <w:Tabset id="Input" title="Input">
 
-  <w:Html id="files" title="File editors">
-   <w:FileEditorList id="fileditorlisttest" />
-   <w:FileEditor id="fileditortest" />
+  <w:Html id="Files" title="File editors">
+   <w:FileEditorList id="FilEditorListTest" />
+   <w:FileEditor id="FilEditorTest" />
   </w:Html>
 
 
-  <w:Fieldgroup id="data" title="Data input">
-   <w:Field id="longtext" label=":Html:A longer text">
-    <w:StringInput id="field" cols=":integer:20" rows=":integer:10">
+  <w:Fieldgroup id="Data" title="Data input">
+   <w:Field id="LongText" Label=":Html:A longer text">
+    <w:StringInput id="Field" cols=":integer:20" rows=":integer:10">
      <w:string id="value">
 Hej allla barn,
 nu är det branprogram!
@@ -43,32 +43,32 @@ Titta här skall ni få se vad farbror frej tar fram!
      </w:string>
     </w:StringInput>
    </w:Field>
-   <w:Field id="lastpwd" label=":Html:Last password">
-    <w:Html id="field" error=":none" />
+   <w:Field id="LastPwd" Label=":Html:Last password">
+    <w:Html id="Field" error=":none" />
    </w:Field>
-   <w:Field id='newpwd' label=':Text:New password'>
-    <w:NewPasswordInput id="field" value="foo" />
+   <w:Field id='NewPwd' Label=':Text:New password'>
+    <w:NewPasswordInput id="Field" value="foo" />
    </w:Field>
-   <w:Field id="updatepwd" label=":Html:Update passwords">
-    <w:Html id="field" error=":none">
-     <w:Button id="pwdclear" title="Clear new password" />
-     <w:Button id="pwdset" title="Set new password" /><br />
+   <w:Field id="UpdatePwd" Label=":Html:Update passwords">
+    <w:Html id="Field" error=":none">
+     <w:Button id="PwdClear" title="Clear new password" />
+     <w:Button id="PwdSet" title="Set new password" /><br />
     </w:Html>
    </w:Field>
-   <w:Field id="someDate" label=":Html:Some date">
-    <w:DateInput id="field" value=":time:1998-01-01 22:33:34" />
+   <w:Field id="SomeDate" Label=":Html:Some date">
+    <w:DateInput id="Field" value=":time:1998-01-01 22:33:34" />
    </w:Field>
-   <w:Field id="address" label=":Html:Some address">
-    <w:AddressInput id="field" error=":none" />
+   <w:Field id="Address" Label=":Html:Some address">
+    <w:AddressInput id="Field" error=":none" />
    </w:Field>
   </w:Fieldgroup>
 
-  <w:Tabset id="third" title="Third item">
-   <w:Html id="first" title="First sub item">
+  <w:Tabset id="Third" title="Third item">
+   <w:Html id="First" title="First sub item">
     Mananana
    </w:Html>
 
-   <w:Html id="second" title="Second sub item">
+   <w:Html id="Second" title="Second sub item">
     Mananana-mamanana
    </w:Html>
 

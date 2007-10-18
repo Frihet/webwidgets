@@ -26,17 +26,17 @@
 
  <w:Html id="FileEditor" top_level="div" expanded=":false">
   <div class="top">
-   <w:DownloadLink id="downloadLink" />
-   <w:ToggleButton id="hide" false_title="Edit file" true_title="Hide editor" />
+   <w:DownloadLink id="DownloadLink" />
+   <w:ToggleButton id="Hide" false_title="Edit file" true_title="Hide editor" />
   </div>
 
-  <w:Fieldgroup id="infoGroup">
-   <w:Field id="name" label=":Text:Filename">
-    <w:StringInput id="field" />
+  <w:Fieldgroup id="InfoGroup">
+   <w:Field id="Name" Label=":Text:Filename">
+    <w:StringInput id="Field" />
    </w:Field>
   </w:Fieldgroup>
 
-  <w:TabbedView id="editors" page=":path:none">
+  <w:TabbedView id="Editors" page=":path:none">
    <w:Html id="none" title="No file">No file created or uploaded</w:Html>
    <w:TextFileEditor id="text__plain" title="Plain text" />
    <w:HtmlFileEditor id="text__html" title="HTML document" />
@@ -51,13 +51,13 @@
    </w:Media>
   </w:TabbedView>
 
-  <w:Html id="upload" top_level="div">
-   <w:Label id="fileLabel" target="1/file" label=":Text:Upload file: " />
-   <w:FileInput id="file">
-    <w:Html id="preview" />
-    <w:Html id="clear" />
+  <w:Html id="Upload" top_level="div">
+   <w:Label id="FileLabel" target="1/File" Label=":Text:Upload file: " />
+   <w:FileInput id="File">
+    <w:Html id="Preview" />
+    <w:Html id="Clear" />
    </w:FileInput>
-   <w:Button id="action" title="Upload" />
+   <w:Button id="Action" title="Upload" />
   </w:Html>
 
  </w:Html>
