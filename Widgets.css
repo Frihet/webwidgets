@@ -18,6 +18,10 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+a:link, a:visited {
+ color: #000000;
+}
+
 body {
  margin: 0;
  padding: 0;
@@ -62,7 +66,7 @@ body {
 
 .Webwidgets-Widgets-Table-Table .buttons button,
 .Webwidgets-Widgets-Table-Table .buttons a {
- background: #dd55ff;
+ background: #f2bfff;
  color: #000000;
 }
 .Webwidgets-Widgets-Table-Table .buttons button[disabled=true] {
@@ -94,20 +98,26 @@ body {
  content: "(asc)";
 }
 .Webwidgets-Widgets-Table-Table th.column_sort_level_0 * {
- background: #dd55ff;
+ background: #5555ff;
+ color: #ffffff;
  font-weight: bold;
+ font-style: italic;
 }
 .Webwidgets-Widgets-Table-Table th.column_sort_level_1 * {
- background: #5555ff;
+ background: #dd55ff;
+ color: #ffffff;
+ font-weight: bold;
 }
 .Webwidgets-Widgets-Table-Table th.column_sort_level_2 * {
  background: #8dd35f;
+ color: #ffffff;
+ font-weight: bold;
 }
 .Webwidgets-Widgets-Table-Table th.column_sort_level_3 * {
- background: #f2bfff;
+ background: #bfbfff;
 }
 .Webwidgets-Widgets-Table-Table th.column_sort_level_4 * {
- background: #bfbfff;
+ background: #f2bfff;
 }
 .Webwidgets-Widgets-Table-Table th.column_sort_level_5 * {
  background: #b3d39e;
@@ -126,28 +136,28 @@ body {
  vertical-align: top;
 }
 .Webwidgets-Widgets-Table-Table td.column_last_level_1 {
- border-bottom: solid 2px #dd55ff;
+ border-bottom: solid 2px #5555ff;
 }
 .Webwidgets-Widgets-Table-Table td.column_last_level_2 {
- border-bottom: solid 2px #5555ff;
+ border-bottom: solid 2px #dd55ff;
 }
 .Webwidgets-Widgets-Table-Table td.column_last_level_3 {
  border-bottom: solid 2px #8dd35f;
 }
 .Webwidgets-Widgets-Table-Table td.column_last_level_4 {
- border-bottom: solid 1px #dd55ff;
+ border-bottom: solid 1px #5555ff;
 }
 .Webwidgets-Widgets-Table-Table td.column_last_level_5 {
- border-bottom: solid 1px #5555ff;
+ border-bottom: solid 1px #dd55ff;
 }
 .Webwidgets-Widgets-Table-Table td.column_last_level_6 {
  border-bottom: solid 1px #8dd35f;
 }
 .Webwidgets-Widgets-Table-Table td.column_last_level_7 {
- border-bottom: dashed 1px #dd55ff;
+ border-bottom: dashed 1px #5555ff;
 }
 .Webwidgets-Widgets-Table-Table td.column_last_level_8 {
- border-bottom: dashed 1px #5555ff;
+ border-bottom: dashed 1px #dd55ff;
 }
 .Webwidgets-Widgets-Table-Table td.functions {
  vertical-align: top;
