@@ -14,5 +14,6 @@ class ApplicationWindow(object):
                         return instance.parent.parent.parent.title
                 title = Title()
 
-    def add_dialog(self, name, dialog):
+    def add_dialog(self, dialog, name = None):
+        if name is None: name = str(len(self['Body']['Dialogs'].children))
         self['Body']['Dialogs'][name] = dialog

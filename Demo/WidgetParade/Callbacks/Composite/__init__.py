@@ -1,5 +1,5 @@
 class Composite(object):
-    class dialog(object):
+    class Dialog(object):
         class SomeDialog(object):
             def selected(self, path, value):
                 if path != self.path: return
@@ -7,5 +7,4 @@ class Composite(object):
             
         class ShowDialog(object):
             def clicked(self, path):
-                dialogs = self.window['body']['dialogs']
-                dialogs[str(len(dialogs.children))] = self.parent.SomeDialog(self.session, self.win_id)
+                self.window.add_dialog(self.parent.SomeDialog(self.session, self.win_id))

@@ -26,11 +26,11 @@
  bind="Webwidgets.Demo.WidgetParade.Callbacks.Composite"
  >
  <w:Tabset id="Composite" title="Composite widgets">
-  <w:Html id="dialog" title="Dialog">
+  <w:Html id="Dialog" title="Dialog">
 
    <w:Dialog classid="SomeDialog">
-    <w:Html id="head" html="My dialog" />
-    <w:Html id="body" html="Click ok or cancel, please" />
+    <w:Html id="Head" html="My dialog" />
+    <w:Html id="Body" html="Click ok or cancel, please" />
    </w:Dialog>
 
    <w:Button id="ShowDialog" title="Show dialog" />
