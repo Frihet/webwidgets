@@ -64,13 +64,8 @@ body {
  text-decoration: none;
 }
 
-.Webwidgets-Widgets-Table-Table .buttons button,
 .Webwidgets-Widgets-Table-Table .buttons a {
  background: #f2bfff;
- color: #000000;
-}
-.Webwidgets-Widgets-Table-Table .buttons button[disabled=true] {
- background: #bfbfff;
  color: #000000;
 }
 
@@ -205,22 +200,20 @@ textarea {
  font-family: serif;
 }
 
-button {
+button, input[type=submit] {
  border: solid 1px black;
  margin: 2;
  padding: 2px;
  background: #f2bfff;
+ color: #000000;
  font-size: 10pt;
  font-family: serif;
+ cursor: pointer;
 }
 
-input[type=submit] {
- border: solid 1px black;
- margin: 2;
- padding: 2px;
- background: #f2bfff;
- font-size: 10pt;
- font-family: serif;
+button[disabled=disabled], input[type=submit][disabled=disabled] {
+ background: #ffffff;
+ cursor: default;
 }
 
 select {
