@@ -855,8 +855,8 @@ class HtmlWindow(Window, StaticComposite):
 
     headers = {'Status': '200 OK'}
     title = 'Page not available'
-    body = Text.derive(html = 'Page not available')
-    head = Text.derive(html = '')
+    Head = Text.derive(html = '')
+    Body = Text.derive(html = 'Page not available')
     encoding = 'UTF-8'
     doctype = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
 
@@ -890,7 +890,7 @@ class HtmlWindow(Window, StaticComposite):
             include_attributes = True)
 
         if body is not None:
-            result['body'] = body
+            result['Body'] = body
         if title is None: title = self.get_title(self.path)
         result['title'] = '<title>' + title + '</title>'
         result['doctype'] = self.doctype
@@ -898,7 +898,7 @@ class HtmlWindow(Window, StaticComposite):
         result['name'] = result['id'] = Webwidgets.Utils.path_to_id(self.path)
         result['base'] = self.session.program.request_base()
 
-        for (all1, name1, value1, all2, value2, name2) in self.findallvalues.findall(result['body']):
+        for (all1, name1, value1, all2, value2, name2) in self.findallvalues.findall(result['Body']):
             self.register_value('field_value' + '_' + (name1 or name2), (value1 or value2))
 
         result['head_content'] = '\n'.join(self.head_content.values())
@@ -910,11 +910,11 @@ class HtmlWindow(Window, StaticComposite):
   <base href='%(base)s' />
   %(head_content)s
   %(title)s
-  %(head)s
+  %(Head)s
  </head>
  <body %(html_attributes)s>
   <form name="%(name)s" method='post' enctype='multipart/form-data' action='%(uri)s' id="%(html_id)s-_-body-form">
-   %(body)s
+   %(Body)s
   </form>
  </body>
 </html>""" % result).encode(self.encoding)

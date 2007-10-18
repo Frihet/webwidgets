@@ -20,8 +20,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 class MyWindow(object):
-    class body(object):
-        class logIn(object):
+    class Body(object):
+        class LogIn(object):
             def authenticate(self, username, password):
                 if username != password:
                     raise Exception("For this demo, the correct password is the same as the username!")

@@ -39,13 +39,13 @@
   id="ApplicationWindow"
   title="Application window">
 
-  <w:Html id="body">
+  <w:Html id="Body">
 
-   <w:List id="dialogs" />
+   <w:List id="Dialogs" />
 
-   <w:LogIn id="logIn" title="Log in/log out">
+   <w:LogIn id="LogIn" title="Log in/log out">
     <w:MainMenu classid="Application" page=":path:logout">
-     <w:LogOut id="logout" title="Log out" />
+     <w:LogOut id="LogOut" title="Log out" />
     </w:MainMenu>
    </w:LogIn>
 

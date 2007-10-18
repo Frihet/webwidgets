@@ -29,19 +29,19 @@
   id="MyWindow"
   title="RedBack Webwidgets demo application">
 
-  <w:ApplicationWindow.body id="body">
-   <w:ApplicationWindow.body.logIn id="logIn">
-    <w:ApplicationWindow.body.logIn.Application classid="Application" page=":path:home">
+  <w:ApplicationWindow.Body id="Body">
+   <w:ApplicationWindow.Body.LogIn id="LogIn">
+    <w:ApplicationWindow.Body.LogIn.Application classid="Application" page=":path:Home">
      <w:pre>
-      <w:Home.Home id="home" />
-      <w:Input.Input id="input" />
-      <w:Formatting.Formatting id="formatting" />
-      <w:Composite.Composite id="composite" />
-      <w:Dynamic.Dynamic id="dynamic" />
-      <w:Config.Config id="config" />
+      <w:Home.Home id="Home" />
+      <w:Input.Input id="Input" />
+      <w:Formatting.Formatting id="Formatting" />
+      <w:Composite.Composite id="Composite" />
+      <w:Dynamic.Dynamic id="Dynamic" />
+      <w:Config.Config id="Config" />
      </w:pre>
-    </w:ApplicationWindow.body.logIn.Application>
-   </w:ApplicationWindow.body.logIn>
-  </w:ApplicationWindow.body>
+    </w:ApplicationWindow.Body.LogIn.Application>
+   </w:ApplicationWindow.Body.LogIn>
+  </w:ApplicationWindow.Body>
  </w:ApplicationWindow>
 </w:wwml>
