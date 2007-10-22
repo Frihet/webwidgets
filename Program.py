@@ -127,8 +127,17 @@ class Program(WebKit.Page.Page):
 
         # Work-around empty adapter name
         adapter = req.adapterName()
-        
-        return 'http://' + req._environ['HTTP_HOST'] + adapter
+
+        port = ''
+        if req._environ['HTTPS'] == 'on':
+            protocol = "https"
+            if req._environ['SERVER_PORT'] != '443':
+                port = ':' + req._environ['SERVER_PORT']
+        else:
+            protocol = "http"
+            if req._environ['SERVER_PORT'] != '80':
+                port = ':' + req._environ['SERVER_PORT']
+        return protocol + '://' + req._environ['HTTP_HOST'] + port + adapter
 
     def request_base(self):
         """@return: A URL to this Webwidgets application."""
