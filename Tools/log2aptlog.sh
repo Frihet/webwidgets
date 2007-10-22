@@ -17,26 +17,28 @@ if [ "$pkgdist_repository" == "tla" ]; then
    echo
   done
 elif [ "$pkgdist_repository" == "svn" ]; then
+ host="$(svn info | grep URL: | sed -e "s+URL: .*://\([^/]*\)/.*+\1+g")"
  find . -type d -a ! -path "*/.svn*" -a ! -path "*/=dist*" |
   while read name; do
-   svn log $name
+   svn log $name |
+    tr "\n%" "%\n" |
+    sed \
+     -e "s+%+ ://: +g" \
+     -e "s+------------------------------------------------------------------------+%+g" \
+     -e "s+^% ://: ++g" |
+    tr "\n%" "%\n" |
+    sed \
+     -e "s+ ://: \( ://: \)*+ ://: +g" \
+     -e "s+^ ://: ++g" \
+     -e "s+ ://: $++g" \
+     -e "s+^r++g"
   done |
-  tr "\n%" "%\n" |
-  sed \
-   -e "s+%+ ://: +g" \
-   -e "s+------------------------------------------------------------------------+%+g" \
-   -e "s+^%++g" |
-  tr "\n%" "%\n" |
-  sed \
-   -e "s+ ://: \( ://: \)*+ ://: +g" \
-   -e "s+^ ://: ++g" \
-   -e "s+ ://: $++g" \
-   -e "s+^r++g" |
   sort | uniq |
   while read line; do
    version="$(echo "$line" | cut -d "|" -f 1 | sed -e "s+ *++g")"
-   date=$(date -d "$(echo "$line" | cut -d "|" -f 3)" +"%a, %d %b %Y %k:%M:%S %z")
+   date=$(LC_ALL=C date -d "$(echo "$line" | cut -d "|" -f 3)" +"%a, %d %b %Y %k:%M:%S %z")
    creator="$(echo "$line" | cut -d "|" -f 2 | sed -e "s+ *++g")"
+   creator="$creator <$creator@$host>"
    summary="$(
     echo "$line" |
      sed \

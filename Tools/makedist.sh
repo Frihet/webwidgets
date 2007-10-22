@@ -38,41 +38,7 @@ echo "Removing old files..."
 rm -rf "=dist/$TITLE-$VERSION"
 
 echo "Copying files..."
-if [ "$pkgdist_repository" == "tla" ]; then
- {
-  echo "."
-  tla inventory -s -d
- } |
-  sed -e "s+(sp)+ +g" |
-  while read dir; do
-   mkdir -p "=dist/$TITLE-$VERSION/$dir"
-   cp -a "$dir/.arch-ids" "=dist/$TITLE-$VERSION/$dir/.arch-ids"
-  done
-
- tla inventory -s -f |
-  sed -e "s+(sp)+ +g" |
-  while read file; do
-   cp -d "$file" "=dist/$TITLE-$VERSION/$file"
-  done
-
- mkdir -p "=dist/$TITLE-$VERSION/{arch}"
- find "{arch}" -maxdepth 1 -mindepth 1 ! -name "++pristine-trees" |
-  while read file; do
-   cp -a -d "$file" "=dist/$TITLE-$VERSION/$file"
-  done
-elif [ "$pkgdist_repository" == "svn" ]; then
- mkdir -p "=dist/$TITLE-$VERSION"
- cp -a ".svn" "=dist/$TITLE-$VERSION/.svn"
- svn ls -R |
-  while read path; do
-   if [ -d "$path" ]; then
-    mkdir -p "=dist/$TITLE-$VERSION/$path"
-    cp -a "$path/.svn" "=dist/$TITLE-$VERSION/$path/.svn"
-   else
-    cp -a "$path" "=dist/$TITLE-$VERSION/$path"
-   fi
-  done
-fi
+Tools/pkgdist_copy.sh "=dist/$TITLE-$VERSION"
 
 echo "Making spec-file..."
 m4 \
@@ -92,7 +58,7 @@ case "$disttype" in
  deb)
   cd $TITLE-$VERSION
   Tools/log2aptlog.sh > debian/changelog
-  dpkg-buildpackage
+  dpkg-buildpackage -rfakeroot
 esac
 
 if [ "$upload" ]; then

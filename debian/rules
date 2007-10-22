@@ -58,11 +58,10 @@ install-indep:
 	dh_testdir; dh_testroot; dh_clean -k -i 
 	for package in $(indep_packages); do mkdir -p $(CURDIR)/debian/$$package; done
 
-	dh_installdocs -p webwidgets-doc README
+	dh_installdocs -p webwidgets-doc Docs
 
 	mkdir -p $(CURDIR)/debian/webwidgets$(widgetdir)
-	tla inventory -s -d | sed -e "s+(sp)+ +g"| while read dir; do mkdir -p "$(CURDIR)/debian/webwidgets$(widgetdir)/$$dir"; cp -a "$$dir/.arch-ids" "$(CURDIR)/debian/webwidgets$(widgetdir)/$$dir"; done
-	tla inventory -s -f | sed -e "s+(sp)+ +g" | while read file; do cp -a -P "$$file" "$(CURDIR)/debian/webwidgets$(widgetdir)/$$file"; done
+	Tools/pkgdist_copy.sh "$(CURDIR)/debian/webwidgets$(widgetdir)"
 
 install-arch:
 #	dh_testdir; dh_testroot; dh_clean -k -s 

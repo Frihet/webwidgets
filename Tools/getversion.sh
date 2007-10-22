@@ -39,9 +39,9 @@ elif [ "$pkgdist_repository" == "svn" ]; then
    pkgdist_svn_versionpath |
     sed \
      -e "s+.*/\(trunk\)+\1+g" \
-     -e "s+.*/branches/\([^/]*\)+branch-\1+g" \
-     -e "s+.*/tags/\([^/]*\)+tag-\1+g"
-   )-$1
+     -e "s+.*/branches/\([^/]*\)+branch.\1+g" \
+     -e "s+.*/tags/\([^/]*\)+tag.\1+g"
+   ).$1
  }
 
  pkgdist_svn_versionpath () {
