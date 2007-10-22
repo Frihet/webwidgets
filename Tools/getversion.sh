@@ -30,7 +30,7 @@ elif [ "$pkgdist_repository" == "svn" ]; then
   pkgdist_svnversion2pkg $(
     svn info |
      grep Revision: |
-     sed -e "s+.*Revision: \(.*\)\+\1+g"
+     sed -e "s+.*Revision: \(.*\)+\1+g"
   )
  }
 

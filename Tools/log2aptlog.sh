@@ -17,7 +17,10 @@ if [ "$pkgdist_repository" == "tla" ]; then
    echo
   done
 elif [ "$pkgdist_repository" == "svn" ]; then
- svn log $(find . -type d ! -path "*/.svn*") |
+ find . -type d -a ! -path "*/.svn*" -a ! -path "*/=dist*" |
+  while read name; do
+   svn log $name
+  done |
   tr "\n%" "%\n" |
   sed \
    -e "s+%+ ://: +g" \
