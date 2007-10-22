@@ -1,5 +1,7 @@
 #! /bin/sh
 
+. Tools/pkgdisk_config.sh
+
 disttype=deb
 server=download.gna.org:/upload/webwidgets/
 
@@ -36,27 +38,39 @@ echo "Removing old files..."
 rm -rf "=dist/$TITLE-$VERSION"
 
 echo "Copying files..."
-{
- echo "."
- tla inventory -s -d
-} |
- sed -e "s+(sp)+ +g" |
- while read dir; do
-  mkdir -p "=dist/$TITLE-$VERSION/$dir"
-  cp -a "$dir/.arch-ids" "=dist/$TITLE-$VERSION/$dir/.arch-ids"
- done
+if [ "$pkgdist_repository" == "tla" ]; then
+ {
+  echo "."
+  tla inventory -s -d
+ } |
+  sed -e "s+(sp)+ +g" |
+  while read dir; do
+   mkdir -p "=dist/$TITLE-$VERSION/$dir"
+   cp -a "$dir/.arch-ids" "=dist/$TITLE-$VERSION/$dir/.arch-ids"
+  done
 
-tla inventory -s -f |
- sed -e "s+(sp)+ +g" |
- while read file; do
-  cp -d "$file" "=dist/$TITLE-$VERSION/$file"
- done
+ tla inventory -s -f |
+  sed -e "s+(sp)+ +g" |
+  while read file; do
+   cp -d "$file" "=dist/$TITLE-$VERSION/$file"
+  done
 
-mkdir -p "=dist/$TITLE-$VERSION/{arch}"
-find "{arch}" -maxdepth 1 -mindepth 1 ! -name "++pristine-trees" |
- while read file; do
-  cp -a -d "$file" "=dist/$TITLE-$VERSION/$file"
- done
+ mkdir -p "=dist/$TITLE-$VERSION/{arch}"
+ find "{arch}" -maxdepth 1 -mindepth 1 ! -name "++pristine-trees" |
+  while read file; do
+   cp -a -d "$file" "=dist/$TITLE-$VERSION/$file"
+  done
+elif [ "$pkgdist_repository" == "svn" ]; then
+ mkdir -p "=dist/$TITLE-$VERSION"
+ svn ls -R |
+  while read path; do
+   if [ -d "$path" ]; then
+    mkdir -p "=dist/$TITLE-$VERSION/$path"
+   else
+    cp -a "$path" "=dist/$TITLE-$VERSION/$path"
+   fi
+  done
+fi
 
 echo "Making spec-file..."
 m4 \
