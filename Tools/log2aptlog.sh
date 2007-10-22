@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 . Tools/pkgdisk_config.sh
 . Tools/getversion.sh

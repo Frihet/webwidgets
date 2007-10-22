@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 . Tools/pkgdisk_config.sh
 
@@ -28,8 +28,9 @@ elif [ "$pkgdist_repository" == "svn" ]; then
  pkgdist_vendor () { echo $pkgdist_vendor; }
  pkgdist_version () {
   pkgdist_svnversion2pkg $(
-    grep revision= .svn/entries |
-     sed -e "s+.*revision=\"\(.*\)\".*+\1+g";
+    svn info |
+     grep Revision: |
+     sed -e "s+.*Revision: \(.*\)\+\1+g"
   )
  }
 
@@ -43,5 +44,9 @@ elif [ "$pkgdist_repository" == "svn" ]; then
    )-$1
  }
 
- pkgdist_svn_versionpath () { grep url= .svn/entries | sed -e "s+.*url=\".*://[^/]*/\(.*\)\"+\1+g"; }
+ pkgdist_svn_versionpath () {
+  svn info |
+   grep URL: |
+   sed -e "s+.*URL: .*://[^/]*/\(.*\)+\1+g"
+ }
 fi
