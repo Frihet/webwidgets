@@ -62,10 +62,12 @@ if [ "$pkgdist_repository" == "tla" ]; then
   done
 elif [ "$pkgdist_repository" == "svn" ]; then
  mkdir -p "=dist/$TITLE-$VERSION"
+ cp -a ".svn" "=dist/$TITLE-$VERSION/.svn"
  svn ls -R |
   while read path; do
    if [ -d "$path" ]; then
     mkdir -p "=dist/$TITLE-$VERSION/$path"
+    cp -a "$path/.svn" "=dist/$TITLE-$VERSION/$path/.svn"
    else
     cp -a "$path" "=dist/$TITLE-$VERSION/$path"
    fi
