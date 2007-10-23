@@ -244,9 +244,6 @@ class ListInput(Base.ValueInput, Base.StaticComposite):
 
     def draw(self, output_options):
         Base.ValueInput.draw(self, output_options)
-        children = self.draw_children(output_options)
-        child_names = children.keys()
-        child_names.sort()
         values = self.value
         if not isinstance(values, types.ListType):
             values = [values]
@@ -255,9 +252,10 @@ class ListInput(Base.ValueInput, Base.StaticComposite):
              %(description)s
             </option>""" % {'selected': child_name in values and 'selected="selected"' or '',
                            'value': child_name,
-                           'description': children[child_name]}
-            for child_name
-            in child_names])
+                           'description': child}
+            for child_name, child
+            in self.draw_children(output_options
+                                  ).iteritems()])
 
         return """<select %(html_attributes)s %(multiple)s %(size)s name="%(name)s" %(disabled)s>
          %(options)s

@@ -84,6 +84,12 @@ class Program(WebKit.Page.Page):
     
     request_nr = 0
 
+    def sleep(self, transaction):
+        import traceback
+        print "============SLEEP============"
+        traceback.print_stack()
+        super(Program, self).sleep(transaction)
+
     def writeHTML(self):
         """Main processing method, called by WebWare."""
 
@@ -118,14 +124,10 @@ class Program(WebKit.Page.Page):
     def webware_base(self):
         """@return: A URL to where the Webware installation is serving
         documents from."""
-        #### fixme ####
-        # name = "https not supported"
-        # description = """Yes, we should check for https, but WebWare
-        # is braindead and doesn't provide that info _at_all_!"""
-        #### end ####
+
         req = self.request()
 
-        # Work-around empty adapter name
+        # FIXME: Work-around empty adapter name
         adapter = req.adapterName()
 
         port = ''

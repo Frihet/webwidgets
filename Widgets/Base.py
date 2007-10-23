@@ -755,11 +755,19 @@ class ValueInput(Input):
     
     value = ''
 
-    def field_input(self, path, string_value):
-        self.value = string_value
+    multiple = False
+    """Handle multiple values"""
+
+    def field_input(self, path, *values):
+        if not self.multiple:
+            values = values[0]
+        self.value = values
 
     def field_output(self, path):
-        return [unicode(self.value)]
+        values = self.value
+        if not self.multiple or not isinstance(values, types.ListType):
+            values = [values]
+        return [unicode(value) for value in values]
 
     def value_changed(self, path, value):
         """This notification is sent to notify the widget that its value,
