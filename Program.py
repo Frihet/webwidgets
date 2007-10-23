@@ -84,11 +84,11 @@ class Program(WebKit.Page.Page):
     
     request_nr = 0
 
-    def sleep(self, transaction):
-        import traceback
-        print "============SLEEP============"
-        traceback.print_stack()
-        super(Program, self).sleep(transaction)
+#     def sleep(self, transaction):
+#         import traceback
+#         print "============SLEEP============"
+#         traceback.print_stack()
+#         super(Program, self).sleep(transaction)
 
     def writeHTML(self):
         """Main processing method, called by WebWare."""
