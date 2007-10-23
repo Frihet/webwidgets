@@ -324,6 +324,10 @@ input.error {
  vertical-align: top;
  text-align: left;
 }
+.Webwidgets-Widgets-Formatting-Field > .field > *{
+ vertical-align: top;
+ text-align: left;
+}
 
 .Webwidgets-Widgets-FileEditor-FileEditor {
  border: 1px solid black;
