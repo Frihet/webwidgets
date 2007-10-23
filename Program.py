@@ -131,7 +131,8 @@ class Program(WebKit.Page.Page):
         adapter = req.adapterName()
 
         port = ''
-        if req._environ['HTTPS'] == 'on':
+        print req._environ
+        if req._environ.get('HTTPS', 'off') == 'on':
             protocol = "https"
             if req._environ['SERVER_PORT'] != '443':
                 port = ':' + req._environ['SERVER_PORT']
