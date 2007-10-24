@@ -190,7 +190,7 @@ class Widget(Object):
 
     class HtmlId(object):
         def __get__(self, instance, owner):
-            if instance.parent is None:
+            if instance is None or instance.parent is None:
                 return None
             return Webwidgets.Utils.path_to_id(instance.path)
     html_id = HtmlId()
@@ -206,7 +206,7 @@ class Widget(Object):
 
     class HtmlAttributes(object):
         def __get__(self, instance, owner):
-            if instance.parent is None:
+            if instance is None or instance.parent is None:
                 return None
             return instance.draw_html_attributes(instance.path)            
     html_attributes = HtmlAttributes()
@@ -214,6 +214,8 @@ class Widget(Object):
     class Path(object):
         def __get__(self, instance, owner):
             """Returns the path of the widget within the widget tree."""
+            if instance is None:
+                return None
             node = instance
             path = []
             while node.parent and not node.root:
@@ -716,6 +718,8 @@ class Input(Widget):
 
     class HtmlClass(Widget.HtmlClass):
         def __get__(self, instance, owner):
+            if instance is None:
+                return None
             err = ''
             if instance.error:
                 err = ' error'
