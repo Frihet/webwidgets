@@ -181,6 +181,7 @@ class Program(WebKit.Page.Page):
 
             class Path(object):
                 def __get__(self, instance, owner):
+                    if instance is None: return None
                     path = instance._path
                     if isinstance(path, list):
                         return path

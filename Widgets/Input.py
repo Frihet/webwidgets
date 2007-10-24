@@ -317,7 +317,7 @@ class FileInput(Base.ValueInput, Base.StaticComposite):
     class Preview(Formatting.Media):
         class Content(object):
             def __get__(self, instance, owner):
-                if instance.parent is None:
+                if instance is None or instance.parent is None:
                     return None
                 return instance.parent.value
         content = Content()
@@ -369,6 +369,7 @@ class ToggleButton(Base.ValueInput, Button):
         def __init__(self):
             self.value=""
         def __get__(self, instance, owner):
+            if instance is None: return None
             return self.value + " " + ['toggle-false','toggle-true'][not not instance.value]
         def __set__(self, instance, value):
             self.value = value
@@ -376,6 +377,7 @@ class ToggleButton(Base.ValueInput, Button):
 
     class Title(object):
         def __get__(self, instance, owner):
+            if instance is None: return None
             if instance.value:
                 return instance.true_title
             return instance.false_title

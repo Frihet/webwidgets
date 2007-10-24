@@ -29,7 +29,7 @@ def method_to_mime_type(mime_type):
 
 class Value(object):
     def __get__(self, instance, owner):
-        if instance.parent is None:
+        if instance is None or instance.parent is None:
             return None
         return instance.parent.parent.value
     def __set__(self, instance, value):
@@ -54,7 +54,7 @@ class FileEditor(object):
     class DownloadLink(object):
         class Content(object):
             def __get__(self, instance, owner):
-                if instance.parent is None:
+                if instance is None or instance.parent is None:
                     return None
                 return instance.parent.value
         content = Content()
@@ -62,7 +62,7 @@ class FileEditor(object):
     class Hide(object):
         class Value(object):
             def __get__(self, instance, owner):
-                if instance.parent is None:
+                if instance is None or instance.parent is None:
                     return None
                 return instance.parent.expanded
             def __set__(self, instance, value):
@@ -77,7 +77,7 @@ class FileEditor(object):
             class Field(object):
                 class Value(object):
                     def __get__(self, instance, owner):
-                        if instance.parent is None:
+                        if instance is None or instance.parent is None:
                             return None
                         return getattr(instance.parent.parent.parent.value, 'filename', '&lt;No file&gt;')
                     def __set__(self, instance, value):
