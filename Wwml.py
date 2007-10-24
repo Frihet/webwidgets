@@ -252,11 +252,12 @@ def generate_widgets_from_file(modulename, filename, file, path = None, bind_con
         parent = '.'.join(module_parts[:-1])
         setattr(sys.modules[parent], module_parts[-1], module)
     try:
-        dom_node = xml.dom.minidom.parse(file).getElementsByTagNameNS(
-            'http://freecode.no/xml/namespaces/wwml-1.0', 'wwml')[0]
-    except pyexpat.ExpatError, e:
+        root_node = xml.dom.minidom.parse(file)
+    except Exception, e:
         e.args = ("Unable to parse file %s: %s" % (filename, e.args[0]),) + e.args[1:]
         raise e
+    dom_node = root_node.getElementsByTagNameNS(
+        'http://freecode.no/xml/namespaces/wwml-1.0', 'wwml')[0]
     return generate_value_for_node(
         module,
         dom_node,
