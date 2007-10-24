@@ -76,11 +76,11 @@ class Html(Base.Text, Base.StaticComposite):
             invisible_as_empty = True,
             include_attributes = True)
         html = self._(self.html, output_options)
+        if self.top_level is not None:
+            html = "<%(top_level)s %(html_attributes)s>" + html + "</%(top_level)s>"
         try:
-            if self.top_level is not None:
-                html = "<%(top_level)s %(html_attributes)s>" + html + "</%(top_level)s>"
             return html % children
-        except KeyError, e:
+        except (KeyError, TypeError), e:
             e.args = (self, self.path) + e.args + (self.html,)
             raise e
 
