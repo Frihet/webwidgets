@@ -79,6 +79,38 @@ class StringInput(Base.ValueInput):
         else:
             return '<input %(html_attributes)s %(size)s type="text" name="%(name)s" value="%(value)s" %(disabled)s />' % info
 
+class IntegerInput(StringInput):
+    def field_input(self, path, string_value):
+        try:
+            if string_value == '':
+                self.value = None
+            else:
+                self.value = int(string_value)
+        except ValueError, e:
+            self.value = None
+            self.error = unicode(e)
+                
+    def field_output(self, path):
+        if self.value is None:
+            return ['']
+        return [str(self.value)]
+
+class FloatInput(StringInput):
+    def field_input(self, path, string_value):
+        try:
+            if string_value == '':
+                self.value = None
+            else:
+                self.value = float(string_value)
+        except ValueError, e:
+            self.value = None
+            self.error = unicode(e)
+                
+    def field_output(self, path):
+        if self.value is None:
+            return ['']
+        return [str(self.value)]
+
 class PasswordInput(Base.ValueInput):
     """Like StringInput, but hides the user input"""
     def draw(self, output_options):
