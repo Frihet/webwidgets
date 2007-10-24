@@ -276,6 +276,7 @@ class FileInput(Base.ValueInput, Base.StaticComposite):
     def field_input(self, path, field_value):
         if path == self.path:
             if field_value != '':
+                field_value.filename = field_value.filename.decode('utf-8')
                 self.value = field_value
                 
     def field_output(self, path):
