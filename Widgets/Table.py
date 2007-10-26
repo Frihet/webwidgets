@@ -173,6 +173,8 @@ class Table(Base.ActionInput, Base.Composite):
     """This attribute is not used internally by the widget, but is
     intended to be used by the user-provide reread() method."""
 
+    printable_link_title = "Printable version"
+
     def __init__(self, session, win_id, **attrs):
         Base.Composite.__init__(self, session, win_id, **attrs)
         self.rows = ChildNodeRows(self, self.rows)
@@ -404,7 +406,7 @@ class Table(Base.ActionInput, Base.Composite):
         location = self.calculate_url({'widget': Webwidgets.Utils.path_to_id(self.path),
                                       'printable_version': 'yes'})
         return """<a class="printable" href="%(location)s">%(caption)s</a>""" % {
-            'caption': self._("Printable version", output_options),
+            'caption': self._(self.printable_link_title, output_options),
             'location': cgi.escape(location),
             }
 

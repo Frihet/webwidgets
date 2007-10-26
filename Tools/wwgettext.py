@@ -9,7 +9,10 @@ MethodWrapperType = type(Dummy.dummy.__call__)
 BuiltinFunctionOrMethod = type(reduce)
 
 excluded_types = set([id(MethodWrapperType), id(BuiltinFunctionOrMethod)])
-excluded_names = set(['__dict__', 'func_code', 'co_code'])
+excluded_names = set(['ww_classes', 'ww_class_path',
+                      '__dict__', '__builtins__', '__file__', '__path__', '__doc__', '__module__', '__name__',
+                      'func_dict', 'func_globals', 'func_name', 'func_code',
+                      'co_code'])
 
 def collect_recurse(obj, name, pool, res, level, mod, **options):
     if (   id(obj) in pool
@@ -33,7 +36,8 @@ def collect_recurse(obj, name, pool, res, level, mod, **options):
             res[mod] = {'module': new_mod,
                         'strings': set()}
 
-    #print (" " * level) + name
+    if 'verbose-collection' in options:
+        sys.stderr.write((" " * level) + name + '\n')
 
     if isinstance(obj, (str, unicode)):
         res[mod]['strings'].add(obj)
@@ -112,7 +116,8 @@ if __name__ == "__main__":
         for name, module in res.iteritems():
             if not 'module' in module or not hasattr(module['module'], '__file__'): continue
             if not 'decorate-all' in options and not name.startswith(mod_name): continue
-            print "Updating .pot-file for %s" % (name,)
+            if 'verbose-output' in options:
+                sys.stderr.write("Updating .pot-file for %s\n" % (name,))
             translations_dir = os.path.splitext(module['module'].__file__)[0] + os.path.extsep + 'translations'
             if not os.access(translations_dir, os.F_OK):
                 os.mkdir(translations_dir)

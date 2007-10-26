@@ -1,16 +1,65 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2007 FreeCode AS, Egil Möller <egil.moller@freecode.no>
+# Copyright (C) AUTHOR AND YEAR
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: 0.1\n"
-"POT-Creation-Date: Fri Sep 28 11:49:25 2007\n"
-"PO-Revision-Date: Fri Sep 28 11:49:25 2007\n"
-"Last-Translator: Egil Möller <egil.moller@freecode.no>\n"
-"Language-Team: None <egil.moller@freecode.no>\n"
+"POT-Creation-Date: Fri Oct 26 10:35:34 2007\n"
+"PO-Revision-Date: DATEANDTIME\n"
+"Last-Translator: EMAIL\n"
+"Language-Team: EMAIL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: ENCODING\n"
 
-msgid "Printable version"
-msgstr "Utskriftsvänlig version"
+msgid "/usr/lib/python2.3/site-packages/Webwidgets/Widgets/Table.py"
+msgstr 
+
+msgid "Group By Ordering List is a special kind of table view that\n"
+"    allows the user to sort the rows and simultaneously group the rows\n"
+"    according to their content and the sorting.\n"
+"\n"
+"    The content is provided as a list of rows, each row a dictionary\n"
+"    of cell values (strings or widgets).\n"
+"\n"
+"    The list can optionally be paged, and the application asked to\n"
+"    provide the previous or next page of content uppon user input.\n"
+"\n"
+"    In addition, the application should provide a dictionary of column\n"
+"    titles and handle the resorted notigication, resorting the rows\n"
+"    according to the sorting specification. Note: This is the\n"
+"    responsibility of the application, as the list shown might be only\n"
+"    one page of a huge set of data, so that resorting actually changes\n"
+"    the content alltogether. In addition, this allows the sorting to\n"
+"    be done by e.g a database back-end.\n"
+"    "
+msgstr 
+
+msgid "Group By Ordering List is a special kind of table view that allows\n"
+"the user to sort the rows and simultaneously group the rows according\n"
+"to their content and the sorting."
+msgstr 
+
+msgid "Webwidgets.Widgets.Table"
+msgstr 
+
+msgid "extend_to_dependent_columns"
+msgstr 
+
+msgid "reverse_dependency"
+msgstr 
+
+msgid "set_sort"
+msgstr 
+
+msgid "sort_to_classes"
+msgstr 
+
+msgid "sort_to_order_by"
+msgstr 
+
+msgid "sort_to_string"
+msgstr 
+
+msgid "string_to_sort"
+msgstr 
+
