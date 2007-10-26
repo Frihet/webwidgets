@@ -112,8 +112,10 @@ if __name__ == "__main__":
         for name, module in res.iteritems():
             if not 'module' in module or not hasattr(module['module'], '__file__'): continue
             if not 'decorate-all' in options and not name.startswith(mod_name): continue
+            print "Updating .pot-file for %s", (name,)
             translations_dir = os.path.splitext(module['module'].__file__)[0] + os.path.extsep + 'translations'
-            os.mkdir(translations_dir)
+            if not os.access(translations_dir, os.F_OK):
+                os.mkdir(translations_dir)
             file = open(os.path.join(translations_dir, 'Webwidgets.pot'), 'w')
             file.write(output(res[name]['strings']))
             file.close()
