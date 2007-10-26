@@ -11,7 +11,7 @@ BuiltinFunctionOrMethod = type(reduce)
 excluded_types = set([id(MethodWrapperType), id(BuiltinFunctionOrMethod)])
 excluded_names = set(['ww_classes', 'ww_class_path',
                       '__dict__', '__builtins__', '__file__', '__path__', '__doc__', '__module__', '__name__',
-                      'func_dict', 'func_globals', 'func_name', 'func_code',
+                      'func_dict', 'func_doc', 'func_globals', 'func_name', 'func_code',
                       'co_code'])
 
 def collect_recurse(obj, name, pool, res, level, mod, **options):
@@ -40,6 +40,8 @@ def collect_recurse(obj, name, pool, res, level, mod, **options):
         sys.stderr.write((" " * level) + name + '\n')
 
     if isinstance(obj, (str, unicode)):
+        if 'debug' in options:
+            obj = name + ': ' + obj
         res[mod]['strings'].add(obj)
     elif isinstance(obj, list):
         for name, sub_obj in enumerate(obj):
@@ -48,10 +50,19 @@ def collect_recurse(obj, name, pool, res, level, mod, **options):
         for name, sub_obj in obj.items():
             collect_recurse(sub_obj, str(name), pool, res, level + 1, mod, **options)
     else:
-        for name in dir(obj):
-            if name in excluded_names: continue
-            sub_obj = getattr(obj, name)
-            collect_recurse(sub_obj, name, pool, res, level + 1, mod, **options)
+        if hasattr(obj, '__bases__') and hasattr(obj, '__dict__'):
+            for sub_obj in obj.__bases__:
+                collect_recurse(sub_obj, getattr(sub_obj, '__name__', 'base'), pool, res, level + 1, mod, **options)
+            
+            for name, sub_obj in obj.__dict__.iteritems():
+                if name in excluded_names: continue
+                collect_recurse(sub_obj, name, pool, res, level + 1, mod, **options)
+        else:
+            for name in dir(obj):
+                if name in excluded_names: continue
+                sub_obj = getattr(obj, name)
+                collect_recurse(sub_obj, name, pool, res, level + 1, mod, **options)
+
     
 def collect(obj, **options):
     pool = set()
@@ -95,7 +106,7 @@ def output(strs):
             res.append('"%s\\n"\n' % (escape(part),))
         if parts[-1]:
             res.append('"%s"\n' % (escape(parts[-1]),))
-        res.append("msgstr ""\n\n")
+        res.append("msgstr \"\"\n\n")
     return ''.join(res)
 
 if __name__ == "__main__":
