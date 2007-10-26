@@ -64,14 +64,14 @@ def collect_recurse(obj, name, pool, res, level, mod, **options):
                 collect_recurse(sub_obj, name, pool, res, level + 1, mod, **options)
 
     
-def collect(obj, **options):
+def collect(objs, **options):
     pool = set()
     pool.add(id(pool))
     res = {None: {'strings': set()}}
     pool.add(id(res))
 
-    mod = getattr(obj, '__module__', None)    
-    collect_recurse(obj, '_', pool, res, 0, mod, **options)
+    for obj in objs:
+        collect_recurse(obj, '_', pool, res, 0, getattr(obj, '__module__', None), **options)
     return res
 
 header = """# SOME DESCRIPTIVE TITLE.
@@ -118,15 +118,46 @@ if __name__ == "__main__":
             del args[pos]
             value = True
             if '=' in option:
-                option, value = arg.split('=', 1)
+                option, value = option.split('=', 1)
             options[option] = value
+
+    if 'help' in options:
+
+        print """
+
+xgettext-ish program for python that uses introspection and thus works
+on code loaded from non .py-files, e.g. wwml-files.
+
+Usage: wwgettext.py [OPTIONS] modulename [modulename ...]
+Where the available options are:
+
+    --decorate=all
+
+        For each mmodule reached, create a directory
+        module.translations (wherever the module resides), and within
+        it a Webwidgets.pot file with the collected strings. Does not
+        print collected strings on the screen.
+        
+    --decorate=modulename
+
+        Like --decorate=all except only modules whose names begin with
+        modulename are decorated.
+
+    --verbose-output
+    --verbose-collection
+        
+        """
+        sys.exit(0)
     
-    mod_name = args[0]
-    res = collect(Webwidgets.Utils.load_class(mod_name), **options)
+    res = collect([Webwidgets.Utils.load_class(mod_name)
+                   for mod_name in args],
+                  **options)
     if 'decorate' in options:
         for name, module in res.iteritems():
             if not 'module' in module or not hasattr(module['module'], '__file__'): continue
-            if not 'decorate-all' in options and not name.startswith(mod_name): continue
+            if options['decorate'] != 'all':
+                if not name.startswith(options['decorate']): continue
+                
             if 'verbose-output' in options:
                 sys.stderr.write("Updating .pot-file for %s\n" % (name,))
             translations_dir = os.path.splitext(module['module'].__file__)[0] + os.path.extsep + 'translations'
@@ -136,4 +167,4 @@ if __name__ == "__main__":
             file.write(output(res[name]['strings']))
             file.close()
     else:
-        print output(res[mod_name]['strings'])
+        print output(res[args[0]]['strings'])
