@@ -90,10 +90,24 @@ class GNUTranslations(gettext.GNUTranslations, NullTranslations):
         except KeyError:
             return NullTranslations.ungettext(self, msgid1, msgid2, n)
 
+    def __repr__(self):
+        return "<%(class)s %(localedir)s:%(domain)s:%(languages)s %(fallback)s>" % {
+            'class': self.__class__.__module__ + '.' + self.__class__.__name__,
+            'domain': self.domain,
+            'localedir': self.localedir,
+            'languages': ','.join(self.languages),
+            'fallback': repr(self._fallback)}
+
+    def __str__(self): return repr(self)
+    def __unicode__(self): return repr(self)
+
 def translation(domain, localedir=None, languages=None,
                 class_=GNUTranslations, fallback=False):
     try:
         res = gettext.translation(domain, localedir, languages, class_)
+        res.domain = domain
+        res.localedir = localedir
+        res.languages = languages
         if fallback:
             res.add_fallback(fallback)
         return res

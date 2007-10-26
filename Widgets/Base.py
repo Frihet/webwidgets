@@ -421,7 +421,7 @@ class Widget(Object):
         return ()
 
     def _get_translations(cls, languages, fallback = False):
-        if not hasattr(cls, '__translations__'): cls.__translations__ = {}
+        if '__translations__' not in cls.__dict__: cls.__translations__ = {}
         if languages not in cls.__translations__:
             obj = Webwidgets.Utils.Gettext.NullTranslations()
             for base in cls.__bases__:
@@ -435,6 +435,7 @@ class Widget(Object):
                     localedir = localedir,
                     languages = languages,
                     fallback = obj)
+
             cls.__translations__[languages] = obj
         return cls.__translations__[languages]
     _get_translations = classmethod(_get_translations)
