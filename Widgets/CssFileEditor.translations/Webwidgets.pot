@@ -1,0 +1,51 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) AUTHOR AND YEAR
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.1\n"
+"POT-Creation-Date: Fri Oct 26 11:35:32 2007\n"
+"PO-Revision-Date: DATEANDTIME\n"
+"Last-Translator: EMAIL\n"
+"Language-Team: EMAIL\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+
+msgid "<div >\n"
+"%(input)s</div>\n"
+"<div >\n"
+"%(update)s</div>\n"
+"<div >\n"
+"%(preview)s</div>\n"
+msgstr ""
+
+msgid "CssFileEditor"
+msgstr ""
+
+msgid "Update"
+msgstr ""
+
+msgid "Webwidgets.Widgets.CssFileEditorCallbacks"
+msgstr ""
+
+msgid "div"
+msgstr ""
+
+msgid "http://freecode.no/xml/namespaces/wwml-1.0"
+msgstr ""
+
+msgid "http://www.w3.org/TR/REC-html40"
+msgstr ""
+
+msgid "input"
+msgstr ""
+
+msgid "preview"
+msgstr ""
+
+msgid "text/css"
+msgstr ""
+
+msgid "update"
+msgstr ""
+

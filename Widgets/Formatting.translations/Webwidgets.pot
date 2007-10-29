@@ -1,0 +1,54 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) AUTHOR AND YEAR
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.1\n"
+"POT-Creation-Date: Fri Oct 26 11:35:32 2007\n"
+"PO-Revision-Date: DATEANDTIME\n"
+"Last-Translator: EMAIL\n"
+"Language-Team: EMAIL\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+
+msgid msgstr ""
+
+msgid "\n"
+msgstr ""
+
+msgid "%(child)s"
+msgstr ""
+
+msgid "&lt;No file&gt;"
+msgstr ""
+
+msgid "</div>\n"
+msgstr ""
+
+msgid "</ul>"
+msgstr ""
+
+msgid "<div %(html_attributes)s>"
+msgstr ""
+
+msgid "<div %(html_attributes)s>%(child)s</div>"
+msgstr ""
+
+msgid "<li>%(child)s</li>"
+msgstr ""
+
+msgid "<link %(html_attributes)s href=\"%(style)s\" title=\"%(title)s\" rel=\"stylesheet\" type=\"text/css\" />"
+msgstr ""
+
+msgid "<span %(html_attributes)s>%(child)s</span>"
+msgstr ""
+
+msgid "<style %(html_attributes)s type='text/css'>%(style)s</style>"
+msgstr ""
+
+msgid "<ul %(html_attributes)s>"
+msgstr ""
+
+msgid "text/html"
+msgstr ""
+

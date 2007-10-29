@@ -1,0 +1,123 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) AUTHOR AND YEAR
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.1\n"
+"POT-Creation-Date: Fri Oct 26 11:35:32 2007\n"
+"PO-Revision-Date: DATEANDTIME\n"
+"Last-Translator: EMAIL\n"
+"Language-Team: EMAIL\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+
+msgid "%(FileLabel)s%(File)s%(Action)s"
+msgstr ""
+
+msgid "1/File"
+msgstr ""
+
+msgid "<div class='top'>\n"
+"%(DownloadLink)s%(Hide)s</div>\n"
+"%(InfoGroup)s%(Editors)s%(Upload)s"
+msgstr ""
+
+msgid "Action"
+msgstr ""
+
+msgid "All files"
+msgstr ""
+
+msgid "CSS stylesheet"
+msgstr ""
+
+msgid "Clear"
+msgstr ""
+
+msgid "DownloadLink"
+msgstr ""
+
+msgid "Edit file"
+msgstr ""
+
+msgid "Editors"
+msgstr ""
+
+msgid "Field"
+msgstr ""
+
+msgid "File"
+msgstr ""
+
+msgid "FileEditor"
+msgstr ""
+
+msgid "FileLabel"
+msgstr ""
+
+msgid "Filename"
+msgstr ""
+
+msgid "HTML document"
+msgstr ""
+
+msgid "Hide"
+msgstr ""
+
+msgid "Hide editor"
+msgstr ""
+
+msgid "InfoGroup"
+msgstr ""
+
+msgid "Label"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "No file"
+msgstr ""
+
+msgid "No file created or uploaded"
+msgstr ""
+
+msgid "Plain text"
+msgstr ""
+
+msgid "Preview"
+msgstr ""
+
+msgid "Upload"
+msgstr ""
+
+msgid "Upload file: "
+msgstr ""
+
+msgid "Webwidgets.Widgets.FileEditorCallbacks"
+msgstr ""
+
+msgid "default"
+msgstr ""
+
+msgid "div"
+msgstr ""
+
+msgid "http://freecode.no/xml/namespaces/wwml-1.0"
+msgstr ""
+
+msgid "http://www.w3.org/TR/REC-html40"
+msgstr ""
+
+msgid "none"
+msgstr ""
+
+msgid "text__css"
+msgstr ""
+
+msgid "text__html"
+msgstr ""
+
+msgid "text__plain"
+msgstr ""
+
