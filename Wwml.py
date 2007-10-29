@@ -34,20 +34,17 @@ Webwidgets directory.
 
 import Webwidgets.Widgets.Base, Utils
 import xml.dom.minidom, pyexpat
-import os.path, sys, types, re, time, datetime
+import os.path, sys, types, time, datetime
 
 debug_loader = False
 debug_subclass = False
 
-markup_clean_space_re = re.compile(r'[ \t\n]+')
 def generate_parts_for_node(module, node, using = [], class_path = [], bind_context = [], html_context = []):
     attributes = []
     texts = []
     for child in node.childNodes:
         if child.nodeType == node.TEXT_NODE:
-            data = markup_clean_space_re.sub(' ', child.data).strip()
-            if data != '':
-                texts.append(data)
+            texts.append(child.data)
         elif child.nodeType == node.ELEMENT_NODE:
             if child.namespaceURI == 'http://freecode.no/xml/namespaces/wwml-1.0':
                 if child.localName == 'variable':
