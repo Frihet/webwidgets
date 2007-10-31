@@ -39,6 +39,14 @@ body {
  border: none;
 }
 
+.Webwidgets-Widgets-MainMenu-MainMenu > .menu {
+}
+
+.Webwidgets-Widgets-MainMenu-MainMenu > .tabs {
+ display: none;
+ margin: 0;
+}
+
 .Webwidgets-Widgets-Table-Table {
  padding-: 2px;
 }
@@ -266,7 +274,6 @@ input.error {
 
 .Webwidgets-Widgets-Composite-Dialog {
  position: fixed;
- overflow: auto;
  left: 20%;
  right: 20%;
  top: 20%;
@@ -275,21 +282,38 @@ input.error {
  position: asbolute;
  color: #000000;
  background-color: #ffffff;
+ z-index: 1;
 }
 
 .Webwidgets-Widgets-Composite-Dialog .dialog-head {
  background: #f2bfff;
  border-bottom: 2px solid #dd55ff;
  padding: 2px;
+ position: absolute;
+ top: 0;
+ height: 26px;
+ left: 0;
+ right: 0;
 }
 
 .Webwidgets-Widgets-Composite-Dialog .dialog-body {
  padding: 10px;
+ overflow: auto;
+ position: absolute;
+ top: 30px;
+ bottom: 50px;
+ left: 0;
+ right: 0;
 }
 
 .Webwidgets-Widgets-Composite-Dialog .dialog-buttons {
  border-top: 2px solid #dd55ff;
  padding: 10px;
+ position: absolute;
+ height: 30px;
+ bottom: 0;
+ left: 0;
+ right: 0;
 }
 
 .Webwidgets-Widgets-CssFileEditor-CssFileEditor {
@@ -310,13 +334,6 @@ input.error {
  display: block;
 }
 
-.Webwidgets-Widgets-Formatting-Fieldgroup {
- display: table;
- border-bottom: 1px solid black;
- padding: 5pt;
- margin-bottom: 10pt;
-}
-
 .Webwidgets-Widgets-Formatting-Field {
  display: table-row;
 }
@@ -324,10 +341,44 @@ input.error {
  display: table-cell;
  vertical-align: top;
  text-align: left;
+ padding: 2px;
 }
 .Webwidgets-Widgets-Formatting-Field > .field > *{
  vertical-align: top;
  text-align: left;
+ width: 100%;
+ margin: 0;
+}
+
+.Webwidgets-Widgets-Formatting-Field:first-child > *{
+ padding-top: 10px;
+}
+.Webwidgets-Widgets-Formatting-Field:last-child > *{
+ padding-bottom: 10px;
+}
+
+.Webwidgets-Widgets-Formatting-Fieldgroup:first-child > .Webwidgets-Widgets-Formatting-Field:first-child > *{
+ padding-top: 2px;
+}
+
+.Webwidgets-Widgets-Formatting-Fieldgroup:last-child > .Webwidgets-Widgets-Formatting-Field:last-child > *{
+ padding-bottom: 2px;
+}
+
+.Webwidgets-Widgets-Formatting-Fieldgroup {
+ display: table;
+ border-bottom: 1px solid black;
+ padding: 5pt;
+ margin-bottom: 10pt;
+ border-collapse: collapse;
+}
+
+.Webwidgets-Widgets-Formatting-Fieldgroup > .Webwidgets-Widgets-Formatting-Fieldgroup {
+ display: table-row-group;
+}
+
+.Webwidgets-Widgets-Formatting-Fieldgroup:last-child {
+ border-bottom: none;
 }
 
 .Webwidgets-Widgets-FileEditor-FileEditor {
