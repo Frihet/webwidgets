@@ -279,10 +279,11 @@ class TabbedView(Base.ActionInput, Tabset):
                     info['children'] = draw_tabs(children)
                     tabs.append("<li><span>%(caption)s</span>%(children)s</li>" % info)
             return """
-                    <ul class="tabs">
+                    <ul id="%(widget_id)s" class="tabs">
                      %(tabs)s
                     </ul>
-                   """ % {'tabs': '\n'.join(tabs)}
+                   """ % {'widget_id': widget_id,
+                          'tabs': '\n'.join(tabs)}
         return draw_tabs(self.draw_page_titles(output_options))
         
     def draw(self, output_options):

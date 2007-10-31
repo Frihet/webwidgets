@@ -52,7 +52,8 @@ var %(child_name)s_menu = new dhtmlXMenuBarPanelObject(%(parent_name)s_menu,%(ch
             return tabs
 
         return """
-                <div id="%(widget_id)s-_-menu"></div>
+                <div id="%(widget_id)s-_-menu" class="menu"></div>
+                %(noscript_version)s
                 <input type="hidden" id="%(widget_id)s-_-value" name="%(widget_id)s" value="" />
                 <script language="javascript">
 function onButtonClick(itemId, itemValue) {
@@ -64,7 +65,8 @@ menu_bar_menu.setOnClickHandler(onButtonClick);
 %(tabs)s
 
                 </script>
-               """ % {'widget_id': widget_id,
+               """ % {'noscript_version': Composite.TabbedView.draw_tabs(self, output_options),
+                      'widget_id': widget_id,
                       'title': self._(self.title, output_options),
                       'tabs': '\n'.join(draw_tabs(self.draw_page_titles(output_options)))}
  

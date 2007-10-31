@@ -40,9 +40,13 @@ def normalize_fields(fields):
     fields = dict(fields)
     for fieldname in fields.keys():
         if isinstance(fields[fieldname], list):
+            fields[fieldname] = [field for field in fields[fieldname]
+                                 if field != '']
             if len(fields[fieldname]) == 1:
                 fields[fieldname] = fields[fieldname][0]
-        if fields[fieldname] == '':
+            elif len(fields[fieldname]) == 0:
+                del fields[fieldname]
+        elif fields[fieldname] == '':
             del fields[fieldname]
     return fields
 
