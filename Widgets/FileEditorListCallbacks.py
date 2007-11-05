@@ -77,3 +77,6 @@ class FileEditorList(object):
                     if file is not None:
                         instance.add_row(file)
     value = FileListValue()
+
+    def reset(self):
+        del self.rows[:]

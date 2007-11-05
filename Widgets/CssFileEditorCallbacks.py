@@ -1,8 +1,8 @@
-import Formatting, cgi
+import Base, Formatting, cgi
 
-class CssFileEditor(object):
-    value = None
-    
+class CssFileEditor(Base.ValueInput):
+    original_value = value = None
+
     class input(object):
         class Value(object):
             def __get__(self, instance, owner):

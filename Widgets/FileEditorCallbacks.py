@@ -35,13 +35,13 @@ class Value(object):
     def __set__(self, instance, value):
         instance.parent.parent.value = value
         
-class FileEditor(object):
+class FileEditor(Webwidgets.ValueInput):
     def __init__(self, session, win_id, **attr):
         Webwidgets.Html.__init__(self, session, win_id, **attr)
         self.value_changed(self.path, self.value)
         self.expanded_changed(self.path, self.expanded)
 
-    value = None
+    original_value = value = None
     error = None
     expanded = False
 

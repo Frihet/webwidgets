@@ -27,7 +27,7 @@ class DateInput(Input.StringInput, Base.DirectoryServer):
     Date Selector Widget.
     """
     format = '%Y-%m-%d'
-    value = datetime.datetime.now()
+    original_value = value = datetime.datetime.now()
 
     def draw(self, output_options):
         """

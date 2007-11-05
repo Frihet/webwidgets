@@ -757,11 +757,16 @@ class ValueInput(Input):
     """Base class for all input widgets that holds some kind of value
     (e.g. all butt buttons). It defines a notification for changing
     the value hold by the widget."""
+
+    original_value = ''
     
     value = ''
 
     multiple = False
     """Handle multiple values"""
+
+    def reset(self):
+        self.value = self.original_value
 
     def field_input(self, path, *values):
         if not self.multiple:

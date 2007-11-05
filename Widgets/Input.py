@@ -80,6 +80,8 @@ class StringInput(Base.ValueInput):
             return '<input %(html_attributes)s %(size)s type="text" name="%(name)s" value="%(value)s" %(disabled)s />' % info
 
 class IntegerInput(StringInput):
+    original_value = None
+    value = None
     def field_input(self, path, string_value):
         try:
             if string_value == '':
@@ -96,6 +98,8 @@ class IntegerInput(StringInput):
         return [str(self.value)]
 
 class FloatInput(StringInput):
+    original_value = None
+    value = None
     def field_input(self, path, string_value):
         try:
             if string_value == '':
@@ -204,6 +208,8 @@ class RadioButtonGroup(Base.ValueInput):
     """Group of radio buttons must be joined together. This is
     performed by setting the 'group' attribute on each of the
     L{RadioInput} in the group to the same instance of this class."""
+
+    #FIXME: What should original_value really be here? '' or None, or something else?
     
     def __init__(self, session, win_id, *arg, **kw):
         Base.ValueInput.__init__(self, session, win_id, *arg, **kw)
@@ -271,8 +277,8 @@ class ListInput(Base.ValueInput, Base.StaticComposite):
     
     size = 0
     """Size of the widget."""
-    
-    value = []
+
+    original_value = value = []
 
     def draw(self, output_options):
         Base.ValueInput.draw(self, output_options)
@@ -303,7 +309,7 @@ class ListInput(Base.ValueInput, Base.StaticComposite):
 
 class FileInput(Base.ValueInput, Base.StaticComposite):
     """File upload box"""
-    value = None
+    original_value = value = None
     
     def field_input(self, path, field_value):
         if path == self.path:
@@ -363,7 +369,7 @@ class ToggleButton(Base.ValueInput, Button):
 
     true_title = 'True'
     false_title = 'False'
-    value=False
+    original_value = value = False
 
     class HtmlClass(object):
         def __init__(self):
@@ -395,7 +401,7 @@ class ToggleButton(Base.ValueInput, Button):
         return []
 
 class FieldStorageInput(Base.ValueInput):
-    value = None
+    original_value = value = None
 
     def field_input(self, path, string_value):
         if self.value is None:
