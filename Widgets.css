@@ -361,11 +361,11 @@ input.error {
  display: table-row-group;
 }
 
-.Webwidgets-Widgets-Formatting-VerticalFieldgroup > .Webwidgets-Widgets-Formatting-AbstractFieldgroup {
+.Webwidgets-Widgets-Formatting-VerticalFieldgroup > .Webwidgets-Widgets-Formatting-VerticalFieldgroup {
  border-bottom: 1px solid black;
 }
 
-.Webwidgets-Widgets-Formatting-VerticalFieldgroup > .Webwidgets-Widgets-Formatting-AbstractFieldgroup:last-child {
+.Webwidgets-Widgets-Formatting-VerticalFieldgroup > .Webwidgets-Widgets-Formatting-VerticalFieldgroup:last-child {
  border-bottom: none;
 }
 
@@ -381,13 +381,20 @@ input.error {
  display: table-column-group;
 }
 
-.Webwidgets-Widgets-Formatting-HorizontalFieldgroup > .Webwidgets-Widgets-Formatting-AbstractFieldgroup {
+.Webwidgets-Widgets-Formatting-HorizontalFieldgroup > .Webwidgets-Widgets-Formatting-HorizontalFieldgroup {
  border-right: 1px solid black;
 }
 
-.Webwidgets-Widgets-Formatting-HorizontalFieldgroup > .Webwidgets-Widgets-Formatting-AbstractFieldgroup:last-child {
+.Webwidgets-Widgets-Formatting-HorizontalFieldgroup > .Webwidgets-Widgets-Formatting-HorizontalFieldgroup:last-child {
  border-right: none;
 }
+
+.Webwidgets-Widgets-Formatting-HorizontalFieldgroup > .Webwidgets-Widgets-Formatting-Field > *{
+ display: block;
+}
+
+
+
 
 .Webwidgets-Widgets-FileEditor-FileEditor {
  border: 1px solid black;
