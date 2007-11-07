@@ -72,5 +72,45 @@
     <w:Html id="cell_2_0_1_3" html="Foo" />
    </w:GridLayout>
   </w:Html>
+
+  <w:Html id="field" title="Field group layout">
+   <w:Fieldgroup id="f1">
+    <w:Field id="f1f1" Label=":Html:Fieldgroup1/Field1/Label" Field=":Html:Fieldgroup1/Field1/Field" />
+    <w:Field id="f1f2" Label=":Html:Fieldgroup1/Field2/Label" Field=":Html:Fieldgroup1/Field2/Field" />
+   </w:Fieldgroup>
+
+   <w:Fieldgroup id="f2">
+    <w:Field id="f2f1" Label=":Html:Fieldgroup2/Field1/Label" Field=":Html:Fieldgroup2/Field1/Field" />
+    <w:Field id="f2f2" Label=":Html:Fieldgroup2/Field2/Label" Field=":Html:Fieldgroup2/Field2/Field" />
+   </w:Fieldgroup>
+
+   <w:Fieldgroup id="f3">
+    <w:Fieldgroup id="f31">
+     <w:Field id="f31f1" Label=":Html:Fieldgroup3/Fieldgroup1/Field1/Label" Field=":Html:Fieldgroup3/Fieldgroup1/Field1/Field" />
+     <w:Field id="f31f2" Label=":Html:Fieldgroup3/Fieldgroup1/Field2/Label" Field=":Html:Fieldgroup3/Fieldgroup1/Field2/Field" />
+    </w:Fieldgroup>
+    <w:Fieldgroup id="f32">
+     <w:Field id="f32f1" Label=":Html:Fieldgroup3/Fieldgroup2/Field1/Label" Field=":Html:Fieldgroup3/Fieldgroup2/Field1/Field" />
+     <w:Field id="f32f2" Label=":Html:Fieldgroup3/Fieldgroup2/Field2/Label" Field=":Html:Fieldgroup3/Fieldgroup2/Field2/Field" />
+    </w:Fieldgroup>
+
+    <w:HorizontalFieldgroup id="f33">
+     <w:Field id="f32f1" Label=":Html:Fieldgroup3/Fieldgroup3/Field1/Label" Field=":Html:Fieldgroup3/Fieldgroup3/Field1/Field" />
+     <w:Field id="f32f2" Label=":Html:Fieldgroup3/Fieldgroup3/Field2/Label" Field=":Html:Fieldgroup3/Fieldgroup3/Field2/Field" />
+    </w:HorizontalFieldgroup>
+
+    <w:HorizontalFieldgroup id="f34">
+     <w:Fieldgroup id="f341">
+      <w:Field id="f341f1" Label=":Html:Fieldgroup3/Fieldgroup4/Fieldgroup1/Field1/Label" Field=":Html:Fieldgroup3/Fieldgroup4/Fieldgroup1/Field1/Field" />
+      <w:Field id="f341f2" Label=":Html:Fieldgroup3/Fieldgroup4/Fieldgroup1/Field2/Label" Field=":Html:Fieldgroup3/Fieldgroup4/Fieldgroup1/Field2/Field" />
+     </w:Fieldgroup>
+     <w:Fieldgroup id="f342">
+      <w:Field id="f342f1" Label=":Html:Fieldgroup3/Fieldgroup4/Fieldgroup2/Field1/Label" Field=":Html:Fieldgroup3/Fieldgroup4/Fieldgroup2/Field1/Field" />
+      <w:Field id="f342f2" Label=":Html:Fieldgroup3/Fieldgroup4/Fieldgroup2/Field2/Label" Field=":Html:Fieldgroup3/Fieldgroup4/Fieldgroup2/Field2/Field" />
+     </w:Fieldgroup>
+    </w:HorizontalFieldgroup>
+   </w:Fieldgroup>
+  </w:Html>
+
  </w:Tabset>
 </w:wwml>

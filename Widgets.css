@@ -350,35 +350,43 @@ input.error {
  margin: 0;
 }
 
-.Webwidgets-Widgets-Formatting-Field:first-child > *{
- padding-top: 10px;
-}
-.Webwidgets-Widgets-Formatting-Field:last-child > *{
- padding-bottom: 10px;
-}
-
-.Webwidgets-Widgets-Formatting-Fieldgroup:first-child > .Webwidgets-Widgets-Formatting-Field:first-child > *{
- padding-top: 2px;
-}
-
-.Webwidgets-Widgets-Formatting-Fieldgroup:last-child > .Webwidgets-Widgets-Formatting-Field:last-child > *{
- padding-bottom: 2px;
-}
-
-.Webwidgets-Widgets-Formatting-Fieldgroup {
+.Webwidgets-Widgets-Formatting-AbstractFieldgroup {
  display: table;
- border-bottom: 1px solid black;
  padding: 5pt;
- margin-bottom: 10pt;
  border-collapse: collapse;
+ margin: 5pt;
 }
 
-.Webwidgets-Widgets-Formatting-Fieldgroup > .Webwidgets-Widgets-Formatting-Fieldgroup {
+.Webwidgets-Widgets-Formatting-VerticalFieldgroup > .Webwidgets-Widgets-Formatting-VerticalFieldgroup {
  display: table-row-group;
 }
 
-.Webwidgets-Widgets-Formatting-Fieldgroup:last-child {
+.Webwidgets-Widgets-Formatting-VerticalFieldgroup > .Webwidgets-Widgets-Formatting-AbstractFieldgroup {
+ border-bottom: 1px solid black;
+}
+
+.Webwidgets-Widgets-Formatting-VerticalFieldgroup > .Webwidgets-Widgets-Formatting-AbstractFieldgroup:last-child {
  border-bottom: none;
+}
+
+.Webwidgets-Widgets-Formatting-HorizontalFieldgroup > * {
+ display: table-cell;
+}
+
+.Webwidgets-Widgets-Formatting-VerticalFieldgroup > .Webwidgets-Widgets-Formatting-HorizontalFieldgroup {
+ display: table-row;
+}
+
+.Webwidgets-Widgets-Formatting-HorizontalFieldgroup > .Webwidgets-Widgets-Formatting-HorizontalFieldgroup {
+ display: table-column-group;
+}
+
+.Webwidgets-Widgets-Formatting-HorizontalFieldgroup > .Webwidgets-Widgets-Formatting-AbstractFieldgroup {
+ border-right: 1px solid black;
+}
+
+.Webwidgets-Widgets-Formatting-HorizontalFieldgroup > .Webwidgets-Widgets-Formatting-AbstractFieldgroup:last-child {
+ border-right: none;
 }
 
 .Webwidgets-Widgets-FileEditor-FileEditor {

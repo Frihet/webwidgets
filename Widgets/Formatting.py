@@ -353,9 +353,15 @@ class Field(Label):
             e.args = (self, self.path) + e.args
             raise e
 
-class Fieldgroup(List):
+class AbstractFieldgroup(List):
     pre = "<div %(html_attributes)s>"
     post = "</div>\n"
+
+class VerticalFieldgroup(AbstractFieldgroup): pass
+class HorizontalFieldgroup(AbstractFieldgroup): pass
+
+# Compatibility and convienence
+class Fieldgroup(VerticalFieldgroup): pass
 
 class GridLayout(Base.StaticComposite, GridLayoutModel.GridLayout):
     """GridLayout that works similar to a GtkTable in Gtk - child widgets
