@@ -53,7 +53,7 @@ def normalize_fields(fields):
 def decode_fields(fields):
     fields = dict(fields)
     for fieldname in fields.keys():
-        if isinstance(fields[fieldname], list):            
+        if isinstance(fields[fieldname], list):
             fields[fieldname] = [decode_field(item)
                                  for item in fields[fieldname]]
         else:
@@ -83,9 +83,9 @@ class Program(WebKit.Page.Page):
     method.
     """
 
-    profile = True
+    profile = False
     debug = False
-    
+
     request_nr = 0
 
 #     def sleep(self, transaction):
@@ -98,7 +98,7 @@ class Program(WebKit.Page.Page):
         """Main processing method, called by WebWare."""
 
         type(self).request_nr += 1
-        
+
         session = self.session()
         servlet = self.request().servletURI()
         if not session.hasValue(servlet):
@@ -154,7 +154,7 @@ class Program(WebKit.Page.Page):
         implement the L{Webwidgets.Program.Program.Session.new_window}
         method.
         """
-        
+
         debug_arguments = False
         debug_fields = False
         debug_field_input = False
@@ -227,7 +227,7 @@ class Program(WebKit.Page.Page):
 
             def __repr__(self):
                 return "Notification(%s)" % (unicode(self),)
-            
+
             def __unicode__(self):
                 return "%s/%s <- %s(%s, %s)" % (
                     self.widget, self.path, self.message, self.args, self.kw)
@@ -260,7 +260,7 @@ class Program(WebKit.Page.Page):
         def process_arguments(self, window, location, arguments):
             """Process arguments (query parameters) and location and
             generate notifications for those that have changed."""
-            
+
             arguments = dict(arguments)
             extra = {}
             for argumentname in arguments.keys():
@@ -317,7 +317,7 @@ class Program(WebKit.Page.Page):
         def process_fields(self, window, fields):
             """Process fields (POST field values) and generate
             notifications for those that have changed."""
-            
+
             if self.debug_fields:
                 print "Fields:", fields
                 print "Original:", dict([(name, value.field_output(Utils.id_to_path(name)))
@@ -327,7 +327,7 @@ class Program(WebKit.Page.Page):
             sorted_fields = window.fields.items()
             sorted_fields.sort(lambda (name1, field1), (name2, field2):
                               field1.input_order(field2))
-                
+
             for fieldname, field in sorted_fields:
                 path = Utils.id_to_path(fieldname)
                 # Check an extra time that the widget is
@@ -357,7 +357,7 @@ class Program(WebKit.Page.Page):
             self.output = None
 
             # extraURLPath begins with a /, so remove the first empty item in location
-            location = req.extraURLPath().split('/')[1:]            
+            location = req.extraURLPath().split('/')[1:]
 
             base_options = {'widget_class': Constants.DEFAULT_WIDGET_CLASS,
                            'win_id': Constants.DEFAULT_WINDOW,
@@ -393,10 +393,10 @@ class Program(WebKit.Page.Page):
                 self.output = {'Status': '404 No such window',
                                'Content-Type': 'text/plain',
                                Constants.OUTPUT: '404 No such window'}
-                
+
             if 'Status' not in self.output:
                 self.output['Status'] = '200 OK'
-                
+
             for key, value in self.output.iteritems():
                 if key not in (Constants.OUTPUT, Constants.FINAL_OUTPUT):
                     response.setHeader(key.encode('utf-8'), value.encode('utf-8'))
@@ -486,7 +486,7 @@ class Program(WebKit.Page.Page):
                     if (    'widget' in output_options
                         and output_options['widget'] != Constants.DEFAULT_WIDGET):
                         path.append('_' + output_options['widget'])
-                
+
             if 'location' in output_options and output_options['location']:
                 path.extend(output_options['location'])
 
@@ -504,7 +504,7 @@ class Program(WebKit.Page.Page):
             args = ''
             if url_arg_list:
                 args = '?' + urllib.urlencode(url_arg_list)
-                
+
             return '/'.join(path) + args
 
         def redirect(self, output_options, arguments):
@@ -512,7 +512,7 @@ class Program(WebKit.Page.Page):
                            'Location': self.calculate_url(output_options,
                                                          arguments)}
             raise Constants.OutputGiven
-        
+
         def new_window(self, win_id):
             """You should override this to return a Window instance in
             your own application."""
