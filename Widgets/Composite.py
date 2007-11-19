@@ -4,7 +4,8 @@
 
 # Webwidgets web developement framework
 # Copyright (C) 2006 uAnywhere, Egil Moeller <redhog@redhog.org>
-# Copyright (C) 2007 FreeCode AS, Egil Moeller <redhog@redhog.org>
+# Copyright (C) 2007 Egil Moeller <redhog@redhog.org>
+# Copyright (C) 2007 FreeCode AS, Egil Moeller <egil.moller@freecode.no>
 # Copyright (C) 2007 FreeCode AS, Axel Liljencrantz <axel.liljencrantz@freecode.no>
 
 # This program is free software; you can redistribute it and/or modify
@@ -94,106 +95,6 @@ class Dialog(Formatting.Html):
     def selected(self, path, value):
         if path != self.path: return
         self.visible = False
-
-class Tree(Base.Input):
-    """Expandable tree widget similar to the tree-view in Nautilus or
-    Windows Explorer. The tree must support the render_tree() protocol."""
-    
-    def __init__(self, session, win_id, **attrs):
-        Base.Widget.__init__(self, session, win_id, **attrs)
-
-    # FIXME: Hardcoded URL!
-    pict_url = 'pictures/'
-    pict_pattern = 'grime.%(name)s.png'
-    pict_icon = ((('doc', '[=]'),
-                 ('doc', '[=]')),
-                (('dir', '\\_\\'),
-                 ('dir.open', '\\_/')))            
-    pict_expander = (((('middle', '|--'),
-                      ('end', '`--')),
-                     (('middle', '|--'),
-                      ('end', '`--'))),
-                    ((('middle.expandable', '|-+'),
-                      ('end.expandable', '`-+')),
-                     (('middle.expanded', '|--'),
-                      ('end.expanded', '`--'))))
-
-    pict_indent = (('vertical', '|&nbsp;&nbsp;'),
-                  ('empty', '&nbsp;&nbsp;&nbsp;'))
-
-    def draw(self, output_options):
-        path = self.path
-        
-        def render_entry(node, sibling, res, indent=''):
-            siblings = node.parent and len(node.parent.sub_nodes) or 1
-            sub_nodes = len(node.sub_nodes)
-
-            res = (res or '') + '<div class="Tree-Row">' + indent
-            res += '<span class="%s">' % ['Tree-ShadedNode', 'Tree-Node'][node.leaf]
-
-            node_path = path + ['node'] + node.path
-            
-            expander_img, expander_alt = self.pict_expander[sub_nodes > 0 or not node.updated
-                                                         ][node.expanded
-                                                           ][sibling == siblings - 1]
-            expand_params = {'src': self.pict_url + self.pict_pattern % {'name':expander_img},
-                            'alt': expander_alt,
-                            'html_id': Webwidgets.Utils.path_to_id(node_path + ['expand']),
-                            'path': node_path + ['expand']}
-            if sub_nodes or not node.updated:
-                self.register_input(expand_params[path])
-                res += '<input type="image" name="%(html_id)s" value="%(html_id)s" src="%(src)s" alt="%(alt)s" id="%(html_id)s" />' % expand_params
-            else:
-                res += '<img src="%(src)s" alt="%(alt)s" id="%(html_id)s" />' % expand_params
-
-            select_img, select_alt = self.pict_icon[sub_nodes > 0][node.expanded]
-            select_params = {'img_path': node_path + ['select_img'],
-                            'img_id': Webwidgets.Utils.path_to_id(node_path + ['select_img']),
-                            'img_src': self.pict_url + self.pict_pattern % {'name':select_img},
-                            'img_alt': select_alt,
-                            'label_path': node_path + ['select_label'],
-                            'label_id': Webwidgets.Utils.path_to_id(node_path + ['select_label'])}
-            if node.translation is not None:
-                select_params['label_text'] = str(unicode(node.translation))
-            elif node.path:
-                select_params['label_text'] = str(unicode(node.path[-1]))
-            else:
-                select_params['label_text'] = str(unicode(getattr(self.tree, 'root_name', 'Root')))
-                
-            if node.leaf:
-                self.register_input(select_params['img_path'])
-                self.register_input(select_params['label_path'])
-                res += ('<input type="image" name="%(img_id)s" value="%(img_id)s" src="%(img_src)s" alt="%(img_alt)s" id="%(img_id)s" />' +
-                        '<input type="submit" name="%(label_id)s" value="%(label_text)s" id="%(label_id)s" />') % select_params
-            else:
-                res += '<img src="%(img_src)s" alt="%(img_alt)s" id="%(img_id)s" />%(label_text)s' % select_params
-
-            res += "</span></div>\n"
-
-            indent_img, indent_alt = self.pict_indent[sibling == siblings - 1]
-            sub_indent = ' ' + indent + '<img src="%(img_src)s" alt="%(img_alt)s" />' % {
-                'img_src': self.pict_url + self.pict_pattern % {'name':indent_img},
-                'img_alt': indent_alt}
-
-            return (res, (sub_indent,), {})
-
-        return '<div class="Tree" id="%s">%s\n</div>\n' % (
-            Webwidgets.Utils.path_to_id(path),
-            self.tree.render_tree(render_entry, '    '))
-
-    def value_changed(self, path, value):
-        if path != self.path: return
-        if value is '': return
-        sub_path = path[path.index('node')+1:-1]
-        action = path[-1]
-        
-        if action == 'expand':
-            self.tree.expand_path(sub_path, 1)
-        elif action in ('select_label', 'select_img'):
-            self.notify('selected', sub_path)
-
-    def selected(self, path, item):
-        print '%s.selected(%s, %s)' % ('.'.join([str(x) for x in self.path]), '.'.join(path), '.'.join(item))
 
 class Tabset(Base.StaticComposite):
     def get_pages(self, path = []):

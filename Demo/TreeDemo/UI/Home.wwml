@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!--
+ Webwidgets web developement framework example file
+ Copyright (C) 2006 uAnywhere, Egil Moeller <redhog@redhog.org>
+ Copyright (C) 2007 FreeCode AS, Egil Moeller <redhog@redhog.org>
+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+-->
+<w:wwml
+ xmlns="http://www.w3.org/TR/REC-html40"
+ xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
+ xmlns:html="http://www.w3.org/TR/REC-html40"
+ bind="Webwidgets.Demo.WidgetParade.Callbacks.Home"
+ >
+ <w:Html id="Home" title="Home">
+  <w:Media id="logo" />
+
+  <h1>Welcome to the RedBack Webwidgets demo application</h1>
+
+  <p>This demo application shows off most of the standard widgets
+  that comes bundled with Webwidgets. It is both a good starting
+  point to shop for widgets, and to learn how to create a
+  Webwidgets application.</p>
+
+  <p>Use the menu at the top to navigate among the different kinds
+  of widgets.</p>
+
+  <h1>Some (helpful) links</h1>
+  <ul>
+   <li><a href="http://code.freecode.no/Projects/Webwidgets">The Webwidgets homepage</a></li>
+   <li><a href="http://freecode.no">Homepage FreeCode, the project sponsor</a></li>
+   <li><a href="http://redhog.org">Homepage RedHog, the original author</a></li>
+  </ul>
+ </w:Html>
+</w:wwml>

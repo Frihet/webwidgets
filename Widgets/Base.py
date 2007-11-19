@@ -824,7 +824,9 @@ class DirectoryServer(Widget):
                                  *path))
         try:
             return {Webwidgets.Constants.FINAL_OUTPUT: file.read(),
-                    'Content-type': Webwidgets.Utils.FileHandling.extension_to_mime_type[ext]}
+                    'Content-type': Webwidgets.Utils.FileHandling.extension_to_mime_type[ext],
+                    'Cache-Control': 'public; max-age=3600'
+                    }
         finally:
             file.close()
     class_output = classmethod(class_output)

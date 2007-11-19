@@ -52,6 +52,7 @@ from Widgets.Base import *
 from Widgets.Formatting import *
 from Widgets.Input import *
 from Widgets.Composite import *
+from Widgets.Tree import *
 from Widgets.Table import *
 from Widgets.LogIn import *
 from Widgets.DateInput import *
