@@ -180,12 +180,6 @@ class Table(Base.ActionInput, Base.Composite):
         self.rows = ChildNodeRows(self, self.rows)
         self.reread()
 
-#     def function(self, path, function, row):
-#         raise Exception('%s: Function %s not implemented (called for row %s)' % (Webwidgets.Utils.path_to_id(path), function, row))
-
-#     def group_function(self, path, function):
-#         raise Exception('%s: Function %s not implemented' % (Webwidgets.Utils.path_to_id(path), function))
-
     def reread(self):
         """Reload the list after a repaging/resorting here. This is
         not a notification to allow for it to be called from __init__.
@@ -319,6 +313,7 @@ class Table(Base.ActionInput, Base.Composite):
             for column in group_order:
                 merge = (    column not in self.dont_merge_columns
                          and node['children']
+                         and 'value' in node['children'][-1]
                          and (   not self.dont_merge_widgets
                               or (    not isinstance(node['children'][-1]['value'], Base.Widget)
                                   and not isinstance(row[column], Base.Widget)))
@@ -331,7 +326,28 @@ class Table(Base.ActionInput, Base.Composite):
                                              'children':[]})
                 node = node['children'][-1]
                 node['rows'] += 1
+            if 'ww_expanded' in row:
+                tree['children'].append({'level': 1,
+                                         'top': row_num,
+                                         'rows': 1,
+                                         'expanded': row['ww_expanded'],
+                                         'children':[]})
+        print "============================"
+        print self.visible_columns()
+        print self.debug_print_tree(tree)
         return tree
+
+    def debug_print_tree(self, tree, indent = 0):
+        node = dict(tree)
+        if 'value' not in node:
+            if 'expanded' in node:
+                node['value'] = '**%s**' % (node['expanded'],)
+            else:
+                node['value'] = '[]'
+        if 'top' not in node: node['top'] = '[]'
+        return  '\n'.join(  [(' ' * indent) + "%(level)s:%(top)s[%(rows)s]: %(value)s" % node]
+                          + [self.debug_print_tree(child, indent + 1)
+                             for child in node['children']])
 
     def draw_tree(self, node, output_options, group_order, visible_columns, first_level = 0, last_level = 0):
         if node['children']:
@@ -356,6 +372,8 @@ class Table(Base.ActionInput, Base.Composite):
             column = group_order[node['level'] - 1]
             rows[0][visible_columns.keys().index(column)
                     ] = self.draw_node(output_options, node, column, first_level, last_level)
+        elif 'expanded' in node:
+            rows[0] = [self.draw_extended_row(output_options, node['expanded'], visible_columns, node['top'])]
         return rows
 
     def draw_node(self, output_options, node, column, first_level, last_level):
@@ -367,6 +385,12 @@ class Table(Base.ActionInput, Base.Composite):
             'class': 'column_first_level_%s column_last_level_%s' % (first_level, last_level),
             'content': self.draw_child(self.path + ["cell_%s_%s" % (row, column)],
                                       value, output_options, True)}
+
+    def draw_extended_row(self, output_options, value, visible_columns, row):
+        return '<td colspan="%(colspan)s" class="expanded">%(content)s</td>' % {
+            'colspan': len(visible_columns),
+            'content': self.draw_child(self.path + ["cell_%s_%s" % (row, 'ww_expanded')],
+                                       value, output_options, True)}
 
     def draw_paging_buttons(self, output_options):
         if self.argument_name:
@@ -540,8 +564,8 @@ class Table(Base.ActionInput, Base.Composite):
             rows = self.get_rows()
         if rows:
             rendered_rows = self.draw_tree(self.rows_to_tree(rows, group_order),
-                                         output_options,
-                                         group_order, visible_columns)
+                                           output_options,
+                                           group_order, visible_columns)
         else:
             rendered_rows = []
 
