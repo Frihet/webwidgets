@@ -279,23 +279,41 @@ input.error {
  color: #000000;
 }
 
+.Webwidgets-Widgets-Composite-StaticDialog {
+ border: 1px solid black;
+ color: #000000;
+ background-color: #ffffff;
+}
+
+.Webwidgets-Widgets-Composite-StaticDialog .dialog-head {
+ background: #f2bfff;
+ border-bottom: 2px solid #dd55ff;
+ padding: 2px;
+ height: 26px;
+}
+
+.Webwidgets-Widgets-Composite-StaticDialog .dialog-body {
+ padding: 10px;
+ overflow: auto;
+}
+
+.Webwidgets-Widgets-Composite-StaticDialog .dialog-buttons {
+ border-top: 2px solid #dd55ff;
+ padding: 10px;
+ height: 30px;
+}
+
 .Webwidgets-Widgets-Composite-Dialog {
  position: fixed;
+ position: asbolute;
  left: 20%;
  right: 20%;
  top: 20%;
  bottom: 20%;
- border: 1px solid black;
- position: asbolute;
- color: #000000;
- background-color: #ffffff;
  z-index: 1;
 }
 
 .Webwidgets-Widgets-Composite-Dialog .dialog-head {
- background: #f2bfff;
- border-bottom: 2px solid #dd55ff;
- padding: 2px;
  position: absolute;
  top: 0;
  height: 26px;
@@ -304,8 +322,6 @@ input.error {
 }
 
 .Webwidgets-Widgets-Composite-Dialog .dialog-body {
- padding: 10px;
- overflow: auto;
  position: absolute;
  top: 30px;
  bottom: 50px;
@@ -314,8 +330,6 @@ input.error {
 }
 
 .Webwidgets-Widgets-Composite-Dialog .dialog-buttons {
- border-top: 2px solid #dd55ff;
- padding: 10px;
  position: absolute;
  height: 30px;
  bottom: 0;

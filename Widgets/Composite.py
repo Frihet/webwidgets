@@ -47,7 +47,7 @@ class LanguageSelector(LanguageInput):
             instance.session.languages = (value,)
     value = Value()
 
-class Dialog(Formatting.Html):
+class StaticDialog(Formatting.Html):
     """Dialogs provides an easy way to let the user select one of a
     few different options, while providing the user with some longer
     explanation/description of the options. Options are described
@@ -92,6 +92,7 @@ class Dialog(Formatting.Html):
             children = {'Buttons': self.Buttons(session, win_id, self.buttons)},
             **attrs)
 
+class Dialog(StaticDialog):
     def selected(self, path, value):
         if path != self.path: return
         self.visible = False
