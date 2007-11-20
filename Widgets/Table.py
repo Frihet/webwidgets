@@ -347,9 +347,9 @@ class Table(Base.ActionInput, Base.Composite):
                           + [self.debug_print_tree(child, indent + 1)
                              for child in node['children']])
 
-    def draw_tree(self, node, output_options, group_order, visible_columns, first_level = 0, last_level = 0):
+    def draw_tree(self, node, rows, output_options, group_order, visible_columns, first_level = 0, last_level = 0):
         if node['children']:
-            rows = []
+            rendered_rows = []
             children = len(node['children'])
             for child in xrange(0, children):
                 sub_first = first_level
@@ -358,21 +358,23 @@ class Table(Base.ActionInput, Base.Composite):
                     sub_first += 1
                 if child != children - 1:
                     sub_last += 1
-                rows.extend(self.draw_tree(node['children'][child],
-                                          output_options,
-                                          group_order, visible_columns,
-                                          sub_first, sub_last))
+                rendered_rows.extend(self.draw_tree(node['children'][child],
+                                                    rows,
+                                                    output_options,
+                                                    group_order, visible_columns,
+                                                    sub_first, sub_last))
         else:
-            rows = []
-            for row in xrange(0, node['rows']):
-                rows.append({'cells':[''] * len(visible_columns)})
+            rendered_rows = []
+            for row in xrange(node['top'], node['top'] + node['rows']):
+                rendered_rows.append({'cells':[''] * len(visible_columns),
+                                      'row': rows[row]})
         if 'value' in node:
             column = group_order[node['level'] - 1]
-            rows[0]['cells'][visible_columns.keys().index(column)
+            rendered_rows[0]['cells'][visible_columns.keys().index(column)
                              ] = self.draw_node(output_options, node, column, first_level, last_level)
         elif 'expanded' in node:
-            rows[0]['cells'] = [self.draw_extended_row(output_options, node['expanded'], visible_columns, node['top'])]
-        return rows
+            rendered_rows[0]['cells'] = [self.draw_extended_row(output_options, node['expanded'], visible_columns, node['top'])]
+        return rendered_rows
 
     def draw_node(self, output_options, node, column, first_level, last_level):
         return self.draw_cell(output_options, node['value'], node['top'], column, node['rows'], first_level, last_level)
@@ -517,6 +519,7 @@ class Table(Base.ActionInput, Base.Composite):
                 if function_active[function]:
                     self.session.windows[self.win_id].fields[Webwidgets.Utils.path_to_id(self.path + ['_', 'function', function])] = self
             for row_num in xrange(0, len(rows)):
+                enabled_functions = rows[row_num]['row'].get('ww_functions', True)
                 functions = '<td class="functions">%s</td>' % ''.join([
                     """<button
                         type="submit"
@@ -529,7 +532,8 @@ class Table(Base.ActionInput, Base.Composite):
                                                                  'disabled': ['disabled="disabled"', ''][function_active[function]],
                                                                  'title': self._(title, output_options),
                                                                  'row': row_num}
-                    for function, title in self.functions.iteritems()])
+                    for function, title in self.functions.iteritems()
+                    if enabled_functions is True or function in enabled_functions])
                 rows[row_num]['cells'].insert(function_position, functions)
     
             headings.insert(function_position, '<th class="column">&nbsp;</th>')
@@ -553,15 +557,16 @@ class Table(Base.ActionInput, Base.Composite):
                                                      if column not in group_order]
 
         headings = self.draw_headings(visible_columns, reverse_dependent_columns, output_options)
-        # Why we need this test here: rows_to_tree would create an empty
-        # top-node for an empty set of rows, which draw_tree would
-        # render into a single row...
         if 'printable_version' in output_options:
             rows = self.get_all_rows()
         else:
             rows = self.get_rows()
+        # Why we need this test here: rows_to_tree would create an empty
+        # top-node for an empty set of rows, which draw_tree would
+        # render into a single row...
         if rows:
             rendered_rows = self.draw_tree(self.rows_to_tree(rows, group_order),
+                                           rows,
                                            output_options,
                                            group_order, visible_columns)
         else:
