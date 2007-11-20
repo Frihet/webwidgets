@@ -41,7 +41,8 @@
     <w:list id="dont_merge_columns"><w:string id="bar">bar</w:string></w:list>
     <w:list id="rows">
      <w:dict id="row1" foo="47" bar="11" fie="56" x="X" y="Y" z="Z" />
-     <w:dict id="row2" foo="47" bar="11" fie="56" x="X" y="Y" z="Z">
+     <w:dict id="row2" foo="47" bar="11" fie="56" x="X" y="Y" z="Z" />
+     <w:dict id="row2.1" foo="47" bar="11" fie="56" x="X" y="Y" z="Z">
       <w:Html id="ww_expanded">
        Sed ut perspiciatis, unde omnis iste natus error sit voluptatem
        accusantium doloremque laudantium, totam rem aperiam eaque

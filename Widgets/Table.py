@@ -157,7 +157,7 @@ class Table(Base.ActionInput, Base.Composite):
     columns = {}
     argument_name = None
     dependent_columns = {}
-    functions = {}
+    functions = {} # FXIME: Add per-row function visibility
     group_functions = {}
     disabled_functions = []
     function_position = 0
@@ -310,31 +310,29 @@ class Table(Base.ActionInput, Base.Composite):
             row = rows[row_num]
             node = tree
             node['rows'] += 1
-            for column in group_order:
-                merge = (    column not in self.dont_merge_columns
-                         and node['children']
-                         and 'value' in node['children'][-1]
-                         and (   not self.dont_merge_widgets
-                              or (    not isinstance(node['children'][-1]['value'], Base.Widget)
-                                  and not isinstance(row[column], Base.Widget)))
-                         and node['children'][-1]['value'] == row[column])
-                if not merge:
-                    node['children'].append({'level': node['level'] + 1,
-                                             'top': row_num,
-                                             'rows': 0,
-                                             'value': row[column],
-                                             'children':[]})
-                node = node['children'][-1]
-                node['rows'] += 1
             if 'ww_expanded' in row:
-                tree['children'].append({'level': 1,
+                node['children'].append({'level': node['level'] + 1,
                                          'top': row_num,
                                          'rows': 1,
                                          'expanded': row['ww_expanded'],
                                          'children':[]})
-        print "============================"
-        print self.visible_columns()
-        print self.debug_print_tree(tree)
+            else:
+                for column in group_order:
+                    merge = (    column not in self.dont_merge_columns
+                             and node['children']
+                             and 'value' in node['children'][-1]
+                             and (   not self.dont_merge_widgets
+                                  or (    not isinstance(node['children'][-1]['value'], Base.Widget)
+                                      and not isinstance(row[column], Base.Widget)))
+                             and node['children'][-1]['value'] == row[column])
+                    if not merge:
+                        node['children'].append({'level': node['level'] + 1,
+                                                 'top': row_num,
+                                                 'rows': 0,
+                                                 'value': row[column],
+                                                 'children':[]})
+                    node = node['children'][-1]
+                    node['rows'] += 1
         return tree
 
     def debug_print_tree(self, tree, indent = 0):
@@ -367,13 +365,13 @@ class Table(Base.ActionInput, Base.Composite):
         else:
             rows = []
             for row in xrange(0, node['rows']):
-                rows.append([''] * len(visible_columns))
+                rows.append({'cells':[''] * len(visible_columns)})
         if 'value' in node:
             column = group_order[node['level'] - 1]
-            rows[0][visible_columns.keys().index(column)
-                    ] = self.draw_node(output_options, node, column, first_level, last_level)
+            rows[0]['cells'][visible_columns.keys().index(column)
+                             ] = self.draw_node(output_options, node, column, first_level, last_level)
         elif 'expanded' in node:
-            rows[0] = [self.draw_extended_row(output_options, node['expanded'], visible_columns, node['top'])]
+            rows[0]['cells'] = [self.draw_extended_row(output_options, node['expanded'], visible_columns, node['top'])]
         return rows
 
     def draw_node(self, output_options, node, column, first_level, last_level):
@@ -387,7 +385,7 @@ class Table(Base.ActionInput, Base.Composite):
                                       value, output_options, True)}
 
     def draw_extended_row(self, output_options, value, visible_columns, row):
-        return '<td colspan="%(colspan)s" class="expanded">%(content)s</td>' % {
+        return '<td colspan="%(colspan)s" class="expanded column_first_level_1 column_last_level_1">%(content)s</td>' % {
             'colspan': len(visible_columns),
             'content': self.draw_child(self.path + ["cell_%s_%s" % (row, 'ww_expanded')],
                                        value, output_options, True)}
@@ -532,14 +530,14 @@ class Table(Base.ActionInput, Base.Composite):
                                                                  'title': self._(title, output_options),
                                                                  'row': row_num}
                     for function, title in self.functions.iteritems()])
-                rows[row_num].insert(function_position, functions)
+                rows[row_num]['cells'].insert(function_position, functions)
     
             headings.insert(function_position, '<th class="column">&nbsp;</th>')
 
     def draw_table(self, headings, rows, output_options):
         return "<table>%(headings)s%(content)s</table>" % {
             'headings': '<tr>%s</tr>' % (' '.join(headings),),
-            'content': '\n'.join(['<tr>%s</tr>' % (''.join(row),) for row in rows])}
+            'content': '\n'.join(['<tr>%s</tr>' % (''.join(row['cells']),) for row in rows])}
             
     def draw(self, output_options):
         widget_id = Webwidgets.Utils.path_to_id(self.path)
