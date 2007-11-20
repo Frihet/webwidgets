@@ -1,6 +1,10 @@
 Black: #000000
 White: #ffffff
 
+Extra light red: #fdf5ff
+Extra light blue: #f5f5ff
+Extra light green: #ced3cb
+
 Light red: #f2bfff
 Light blue: #bfbfff
 Light green: #b3d39e

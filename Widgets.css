@@ -136,10 +136,17 @@ body {
  background: #ffffff;
 }
 
+.Webwidgets-Widgets-Table-Table tr.row_even {
+ background: #ffffff;
+}
+.Webwidgets-Widgets-Table-Table tr.row_odd {
+ background: #f5f5ff;
+}
+
 .Webwidgets-Widgets-Table-Table td {
  vertical-align: top;
 }
-.Webwidgets-Widgets-Table-Table td.column_last_level_1 {
+Webwidgets-Widgets-Table-Table td.column_last_level_1 {
  border-bottom: solid 2px #5555ff;
 }
 .Webwidgets-Widgets-Table-Table td.column_last_level_2 {
@@ -171,7 +178,7 @@ body {
  margin: 0px;
  border: 0px;
  font: inherit;
- background: #ffffff;
+ background: inherit;
 }
 
 

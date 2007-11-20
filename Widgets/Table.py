@@ -157,7 +157,7 @@ class Table(Base.ActionInput, Base.Composite):
     columns = {}
     argument_name = None
     dependent_columns = {}
-    functions = {} # FXIME: Add per-row function visibility
+    functions = {}
     group_functions = {}
     disabled_functions = []
     function_position = 0
@@ -374,10 +374,12 @@ class Table(Base.ActionInput, Base.Composite):
         return self.draw_cell(output_options, row, value, row_num, 'ww_expanded', 1, len(visible_columns), first_level, last_level)
 
     def draw_cell(self, output_options, row, value, row_num, column_name, rowspan, colspan, first_level, last_level):
+        html_class = row.get('ww_class', [])
         return '<td rowspan="%(rowspan)s" colspan="%(colspan)s" class="%(class)s">%(content)s</td>' % {
             'rowspan': rowspan,
             'colspan': colspan,
-            'class': 'column_first_level_%s column_last_level_%s' % (first_level, last_level),
+            'class': ' '.join(html_class + ['column_first_level_%s' % first_level,
+                                            'column_last_level_%s' % last_level]),
             'content': self.draw_child(self.path + ["cell_%s_%s" % (row_num, column_name)],
                                        value, output_options, True)}
 
@@ -530,7 +532,9 @@ class Table(Base.ActionInput, Base.Composite):
     def draw_table(self, headings, rows, output_options):
         return "<table>%(headings)s%(content)s</table>" % {
             'headings': '<tr>%s</tr>' % (' '.join(headings),),
-            'content': '\n'.join(['<tr>%s</tr>' % (''.join(row['cells']),) for row in rows])}
+            'content': '\n'.join(['<tr class="%s">%s</tr>' % ('row_' + ['even', 'odd'][row_num % 2],
+                                                              ''.join(row['cells']),)
+                                  for (row_num, row) in enumerate(rows)])}
             
     def draw(self, output_options):
         widget_id = Webwidgets.Utils.path_to_id(self.path)

@@ -44,6 +44,7 @@
      <w:dict id="row2" foo="47" bar="11" fie="56" x="X" y="Y" z="Z" />
      <w:dict id="row2.1" foo="47" bar="11" fie="56" x="X" y="Y" z="Z">
       <w:list id="ww_functions" />
+      <w:list id="ww_class" foo="FOO" />
       <w:Html id="ww_expanded">
        Sed ut perspiciatis, unde omnis iste natus error sit voluptatem
        accusantium doloremque laudantium, totam rem aperiam eaque
