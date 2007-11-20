@@ -314,7 +314,7 @@ class Table(Base.ActionInput, Base.Composite):
                 node['children'].append({'level': node['level'] + 1,
                                          'top': row_num,
                                          'rows': 1,
-                                         'expanded': row['ww_expanded'],
+                                         'value': row['ww_expanded'],
                                          'children':[]})
             else:
                 for column in group_order:
@@ -334,18 +334,6 @@ class Table(Base.ActionInput, Base.Composite):
                     node = node['children'][-1]
                     node['rows'] += 1
         return tree
-
-    def debug_print_tree(self, tree, indent = 0):
-        node = dict(tree)
-        if 'value' not in node:
-            if 'expanded' in node:
-                node['value'] = '**%s**' % (node['expanded'],)
-            else:
-                node['value'] = '[]'
-        if 'top' not in node: node['top'] = '[]'
-        return  '\n'.join(  [(' ' * indent) + "%(level)s:%(top)s[%(rows)s]: %(value)s" % node]
-                          + [self.debug_print_tree(child, indent + 1)
-                             for child in node['children']])
 
     def draw_tree(self, node, rows, output_options, group_order, visible_columns, first_level = 0, last_level = 0):
         if node['children']:
@@ -368,28 +356,29 @@ class Table(Base.ActionInput, Base.Composite):
             for row in xrange(node['top'], node['top'] + node['rows']):
                 rendered_rows.append({'cells':[''] * len(visible_columns),
                                       'row': rows[row]})
+        row = rendered_rows[0]['row']
         if 'value' in node:
-            column = group_order[node['level'] - 1]
-            rendered_rows[0]['cells'][visible_columns.keys().index(column)
-                             ] = self.draw_node(output_options, node, column, first_level, last_level)
-        elif 'expanded' in node:
-            rendered_rows[0]['cells'] = [self.draw_extended_row(output_options, node['expanded'], visible_columns, node['top'])]
+            if 'ww_expanded' in row:
+                rendered_rows[0]['cells'] = [
+                    self.draw_extended_row(output_options, row, node['value'], visible_columns, node['top'], first_level, last_level)]
+            else:
+                column = group_order[node['level'] - 1]
+                rendered_rows[0]['cells'][visible_columns.keys().index(column)
+                                          ] = self.draw_node(output_options, row, node, column, first_level, last_level)
         return rendered_rows
 
-    def draw_node(self, output_options, node, column, first_level, last_level):
-        return self.draw_cell(output_options, node['value'], node['top'], column, node['rows'], first_level, last_level)
-        
-    def draw_cell(self, output_options, value, row, column, rowspan, first_level, last_level):
-        return '<td rowspan="%(rowspan)s" class="%(class)s">%(content)s</td>' % {
-            'rowspan': rowspan,
-            'class': 'column_first_level_%s column_last_level_%s' % (first_level, last_level),
-            'content': self.draw_child(self.path + ["cell_%s_%s" % (row, column)],
-                                      value, output_options, True)}
+    def draw_node(self, output_options, row, node, column, first_level, last_level):
+        return self.draw_cell(output_options, row, node['value'], node['top'], column, node['rows'], 1, first_level, last_level)
 
-    def draw_extended_row(self, output_options, value, visible_columns, row):
-        return '<td colspan="%(colspan)s" class="expanded column_first_level_1 column_last_level_1">%(content)s</td>' % {
-            'colspan': len(visible_columns),
-            'content': self.draw_child(self.path + ["cell_%s_%s" % (row, 'ww_expanded')],
+    def draw_extended_row(self, output_options, row, value, visible_columns, row_num, first_level, last_level):
+        return self.draw_cell(output_options, row, value, row_num, 'ww_expanded', 1, len(visible_columns), first_level, last_level)
+
+    def draw_cell(self, output_options, row, value, row_num, column_name, rowspan, colspan, first_level, last_level):
+        return '<td rowspan="%(rowspan)s" colspan="%(colspan)s" class="%(class)s">%(content)s</td>' % {
+            'rowspan': rowspan,
+            'colspan': colspan,
+            'class': 'column_first_level_%s column_last_level_%s' % (first_level, last_level),
+            'content': self.draw_child(self.path + ["cell_%s_%s" % (row_num, column_name)],
                                        value, output_options, True)}
 
     def draw_paging_buttons(self, output_options):
