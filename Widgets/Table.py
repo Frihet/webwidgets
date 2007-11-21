@@ -174,6 +174,8 @@ class Table(Base.ActionInput, Base.Composite):
     intended to be used by the user-provide reread() method."""
 
     printable_link_title = "Printable version"
+    printable_link_only_when_other_buttons = False
+    button_frame_only_when_usefull = True
 
     def __init__(self, session, win_id, **attrs):
         Base.Composite.__init__(self, session, win_id, **attrs)
@@ -392,6 +394,8 @@ class Table(Base.ActionInput, Base.Composite):
         page_active = self.get_active(self.path + ['_', 'page'])
         if page_active:
             self.session.windows[self.win_id].fields[page_id] = self
+        back_active = page_active and self.page > 1
+        forward_active = page_active and self.page < self.get_pages()
         info = {'html_id': page_id,
                 'first': 1,
                 'previous': self.page - 1,
@@ -399,11 +403,11 @@ class Table(Base.ActionInput, Base.Composite):
                 'pages': self.get_pages(),
                 'next': self.page + 1,
                 'last': self.get_pages(),
-                'back_active': ['', 'disabled="disabled"'][not page_active or self.page <= 1],
-                'forward_active': ['', 'disabled="disabled"'][not page_active or self.page >= self.get_pages()],
+                'back_active': ['', 'disabled="disabled"'][not back_active],
+                'forward_active': ['', 'disabled="disabled"'][not forward_active],
                 }
             
-        return """
+        return (back_active or forward_active, """
 <span class="left">
  <button type="submit" %(back_active)s id="%(html_id)s-_-first" name="%(html_id)s" value="%(first)s">&lt;&lt;</button>
  <button type="submit" %(back_active)s id="%(html_id)s-_-previous" name="%(html_id)s" value="%(previous)s">&lt;</button>
@@ -415,15 +419,15 @@ class Table(Base.ActionInput, Base.Composite):
  <button type="submit" %(forward_active)s id="%(html_id)s-_-next" name="%(html_id)s" value="%(next)s">&gt;</button>
  <button type="submit" %(forward_active)s id="%(html_id)s-_-last" name="%(html_id)s" value="%(last)s">&gt;&gt;</button>
 </span>
-""" % info
+""" % info)
 
     def draw_printable_link(self, output_options):
         location = self.calculate_url({'widget': Webwidgets.Utils.path_to_id(self.path),
                                       'printable_version': 'yes'})
-        return """<a class="printable" href="%(location)s">%(caption)s</a>""" % {
+        return (True, """<a class="printable" href="%(location)s">%(caption)s</a>""" % {
             'caption': self._(self.printable_link_title, output_options),
             'location': cgi.escape(location),
-            }
+            })
 
     def draw_group_functions(self, output_options):
         function_active = {}
@@ -434,7 +438,7 @@ class Table(Base.ActionInput, Base.Composite):
             if function_active[function]:
                 self.session.windows[self.win_id].fields[Webwidgets.Utils.path_to_id(self.path + ['_', 'group_function', function])] = self
 
-        return '\n'.join([
+        res = '\n'.join([
             """<button
                 type="submit"
                 id="%(html_id)s"
@@ -446,9 +450,24 @@ class Table(Base.ActionInput, Base.Composite):
                                                           'disabled': ['disabled="disabled"', ''][function_active[function]],
                                                           'title': self._(title, output_options)}
             for function, title in self.group_functions.iteritems()])
+        return (res != '', res)
 
     def draw_buttons(self, output_options):
         if 'printable_version' in output_options:
+            return ''
+        button_bars = {'paging_puttons': self.draw_paging_buttons(output_options),
+                       'group_functions': self.draw_group_functions(output_options),
+                       'printable_link': self.draw_printable_link(output_options)}
+        button_bars_enabled = dict([(name, enabled)
+                                    for name, (enabled, html) in button_bars.iteritems()])
+        button_bars_html = dict([(name, html)
+                                 for name, (enabled, html) in button_bars.iteritems()])
+        if self.printable_link_only_when_other_buttons:
+            button_bars_enabled['printable_link'] = button_bars_enabled['printable_link'] and reduce(lambda x, y: x or y,
+                                                                                                     [enabled
+                                                                                                      for name, enabled in button_bars_enabled.iteritems()
+                                                                                                      if name != 'printable_link'])
+        if self.button_frame_only_when_usefull and not reduce(lambda x, y: x or y, button_bars_enabled.itervalues()):
             return ''
         return """
 <div class="buttons">
@@ -456,9 +475,7 @@ class Table(Base.ActionInput, Base.Composite):
  %(printable_link)s
  %(group_functions)s
 </div>
-""" % {'paging_puttons': self.draw_paging_buttons(output_options),
-       'printable_link': self.draw_printable_link(output_options),
-       'group_functions': self.draw_group_functions(output_options)}
+""" % button_bars_html
 
     def draw_headings(self, visible_columns, reverse_dependent_columns, output_options):
         if self.argument_name:

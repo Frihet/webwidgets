@@ -159,6 +159,7 @@ class Program(WebKit.Page.Page):
         debug_fields = False
         debug_field_input = False
         debug_receive_notification = False
+        debug_field_registrations = False
 
         root = True
         parent = None
@@ -323,6 +324,10 @@ class Program(WebKit.Page.Page):
                 print "Original:", dict([(name, value.field_output(Utils.id_to_path(name)))
                                          for (name, value)
                                          in window.fields.iteritems()])
+            if self.debug_field_registrations:
+                print "Field registrations:"
+                for (name, value) in window.fields.iteritems():
+                    print name, value
 
             sorted_fields = window.fields.items()
             sorted_fields.sort(lambda (name1, field1), (name2, field2):

@@ -392,6 +392,7 @@ input.error {
 
 .Webwidgets-Widgets-Formatting-HorizontalFieldgroup > * {
  display: table-cell;
+ vertical-align:top;
 }
 
 .Webwidgets-Widgets-Formatting-VerticalFieldgroup > .Webwidgets-Widgets-Formatting-HorizontalFieldgroup {
