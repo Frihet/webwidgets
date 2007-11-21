@@ -27,6 +27,25 @@ body {
  padding: 0;
 }
 
+/* Some standard classes that can be attatched to rows in tables etc */
+.correction {
+ background: #ff0000 !important;
+ color: #ffffff;
+}
+.deleted {
+ background: #dd55ff !important;
+ color: #ffffff;
+}
+.new {
+ background: #8dd35f !important;
+ color: #ffffff;
+}
+.important {
+ background: #5555ff !important;
+ color: #ffffff;
+}
+
+/* Widget styling */
 .Webwidgets-Widgets-Composite-TabbedView > .page {
  padding: 10px;
 }
@@ -283,6 +302,7 @@ input.error {
  border: 1px solid black;
  color: #000000;
  background-color: #ffffff;
+ margin: 5pt;
 }
 
 .Webwidgets-Widgets-Composite-StaticDialog .dialog-head {
@@ -311,6 +331,7 @@ input.error {
  top: 20%;
  bottom: 20%;
  z-index: 1;
+ margin: 0;
 }
 
 .Webwidgets-Widgets-Composite-Dialog .dialog-head {

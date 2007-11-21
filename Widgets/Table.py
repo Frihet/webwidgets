@@ -549,7 +549,8 @@ class Table(Base.ActionInput, Base.Composite):
     def draw_table(self, headings, rows, output_options):
         return "<table>%(headings)s%(content)s</table>" % {
             'headings': '<tr>%s</tr>' % (' '.join(headings),),
-            'content': '\n'.join(['<tr class="%s">%s</tr>' % ('row_' + ['even', 'odd'][row_num % 2],
+            'content': '\n'.join(['<tr class="%s">%s</tr>' % (' '.join(  ['row_' + ['even', 'odd'][row_num % 2]]
+                                                                       + row['row'].get('ww_class', [])),
                                                               ''.join(row['cells']),)
                                   for (row_num, row) in enumerate(rows)])}
             
