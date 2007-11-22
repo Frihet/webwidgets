@@ -127,13 +127,54 @@ class Tabset(Base.StaticComposite):
             return res
         return draw_page_titles(self.get_pages())
 
-class TabbedView(Base.ActionInput, Tabset):
+class SwitchingView(Tabset):
+    """Provides a set of overlapping 'pages', of which only one is
+    shown to the user at any given time, each holding some other
+    widget."""
+    old_page = None
+    page = None
+
+    def page_changed(self, path, page):
+        """Notification that the user has changed page."""
+        if path != self.path: return
+        if self.old_page is not None:
+            self.get_widget_by_path(self.old_page).notify('tab_blur')
+        if self.page is not None:
+            self.get_widget_by_path(self.page).notify('tab_focus')
+        self.old_page = self.page
+
+    def draw_page(self, output_options):
+        return self.draw_child(self.get_widget_by_path(self.page).path,
+                               self.get_widget_by_path(self.page),
+                               output_options,
+                               True)
+
+    def draw_pre(self, output_options):
+        return ''
+
+    def draw_post(self, output_options):
+        return ''
+
+    def draw(self, output_options):
+        return """
+               <div %(html_attributes)s>
+                %(pre)s
+                <div class="page">
+                 %(page)s
+                </div>
+                %(post)s
+               </div>
+               """ % {'html_attributes': self.draw_html_attributes(self.path),
+                      'page': self.draw_page(output_options),
+                      'pre': self.draw_pre(output_options),
+                      'post': self.draw_post(output_options),
+                      }
+
+class TabbedView(SwitchingView, Base.ActionInput):
     """Provides a set of overlapping 'pages' with tabs, each tab
     holding some other widget, through wich a user can browse using
     the tabs."""
     argument_name = None
-    old_page = None
-    page = None
 
     def field_input(self, path, string_value):
         if string_value != '':
@@ -147,15 +188,6 @@ class TabbedView(Base.ActionInput, Tabset):
         or not.
         """
         return self.active and self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, path)
-
-    def page_changed(self, path, page):
-        """Notification that the user has changed page."""
-        if path != self.path: return
-        if self.old_page is not None:
-            self.get_widget_by_path(self.old_page).notify('tab_blur')
-        if self.page is not None:
-            self.get_widget_by_path(self.page).notify('tab_focus')
-        self.old_page = self.page
 
     def draw_tabs(self, output_options):
         active = self.register_input(self.path, self.argument_name)
@@ -187,18 +219,9 @@ class TabbedView(Base.ActionInput, Tabset):
                    """ % {'widget_id': widget_id,
                           'tabs': '\n'.join(tabs)}
         return draw_tabs(self.draw_page_titles(output_options))
-        
-    def draw(self, output_options):
-        return """
-               <div %(html_attributes)s>
-                %(tabs)s
-                <div class="page">
-                 %(page)s
-                </div>
-               </div>
-               """ % {'html_attributes': self.draw_html_attributes(self.path),
-                      'page': self.draw_child(self.get_widget_by_path(self.page).path, self.get_widget_by_path(self.page), output_options, True),
-                      'tabs': self.draw_tabs(output_options)}
+
+    def draw_pre(self, output_options):
+        return self.draw_tabs(output_options)
 
 class Hide(Base.StaticComposite):
     """
