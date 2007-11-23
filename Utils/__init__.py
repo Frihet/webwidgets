@@ -242,6 +242,12 @@ def id_to_path(id, accept_None = False):
     assert path[0] == 'root'
     return path[1:]
 
+def classes_to_css_classes(classes, postfix = []):
+    if postfix:
+        postfix = ['', '_'] + postfix
+    return ' '.join([c.replace('.', '-') + '-'.join(postfix)
+                     for c in classes])
+
 def is_prefix(prefix, list):
     prefix_len = len(prefix)
     return prefix_len <= len(list) and prefix == list[:prefix_len]

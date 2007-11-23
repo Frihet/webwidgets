@@ -298,26 +298,26 @@ input.error {
  color: #000000;
 }
 
-.Webwidgets-Widgets-Composite-StaticDialog {
+.Webwidgets-Widgets-Composite-InfoFrame {
  border: 1px solid black;
  color: #000000;
  background-color: #ffffff;
  margin: 5pt;
 }
 
-.Webwidgets-Widgets-Composite-StaticDialog .dialog-head {
+.Webwidgets-Widgets-Composite-InfoFrame-_-head {
  background: #f2bfff;
  border-bottom: 2px solid #dd55ff;
  padding: 2px;
  height: 26px;
 }
 
-.Webwidgets-Widgets-Composite-StaticDialog .dialog-body {
+.Webwidgets-Widgets-Composite-InfoFrame-_-body {
  padding: 10px;
  overflow: auto;
 }
 
-.Webwidgets-Widgets-Composite-StaticDialog .dialog-buttons {
+.Webwidgets-Widgets-Composite-InfoFrame-_-foot {
  border-top: 2px solid #dd55ff;
  padding: 10px;
  height: 30px;
@@ -334,7 +334,7 @@ input.error {
  margin: 0;
 }
 
-.Webwidgets-Widgets-Composite-Dialog .dialog-head {
+.Webwidgets-Widgets-Composite-Dialog-_-head {
  position: absolute;
  top: 0;
  height: 26px;
@@ -342,7 +342,7 @@ input.error {
  right: 0;
 }
 
-.Webwidgets-Widgets-Composite-Dialog .dialog-body {
+.Webwidgets-Widgets-Composite-Dialog-_-body {
  position: absolute;
  top: 30px;
  bottom: 50px;
@@ -350,7 +350,7 @@ input.error {
  right: 0;
 }
 
-.Webwidgets-Widgets-Composite-Dialog .dialog-buttons {
+.Webwidgets-Widgets-Composite-Dialog-_-foot {
  position: absolute;
  height: 30px;
  bottom: 0;

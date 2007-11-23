@@ -51,12 +51,12 @@ class InfoFrame(Base.StaticComposite):
     def draw_head(self, children, output_options):
         if 'Head' not in children:
             children['Head'] = children['Body'].title
-        return """<div class="dialog-head" id="%(html_id)s-head">
+        return """<div class="%(html_head_classes)s" id="%(html_id)s-head">
                    %(Head)s
                   </div>""" % children
 
     def draw_body(self, children, output_options):
-        return """<div class="dialog-body" id="%(html_id)s-body">
+        return """<div class="%(html_body_classes)s" id="%(html_id)s-body">
                    %(Body)s
                   </div>""" % children
 
@@ -68,6 +68,9 @@ class InfoFrame(Base.StaticComposite):
             output_options,
             invisible_as_empty = True,
             include_attributes = True)
+        children['html_head_classes'] = Webwidgets.Utils.classes_to_css_classes(self.ww_classes, ['head'])
+        children['html_body_classes'] = Webwidgets.Utils.classes_to_css_classes(self.ww_classes, ['body'])
+        children['html_foot_classes'] = Webwidgets.Utils.classes_to_css_classes(self.ww_classes, ['foot'])
         children['head'] = self.draw_head(children, output_options)
         children['body'] = self.draw_body(children, output_options)
         children['foot'] = self.draw_foot(children, output_options)
@@ -93,7 +96,7 @@ class StaticDialog(InfoFrame):
         self.children['Buttons'] = self.Buttons(session, win_id, self.buttons)
 
     def draw_foot(self, children, output_options):
-        return """<div class="dialog-buttons" id="%(html_id)s-body">
+        return """<div class="%(html_foot_classes)s" id="%(html_id)s-body">
                    %(Buttons)s
                   </div>""" % children
 

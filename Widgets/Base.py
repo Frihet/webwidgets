@@ -200,8 +200,7 @@ class Widget(Object):
             ww_classes = owner.ww_classes
             if instance:
                 ww_classes = instance.ww_classes
-            return ' '.join([c.replace('.', '-')
-                             for c in ww_classes])
+            return Webwidgets.Utils.classes_to_css_classes(ww_classes)
     html_class = HtmlClass()
 
     class HtmlAttributes(object):
