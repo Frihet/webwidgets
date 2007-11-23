@@ -143,32 +143,11 @@ class SwitchingView(Tabset):
             self.get_widget_by_path(self.page).notify('tab_focus')
         self.old_page = self.page
 
-    def draw_page(self, output_options):
+    def draw(self, output_options):
         return self.draw_child(self.get_widget_by_path(self.page).path,
                                self.get_widget_by_path(self.page),
                                output_options,
                                True)
-
-    def draw_pre(self, output_options):
-        return ''
-
-    def draw_post(self, output_options):
-        return ''
-
-    def draw(self, output_options):
-        return """
-               <div %(html_attributes)s>
-                %(pre)s
-                <div class="page">
-                 %(page)s
-                </div>
-                %(post)s
-               </div>
-               """ % {'html_attributes': self.draw_html_attributes(self.path),
-                      'page': self.draw_page(output_options),
-                      'pre': self.draw_pre(output_options),
-                      'post': self.draw_post(output_options),
-                      }
 
 class TabbedView(SwitchingView, Base.ActionInput):
     """Provides a set of overlapping 'pages' with tabs, each tab
@@ -220,8 +199,18 @@ class TabbedView(SwitchingView, Base.ActionInput):
                           'tabs': '\n'.join(tabs)}
         return draw_tabs(self.draw_page_titles(output_options))
 
-    def draw_pre(self, output_options):
-        return self.draw_tabs(output_options)
+    def draw(self, output_options):
+        return """
+               <div %(html_attributes)s>
+                %(tabs)s
+                <div class="page">
+                 %(page)s
+                </div>
+               </div>
+               """ % {'html_attributes': self.draw_html_attributes(self.path),
+                      'page': super(TabbedView, self).draw(output_options),
+                      'tabs': self.draw_tabs(output_options),
+                      }
 
 class Hide(Base.StaticComposite):
     """

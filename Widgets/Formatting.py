@@ -335,14 +335,19 @@ class Field(Label):
             target = self + ['Field'] + self.target
         target_path = target.path
         res = self.draw_children(output_options, include_attributes = True)
-        res['error'] = ''
+        res['label'] = res['Label']
         if getattr(target, 'error', None) is not None:
-           res['error'] = """ <span class="error">(%s)</span>""" % (target.error,)
+            if res['label'] == '':
+                res['label'] = """<span class="error">%s</span>""" % (target.error,)
+            else:
+                res['label'] += """ <span class="error">(%s)</span>""" % (target.error,)
+        if res['label'] != '':
+            res['label'] += ':'
         res['target'] = Webwidgets.Utils.path_to_id(target_path)
         try:
             return """<div %(html_attributes)s>
                        <label for="%(target)s">
-                        %(Label)s%(error)s:
+                        %(label)s
                        </label>
                        <span class="field">
                         %(Field)s
