@@ -47,26 +47,53 @@ class LanguageSelector(LanguageInput):
             instance.session.languages = (value,)
     value = Value()
 
-class StaticDialog(Formatting.Html):
+class InfoFrame(Base.StaticComposite):
+    def draw_head(self, children, output_options):
+        return """<div class="dialog-head" id="%(html_id)s-head">
+                   %(Head)s
+                  </div>""" % children
+
+    def draw_body(self, children, output_options):
+        return """<div class="dialog-body" id="%(html_id)s-body">
+                   %(Body)s
+                  </div>""" % children
+
+    def draw_foot(self, children, output_options):
+        return ""
+
+    def draw(self, output_options):
+        children = self.draw_children(
+            output_options,
+            invisible_as_empty = True,
+            include_attributes = True)
+        children['head'] = self.draw_head(children, output_options)
+        children['body'] = self.draw_body(children, output_options)
+        children['foot'] = self.draw_foot(children, output_options)
+
+        return """
+    <div %(html_attributes)s>
+     %(head)s
+     %(body)s
+     %(foot)s
+    </div>
+    """ % children
+
+class StaticDialog(InfoFrame):
     """Dialogs provides an easy way to let the user select one of a
     few different options, while providing the user with some longer
     explanation/description of the options. Options are described
     using a dictionary of description-value pairs."""
     __wwml_html_override__ = False
     buttons = {'Cancel': '0', 'Ok': '1'}
-    html = """
-    <div %(html_attributes)s>
-     <div class="dialog-head" id="%(html_id)s-head">
-      %(Head)s
-     </div>
-     <div class="dialog-body" id="%(html_id)s-body">
-      %(Body)s
-     </div>
-     <div class="dialog-buttons" id="%(html_id)s-buttons">
-      %(Buttons)s
-     </div>
-    </div>
-    """
+
+    def __init__(self, session, win_id, **attrs):
+        super(InfoFrame, self).__init__(session, win_id, **attrs)
+        self.children['Buttons'] = self.Buttons(session, win_id, self.buttons)
+
+    def draw_foot(self, children, output_options):
+        return """<div class="dialog-buttons" id="%(html_id)s-body">
+                   %(Buttons)s
+                  </div>""" % children
 
     class Buttons(Formatting.List):
         ww_explicit_load = True
@@ -85,12 +112,6 @@ class StaticDialog(Formatting.Html):
                       Dialog.Buttons.Button(session, win_id,
                                             title=title, value=value))
                      for title, value in buttons.iteritems()]))
-        
-    def __init__(self, session, win_id, **attrs):
-        super(Formatting.Html, self).__init__(
-            session, win_id,
-            children = {'Buttons': self.Buttons(session, win_id, self.buttons)},
-            **attrs)
 
 class Dialog(StaticDialog):
     def selected(self, path, value):
