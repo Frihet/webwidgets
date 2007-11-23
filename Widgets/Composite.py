@@ -49,6 +49,8 @@ class LanguageSelector(LanguageInput):
 
 class InfoFrame(Base.StaticComposite):
     def draw_head(self, children, output_options):
+        if 'Head' not in children:
+            children['Head'] = children['Body'].title
         return """<div class="dialog-head" id="%(html_id)s-head">
                    %(Head)s
                   </div>""" % children
