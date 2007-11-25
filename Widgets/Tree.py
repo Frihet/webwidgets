@@ -88,6 +88,8 @@ class TreeModelGroupingWrapperNode(TreeModelNode):
             if instance.prefix:
                 return None
             return instance.wrapped.value
+        def __set__(self, instance, value):
+            pass
     value = Value()
 
     class Leaf(object):
@@ -327,9 +329,9 @@ class Tree(Base.ActionInput, Base.DirectoryServer):
 
             return (res, (sub_indent,), {})
 
-        return '<div class="Tree" id="%s">%s\n</div>\n' % (
-            Webwidgets.Utils.path_to_id(widget_path),
-            self.tree.render_tree(render_entry, '    '))
+        return '<div %(html_attributes)s>%(tree)s\n</div>\n' % {
+            'html_attributes': self.html_attributes,
+            'tree': self.tree.render_tree(render_entry, '    ')}
 
     def field_input(self, path, string_value):
         if string_value == '': return
@@ -344,7 +346,7 @@ class Tree(Base.ActionInput, Base.DirectoryServer):
     def field_output(self, path):
         return []
 
-    def selected(self, path, item):
-        print '%s.selected(%s, %s)' % ('.'.join([str(x) for x in self.path]),
-                                       '.'.join(path),
-                                       '.'.join(item))
+#     def selected(self, path, item):
+#         print '%s.selected(%s, %s)' % ('.'.join([str(x) for x in self.path]),
+#                                        '.'.join(path),
+#                                        item)

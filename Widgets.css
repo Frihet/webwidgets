@@ -284,7 +284,8 @@ input.error {
 }
 
 
-.Tree * {
+.Webwidgets-Widgets-Tree-Tree *,
+.Webwidgets-Widgets-Tree-Tree input {
  border-style: none;
  padding: 0px;
  margin: 0px;
@@ -294,7 +295,7 @@ input.error {
  color: #555555;
 }
 
-.Tree input {
+.Webwidgets-Widgets-Tree-Tree input {
  color: #000000;
 }
 
