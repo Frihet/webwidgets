@@ -245,15 +245,16 @@ class Hide(Base.StaticComposite):
     Change the value of the title variable to change the text in the button.
 
     TODO:
-    Implement an alternative javascript implementation for faster update at the expense of longer reloads
+    Implement an alternative javascript implementation for faster
+    update at the expense of longer reloads
     """
 
-    class hideButton(Input.ToggleButton):
+    class HideButton(Input.ToggleButton):
         true_title = "Hide"
         false_title = "Show"
 
     def draw(self, path):
-        self['child'].visible = self['hideButton'].value
+        self['Child'].visible = self['HideButton'].value
         children = self.draw_children(path, invisible_as_empty=True, include_attributes=True)
-        return """<div %(html_attributes)s>%(hideButton)s %(child)s</div>""" % children
+        return """<div %(html_attributes)s>%(HideButton)s %(Child)s</div>""" % children
  

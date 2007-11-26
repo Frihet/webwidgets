@@ -73,13 +73,7 @@ class Type(type):
 
     def ww_update_classes(self):
         if not self.ww_class_data.get('ww_class_data__no_classes_name', False):
-            cls_name = []
-            if hasattr(self, '__module__'):
-                cls_name.append(self.__module__)
-            if getattr(self, 'ww_class_path', ''):
-                cls_name.append(self.ww_class_path)
-            cls_name.append(self.__name__)
-            self.ww_classes[0] = '.'.join(cls_name)
+            self.ww_classes[0] = Webwidgets.Utils.class_full_name(self)
 
 class Object(object):
     """Object is a more elaborate version of object, providing a few

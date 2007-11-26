@@ -305,3 +305,12 @@ def subclass_dict(superdict, members):
 def subclass_list(superlist, members):
     return superlist + members
 
+
+def class_full_name(cls):
+    cls_name = []
+    if hasattr(cls, '__module__'):
+        cls_name.append(cls.__module__)
+    if getattr(cls, 'ww_class_path', ''):
+        cls_name.append(cls.ww_class_path)
+    cls_name.append(cls.__name__)
+    return '.'.join(cls_name)
