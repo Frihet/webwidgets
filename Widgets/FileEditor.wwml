@@ -23,7 +23,6 @@
  xmlns:h="http://www.w3.org/TR/REC-html40"
  bind="Webwidgets.Widgets.FileEditorCallbacks">
  >
-
  <w:Html id="FileEditor" top_level="div" expanded=":false">
   <div class="top">
    <w:DownloadLink id="DownloadLink" />
