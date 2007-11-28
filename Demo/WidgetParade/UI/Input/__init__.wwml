@@ -32,6 +32,23 @@
    <w:FileEditor id="FilEditorTest" />
   </w:Html>
 
+  <w:Html id="Radio" title="Radio buttons">
+   <w:RadioButtonGroup id="Drink" />
+   <w:RadioButtonGroup id="Food" />
+
+   <w:Html id="Hot">
+    <h1>Hot stuff</h1>
+    <w:Field id="Tea" Label=":Html:Tea"><w:RadioInput id="Field" group=":path:3/Drink" /></w:Field>
+    <w:Field id="Ratatouille" Label=":Html:Ratatouille"><w:RadioInput id="Field" group=":path:3/Food" /></w:Field>
+   </w:Html>
+   <w:Html id="Cold">
+    <h1>Cold stuff</h1>
+    <w:Field id="Coce" Label=":Html:Coce"><w:RadioInput id="Field" group=":path:3/Drink" /></w:Field>
+    <w:Field id="Icecream" Label=":Html:Icecream"><w:RadioInput id="Field" group=":path:3/Food" /></w:Field>
+   </w:Html>
+
+  </w:Html>
+
 
   <w:Fieldgroup id="Data" title="Data input">
    <w:Field id="LongText" Label=":Html:A longer text">

@@ -42,25 +42,30 @@ Example application (in test.py):
 
 """
 
-import Compatibility
-import Wwml
-from Constants import *
-from Program import *
-from AccessManager import *
+# This check is here because Webware might erraneously import us with
+# the wrong name first, when loading an index.py-file from the Demo
+# directory. Doing so makes us have copies of some classes, which
+# fucks up isinstance()-calls.
+if __name__ == "Webwidgets":
+    import Compatibility
+    import Wwml
+    from Constants import *
+    from Program import *
+    from AccessManager import *
 
-from Widgets.Base import *
-from Widgets.Formatting import *
-from Widgets.Input import *
-from Widgets.Composite import *
-from Widgets.Tree import *
-from Widgets.Table import *
-from Widgets.LogIn import *
-from Widgets.DateInput import *
-from Widgets.TextFileEditor import *
-from Widgets.CssFileEditor import *
-from Widgets.HtmlInput import *
-from Widgets.HtmlFileEditor import *
-from Widgets.FileEditor import *
-from Widgets.FileEditorList import *
-from Widgets.MainMenu import *
-from Widgets.InputCombinations import *
+    from Widgets.Base import *
+    from Widgets.Formatting import *
+    from Widgets.Input import *
+    from Widgets.Composite import *
+    from Widgets.Tree import *
+    from Widgets.Table import *
+    from Widgets.LogIn import *
+    from Widgets.DateInput import *
+    from Widgets.TextFileEditor import *
+    from Widgets.CssFileEditor import *
+    from Widgets.HtmlInput import *
+    from Widgets.HtmlFileEditor import *
+    from Widgets.FileEditor import *
+    from Widgets.FileEditorList import *
+    from Widgets.MainMenu import *
+    from Widgets.InputCombinations import *

@@ -211,35 +211,31 @@ class RadioButtonGroup(Base.ValueInput):
 
     #FIXME: What should original_value really be here? '' or None, or something else?
     
-    def __init__(self, session, win_id, *arg, **kw):
-        Base.ValueInput.__init__(self, session, win_id, *arg, **kw)
-        self.members = {}
-
 class RadioInput(Base.ValueInput, Base.StaticComposite):
     """A radio button (selection list item). You must create a
     L{RadioButtonGroup} instance and set the 'group' attribute to that
     instance so that all radio buttons in the group knows about each
     other."""
-    def __init__(self, session, win_id, **attrs):
-        Base.StaticComposite.__init__(self, session, win_id, **attrs)
-        self.group.members[self.value] = self
-        if self.default:
-            self.group.value = self.value
+
+    def get_group(self):
+        if isinstance(self.group, Base.Widget):
+            return self.group
+        return self + self.group
 
     def field_input(self, path, string_value):
         value = Utils.id_to_path(string_value)
-        if value == path:
-            self.group.value = self.value
+        if value == self.path:
+            self.get_group().value = self.value
 
     def field_output(self, path):
-        return [Utils.path_to_id(self.group.members[self.group.value].path)]
+        return [Utils.path_to_id(self.path)]
 
     def draw(self, output_options):
         self.register_input(self.group.path, self.argument_name)
         result = self.draw_children(output_options, include_attributes = True)
         result['name'] = Webwidgets.Utils.path_to_id(self.group.path)
         result['value'] = result['id']
-        result['checked'] = ['', 'checked'][self.value == self.group.value]
+        result['checked'] = ['', 'checked'][self.value == self.get_group().value]
         result['disabled'] = ['', 'disabled="disabled"'][not self.get_active(self.path)],
         return """<input
                    %(html_attributes)s
@@ -248,7 +244,7 @@ class RadioInput(Base.ValueInput, Base.StaticComposite):
                    value="%(value)s"
                    %(checked)s
                    %(disabled)s
-                  >%(title)s</input>""" % result
+                  />""" % result
 
 class Checkbox(Base.ValueInput):
     """Boolean input widget - it's value can either be true or false."""
