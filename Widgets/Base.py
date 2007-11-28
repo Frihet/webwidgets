@@ -239,10 +239,13 @@ class Widget(Object):
             res = res[name]
         return res
 
-    def get_widgets_by_attribute(self, attribute = '__name__'):
+    def get_widgets_by_attribute(self, attribute = '__name__', direction_down = True):
+	res = {}
+	if not direction_down and self.parent:
+            res.update(self.parent.get_widgets_by_attribute(attribute, False))
         if hasattr(self, attribute):
-            return {getattr(self, attribute): self}
-        return {}
+            res[getattr(self, attribute)] = self
+        return res
 
     def path_to_subwidget_path(self, path):
         widget_path = self.path
@@ -575,11 +578,12 @@ class Composite(Widget):
         """@return: a child widget."""
         raise NotImplemented
 
-    def get_widgets_by_attribute(self, attribute = '__name__'):
-        fields = Widget.get_widgets_by_attribute(self, attribute)
-        for name, child in self:
-            if isinstance(child, Widget):
-                fields.update(child.get_widgets_by_attribute(attribute))
+    def get_widgets_by_attribute(self, attribute = '__name__', direction_down = True):
+        fields = Widget.get_widgets_by_attribute(self, attribute, direction_down)
+        if direction_down:
+            for name, child in self:
+                if isinstance(child, Widget):
+                    fields.update(child.get_widgets_by_attribute(attribute))
         return fields
 
     def __getitem__(self, name):
