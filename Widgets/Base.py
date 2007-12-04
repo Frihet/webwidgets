@@ -4,7 +4,7 @@
 
 # Webwidgets web developement framework
 # Copyright (C) 2006 uAnywhere, Egil Moeller <redhog@redhog.org>
-# Copyright (C) 2007 FreeCode AS, Egil Moeller <redhog@redhog.org>
+# Copyright (C) 2007 FreeCode AS, Egil Moeller <egil.moller@freecode.no>
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
