@@ -543,8 +543,9 @@ class Composite(Widget):
                 result = self._(child, output_options)
         else:
             result = [None, ''][invisible_as_empty]
-        if 'draw_wrapper' in output_options:
-            result = output_options['draw_wrapper'](self, path, child, visible, result, output_options, invisible_as_empty)
+        if 'internal' in output_options and 'draw_wrapper' in output_options['internal']:
+            result = output_options['internal']['draw_wrapper'](
+                self, path, child, visible, result, output_options, invisible_as_empty)
         return result
 
     def draw_children(self, output_options, invisible_as_empty = False, include_attributes = False):
