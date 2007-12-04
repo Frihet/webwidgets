@@ -1,3 +1,6 @@
+# This module is /usr/lib/python2.4/sets.py
+# Please see Docs/PYTHON_LICENSE for license details.
+
 """Classes to represent arbitrary sets (including sets of sets).
 
 This module implements sets using dictionaries whose values are
