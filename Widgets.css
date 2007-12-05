@@ -44,6 +44,23 @@ body {
  background: #5555ff !important;
  color: #ffffff;
 }
+span.error, div.error {
+ color: #ff0000;
+}
+input.error,
+.system-error {
+ border: 1px solid #ff0000;
+}
+.system-error > .traceback {
+ display: none;
+}
+.system-error:hover > .traceback {
+ display: block;
+ border: 1px solid #ff0000;
+ margin: 2pt;
+ padding: 2pt;
+}
+
 
 /* Widget styling */
 .Webwidgets-Widgets-Composite-TabbedView > .page {
@@ -274,15 +291,6 @@ select {
 .Webwidgets-Widgets-Input-NewPasswordInput input {
  display: block;
 }
-
-span.error, div.error {
- color: #ff0000;
-}
-
-input.error {
- border-color: #ff0000;
-}
-
 
 .Webwidgets-Widgets-Tree-Tree *,
 .Webwidgets-Widgets-Tree-Tree input {

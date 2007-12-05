@@ -537,10 +537,15 @@ class Composite(Widget):
             visible = self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, path)
 
         if visible:
-            if isinstance(child, Widget):
-                result = child.draw(output_options)
-            else:
-                result = self._(child, output_options)
+            try:
+                if isinstance(child, Widget):
+                    result = child.draw(output_options)
+                else:
+                    result = self._(child, output_options)
+            except Exception, e:
+                import WebUtils.HTMLForException
+                result = self._("""<div class="error system-error">Error<div class="traceback">%s</div></div>""", output_options
+                                ) % (WebUtils.HTMLForException.HTMLForException(),)
         else:
             result = [None, ''][invisible_as_empty]
         if 'internal' in output_options and 'draw_wrapper' in output_options['internal']:
