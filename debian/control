@@ -1,23 +1,20 @@
 Source: webwidgets
 Section: unknown
 Priority: optional
-Maintainer: Egil <egil.moller@freecode.no>
+Maintainer: Egil Moeller <egil.moller@freecode.no>
 Build-Depends: debhelper (>= 4.0.0)
 Standards-Version: 3.6.2
 
 Package: webwidgets
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, python (>= ${pyversion}), python (<< ${pynextversion}), webware
-Description: The RedBack Webwidgets web programming framework
- RedBack Webwidgets is a framework for web programming built on top of
- Webware, that provides a programming paradigm very similar to that of
- desktop application programming (e.g. Gtk+ or Qt) with widgets and
- callbacks.
-
-Package: webwidgets-doc
-Architecture: all
-Description: Documentation for the RedBack Webwidgets web programming framework
- RedBack Webwidgets is a framework for web programming built on top of
- Webware, that provides a programming paradigm very similar to that of
- desktop application programming (e.g. Gtk+ or Qt) with widgets and
- callbacks.
+Description: The Webwidgets web application framework
+ Webwidgets is a framework for writing Web applications as if they
+ where desktop applications. It employs the same programming paradigm
+ as Gtk, Qt etc with a tree of widgets with callbacks for events such
+ as a button press. It encapsulates page loads, session data, form
+ handling etc into widgets with their own state.
+ Webwidgets is focused on code reuse and rapid prototyping and
+ separation between graphic design, interaction design and application
+ logic. Webwidgets is implemented in the Python programming language
+ and uses the Webware application server framework.

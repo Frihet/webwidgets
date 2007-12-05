@@ -1,0 +1,5 @@
+webwidgets (0.8.0) unstable; urgency=low
+
+  * Initial debian release.
+
+ -- Egil Moeller <egil.moller@freecode.no>  Wed, 5 Dec 2007 14:07:00 +0100
