@@ -155,6 +155,9 @@ class Widget(Object):
     parent = None
     name = 'anonymous'
 
+
+    system_errors = []
+
     def __init__(self, session, win_id, **attrs):
         """Creates a new widget
         
@@ -180,6 +183,7 @@ class Widget(Object):
         
         self.session = session
         self.win_id = win_id
+        self.system_errors = []
         Object.__init__(self, **attrs)
 
     class HtmlId(object):
@@ -522,6 +526,23 @@ class Composite(Widget):
     """Base class for all composite widgets, handling the drawing of
     children and the visibility attribute of children."""
     ww_class_data__no_classes_name = True
+
+    system_error_format = """<div class="system-error hover-expand">
+                              <div class="header">%(exception)s</div>
+                              <div class="content">
+                               %(traceback)s
+                              </div>
+                             </div>"""
+
+    system_errors_format = """<div class="system-errors click-expand">
+                               <div class="header">Error</div>
+                               <div class="content">
+                                This widget caused errors:
+                                %(tracebacks)s
+                               </div>
+                              </div>"""
+
+
     def __init__(self, session, win_id, **attrs):
         super(Composite, self).__init__(
             session, win_id, **attrs)
@@ -537,17 +558,28 @@ class Composite(Widget):
             visible = self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, path)
 
         if visible:
-            try:
-                if isinstance(child, Widget):
+            if isinstance(child, Widget):
+                try:
                     result = child.draw(output_options)
-                else:
-                    result = self._(child, output_options)
-            except Exception, e:
-                import WebUtils.HTMLForException
-                result = self._("""<div class="error system-error">Error<div class="traceback">%s</div></div>""", output_options
-                                ) % (WebUtils.HTMLForException.HTMLForException(),)
+                except Exception, e:
+                    result = ''
+                    import WebUtils.HTMLForException
+                    child.system_errors.append(
+                        (sys.exc_info()[1],
+                         WebUtils.HTMLForException.HTMLForException()))
+            else:
+                result = self._(child, output_options)
         else:
             result = [None, ''][invisible_as_empty]
+
+        if result is not None and child.system_errors:
+            result = self._(self.system_errors_format, output_options
+                            ) % {'tracebacks': '\n'.join([self._(self.system_error_format, output_options
+                                                                 ) % {'exception': cgi.escape(unicode(error[0])),
+                                                                      'traceback': error[1]}
+                                                          for error in child.system_errors])} + result
+            del child.system_errors[:]
+
         if 'internal' in output_options and 'draw_wrapper' in output_options['internal']:
             result = output_options['internal']['draw_wrapper'](
                 self, path, child, visible, result, output_options, invisible_as_empty)

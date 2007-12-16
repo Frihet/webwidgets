@@ -216,15 +216,20 @@ class Program(WebKit.Page.Page):
                                 )(self.path, *self.args, **self.kw)
                     except StopIteration:
                         return
+                    except:
+                        self.widget.system_errors.append(
+                            (sys.exc_info()[1],
+                             traceback.format_exc()))
                 else:
                     if self.widget.session.debug_receive_notification:
                         print "Notifying %s (ignored)" % self
                 if self.widget.session.debug_receive_notification:
-                    print "Notifying parent %s" % self.widget.parent
+                    print "Notifying parent %s" % self.widget.parent                    
                 try:
-                    return self.parent().process()
+                    parent = self.parent()
                 except StopIteration:
                     return
+                return parent.process()
 
             def __repr__(self):
                 return "Notification(%s)" % (unicode(self),)
