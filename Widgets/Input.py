@@ -420,3 +420,21 @@ class FieldStorageInput(Base.ValueInput):
             res = self.value.file.read().decode('utf-8')
         return [res]
 
+class NotificationError(Base.ActionInput):
+    error = Exception("Example error")
+
+    def field_input(self, path, string_value):
+        self.notify('raise_error')
+
+    def field_output(self, path):
+        return []
+
+    def draw(self, output_options):
+        super(NotificationError, self).draw(output_options)
+        return '<input %(html_attributes)s type="hidden" name="%(name)s" value="cause-error" %(disabled)s />' % {
+            'html_attributes': self.draw_html_attributes(self.path),
+            'name': Webwidgets.Utils.path_to_id(self.path),
+            'disabled': ['', 'disabled="disabled"'][not self.get_active(self.path)]}
+
+    def raise_error(self, path):
+        raise self.error

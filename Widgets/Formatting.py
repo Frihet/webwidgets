@@ -415,3 +415,10 @@ class GridLayout(Base.StaticComposite, GridLayoutModel.GridLayout):
                 result += '</tr>\n'
         result += '</table>\n'
         return result
+
+
+class DrawError(Base.Widget):
+    error = Exception("Example error")
+
+    def draw(self, output_options):
+	raise self.error

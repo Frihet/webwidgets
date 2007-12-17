@@ -22,27 +22,14 @@
  xmlns="http://www.w3.org/TR/REC-html40"
  xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
  xmlns:html="http://www.w3.org/TR/REC-html40"
- using="Webwidgets.Demo.WidgetParade.UI"
- bind="Webwidgets.Demo.WidgetParade.Callbacks"
+ bind="Webwidgets.Demo.WidgetParade.Callbacks.Errors"
  >
- <w:ApplicationWindow
-  id="MyWindow"
-  title="RedBack Webwidgets demo application">
+ <w:Html id="Errors" title="Errors">
+  <h1>Notification error</h1>
+  <w:NotificationError id="NotificationError" />
 
-  <w:ApplicationWindow.Body id="Body">
-   <w:ApplicationWindow.Body.LogIn id="LogIn">
-    <w:ApplicationWindow.Body.LogIn.Application classid="Application" page=":path:Home">
-     <w:pre>
-      <w:Home.Home id="Home" />
-      <w:Input.Input id="Input" />
-      <w:Formatting.Formatting id="Formatting" />
-      <w:Composite.Composite id="Composite" />
-      <w:Dynamic.Dynamic id="Dynamic" />
-      <w:Errors.Errors id="Errors" />
-      <w:Config.Config id="Config" />
-     </w:pre>
-    </w:ApplicationWindow.Body.LogIn.Application>
-   </w:ApplicationWindow.Body.LogIn>
-  </w:ApplicationWindow.Body>
- </w:ApplicationWindow>
+  <h1>Draw error</h1>
+  <w:DrawError id="DrawError" />
+
+ </w:Html>
 </w:wwml>

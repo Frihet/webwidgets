@@ -27,7 +27,7 @@ application.
 """
 
 import WebKit.Page
-import cgi, urllib, types, os
+import cgi, urllib, types, os, sys
 import Utils, Widgets, AccessManager, Constants
 import hotshot, pdb
 
@@ -217,9 +217,10 @@ class Program(WebKit.Page.Page):
                     except StopIteration:
                         return
                     except:
+                        import WebUtils.HTMLForException
                         self.widget.system_errors.append(
                             (sys.exc_info()[1],
-                             traceback.format_exc()))
+                             WebUtils.HTMLForException.HTMLForException()))
                 else:
                     if self.widget.session.debug_receive_notification:
                         print "Notifying %s (ignored)" % self
