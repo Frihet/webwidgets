@@ -339,7 +339,9 @@ class Widget(Object):
         return self.widget_script
 
     def get_title(self, path):
-        return self.title or Webwidgets.Utils.path_to_id(path)
+        if self.title is not None:
+            return self.title
+        return Webwidgets.Utils.path_to_id(path)
 
     def register_head_content(self, content_name, content):        
         self.session.windows[self.win_id].head_content[content_name] = content

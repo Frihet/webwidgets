@@ -198,11 +198,12 @@ class TabbedView(SwitchingView, Base.ActionInput):
         active = self.register_input(self.path, self.argument_name)
         widget_id = Webwidgets.Utils.path_to_id(self.path)
 
-        def draw_tabs(pages):
+        def draw_tabs(pages, path = []):
             tabs = []
             for name, (page, title, children) in pages.iteritems():
                 info = {'disabled': ['', 'disabled="disabled"'][page == self.page or not active],
-                        'html_id': widget_id,
+                        'name': widget_id,
+                        'html_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'page'] + page),
                         'page': Webwidgets.Utils.path_to_id(page),
                         'caption': title}
                 if children is None:
@@ -210,18 +211,18 @@ class TabbedView(SwitchingView, Base.ActionInput):
                                  <li><button
                                       type="submit"
                                       %(disabled)s
-                                      id="%(html_id)s-_-%(page)s"
-                                      name="%(html_id)s"
+                                      id="%(html_id)s"
+                                      name="%(name)s"
                                       value="%(page)s">%(caption)s</button></li>
                                 """ % info)
                 else:
-                    info['children'] = draw_tabs(children)
+                    info['children'] = draw_tabs(children, path + [name])
                     tabs.append("<li><span>%(caption)s</span>%(children)s</li>" % info)
             return """
                     <ul id="%(widget_id)s" class="tabs">
                      %(tabs)s
                     </ul>
-                   """ % {'widget_id': widget_id,
+                   """ % {'widget_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'group'] + path),
                           'tabs': '\n'.join(tabs)}
         return draw_tabs(self.draw_page_titles(output_options))
 
