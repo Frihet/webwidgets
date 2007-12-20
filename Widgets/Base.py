@@ -574,7 +574,7 @@ class Composite(Widget):
         else:
             result = [None, ''][invisible_as_empty]
 
-        if result is not None and child.system_errors:
+        if result is not None and getattr(child, 'system_errors', []):
             result = self._(self.system_errors_format, output_options
                             ) % {'tracebacks': '\n'.join([self._(self.system_error_format, output_options
                                                                  ) % {'exception': cgi.escape(unicode(error[0])),
