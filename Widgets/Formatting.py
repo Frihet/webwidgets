@@ -293,6 +293,10 @@ class Media(Base.Widget):
     draw_inline_text__html = draw_inline_text
     draw_inline_text__xml = draw_inline_text
 
+class DownloadLink(Media):
+    types = {'default': Webwidgets.Utils.subclass_dict(Media.types['default'],
+                                                      {'inline':False})}
+
 class Label(Base.StaticComposite):
     """Renders a label for an input field. The input field can be
     specified either as the widget itself, or a
@@ -305,45 +309,38 @@ class Label(Base.StaticComposite):
     the widget.
     """
 
-    def draw(self, output_options):
-        if isinstance(self.target, Base.Widget):
-            target = self.target
-        else:
-            target = self + self.target
-        target_path = target.path
-        res = self.draw_children(output_options, include_attributes = True)
-        res['error'] = ''
-        if getattr(target, 'error', None) is not None:
-           res['error'] = """ <span class="error">(%s)</span>""" % (target._(target.error, output_options),)
-        res['target'] = Webwidgets.Utils.path_to_id(target_path)
-        try:
-            return """<label %(html_attributes)s for="%(target)s">%(Label)s%(error)s</label>""" % res
-        except KeyError, e:
-            e.args = (self, self.path) + e.args
-            raise e
-        
-class DownloadLink(Media):
-    types = {'default': Webwidgets.Utils.subclass_dict(Media.types['default'],
-                                                      {'inline':False})}
+    target_prefix = []
 
-class Field(Label):
-    __wwml_html_override__ = False
-    def draw(self, output_options):
+    def draw_label_parts(self, output_options):
         if isinstance(self.target, Base.Widget):
             target = self.target
         else:
-            target = self + ['Field'] + self.target
+            target = self + self.target_prefix + self.target
         target_path = target.path
         res = self.draw_children(output_options, include_attributes = True)
         res['label'] = res['Label']
         if getattr(target, 'error', None) is not None:
+            error_arg = (target._(target.error, output_options),)
             if res['label'] == '':
-                res['label'] = """<span class="error">%s</span>""" % (target.error,)
+                res['label'] = """<span class="error">%s</span>""" % error_arg
             else:
-                res['label'] += """ <span class="error">(%s)</span>""" % (target.error,)
-        if res['label'] != '':
-            res['label'] += ':'
+                res['label'] += """ <span class="error">(%s)</span>""" % error_arg
         res['target'] = Webwidgets.Utils.path_to_id(target_path)
+ 	return res
+
+    def draw(self, output_options):
+        res = self.draw_label_parts(output_options)
+        try:
+            return """<label %(html_attributes)s for="%(target)s">%(Label)s</label>""" % res
+        except KeyError, e:
+            e.args = (self, self.path) + e.args
+            raise e
+
+class Field(Label):
+    __wwml_html_override__ = False
+    target_prefix = ['Field']
+    def draw(self, output_options):
+        res = self.draw_label_parts(output_options)
         try:
             return """<div %(html_attributes)s>
                        <label for="%(target)s">
