@@ -309,6 +309,8 @@ class Label(Base.StaticComposite):
 
     target_prefix = []
 
+    separator = ''
+
     def draw_label_parts(self, output_options):
         if isinstance(self.target, Base.Widget):
             target = self.target
@@ -326,6 +328,8 @@ class Label(Base.StaticComposite):
                 res['label'] = """<span class="error">%s</span>""" % error_arg
             else:
                 res['label'] += """ <span class="error">(%s)</span>""" % error_arg
+        if res['label']:
+            res['label'] += self.separator
         res['target'] = Webwidgets.Utils.path_to_id(target_path)
  	return res
 
@@ -340,6 +344,7 @@ class Label(Base.StaticComposite):
 class Field(Label):
     __wwml_html_override__ = False
     target_prefix = ['Field']
+    separator = ':'
     def draw(self, output_options):
         res = self.draw_label_parts(output_options)
         try:
