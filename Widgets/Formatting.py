@@ -318,7 +318,10 @@ class Label(Base.StaticComposite):
             target = self + self.target_prefix + self.target
         target_path = target.path
         res = self.draw_children(output_options, include_attributes = True)
-        res['label'] = res['Label']
+        if 'Label' in res:
+            res['label'] = res['Label']
+        else:
+            res['label'] = target.get_title()
         if getattr(target, 'error', None) is not None:
             error_arg = (target._(target.error, output_options),)
             if res['label'] == '':
@@ -336,7 +339,7 @@ class Label(Base.StaticComposite):
             e.args = (self, self.path) + e.args
             raise e
 
-class Field(Label):
+class AbstractField(Label):
     __wwml_html_override__ = False
     target_prefix = ['Field']
     def draw(self, output_options):
@@ -354,6 +357,12 @@ class Field(Label):
         except KeyError, e:
             e.args = (self, self.path) + e.args
             raise e
+
+class FreeField(AbstractField): pass
+class TableField(AbstractField): pass
+
+# Compatibility and convienence
+class Field(TableField): pass
 
 class AbstractFieldgroup(List):
     pre = "<div %(html_attributes)s>"
