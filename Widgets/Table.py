@@ -133,7 +133,11 @@ class ChildNodeRows(list):
     def sort(self, *arg, **kw):
         super(ChildNodeRows, self).sort(*arg, **kw)
         self.ensure()
-  
+
+class RenderedRowType(object): pass
+class RenderedRowTypeRow(RenderedRowType): pass
+class RenderedRowTypeHeading(RenderedRowType): pass
+
 class Table(Base.ActionInput, Base.Composite):
     """Group By Ordering List is a special kind of table view that
     allows the user to sort the rows and simultaneously group the rows
@@ -357,6 +361,7 @@ class Table(Base.ActionInput, Base.Composite):
             rendered_rows = []
             for row in xrange(node['top'], node['top'] + node['rows']):
                 rendered_rows.append({'cells':[''] * len(visible_columns),
+                                      'type': RenderedRowTypeRow,
                                       'row': rows[row]})
         row = rendered_rows[0]['row']
         if 'value' in node:
@@ -367,6 +372,31 @@ class Table(Base.ActionInput, Base.Composite):
                 column = group_order[node['level'] - 1]
                 rendered_rows[0]['cells'][visible_columns.keys().index(column)
                                           ] = self.draw_node(output_options, row, node, column, first_level, last_level)
+        return rendered_rows
+
+
+    def draw_rows(self, visible_columns, reverse_dependent_columns, output_options):
+        group_order = extend_to_dependent_columns(
+            [column for column, dir in self.sort],
+            self.dependent_columns)
+        group_order = [column for column in group_order
+                      if column in visible_columns] + [column for column in visible_columns
+                                                     if column not in group_order]
+
+        if 'printable_version' in output_options:
+            rows = self.get_all_rows()
+        else:
+            rows = self.get_rows()
+        # Why we need this test here: rows_to_tree would create an empty
+        # top-node for an empty set of rows, which draw_tree would
+        # render into a single row...
+        if rows:
+            rendered_rows = self.draw_tree(self.rows_to_tree(rows, group_order),
+                                           rows,
+                                           output_options,
+                                           group_order, visible_columns)
+        else:
+            rendered_rows = []
         return rendered_rows
 
     def draw_node(self, output_options, row, node, column, first_level, last_level):
@@ -546,54 +576,48 @@ class Table(Base.ActionInput, Base.Composite):
     
             headings.insert(function_position, '<th class="column">&nbsp;</th>')
 
-    def draw_table(self, headings, rows, output_options):
-        return "<table>%(headings)s%(content)s</table>" % {
-            'headings': '<tr>%s</tr>' % (' '.join(headings),),
-            'content': '\n'.join(['<tr class="%s">%s</tr>' % (' '.join(  ['row_' + ['even', 'odd'][row_num % 2]]
-                                                                       + row['row'].get('ww_class', [])),
-                                                              ''.join(row['cells']),)
-                                  for (row_num, row) in enumerate(rows)])}
-            
-    def draw(self, output_options):
-        widget_id = Webwidgets.Utils.path_to_id(self.path)
+    def append_headings(self, rows, headings, output_options):
+        rows.insert(0, {'cells': headings,
+                        'type': RenderedRowTypeHeading})
 
-        reverse_dependent_columns = reverse_dependency(self.dependent_columns)
-        visible_columns = self.visible_columns()
+    def append_classes(self, rows, output_options):
+        for (row_num, row) in enumerate(rows):
+            row['class'] = ['row_' + ['even', 'odd'][row_num % 2]] + row['row'].get('ww_class', [])
 
-        group_order = extend_to_dependent_columns(
-            [column for column, dir in self.sort],
-            self.dependent_columns)
-        group_order = [column for column in group_order
-                      if column in visible_columns] + [column for column in visible_columns
-                                                     if column not in group_order]
-
+    def mangle_rows(self, rows, visible_columns, reverse_dependent_columns, output_options):
         headings = self.draw_headings(visible_columns, reverse_dependent_columns, output_options)
-        if 'printable_version' in output_options:
-            rows = self.get_all_rows()
-        else:
-            rows = self.get_rows()
-        # Why we need this test here: rows_to_tree would create an empty
-        # top-node for an empty set of rows, which draw_tree would
-        # render into a single row...
-        if rows:
-            rendered_rows = self.draw_tree(self.rows_to_tree(rows, group_order),
-                                           rows,
-                                           output_options,
-                                           group_order, visible_columns)
-        else:
-            rendered_rows = []
 
-        self.append_functions(rendered_rows, headings, output_options)
+        self.append_functions(rows, headings, output_options)
+        self.append_classes(rows, output_options)
+        self.append_headings(rows, headings, output_options)
+        return rows
 
+    def draw_table(self, rows, output_options):
+        return "<table>%s</table>" % '\n'.join(['<tr class="%s">%s</tr>' % (' '.join(row.get('class', [])),
+                                                                            ''.join(row.get('cells', [])))
+                                                for row in rows])
+    
+    def mangle_output(self, table, output_options):
         return """
 <div %(html_attributes)s>
  %(table)s
  %(buttons)s
 </div>
 """ % {'html_attributes': self.draw_html_attributes(self.path),
-       'table': self.draw_table(headings, rendered_rows, output_options),
+       'table': table,
        'buttons': self.draw_buttons(output_options)
        }
+
+    def draw(self, output_options):
+        reverse_dependent_columns = reverse_dependency(self.dependent_columns)
+        visible_columns = self.visible_columns()
+        return self.mangle_output(
+            self.draw_table(
+                self.mangle_rows(
+                    self.draw_rows(visible_columns, reverse_dependent_columns, output_options),
+                    visible_columns, reverse_dependent_columns, output_options),
+                output_options),
+            output_options)
 
     def output(self, output_options):
         return {Webwidgets.Constants.OUTPUT: self.draw_printable_version(output_options),
