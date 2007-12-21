@@ -339,7 +339,7 @@ class Label(Base.StaticComposite):
             e.args = (self, self.path) + e.args
             raise e
 
-class AbstractField(Label):
+class Field(Label):
     __wwml_html_override__ = False
     target_prefix = ['Field']
     def draw(self, output_options):
@@ -357,12 +357,6 @@ class AbstractField(Label):
         except KeyError, e:
             e.args = (self, self.path) + e.args
             raise e
-
-class FreeField(AbstractField): pass
-class TableField(AbstractField): pass
-
-# Compatibility and convienence
-class Field(TableField): pass
 
 class AbstractFieldgroup(List):
     pre = "<div %(html_attributes)s>"

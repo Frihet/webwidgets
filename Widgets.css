@@ -385,24 +385,24 @@ select {
  display: block;
 }
 
-.Webwidgets-Widgets-Formatting-AbstractField > *{
+.Webwidgets-Widgets-Formatting-Field > *{
  vertical-align: top;
  text-align: left;
  padding: 2px;
 }
-.Webwidgets-Widgets-Formatting-AbstractField > .field > *{
+.Webwidgets-Widgets-Formatting-Field > .field > *{
  vertical-align: top;
  text-align: left;
  margin: 0;
 }
 
-.Webwidgets-Widgets-Formatting-TableField {
+.Webwidgets-Widgets-Formatting-AbstractFieldgroup > .Webwidgets-Widgets-Formatting-Field {
  display: table-row;
 }
-.Webwidgets-Widgets-Formatting-TableField > *{
+.Webwidgets-Widgets-Formatting-AbstractFieldgroup > .Webwidgets-Widgets-Formatting-Field > *{
  display: table-cell;
 }
-.Webwidgets-Widgets-Formatting-TableField > .field > *{
+.Webwidgets-Widgets-Formatting-AbstractFieldgroup > .Webwidgets-Widgets-Formatting-Field > .field > *{
  width: 100%;
 }
 
@@ -446,7 +446,7 @@ select {
  border-right: none;
 }
 
-.Webwidgets-Widgets-Formatting-HorizontalFieldgroup > .Webwidgets-Widgets-Formatting-TableField > *{
+.Webwidgets-Widgets-Formatting-HorizontalFieldgroup > .Webwidgets-Widgets-Formatting-Field > *{
  display: block;
 }
 
