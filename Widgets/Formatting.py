@@ -88,17 +88,15 @@ class Div(Html):
     """Adds a single div with the widget id as id around the single
     child "child"
     """
+    top_level="div"
     ww_class_data__no_classes_name = True
-    __wwml_html_override__ = False
-    html = """<div %(html_attributes)s>%(child)s</div>"""
 
 class Span(Html):
     """Adds a single span with the widget id as id around the single
     child "child"
     """
+    top_level="span"
     ww_class_data__no_classes_name = True
-    __wwml_html_override__ = False
-    html = """<span %(html_attributes)s>%(child)s</span>"""
 
 class Style(Html):
     """Includes the css style from the child "style"
