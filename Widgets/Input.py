@@ -223,12 +223,12 @@ class RadioInput(Base.ValueInput, Base.StaticComposite):
         return self + self.group
 
     def field_input(self, path, string_value):
-        value = Utils.id_to_path(string_value)
+        value = Webwidgets.Utils.id_to_path(string_value)
         if value == self.path:
             self.get_group().value = self.value
 
     def field_output(self, path):
-        return [Utils.path_to_id(self.path)]
+        return [Webwidgets.Utils.path_to_id(self.path)]
 
     def draw(self, output_options):
         self.register_input(self.group.path, self.argument_name)

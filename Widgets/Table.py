@@ -138,7 +138,7 @@ class RenderedRowType(object): pass
 class RenderedRowTypeRow(RenderedRowType): pass
 class RenderedRowTypeHeading(RenderedRowType): pass
 
-class Table(Base.ActionInput, Base.Composite):
+class BaseTable(Base.Composite):
     """Group By Ordering List is a special kind of table view that
     allows the user to sort the rows and simultaneously group the rows
     according to their content and the sorting.
@@ -147,7 +147,8 @@ class Table(Base.ActionInput, Base.Composite):
     of cell values (strings or widgets).
 
     The list can optionally be paged, and the application asked to
-    provide the previous or next page of content uppon user input.
+    provide the previous or next page of content when the page is
+    changed.
 
     In addition, the application should provide a dictionary of column
     titles and handle the resorted notigication, resorting the rows
@@ -159,12 +160,7 @@ class Table(Base.ActionInput, Base.Composite):
     """
     
     columns = {}
-    argument_name = None
     dependent_columns = {}
-    functions = {}
-    group_functions = {}
-    disabled_functions = []
-    function_position = 0
     sort = []
     rows = []
     page = 1
@@ -172,14 +168,9 @@ class Table(Base.ActionInput, Base.Composite):
     non_memory_storage = False
     dont_merge_widgets = True
     dont_merge_columns = ()
-    old_sort = []
     rows_per_page = 10
     """This attribute is not used internally by the widget, but is
     intended to be used by the user-provide reread() method."""
-
-    printable_link_title = "Printable version"
-    printable_link_only_when_other_buttons = False
-    button_frame_only_when_usefull = True
 
     def __init__(self, session, win_id, **attrs):
         Base.Composite.__init__(self, session, win_id, **attrs)
@@ -245,62 +236,18 @@ class Table(Base.ActionInput, Base.Composite):
                     fields.update(child.get_widgets_by_attribute(attribute))
         return fields
 
-    def field_input(self, path, string_value):
-        widget_path = self.path
-        try:
-            sub_widget = self.path_to_subwidget_path(path)
-        except Webwidgets.Constants.NotASubwidgetException:
-            return
-        
-        if sub_widget == ['sort']:
-            if string_value != '':
-                self.sort = string_to_sort(string_value)
-        elif sub_widget == ['page']:
-            if string_value != '':
-                self.page = int(string_value)
-        elif sub_widget[0] == 'function':
-            if string_value != '':
-                self.notify('function', sub_widget[1], int(string_value))
-        elif sub_widget[0] == 'group_function':
-            if string_value != '':
-                self.notify('group_function', sub_widget[1])
-    
-    def field_output(self, path):
-        widget_path = self.path
-        sub_widget = self.path_to_subwidget_path(path)
-        
-        if sub_widget == ['sort']:
-            return [sort_to_string(self.sort)]
-        elif sub_widget == ['page']:
-            return [unicode(self.page)]
-        elif sub_widget[0] == 'function':
-            return []
-        elif sub_widget[0] == 'group_function':
-            return []
-        else:
-            raise Exception('Unknown sub-widget %s in %s' %(sub_widget, widget_path))
-
     def get_active(self, path):
-        """@return: Whether the widget is allowing input from the user
-        or not.
+        """@return: Whether the widget is allowing the user to acces
+        a given part of it or not.
         """
         widget_path = self.path
         sub_widget = self.path_to_subwidget_path(path)
 
         if not self.active: return False
+        return getattr(self, 'get_active_' + sub_widget[0])(sub_widget[1:])
 
-        if sub_widget == ['sort'] or sub_widget == ['page']:
-            return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, path)
-        elif sub_widget[0] == 'column':
-            return self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, path)
-        elif sub_widget[0] == 'function':
-            if sub_widget[1] in self.disabled_functions: return False
-            return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, path)
-        elif sub_widget[0] == 'group_function':
-            if sub_widget[1] in self.disabled_functions: return False
-            return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, path)
-        else:
-            raise Exception('Unknown sub-widget %s in %s' %(sub_widget, widget_path))
+    def get_active_column(self, path):
+        return self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, path)
 
     def visible_columns(self):
         # Optimisation: we could have used get_active and constructed a path...
@@ -414,6 +361,115 @@ class Table(Base.ActionInput, Base.Composite):
                                             'column_last_level_%s' % last_level]),
             'content': self.draw_child(self.path + ["cell_%s_%s" % (row_num, column_name)],
                                        value, output_options, True)}
+
+    def append_classes(self, rows, output_options):
+        for (row_num, row) in enumerate(rows):
+            row['class'] = ['row_' + ['even', 'odd'][row_num % 2]] + row['row'].get('ww_class', [])
+
+    def mangle_rows(self, rows, visible_columns, reverse_dependent_columns, output_options):
+        self.append_classes(rows, output_options)
+        return rows
+
+    def draw_table(self, rows, output_options):
+        return "<table>%s</table>" % '\n'.join(['<tr class="%s">%s</tr>' % (' '.join(row.get('class', [])),
+                                                                            ''.join(row.get('cells', [])))
+                                                for row in rows])
+    
+    def mangle_output(self, table, output_options):
+        return table
+
+    def draw(self, output_options):
+        reverse_dependent_columns = reverse_dependency(self.dependent_columns)
+        visible_columns = self.visible_columns()
+        return self.mangle_output(
+            self.draw_table(
+                self.mangle_rows(
+                    self.draw_rows(visible_columns, reverse_dependent_columns, output_options),
+                    visible_columns, reverse_dependent_columns, output_options),
+                output_options),
+            output_options)
+
+    def output(self, output_options):
+        return {Webwidgets.Constants.OUTPUT: self.draw_printable_version(output_options),
+               'Content-type': 'text/html'
+               }
+
+    def draw_printable_version(self, output_options):
+        return self.session.windows[self.win_id].draw(output_options,
+                                                     body = self.draw(output_options),
+                                                     title = self.title)
+
+class Table(Base.ActionInput, BaseTable):
+    """Group By Ordering List is a special kind of table view that
+    allows the user to sort the rows and simultaneously group the rows
+    according to their content and the sorting.
+
+    The content is provided as a list of rows, each row a dictionary
+    of cell values (strings or widgets).
+
+    The list can optionally be paged, and the application asked to
+    provide the previous or next page of content uppon user input.
+
+    In addition, the application should provide a dictionary of column
+    titles and handle the resorted notigication, resorting the rows
+    according to the sorting specification. Note: This is the
+    responsibility of the application, as the list shown might be only
+    one page of a huge set of data, so that resorting actually changes
+    the content alltogether. In addition, this allows the sorting to
+    be done by e.g a database back-end.
+    """
+    
+    argument_name = None
+    functions = {}
+    group_functions = {}
+    disabled_functions = []
+    function_position = 0
+    old_sort = []
+
+    printable_link_title = "Printable version"
+    printable_link_only_when_other_buttons = False
+    button_frame_only_when_usefull = True
+
+    def field_input(self, path, string_value):
+        try:
+            sub_widget = self.path_to_subwidget_path(path)
+        except Webwidgets.Constants.NotASubwidgetException:
+            return
+        if string_value != '':
+            getattr(self, 'field_input_' + sub_widget[0])(sub_widget[1:], string_value)
+
+    def field_input_sort(self, path, string_value):
+        self.sort = string_to_sort(string_value)
+    def field_input_page(self, path, string_value):
+        self.page = int(string_value)
+    def field_input_function(self, path, string_value):
+        self.notify('function', path[0], int(string_value))
+    def field_input_group_function(self, path, string_value):
+        self.notify('group_function', path[0])
+    
+    def field_output(self, path):
+        sub_widget = self.path_to_subwidget_path(path)
+        return getattr(self, 'field_output_' + sub_widget[0])(sub_widget[1:])
+
+    def field_output_sort(self, path):
+        return [sort_to_string(self.sort)]
+    def field_output_page(self, path):
+        return [unicode(self.page)]
+    def field_output_function(self, path):
+        return []
+    def field_output_group_function(self, path):
+        return []
+
+    def get_active_sort(self, path):
+        return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, path)
+    def get_active_page(self, path):
+        return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, path)
+    def get_active_function(self, path):
+        if sub_widget[1] in self.disabled_functions: return False
+        return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, path)
+    def get_active_group_function(self, path):
+        if sub_widget[1] in self.disabled_functions: return False
+        return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, path)
 
     def draw_paging_buttons(self, output_options):
         if self.argument_name:
@@ -580,23 +636,16 @@ class Table(Base.ActionInput, Base.Composite):
         rows.insert(0, {'cells': headings,
                         'type': RenderedRowTypeHeading})
 
-    def append_classes(self, rows, output_options):
-        for (row_num, row) in enumerate(rows):
-            row['class'] = ['row_' + ['even', 'odd'][row_num % 2]] + row['row'].get('ww_class', [])
-
     def mangle_rows(self, rows, visible_columns, reverse_dependent_columns, output_options):
+        super(Table, self).mangle_rows(rows, visible_columns, reverse_dependent_columns, output_options)
+
         headings = self.draw_headings(visible_columns, reverse_dependent_columns, output_options)
 
         self.append_functions(rows, headings, output_options)
-        self.append_classes(rows, output_options)
         self.append_headings(rows, headings, output_options)
+
         return rows
 
-    def draw_table(self, rows, output_options):
-        return "<table>%s</table>" % '\n'.join(['<tr class="%s">%s</tr>' % (' '.join(row.get('class', [])),
-                                                                            ''.join(row.get('cells', [])))
-                                                for row in rows])
-    
     def mangle_output(self, table, output_options):
         return """
 <div %(html_attributes)s>
@@ -608,23 +657,4 @@ class Table(Base.ActionInput, Base.Composite):
        'buttons': self.draw_buttons(output_options)
        }
 
-    def draw(self, output_options):
-        reverse_dependent_columns = reverse_dependency(self.dependent_columns)
-        visible_columns = self.visible_columns()
-        return self.mangle_output(
-            self.draw_table(
-                self.mangle_rows(
-                    self.draw_rows(visible_columns, reverse_dependent_columns, output_options),
-                    visible_columns, reverse_dependent_columns, output_options),
-                output_options),
-            output_options)
-
-    def output(self, output_options):
-        return {Webwidgets.Constants.OUTPUT: self.draw_printable_version(output_options),
-               'Content-type': 'text/html'
-               }
-
-    def draw_printable_version(self, output_options):
-        return self.session.windows[self.win_id].draw(output_options,
-                                                     body = self.draw(output_options),
-                                                     title = self.title)
+    draw = BaseTable.draw # Override the default from ActionInput...
