@@ -138,6 +138,12 @@ class RenderedRowType(object): pass
 class RenderedRowTypeRow(RenderedRowType): pass
 class RenderedRowTypeHeading(RenderedRowType): pass
 
+class SpecialCell(object): 
+    html_class = []
+
+    def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
+        return ''
+
 class BaseTable(Base.Composite):
     """Group By Ordering List is a special kind of table view that
     allows the user to sort the rows and simultaneously group the rows
@@ -215,6 +221,13 @@ class BaseTable(Base.Composite):
         return self.rows[(self.page - 1) * self.rows_per_page:
                          self.page * self.rows_per_page]
 
+    def mangle_row(self, row, output_options):
+        return row
+
+    def mangle_rows(self, rows, output_options):
+	return [self.mangle_row(row, output_options)
+                for row in rows]
+
     def get_pages(self):
         if self.non_memory_storage:
             return self.pages        
@@ -240,6 +253,7 @@ class BaseTable(Base.Composite):
         """@return: Whether the widget is allowing the user to acces
         a given part of it or not.
         """
+        
         widget_path = self.path
         sub_widget = self.path_to_subwidget_path(path)
 
@@ -247,7 +261,7 @@ class BaseTable(Base.Composite):
         return getattr(self, 'get_active_' + sub_widget[0])(sub_widget[1:])
 
     def get_active_column(self, path):
-        return self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, path)
+        return self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, self.path + ['column'] + path)
 
     def visible_columns(self):
         # Optimisation: we could have used get_active and constructed a path...
@@ -259,8 +273,7 @@ class BaseTable(Base.Composite):
         tree = {'level': 0,
                 'rows': 0,
                 'children':[]}
-        for row_num in xrange(0, len(rows)):
-            row = rows[row_num]
+        for row_num, row in enumerate(rows):
             node = tree
             node['rows'] += 1
             if 'ww_expanded' in row:
@@ -321,6 +334,37 @@ class BaseTable(Base.Composite):
                                           ] = self.draw_node(output_options, row, node, column, first_level, last_level)
         return rendered_rows
 
+    def draw_node(self, output_options, row, node, column, first_level, last_level):
+        return self.draw_cell(output_options, row, node['value'], node['top'], column, node['rows'], 1, first_level, last_level)
+
+    def draw_extended_row(self, output_options, row, value, visible_columns, row_num, first_level, last_level):
+        return self.draw_cell(output_options, row, value, row_num, 'ww_expanded', 1, len(visible_columns), first_level, last_level)
+
+    def draw_cell(self, output_options, row, value,
+                  row_num, column_name, rowspan, colspan, first_level, last_level):
+        html_class = []
+        if isinstance(value, SpecialCell):
+            html_class.extend(value.html_class)
+            value = value.draw_cell(
+                output_options, row, self,
+                row_num, column_name, rowspan, colspan, first_level, last_level)
+        else:
+            value = self.draw_child(self.path + ["cell_%s_%s" % (row.row, column_name)],
+                                    value, output_options, True)
+        html_class.extend(row.get('ww_class', []))
+        return '<td rowspan="%(rowspan)s" colspan="%(colspan)s" class="%(class)s">%(content)s</td>' % {
+            'rowspan': rowspan,
+            'colspan': colspan,
+            'class': ' '.join(html_class + ['column_first_level_%s' % first_level,
+                                            'column_last_level_%s' % last_level]),
+            'content': value}
+
+    def get_mangled_rows(self, output_options):
+        if 'printable_version' in output_options:
+            rows = self.get_all_rows()
+        else:
+            rows = self.get_rows()
+	return self.mangle_rows(rows, output_options)
 
     def draw_rows(self, visible_columns, reverse_dependent_columns, output_options):
         group_order = extend_to_dependent_columns(
@@ -330,10 +374,8 @@ class BaseTable(Base.Composite):
                       if column in visible_columns] + [column for column in visible_columns
                                                      if column not in group_order]
 
-        if 'printable_version' in output_options:
-            rows = self.get_all_rows()
-        else:
-            rows = self.get_rows()
+        rows = self.get_mangled_rows(output_options)
+
         # Why we need this test here: rows_to_tree would create an empty
         # top-node for an empty set of rows, which draw_tree would
         # render into a single row...
@@ -346,29 +388,14 @@ class BaseTable(Base.Composite):
             rendered_rows = []
         return rendered_rows
 
-    def draw_node(self, output_options, row, node, column, first_level, last_level):
-        return self.draw_cell(output_options, row, node['value'], node['top'], column, node['rows'], 1, first_level, last_level)
+    def append_classes(self, rendered_rows, output_options):
+        for rendered_row in rendered_rows:
+            rendered_row['class'] = (  ['row_' + ['even', 'odd'][rendered_row['row'].row % 2]]
+                                     + rendered_row['row'].get('ww_class', []))
 
-    def draw_extended_row(self, output_options, row, value, visible_columns, row_num, first_level, last_level):
-        return self.draw_cell(output_options, row, value, row_num, 'ww_expanded', 1, len(visible_columns), first_level, last_level)
-
-    def draw_cell(self, output_options, row, value, row_num, column_name, rowspan, colspan, first_level, last_level):
-        html_class = row.get('ww_class', [])
-        return '<td rowspan="%(rowspan)s" colspan="%(colspan)s" class="%(class)s">%(content)s</td>' % {
-            'rowspan': rowspan,
-            'colspan': colspan,
-            'class': ' '.join(html_class + ['column_first_level_%s' % first_level,
-                                            'column_last_level_%s' % last_level]),
-            'content': self.draw_child(self.path + ["cell_%s_%s" % (row_num, column_name)],
-                                       value, output_options, True)}
-
-    def append_classes(self, rows, output_options):
-        for (row_num, row) in enumerate(rows):
-            row['class'] = ['row_' + ['even', 'odd'][row_num % 2]] + row['row'].get('ww_class', [])
-
-    def mangle_rows(self, rows, visible_columns, reverse_dependent_columns, output_options):
-        self.append_classes(rows, output_options)
-        return rows
+    def mangle_rendered_rows(self, rendered_rows, visible_columns, reverse_dependent_columns, output_options):
+        self.append_classes(rendered_rows, output_options)
+        return rendered_rows
 
     def draw_table(self, rows, output_options):
         return "<table>%s</table>" % '\n'.join(['<tr class="%s">%s</tr>' % (' '.join(row.get('class', [])),
@@ -383,7 +410,7 @@ class BaseTable(Base.Composite):
         visible_columns = self.visible_columns()
         return self.mangle_output(
             self.draw_table(
-                self.mangle_rows(
+                self.mangle_rendered_rows(
                     self.draw_rows(visible_columns, reverse_dependent_columns, output_options),
                     visible_columns, reverse_dependent_columns, output_options),
                 output_options),
@@ -399,7 +426,40 @@ class BaseTable(Base.Composite):
                                                      body = self.draw(output_options),
                                                      title = self.title)
 
-class Table(Base.ActionInput, BaseTable):
+class FunctionCell(SpecialCell):
+    html_class = ['functions']
+    
+    def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
+        enabled_functions = row.get('ww_functions', True)
+        rendered_functions = []
+        for function, title in table.functions[column_name].iteritems():
+            if enabled_functions is not True and function not in enabled_functions:
+                continue
+            active = table.get_active(table.path + ['_', 'function', function])
+            if active:
+                table.session.windows[table.win_id].fields[Webwidgets.Utils.path_to_id(
+                    table.path + ['_', 'function', function])] = table
+            rendered_functions.append(
+                """<button
+                    type="submit"
+                    id="%(html_id)s-%(row)s"
+                    class="%(html_class)s"
+                    %(disabled)s
+                    name="%(html_id)s"
+                    value="%(row)s">%(title)s</button>""" % {
+                        'html_id': Webwidgets.Utils.path_to_id(table.path + ['_', 'function', function]),
+                        'html_class': function,
+                        'disabled': ['disabled="disabled"', ''][active],
+                        'title': table._(title, output_options),
+                        'row': row_num})
+        return ''.join(rendered_functions)
+
+    def __cmp__(self, other):
+        return -1
+
+FunctionCellInstance = FunctionCell()
+
+class Table(BaseTable, Base.ActionInput):
     """Group By Ordering List is a special kind of table view that
     allows the user to sort the rows and simultaneously group the rows
     according to their content and the sorting.
@@ -420,10 +480,10 @@ class Table(Base.ActionInput, BaseTable):
     """
     
     argument_name = None
-    functions = {}
-    group_functions = {}
-    disabled_functions = []
-    function_position = 0
+    functions = {} # {'column_name': {'function_name': 'title'}}
+    group_functions = {} # {'function_name': 'title'}
+    disabled_functions = [] # ['function_name']
+    disabled_columns = []
     old_sort = []
 
     printable_link_title = "Printable version"
@@ -461,15 +521,27 @@ class Table(Base.ActionInput, BaseTable):
         return []
 
     def get_active_sort(self, path):
-        return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, path)
+        if path and (  path[0] in self.disabled_columns
+                     or path[0] in self.functions): return False
+        return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['sort'] + path)
     def get_active_page(self, path):
-        return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, path)
+        return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['page'] + path)
     def get_active_function(self, path):
-        if sub_widget[1] in self.disabled_functions: return False
-        return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, path)
+        if path[0] in self.disabled_functions: return False
+        return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, self.path + ['function'] + path)
     def get_active_group_function(self, path):
-        if sub_widget[1] in self.disabled_functions: return False
-        return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, path)
+        if path[0] in self.disabled_functions: return False
+        return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, self.path + ['group_function'] + path)
+
+    def mangle_row(self, row, output_options):
+        if 'printable_version' not in output_options and self.functions:
+            mangled_row = ChildNodeCells(row.node, row.row)
+            mangled_row.update(row)
+            for name in self.functions.iterkeys():
+                mangled_row[name] = FunctionCellInstance
+            mangled_row.row = row.row
+            return mangled_row
+        return row
 
     def draw_paging_buttons(self, output_options):
         if self.argument_name:
@@ -564,17 +636,18 @@ class Table(Base.ActionInput, BaseTable):
 """ % button_bars_html
 
     def draw_headings(self, visible_columns, reverse_dependent_columns, output_options):
+        sort_path = self.path + ['_', 'sort']
+        headings = []
+        input_id = Webwidgets.Utils.path_to_id(sort_path)
+        widget_id = Webwidgets.Utils.path_to_id(self.path)
+
         if self.argument_name:
             self.session.windows[self.win_id].arguments[self.argument_name + '_sort'] = {
-                'widget':self, 'path': self.path + ['_', 'sort']}
+                'widget':self, 'path': sort_path}
+        self.session.windows[self.win_id].fields[input_id] = self
 
-        sort_active = self.get_active(self.path + ['_', 'sort'])
-        headings = []
-        input_id = Webwidgets.Utils.path_to_id(self.path + ['_', 'sort'])
-        widget_id = Webwidgets.Utils.path_to_id(self.path)
-        if sort_active:
-            self.session.windows[self.win_id].fields[input_id] = self
         for column, title in visible_columns.iteritems():
+            sort_active = self.get_active(sort_path + [column])
             info = {'input_id': input_id,
                     'html_id': widget_id,
                     'column': column,
@@ -597,54 +670,18 @@ class Table(Base.ActionInput, BaseTable):
 """ % info)
         return headings
 
-    def append_functions(self, rows, headings, output_options):
-        if 'printable_version' not in output_options and self.functions:
-            function_position = self.function_position
-            if function_position < 0:
-                function_position += 1
-                if function_position == 0: 
-                    function_position = len(headings)
-            
-            function_active = {}
-            for function in self.functions:
-                function_active[function] = self.get_active(self.path + ['_', 'function', function])
-
-            for function in self.functions:
-                if function_active[function]:
-                    self.session.windows[self.win_id].fields[Webwidgets.Utils.path_to_id(self.path + ['_', 'function', function])] = self
-            for row_num in xrange(0, len(rows)):
-                enabled_functions = rows[row_num]['row'].get('ww_functions', True)
-                functions = '<td class="functions">%s</td>' % ''.join([
-                    """<button
-                        type="submit"
-                        id="%(html_id)s-%(row)s"
-                        class="%(html_class)s"
-                        %(disabled)s
-                        name="%(html_id)s"
-                        value="%(row)s">%(title)s</button>""" % {'html_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'function', function]),
-                                                                 'html_class': function,
-                                                                 'disabled': ['disabled="disabled"', ''][function_active[function]],
-                                                                 'title': self._(title, output_options),
-                                                                 'row': row_num}
-                    for function, title in self.functions.iteritems()
-                    if enabled_functions is True or function in enabled_functions])
-                rows[row_num]['cells'].insert(function_position, functions)
-    
-            headings.insert(function_position, '<th class="column">&nbsp;</th>')
-
     def append_headings(self, rows, headings, output_options):
         rows.insert(0, {'cells': headings,
                         'type': RenderedRowTypeHeading})
 
-    def mangle_rows(self, rows, visible_columns, reverse_dependent_columns, output_options):
-        super(Table, self).mangle_rows(rows, visible_columns, reverse_dependent_columns, output_options)
+    def mangle_rendered_rows(self, rendered_rows, visible_columns, reverse_dependent_columns, output_options):
+        super(Table, self).mangle_rendered_rows(rendered_rows, visible_columns, reverse_dependent_columns, output_options)
 
         headings = self.draw_headings(visible_columns, reverse_dependent_columns, output_options)
 
-        self.append_functions(rows, headings, output_options)
-        self.append_headings(rows, headings, output_options)
+        self.append_headings(rendered_rows, headings, output_options)
 
-        return rows
+        return rendered_rows
 
     def mangle_output(self, table, output_options):
         return """
@@ -656,5 +693,3 @@ class Table(Base.ActionInput, BaseTable):
        'table': table,
        'buttons': self.draw_buttons(output_options)
        }
-
-    draw = BaseTable.draw # Override the default from ActionInput...

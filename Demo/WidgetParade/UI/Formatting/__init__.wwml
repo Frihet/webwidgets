@@ -28,16 +28,23 @@
  <w:Tabset id="Formatting" title="Output">
   <w:Html id="table" title="Tables">
    <w:Table id="ListTest" argument_name='test' rows_per_page=":integer:20">
-    <w:dict id="functions" copy="C" edit="E" delete="D" />
-    <w:dict id="group_functions" new="New" delete="Delete all" />
     <w:odict id="columns">
      <w:string id="foo">Fooish foo</w:string>
+     <w:string id="functs"></w:string>
      <w:string id="bar">Barbar</w:string>
      <w:string id="fie">Fish</w:string>
      <w:string id="x">X</w:string>
      <w:string id="y">Y</w:string>
      <w:string id="z">Z</w:string>
     </w:odict>
+    <w:odict id="functions">
+     <w:odict id="functs">
+      <w:string id="copy">C</w:string>
+      <w:string id="edit">E</w:string>
+      <w:string id="delete">D</w:string>
+     </w:odict>
+    </w:odict>
+    <w:dict id="group_functions" new="New" delete="Delete all" />
     <w:list id="dont_merge_columns"><w:string id="bar">bar</w:string></w:list>
     <w:list id="rows">
      <w:dict id="row1" foo="47" bar="11" fie="56" x="X" y="Y" z="Z" />
