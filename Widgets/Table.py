@@ -138,9 +138,13 @@ class RenderedRowType(object): pass
 class RenderedRowTypeRow(RenderedRowType): pass
 class RenderedRowTypeHeading(RenderedRowType): pass
 
-class SpecialCell(object): 
+class SpecialCell(object):
     html_class = []
-
+    def get_html_class(self,
+        output_options, row, table,
+        row_num, column_name, rowspan, colspan, first_level, last_level):
+        return self.html_class
+    
     def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
         return ''
 
@@ -221,6 +225,9 @@ class BaseTable(Base.Composite):
         return self.rows[(self.page - 1) * self.rows_per_page:
                          self.page * self.rows_per_page]
 
+    def mangle_columns(self, columns, output_options):
+        return columns
+    
     def mangle_row(self, row, output_options):
         return row
 
@@ -263,9 +270,11 @@ class BaseTable(Base.Composite):
     def get_active_column(self, path):
         return self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, self.path + ['column'] + path)
 
-    def visible_columns(self):
+    def visible_columns(self, output_options):
         # Optimisation: we could have used get_active and constructed a path...
-        return Webwidgets.Utils.OrderedDict([(name, description) for (name, description) in self.columns.iteritems()
+        return Webwidgets.Utils.OrderedDict([(name, description)
+                                             for (name, description)
+                                             in self.mangle_columns(self.columns, output_options).iteritems()
                                              if self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id,
                                                                            self.path + ['_', 'column', name])])
 
@@ -344,19 +353,21 @@ class BaseTable(Base.Composite):
                   row_num, column_name, rowspan, colspan, first_level, last_level):
         html_class = []
         if isinstance(value, SpecialCell):
-            html_class.extend(value.html_class)
+            html_class = value.get_html_class(
+                output_options, row, self,
+                row_num, column_name, rowspan, colspan, first_level, last_level)
             value = value.draw_cell(
                 output_options, row, self,
                 row_num, column_name, rowspan, colspan, first_level, last_level)
         else:
+            html_class = row.get('ww_class', []) + ['column_first_level_%s' % first_level,
+                                                    'column_last_level_%s' % last_level]
             value = self.draw_child(self.path + ["cell_%s_%s" % (row.row, column_name)],
                                     value, output_options, True)
-        html_class.extend(row.get('ww_class', []))
         return '<td rowspan="%(rowspan)s" colspan="%(colspan)s" class="%(class)s">%(content)s</td>' % {
             'rowspan': rowspan,
             'colspan': colspan,
-            'class': ' '.join(html_class + ['column_first_level_%s' % first_level,
-                                            'column_last_level_%s' % last_level]),
+            'class': ' '.join(html_class),
             'content': value}
 
     def get_mangled_rows(self, output_options):
@@ -407,7 +418,7 @@ class BaseTable(Base.Composite):
 
     def draw(self, output_options):
         reverse_dependent_columns = reverse_dependency(self.dependent_columns)
-        visible_columns = self.visible_columns()
+        visible_columns = self.visible_columns(output_options)
         return self.mangle_output(
             self.draw_table(
                 self.mangle_rendered_rows(
@@ -428,7 +439,21 @@ class BaseTable(Base.Composite):
 
 class FunctionCell(SpecialCell):
     html_class = ['functions']
-    
+
+    def draw_function(self, table, row_num, path, html_class, title, active, output_options):
+        return """<button
+                   type="submit"
+                   id="%(html_id)s-%(row)s"
+                   class="%(html_class)s"
+                   %(disabled)s
+                   name="%(html_id)s"
+                   value="%(row)s">%(title)s</button>""" % {
+                       'html_id': Webwidgets.Utils.path_to_id(table.path + ['_'] + path),
+                       'html_class': html_class,
+                       'disabled': ['disabled="disabled"', ''][active],
+                       'title': table._(title, output_options),
+                       'row': row_num}
+                       
     def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
         enabled_functions = row.get('ww_functions', True)
         rendered_functions = []
@@ -439,19 +464,8 @@ class FunctionCell(SpecialCell):
             if active:
                 table.session.windows[table.win_id].fields[Webwidgets.Utils.path_to_id(
                     table.path + ['_', 'function', function])] = table
-            rendered_functions.append(
-                """<button
-                    type="submit"
-                    id="%(html_id)s-%(row)s"
-                    class="%(html_class)s"
-                    %(disabled)s
-                    name="%(html_id)s"
-                    value="%(row)s">%(title)s</button>""" % {
-                        'html_id': Webwidgets.Utils.path_to_id(table.path + ['_', 'function', function]),
-                        'html_class': function,
-                        'disabled': ['disabled="disabled"', ''][active],
-                        'title': table._(title, output_options),
-                        'row': row_num})
+            rendered_functions.append(self.draw_function(
+                table, row_num, ['function', function], function, title, active, output_options))
         return ''.join(rendered_functions)
 
     def __cmp__(self, other):
@@ -658,13 +672,13 @@ class Table(BaseTable, Base.ActionInput):
                     }
             if 'printable_version' in output_options:
                 headings.append("""
-<th id="%(html_id)s-_-head-%(column)s" class="column %(ww_classes)s">
+<th id="%(html_id)s-_-head-%(column)s" class="column %(column)s %(ww_classes)s">
  <span id="%(html_id)s-_-sort-%(column)s">%(caption)s</span>
 </th>
 """ % info)
             else:
                 headings.append("""
-<th id="%(html_id)s-_-head-%(column)s" class="column %(ww_classes)s">
+<th id="%(html_id)s-_-head-%(column)s" class="column %(column)s %(ww_classes)s">
  <button type="submit" id="%(html_id)s-_-sort-%(column)s" %(disabled)s name="%(html_id)s-_-sort" value="%(sort)s">%(caption)s</button>
 </th>
 """ % info)
