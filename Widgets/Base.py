@@ -45,6 +45,7 @@ class Type(type):
         if 'ww_class_data' not in members:
             members['ww_class_data'] = {}
         members['ww_class_data'] = {}
+        
 
         for key in members.keys():
             if key.startswith('class_data_'):
@@ -249,6 +250,8 @@ class Widget(Object):
             res.update(self.parent.get_widgets_by_attribute(attribute, False))
         if hasattr(self, attribute):
             res[getattr(self, attribute)] = self
+        elif hasattr(type(self), attribute):
+            res[getattr(type(self), attribute)] = self
         return res
 
     def path_to_subwidget_path(self, path):

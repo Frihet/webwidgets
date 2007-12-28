@@ -170,7 +170,7 @@ def generate_value(type_name, text, attributes, module, using, class_path, bind_
                     ', '.join([str(cls) for cls in base_cls]),
                     str(e)))
         elif hasattr(node_value, '__iter__'):
-            value = dict(attributes)
+            value = Utils.OrderedDict(attributes)
             if 'classid' in value: del value['classid']
             if 'id' in value: del value['id']
             if hasattr(node_value, 'iteritems'):
