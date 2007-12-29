@@ -836,14 +836,34 @@ class ActionInput(Input):
 
     __input_subordinates__ = (ValueInput,)
 
+    def field_output(self, path):
+        return []
+
+class SingleActionInput(ActionInput):
+    """Base class for all input widgets that only fires a single
+    notification with no parameters."""
+
+    __input_subordinates__ = (ValueInput,)
+
     def field_input(self, path, string_value):
         if string_value != '':
             self.notify('clicked')
 
-    def field_output(self, path):
-        return []
-
     def clicked(self, path):
+        if path != self.path: return
+        return
+
+class MultipleActionInput(ActionInput):
+    """Base class for all input widgets that can fire any of a set of
+    notifications."""
+
+    __input_subordinates__ = (ValueInput,)
+
+    def field_input(self, path, string_value):
+        if string_value != '':
+            self.notify('selected', string_value)
+
+    def selected(self, path, value):
         if path != self.path: return
         return
 

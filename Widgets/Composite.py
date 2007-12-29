@@ -91,32 +91,21 @@ class StaticDialog(InfoFrame):
     __wwml_html_override__ = False
     buttons = {'Cancel': '0', 'Ok': '1'}
 
-    def __init__(self, session, win_id, **attrs):
-        super(InfoFrame, self).__init__(session, win_id, **attrs)
-        self.children['Buttons'] = self.Buttons(session, win_id, self.buttons)
-
     def draw_foot(self, children, output_options):
         return """<div class="%(html_foot_classes)s" id="%(html_id)s-body">
                    %(Buttons)s
                   </div>""" % children
 
-    class Buttons(Formatting.List):
-        ww_explicit_load = True
+    class Buttons(Input.ButtonArray):
+        class Buttons(object):
+            def __get__(self, instance, owner):
+                if not instance.parent: return None
+                return instance.parent.buttons
 
-        class Button(Input.Button):
-            ww_explicit_load = True
-            def clicked(self, path):
-                self.parent.parent.notify('selected', self.value)
+            def selected(self, path, value):
+                self.parent.notify('selected', value)
                 raise StopIteration
-            
-        def __init__(self, session, win_id, buttons):
-            super(Dialog.Buttons, self).__init__(
-                session, win_id,
-                children = Webwidgets.Utils.OrderedDict(
-                    [(str(value),
-                      Dialog.Buttons.Button(session, win_id,
-                                            title=title, value=value))
-                     for title, value in buttons.iteritems()]))
+        buttons = Buttons()
 
 class Dialog(StaticDialog):
     def selected(self, path, value):

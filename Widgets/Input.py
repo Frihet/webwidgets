@@ -167,7 +167,7 @@ class NewPasswordInput(Formatting.Html, Base.ValueInput):
         self['input1'].value = self['input2'].value = self.value
         self.error = None
 
-class Button(Base.ActionInput):
+class Button(Base.SingleActionInput):
     """Button widget - throws a "clicked" notification when clicked"""
     title = ''
 
@@ -179,14 +179,14 @@ class Button(Base.ActionInput):
             'title': self._(self.title, output_options),
             'disabled': ['', 'disabled="disabled"'][not self.get_active(self.path)]}
 
-class UpdateButton(Base.ActionInput):
+class UpdateButton(Base.SingleActionInput):
     """This is a special kind of button that only submits the form and
     causes other widgets to get their input. In addition, it
     dissapears if JavaScript is enabled. It is intended to be used in
     conjunction with register_submit_action() on other widgets."""
 
     def draw(self, output_options):
-        Base.ActionInput.draw(self, output_options)
+        Base.SingleActionInput.draw(self, output_options)
         info = {'html_attributes': self.draw_html_attributes(self.path),
                 'id': Webwidgets.Utils.path_to_id(self.path),
                 'title': self._("Update", output_options),
@@ -203,6 +203,29 @@ class UpdateButton(Base.ActionInput):
 
     def field_input(self, path, string_value):
         pass
+
+class ButtonArray(Base.MultipleActionInput):
+    """Button array widget - throws a "selected" notification when any one of the buttons is clicked"""
+    
+    buttons = {'Cancel': '0', 'Ok': '1'}
+    "Mapping from button title to value"
+
+    def draw(self, output_options):
+        super(ButtonArray, self).draw(output_options)
+        input_id = Webwidgets.Utils.path_to_id(self.path)
+        buttons = ["""<button
+                       type="submit"
+                       %(disabled)s
+                       name="%(name)s"
+                       value="%(value)s">%(title)s</button>""" %
+                   {'name': input_id,
+                    'title': self._(title, output_options),
+                    'value': value,
+                    'disabled': ['', 'disabled="disabled"'][not self.get_active(self.path + ['_', 'button', value])]}
+                   for title, value in self.buttons.iteritems()]
+        return """<div %(html_attributes)s>%(buttons)s</div>""" % {
+            'html_attributes': self.draw_html_attributes(self.path),
+            'buttons': ''.join(buttons)}
 
 class RadioButtonGroup(Base.ValueInput):
     """Group of radio buttons must be joined together. This is
@@ -420,7 +443,7 @@ class FieldStorageInput(Base.ValueInput):
             res = self.value.file.read().decode('utf-8')
         return [res]
 
-class NotificationError(Base.ActionInput):
+class NotificationError(Base.SingleActionInput):
     error = Exception("Example error")
 
     def field_input(self, path, string_value):
