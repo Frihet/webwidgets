@@ -213,6 +213,11 @@ def generate_value_for_node(module, node, using = [], class_path = [], bind_cont
         using = attributes['using'].split(' ') + using
 
     if 'bind' in attributes:
+        # Just check that it exists and barf otherwize - we'll load it
+        # again later when we actually need it or a part of it (at
+        # this point, it does not matter if the name points to a class
+        # or just to a module).
+        Utils.load_class(attributes['bind'], using, module = module)
         bind_context = attributes['bind'].split('.')
     else:
         bind_context = bind_context + [attributes.get('classid', '__unknown__')]

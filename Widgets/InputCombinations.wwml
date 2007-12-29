@@ -24,9 +24,7 @@
  bind="Webwidgets.Widgets.InputCombinationCallbacks">
  >
 
- <w:Fieldgroup id="AddressInput"
-  using="Webwidgets"
-  bind="Webwidgets.Widgets.InputCombinationsCallbacks">
+ <w:Fieldgroup id="AddressInput">
   <w:Field id="Co" Label=":Text:c/o"><w:StringInput id="Field" field_name="co" /></w:Field>
   <w:Field id="Street" Label=":Text:Street"><w:StringInput id="Field" field_name="street" /></w:Field>
   <w:Field id="Zip" Label=":Text:Post-code/zip code"><w:StringInput id="Field" field_name="zip" /></w:Field>
