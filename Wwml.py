@@ -298,6 +298,40 @@ class WwmlLoader(ihooks.ModuleLoader):
             # Otherwise, use the default handler for loading
             return ihooks.ModuleLoader.load_module(self, name, (file, filename, (suff, mode, type)))
 
-ihooks.install(ihooks.ModuleImporter(WwmlLoader(WwmlHooks())))
+class ModuleImporter(ihooks.ModuleImporter):
+    def find_head_package(self, parent, name):
+        if '.' in name:
+            i = name.find('.')
+            head = name[:i]
+            tail = name[i+1:]
+        else:
+            head = name
+            tail = ""
+        if parent:
+            qname = "%s.%s" % (parent.__name__, head)
+        else:
+            qname = head
+        q = self.import_it(head, qname, parent)
+        if q: return q, (tail, name)
+        if parent:
+            qname = head
+            parent = None
+            q = self.import_it(head, qname, parent)
+            if q: return q, (tail, name)
+        raise Utils.LocalizedImportError(name, "No module named " + qname)
+
+    def load_tail(self, q, (tail, name)):
+        m = q
+        while tail:
+            i = tail.find('.')
+            if i < 0: i = len(tail)
+            head, tail = tail[:i], tail[i+1:]
+            mname = "%s.%s" % (m.__name__, head)
+            m = self.import_it(head, mname, m)
+            if not m:
+                raise Utils.LocalizedImportError(name, "No module named " + mname)
+        return m
+
+ihooks.install(ModuleImporter(WwmlLoader(WwmlHooks())))
 
 

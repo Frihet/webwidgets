@@ -252,6 +252,13 @@ def is_prefix(prefix, list):
     prefix_len = len(prefix)
     return prefix_len <= len(list) and prefix == list[:prefix_len]
 
+class LocalizedImportError(ImportError):
+    def __init__(self, location, *args):
+        ImportError.__init__(self, *args)
+        self.location = location
+
+class ModuleDoesNotExistButWeDontCare(Exception): pass
+
 def load_class(name, using = [], imp = None, global_dict = None, local_dict = None, module = None):
     if debug_class_loading: print "load_class: Importing %s using %s:" % (name, ' '.join(using))
 
@@ -270,30 +277,36 @@ def load_class(name, using = [], imp = None, global_dict = None, local_dict = No
                 if debug_class_loading: print "load_class:         Trying %s" % name
                 mod = (imp or __import__)(name, global_dict, local_dict)
                 break
-            except ImportError, e:
+            except LocalizedImportError, e:
+                if e.location != name:
+                    raise
                 if debug_class_loading: print "load_class:             %s" % str(e)
             del prefix[-1]
         if mod is None:
-            raise ImportError("Class does not exist:", name, using, file)
+            raise ModuleDoesNotExistButWeDontCare("Class does not exist:", name, using, file)
         for component in components[1:]:
             dict_components = []
             if '-' in component:
                 dict_components = component.split('-')
                 component = dict_components[0]
                 del dict_components[0]
+            if not hasattr(mod, component):
+                raise ModuleDoesNotExistButWeDontCare("Attribute does not exist", mod, component)
             mod = getattr(mod, component)
             for dict_component in dict_components:
+                if dict_component not in mod:
+                    raise ModuleDoesNotExistButWeDontCare("Item does not exist", mod, dict_component)
                 mod = mod[dict_component]
         return mod
 
     for pkg in using:
         try:
             return load_class_absolute(pkg + '.' + name)
-        except (ImportError, AttributeError), e:
+        except ModuleDoesNotExistButWeDontCare, e:
             if debug_class_loading: print "load_class:         %s" % str(e)
     try:
         return load_class_absolute(name)
-    except (ImportError, AttributeError), e:
+    except ModuleDoesNotExistButWeDontCare, e:
         if debug_class_loading: print "load_class:         %s" % str(e)
         raise ImportError("Class does not exist:", name, using, file)
 
