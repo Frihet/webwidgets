@@ -97,14 +97,14 @@ class StaticDialog(InfoFrame):
                   </div>""" % children
 
     class Buttons(Input.ButtonArray):
+        def selected(self, path, value):
+            self.parent.notify('selected', value)
+            raise StopIteration
         class Buttons(object):
             def __get__(self, instance, owner):
                 if not instance.parent: return None
                 return instance.parent.buttons
 
-            def selected(self, path, value):
-                self.parent.notify('selected', value)
-                raise StopIteration
         buttons = Buttons()
 
 class Dialog(StaticDialog):
