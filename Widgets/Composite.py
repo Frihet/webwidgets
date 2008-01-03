@@ -92,7 +92,7 @@ class StaticDialog(InfoFrame):
     buttons = {'Cancel': '0', 'Ok': '1'}
 
     def draw_foot(self, children, output_options):
-        return """<div class="%(html_foot_classes)s" id="%(html_id)s-body">
+        return """<div class="%(html_foot_classes)s" id="%(html_id)s-foot">
                    %(Buttons)s
                   </div>""" % children
 

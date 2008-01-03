@@ -366,12 +366,12 @@ class Widget(Object):
     def register_script(self, name, script):
         self.register_head_content(
             name,
-            "<script language='javascript'>%s</script>" % (script,))
+            "<script language='javascript' type='text/javascript'>%s</script>" % (script,))
 
     def register_style(self, name, style):
         self.register_head_content(
             name,
-            "<style>%s</style>" % (style,))
+            "<style type='text/css'>%s</style>" % (style,))
 
     def register_submit_action(self, path, event):
         info = {'id': Webwidgets.Utils.path_to_id(path),
@@ -389,7 +389,7 @@ class Widget(Object):
 
     def register_value(self, name, value):
         self.register_head_content('value: ' + name,
-                                 """<script language="javascript">webwidgets_values['%(name)s'] = '%(value)s';</script>""" % {'name': name,
+                                 """<script language="javascript" type='text/javascript'>webwidgets_values['%(name)s'] = '%(value)s';</script>""" % {'name': name,
                                                                                                                               'value': value})
 
     def calculate_url(self, output_options, arguments = None):

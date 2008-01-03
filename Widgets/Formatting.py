@@ -352,9 +352,9 @@ class Field(Label):
                        <label for="%(target)s">
                         %(label)s
                        </label>
-                       <span class="field">
+                       <div class="field">
                         %(Field)s
-                       </span>
+                       </div>
                       </div>
                       """ % res
         except KeyError, e:
