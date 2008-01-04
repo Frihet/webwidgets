@@ -435,6 +435,7 @@ select {
  vertical-align:top;
 }
 
+.Webwidgets-Widgets-Formatting-HorizontalFieldgroup,
 .Webwidgets-Widgets-Formatting-VerticalFieldgroup > .Webwidgets-Widgets-Formatting-HorizontalFieldgroup {
  display: table-row;
 }
