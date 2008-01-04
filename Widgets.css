@@ -218,14 +218,14 @@ input.error,
 }
 
 
-.Webwidgets-Widgets-Composite-TabbedView ul.tabs {
+.Webwidgets-Widgets-Composite-TabbedView > ul.tabs {
  list-style-type: none;
  padding: 0pt;
 }
-.Webwidgets-Widgets-Composite-TabbedView ul.tabs li {
+.Webwidgets-Widgets-Composite-TabbedView > ul.tabs li {
  display: inline;
 }
-.Webwidgets-Widgets-Composite-TabbedView ul.tabs li * {
+.Webwidgets-Widgets-Composite-TabbedView > ul.tabs li * {
  font-size: 8pt;
  padding: 0px;
  margin: 0px;
