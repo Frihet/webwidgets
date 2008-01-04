@@ -407,7 +407,7 @@ select {
  display: table-cell;
 }
 .Webwidgets-Widgets-Formatting-AbstractFieldgroup > .Webwidgets-Widgets-Formatting-Field > .field > *{
- width: 100%;
+ width: 95%; /* really it should be 100% - whatever border we have, but CSS doesn't allow that kind of thing */
 }
 
 .Webwidgets-Widgets-Formatting-AbstractFieldgroup {
