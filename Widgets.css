@@ -63,12 +63,30 @@ input.error,
 
 
 /* Widget styling */
-.Webwidgets-Widgets-Composite-TabbedView > .page {
- padding: 10px;
+.Webwidgets-Widgets-Composite-TabbedView {
 }
 
-.Webwidgets-Widgets-Composite-TabbedView {
+.Webwidgets-Widgets-Composite-TabbedView > .page {
+ padding: 10px;
  border: 1px solid black;
+}
+
+.Webwidgets-Widgets-Composite-TabbedView > ul.tabs {
+ list-style-type: none;
+ padding: 0pt;
+ margin-bottom: 0;
+}
+.Webwidgets-Widgets-Composite-TabbedView > ul.tabs li {
+ border-top: 1px solid black;
+ border-left: 1px solid black;
+ border-right: 1px solid black;
+ display: inline;
+}
+.Webwidgets-Widgets-Composite-TabbedView > ul.tabs li * {
+ font-size: 8pt;
+ padding: 0px;
+ margin: 0px;
+ border: none;
 }
 
 .Webwidgets-Widgets-MainMenu-MainMenu {
@@ -215,21 +233,6 @@ input.error,
  border: 0px;
  font: inherit;
  background: inherit;
-}
-
-
-.Webwidgets-Widgets-Composite-TabbedView > ul.tabs {
- list-style-type: none;
- padding: 0pt;
-}
-.Webwidgets-Widgets-Composite-TabbedView > ul.tabs li {
- display: inline;
-}
-.Webwidgets-Widgets-Composite-TabbedView > ul.tabs li * {
- font-size: 8pt;
- padding: 0px;
- margin: 0px;
- border: none;
 }
 
 input {
@@ -389,9 +392,6 @@ select {
  vertical-align: top;
  text-align: left;
  padding: 2px;
-}
-.Webwidgets-Widgets-Formatting-Field > .field {
- display: inline;
 }
 
 .Webwidgets-Widgets-Formatting-Field > .field > *{
