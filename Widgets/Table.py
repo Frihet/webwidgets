@@ -500,9 +500,18 @@ class Table(BaseTable, Base.ActionInput):
     disabled_columns = []
     old_sort = []
 
-    printable_link_title = "Printable version"
-    printable_link_only_when_other_buttons = False
-    button_frame_only_when_usefull = True
+    button_bars = {'bottom':
+                   Webwidgets.Utils.OrderedDict([('paging_buttons',  {'level': 0}),
+                                                 ('printable_link',  {'level': 2,
+                                                                      'title': 'Printable version'}),
+                                                 ('group_functions', {'level': 1})]),
+                   'top':
+                   Webwidgets.Utils.OrderedDict([  #('title_bar', {'level': 2}),
+                                                 ])}
+    button_bars_level_force_min = 0
+    # A button bar is drawn if it is active, or its level is >=
+    # button_bars_level_force_min or there are other button bars with
+    # level < that button bars' level that are to be drawn.
 
     def field_input(self, path, string_value):
         try:
@@ -557,7 +566,13 @@ class Table(BaseTable, Base.ActionInput):
             return mangled_row
         return row
 
-    def draw_paging_buttons(self, output_options):
+    def draw_title_bar(self, config, output_options):
+        title = getattr(self, 'title', None)
+        if title is None:
+            return (False, '')
+        return (True, "<h1>%s</h1>" % (title,))
+    
+    def draw_paging_buttons(self, config, output_options):
         if self.argument_name:
             self.session.windows[self.win_id].arguments[self.argument_name + '_page'] = {
                 'widget':self, 'path': self.path + ['_', 'page']}
@@ -593,15 +608,15 @@ class Table(BaseTable, Base.ActionInput):
 </span>
 """ % info)
 
-    def draw_printable_link(self, output_options):
+    def draw_printable_link(self, config, output_options):
         location = self.calculate_url({'widget': Webwidgets.Utils.path_to_id(self.path),
                                       'printable_version': 'yes'})
         return (True, """<a class="printable" href="%(location)s">%(caption)s</a>""" % {
-            'caption': self._(self.printable_link_title, output_options),
+            'caption': self._(config['title'], output_options),
             'location': cgi.escape(location),
             })
 
-    def draw_group_functions(self, output_options):
+    def draw_group_functions(self, config, output_options):
         function_active = {}
         for function in self.group_functions:
             function_active[function] = self.get_active(self.path + ['_', 'group_function', function])
@@ -624,30 +639,25 @@ class Table(BaseTable, Base.ActionInput):
             for function, title in self.group_functions.iteritems()])
         return (res != '', res)
 
-    def draw_buttons(self, output_options):
-        if 'printable_version' in output_options:
+    def draw_buttons(self, position, output_options):
+        if (   'printable_version' in output_options
+            or position not in self.button_bars):
             return ''
-        button_bars = {'paging_puttons': self.draw_paging_buttons(output_options),
-                       'group_functions': self.draw_group_functions(output_options),
-                       'printable_link': self.draw_printable_link(output_options)}
-        button_bars_enabled = dict([(name, enabled)
-                                    for name, (enabled, html) in button_bars.iteritems()])
-        button_bars_html = dict([(name, html)
-                                 for name, (enabled, html) in button_bars.iteritems()])
-        if self.printable_link_only_when_other_buttons:
-            button_bars_enabled['printable_link'] = button_bars_enabled['printable_link'] and reduce(lambda x, y: x or y,
-                                                                                                     [enabled
-                                                                                                      for name, enabled in button_bars_enabled.iteritems()
-                                                                                                      if name != 'printable_link'])
-        if self.button_frame_only_when_usefull and not reduce(lambda x, y: x or y, button_bars_enabled.itervalues()):
+
+        configs = self.button_bars[position]
+        button_bars_level_min = self.button_bars_level_force_min
+        button_bars = Webwidgets.Utils.OrderedDict()
+        for name, config in configs.iteritems():
+            button_bars[name] = getattr(self, 'draw_' + name)(config, output_options)
+            if button_bars[name][0]:
+                 button_bars_level_min = min(config['level'], button_bars_level_min)
+
+        button_bars_html = ''.join([html
+                                    for name, (active, html) in button_bars.iteritems()
+                                    if configs[name]['level'] >= button_bars_level_min])
+        if not button_bars_html:
             return ''
-        return """
-<div class="buttons">
- %(paging_puttons)s
- %(printable_link)s
- %(group_functions)s
-</div>
-""" % button_bars_html
+        return "<div class='buttons'>%s</div>" % (button_bars_html,)
 
     def draw_headings(self, visible_columns, reverse_dependent_columns, output_options):
         sort_path = self.path + ['_', 'sort']
@@ -698,12 +708,15 @@ class Table(BaseTable, Base.ActionInput):
         return rendered_rows
 
     def mangle_output(self, table, output_options):
+        info = {'html_attributes': self.draw_html_attributes(self.path),
+                'table': table,
+                'buttons_top': self.draw_buttons('top', output_options),
+                'buttons_bottom': self.draw_buttons('bottom', output_options)
+                }
         return """
 <div %(html_attributes)s>
+ %(buttons_top)s
  %(table)s
- %(buttons)s
+ %(buttons_bottom)s
 </div>
-""" % {'html_attributes': self.draw_html_attributes(self.path),
-       'table': table,
-       'buttons': self.draw_buttons(output_options)
-       }
+""" % info
