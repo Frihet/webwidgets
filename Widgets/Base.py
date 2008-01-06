@@ -247,7 +247,8 @@ class Widget(Object):
     def get_widgets_by_attribute(self, attribute = '__name__', direction_down = True):
 	res = {}
 	if not direction_down and self.parent:
-            res.update(self.parent.get_widgets_by_attribute(attribute, False))
+            if hasattr(self.parent, 'get_widgets_by_attribute'):
+                res.update(self.parent.get_widgets_by_attribute(attribute, False))
         if hasattr(self, attribute):
             res[getattr(self, attribute)] = self
         elif hasattr(type(self), attribute):
