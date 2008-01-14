@@ -102,7 +102,7 @@ input.error,
 }
 
 .Webwidgets-Widgets-Table-Table {
- padding-: 2px;
+ padding: 2px;
 }
 
 .Webwidgets-Widgets-Table-Table table {
@@ -257,7 +257,7 @@ textarea {
 
 button, input[type=submit] {
  border: solid 1px black;
- margin: 2;
+ margin: 2px;
  padding: 2px;
  background: #f2bfff;
  color: #000000;
@@ -275,7 +275,7 @@ select {
  border: solid;
  border-width: 1px;
  margin: 2px;
-// padding: 2px;
+/* padding: 2px; */
  background-color: #ffffff;
  font-size: 10pt;
  font-family: serif;
@@ -313,7 +313,7 @@ select {
 .Webwidgets-Widgets-Composite-InfoFrame {
  border: 1px solid black;
  color: #000000;
- background-color: #ffffff;
+ background: #ffffff;
  margin: 5pt;
 }
 
@@ -336,8 +336,7 @@ select {
 }
 
 .Webwidgets-Widgets-Composite-Dialog {
- position: fixed;
- position: asbolute;
+ position: absolute;
  left: 20%;
  right: 20%;
  top: 20%;
