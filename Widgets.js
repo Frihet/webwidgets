@@ -53,7 +53,10 @@ function webwidgets_submit_button_iefix() {
   if (buttons[i].type == "submit")
    if (buttons[i] != event.srcElement)
     buttons[i].parentNode.removeChild(buttons[i]);
- event.srcElement.innerText = webwidgets_values['field_value_' + event.srcElement.id];
+ if (   event.srcElement.tagName.toLowerCase() == "button"
+     || (   event.srcElement.tagName.toLowerCase() == "input"
+         && event.srcElement.type.toLowerCase() == "submit"))
+  event.srcElement.innerText = webwidgets_values['field_value_' + event.srcElement.id];
 }
 
 function webwidgets_iefix_load() {
@@ -66,4 +69,5 @@ function webwidgets_iefix_load() {
    buttons[i].onclick = webwidgets_submit_button_iefix;
 }
 
-webwidgets_add_event_handler(window, 'load', 'webwidgets_iefix', webwidgets_iefix_load);
+if (window.navigator.userAgent.indexOf ( "MSIE " ) > 0)
+ webwidgets_add_event_handler(window, 'load', 'webwidgets_iefix', webwidgets_iefix_load);
