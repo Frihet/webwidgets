@@ -44,6 +44,8 @@ webwidgets_add_event_handler(window, 'load', 'webwidgets_delayed', webwidgets_de
 
 
 function webwidgets_submit_button_iefix() {
+ if (window.navigator.userAgent.indexOf ( "MSIE " ) <= 0)
+  return;
  buttons = document.getElementsByTagName('button');
  for (i = buttons.length - 1; i >= 0; i--)
   if (buttons[i] != event.srcElement)

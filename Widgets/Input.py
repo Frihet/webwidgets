@@ -149,7 +149,7 @@ class NewPasswordInput(Formatting.Html, Base.ValueInput):
         
         def value_changed(self, path, value):
             if self.parent['input1'].value == self.parent['input2'].value:
-                print "Passwords matches", self.parent['input1'].value, self.parent['input2'].value
+                #print "Passwords matches", self.parent['input1'].value, self.parent['input2'].value
                 self.parent.value = value
             else:
                 self.parent.value = None
