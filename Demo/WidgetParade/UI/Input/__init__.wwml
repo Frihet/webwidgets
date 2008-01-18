@@ -28,8 +28,18 @@
  <w:Tabset id="Input" title="Input">
 
   <w:Html id="Files" title="File editors">
-   <w:FileEditorList id="FilEditorListTest" />
+   <h1>CssFileEditor</h1>
+   <w:CssFileEditor id="CssFilEditorTest" />
+
+   <h1>FileEditor</h1>
    <w:FileEditor id="FilEditorTest" />
+
+   <h1>TextFileEditor</h1>
+   <w:TextFileEditor id="TextFilEditorTest" />
+
+   <h1>FileEditorList</h1>
+   <w:FileEditorList id="FilEditorListTest" />
+
   </w:Html>
 
   <w:Html id="Radio" title="Radio buttons">

@@ -20,7 +20,7 @@
 
 import Base, Formatting, cgi
 
-class CssFileEditor(Base.ValueInput):
+class CssFileEditor(Formatting.Html, Base.ValueInput):
     original_value = value = None
 
     class input(object):

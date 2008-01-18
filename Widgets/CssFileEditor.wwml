@@ -22,7 +22,7 @@
  xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
  xmlns:h="http://www.w3.org/TR/REC-html40"
  bind="Webwidgets.Widgets.CssFileEditorCallbacks">
- >
+
  <w:Html id="CssFileEditor" top_level="div">
   <div><w:TextFileEditor id="input" mime_type="text/css" /></div>
   <div><w:Button id="update" title="Update" /></div>
