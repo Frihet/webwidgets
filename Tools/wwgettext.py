@@ -119,6 +119,7 @@ def output(strs):
     strs = list(strs)
     strs.sort()
     for s in strs:
+        if not s: continue
         res.append("msgid ")
         parts = s.split('\n')
         for part in parts[:-1]:

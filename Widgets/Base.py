@@ -284,9 +284,9 @@ class Widget(Object):
     def draw_attributes(self, output_options):
         res = Webwidgets.Utils.OrderedDict()
         for key in dir(self):
+            #if key.startswith('_'): continue
             value = getattr(self, key)
-            if isinstance(value, (type, types.MethodType)):
-                continue
+            if isinstance(value, (type, types.MethodType)): continue
             try:
                 res[key] = self._(value, output_options)
             except:

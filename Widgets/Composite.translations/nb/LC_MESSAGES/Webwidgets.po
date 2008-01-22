@@ -1,0 +1,260 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) AUTHOR AND YEAR
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.1\n"
+"POT-Creation-Date: Tue Jan 22 11:07:38 2008\n"
+"PO-Revision-Date: DATEANDTIME\n"
+"Last-Translator: Egil Möller, Anette Furulund\n"
+"Language-Team: EMAIL\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "0"
+msgstr ""
+
+msgid "1"
+msgstr ""
+
+msgid "English"
+msgstr "Engelsk"
+
+msgid "Hide"
+msgstr "Skjul"
+
+msgid "Norsk"
+msgstr "Norsk"
+
+msgid "Show"
+msgstr "Vis"
+
+msgid "Svenska"
+msgstr "Svensk"
+
+#~ msgid "&lt;No file&gt"
+#~ msgstr "&lt;Ingen fil&gt"
+
+#~ msgid "&lt;No file&gt;"
+#~ msgstr "&lt;Ingen fil&gt;"
+
+#~ msgid "404 Page not implemented"
+#~ msgstr "404 Siden finnes ikke"
+
+#~ msgid ""
+#~ "<div class=\"system-errors click-expand\">\n"
+#~ "                               <div class=\"header\">Error</div>\n"
+#~ "                               <div class=\"content\">\n"
+#~ "                                This widget caused errors:\n"
+#~ "                                %(tracebacks)s\n"
+#~ "                               </div>\n"
+#~ "                              </div>"
+#~ msgstr ""
+#~ "<div class=\"system-errors click-expand\">\n"
+#~ "                               <div class=\"header\">Feil</div>\n"
+#~ "                               <div class=\"content\">\n"
+#~ "                                Denne widget feilet:\n"
+#~ "                                %(tracebacks)s\n"
+#~ "                               </div>\n"
+#~ "                              </div>"
+
+#~ msgid "Action"
+#~ msgstr "Handling"
+
+#~ msgid "Add new file"
+#~ msgstr "Legg til ny fil"
+
+#~ msgid "All files"
+#~ msgstr "Alle filer"
+
+#~ msgid "Application"
+#~ msgstr "Program"
+
+#~ msgid "Application window"
+#~ msgstr "Programvindu"
+
+#~ msgid "Body"
+#~ msgstr "Kropp"
+
+#~ msgid "CSS stylesheet"
+#~ msgstr "CSS stylesheet"
+
+#~ msgid "City"
+#~ msgstr "By"
+
+#~ msgid "Clear"
+#~ msgstr "Slett"
+
+#~ msgid "Co"
+#~ msgstr "Co"
+
+#~ msgid "Country"
+#~ msgstr "Land"
+
+#~ msgid "County"
+#~ msgstr "Kommune"
+
+#~ msgid "County/State"
+#~ msgstr "Fylke"
+
+#~ msgid "Delete"
+#~ msgstr "Slett"
+
+#~ msgid "Description"
+#~ msgstr "Beskrivelse"
+
+#~ msgid "Dialogs"
+#~ msgstr "Dialoger"
+
+#~ msgid "Edit"
+#~ msgstr "Endre"
+
+#~ msgid "Edit file"
+#~ msgstr "Endre fil"
+
+#~ msgid "Editors"
+#~ msgstr "Editorer"
+
+#~ msgid "False"
+#~ msgstr "Falsk"
+
+#~ msgid "Field"
+#~ msgstr "Felt"
+
+#~ msgid "File"
+#~ msgstr "Fil"
+
+#~ msgid "Filename"
+#~ msgstr "Filnavn"
+
+#~ msgid "HTML document"
+#~ msgstr "HTML dokument"
+
+#~ msgid "Head"
+#~ msgstr "Hode"
+
+#~ msgid "Hide editor"
+#~ msgstr "Skjul editor"
+
+#~ msgid "Log in/log out"
+#~ msgstr "Logg inn/Logg ut"
+
+#~ msgid "Log out"
+#~ msgstr "Logg ut"
+
+#~ msgid "Message"
+#~ msgstr "Beskjed"
+
+#~ msgid "Name"
+#~ msgstr "Navn"
+
+#~ msgid "No file"
+#~ msgstr "Ingen fil"
+
+#~ msgid "No file created or uploaded"
+#~ msgstr "Ingen fil laget eller oppladet"
+
+#~ msgid "Page not available"
+#~ msgstr "Siden ikke tilgjengelig"
+
+#~ msgid "Password"
+#~ msgstr "Passord"
+
+#~ msgid "Plain text"
+#~ msgstr "Ren tekst"
+
+#~ msgid "Please log in:"
+#~ msgstr "Logg inn:"
+
+#~ msgid "Post-code/zip code"
+#~ msgstr "Postkode"
+
+#~ msgid "Preview"
+#~ msgstr "Forhåndsvis"
+
+#~ msgid "Printable version"
+#~ msgstr "Utskrivbar versjon"
+
+#~ msgid "Really log out?"
+#~ msgstr "Vil du virkelig logge ut?"
+
+#~ msgid "Set"
+#~ msgstr "Sett"
+
+#~ msgid "Street"
+#~ msgstr "Gate"
+
+#~ msgid "True"
+#~ msgstr "Sant"
+
+#~ msgid "Update"
+#~ msgstr "Oppdater"
+
+#~ msgid "Upload"
+#~ msgstr "Lad opp"
+
+#~ msgid "Upload file: "
+#~ msgstr "Lad opp fil"
+
+#~ msgid "Username"
+#~ msgstr "Brukernavn"
+
+#~ msgid "Zip"
+#~ msgstr "Postkode"
+
+#~ msgid "anonymous"
+#~ msgstr "anonym"
+
+#~ msgid "c/o"
+#~ msgstr "c/o"
+
+#~ msgid "city"
+#~ msgstr "by"
+
+#~ msgid "co"
+#~ msgstr "co"
+
+#~ msgid "country"
+#~ msgstr "land"
+
+#~ msgid "county"
+#~ msgstr "kommune"
+
+#~ msgid "default"
+#~ msgstr "default"
+
+#~ msgid "description"
+#~ msgstr "beskrivelse"
+
+#~ msgid "filename"
+#~ msgstr "filnavn"
+
+#~ msgid "functions"
+#~ msgstr "funksjoner"
+
+#~ msgid "input"
+#~ msgstr "input"
+
+#~ msgid "login"
+#~ msgstr "logge inn"
+
+#~ msgid "logout"
+#~ msgstr "logge ut"
+
+#~ msgid "none"
+#~ msgstr "ingen"
+
+#~ msgid "password"
+#~ msgstr "passord"
+
+#~ msgid "preview"
+#~ msgstr "forhåndsvis"
+
+#~ msgid "street"
+#~ msgstr "gate"
+
+#~ msgid "update"
+#~ msgstr "oppdater"
+
+#~ msgid "username"
+#~ msgstr "brukernavn"

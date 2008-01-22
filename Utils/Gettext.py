@@ -91,12 +91,15 @@ class GNUTranslations(gettext.GNUTranslations, NullTranslations):
             return NullTranslations.ungettext(self, msgid1, msgid2, n)
 
     def __repr__(self):
+        fallback = repr(self._fallback)
+        # FIXME: The getattr:s here are because some bug that causes
+        # domain/localedir/languages not to be set in some cases...
         return "<%(class)s %(localedir)s:%(domain)s:%(languages)s %(fallback)s>" % {
             'class': self.__class__.__module__ + '.' + self.__class__.__name__,
-            'domain': self.domain,
-            'localedir': self.localedir,
-            'languages': ','.join(self.languages),
-            'fallback': repr(self._fallback)}
+            'domain': getattr(self, "domain", "unknown"),
+            'localedir': getattr(self, "localedir", "unknown"),
+            'languages': ','.join(getattr(self, "languages", ["unknown"])),
+            'fallback': fallback}
 
     def __str__(self): return repr(self)
     def __unicode__(self): return repr(self)
