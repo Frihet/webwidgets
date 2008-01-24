@@ -80,6 +80,7 @@ class StringInput(Base.ValueInput):
             return '<input %(html_attributes)s %(size)s type="text" name="%(name)s" value="%(value)s" %(disabled)s />' % info
 
 class IntegerInput(StringInput):
+    error_string = "Integers must only contain the digits 0-9"
     original_value = None
     value = None
     def field_input(self, path, string_value):
@@ -90,7 +91,7 @@ class IntegerInput(StringInput):
                 self.value = int(string_value)
         except ValueError, e:
             self.value = None
-            self.error = unicode(e)
+            self.error = self.error_string
                 
     def field_output(self, path):
         if self.value is None:
@@ -98,6 +99,7 @@ class IntegerInput(StringInput):
         return [str(self.value)]
 
 class FloatInput(StringInput):
+    error_string = "Numbers must only contain the digits 0-9, period '.' and the exp. separator 'e'"
     original_value = None
     value = None
     def field_input(self, path, string_value):
@@ -108,7 +110,7 @@ class FloatInput(StringInput):
                 self.value = float(string_value)
         except ValueError, e:
             self.value = None
-            self.error = unicode(e)
+            self.error = self.error_string
                 
     def field_output(self, path):
         if self.value is None:
