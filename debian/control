@@ -2,7 +2,7 @@ Source: webwidgets
 Section: unknown
 Priority: optional
 Maintainer: Egil Moeller <egil.moller@freecode.no>
-Build-Depends: debhelper (>= 4.0.0)
+Build-Depends: debhelper (>= 4.0.0), gettext
 Standards-Version: 3.6.2
 
 Package: webwidgets

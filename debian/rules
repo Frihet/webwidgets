@@ -39,6 +39,8 @@ configure-stamp:
 build: build-indep
 
 build-arch: build-arch-stamp
+	Tools/compiletranslations.sh
+
 build-arch-stamp: configure-stamp 
 	touch build-arch-stamp
 
