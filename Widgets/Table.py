@@ -556,6 +556,16 @@ class Table(BaseTable, Base.ActionInput):
         if path[0] in self.disabled_functions: return False
         return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, self.path + ['group_function'] + path)
 
+    def mangle_columns(self, columns, output_options):
+        if 'printable_version' in output_options and self.functions:
+            res = {}
+            res.update(columns)
+            for key in self.functions.iterkeys():
+                if key in res:
+                    del res[key]
+            return res
+        return columns
+
     def mangle_row(self, row, output_options):
         if 'printable_version' not in output_options and self.functions:
             mangled_row = ChildNodeCells(row.node, row.row)
