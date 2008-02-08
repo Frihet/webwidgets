@@ -51,12 +51,12 @@ class InfoFrame(Base.StaticComposite):
     def draw_head(self, children, output_options):
         if 'Head' not in children:
             children['Head'] = children['Body'].title
-        return """<div class="%(html_head_classes)s" id="%(html_id)s-head">
+        return """<div class="%(html_head_classes)s" id="%(ww_untranslated__html_id)s-head">
                    %(Head)s
                   </div>""" % children
 
     def draw_body(self, children, output_options):
-        return """<div class="%(html_body_classes)s" id="%(html_id)s-body">
+        return """<div class="%(html_body_classes)s" id="%(ww_untranslated__html_id)s-body">
                    %(Body)s
                   </div>""" % children
 
@@ -92,7 +92,7 @@ class StaticDialog(InfoFrame):
     buttons = {'Cancel': '0', 'Ok': '1'}
 
     def draw_foot(self, children, output_options):
-        return """<div class="%(html_foot_classes)s" id="%(html_id)s-foot">
+        return """<div class="%(html_foot_classes)s" id="%(ww_untranslated__html_id)s-foot">
                    %(Buttons)s
                   </div>""" % children
 

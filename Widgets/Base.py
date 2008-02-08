@@ -287,10 +287,11 @@ class Widget(Object):
             #if key.startswith('_'): continue
             value = getattr(self, key)
             if isinstance(value, (type, types.MethodType)): continue
+	    res[key] = res['ww_untranslated__' + key] = str(value)
             try:
                 res[key] = self._(value, output_options)
             except:
-                res[key] = str(value)
+                pass
         return res
 
     def draw(self, output_options):
@@ -976,26 +977,25 @@ class HtmlWindow(Window, StaticComposite):
         if title is None: title = self.get_title(self.path)
         result['title'] = '<title>' + title + '</title>'
         result['doctype'] = self.doctype
-        result['uri'] = cgi.escape(self.session.program.request()._environ['REQUEST_URI'])
-        result['name'] = result['id'] = Webwidgets.Utils.path_to_id(self.path)
-        result['base'] = self.session.program.request_base()
+        result['ww_untranslated__uri'] = cgi.escape(self.session.program.request()._environ['REQUEST_URI'])
+        result['ww_untranslated__base'] = self.session.program.request_base()
 
         for (all1, name1, value1, all2, value2, name2) in self.findallvalues.findall(result['Body']):
             self.register_value('field_value' + '_' + (name1 or name2), (value1 or value2))
 
-        result['head_content'] = '\n'.join(self.head_content.values())
+        result['ww_untranslated__head_content'] = '\n'.join(self.head_content.values())
         
         return ("""
 %(doctype)s
 <html xmlns="http://www.w3.org/1999/xhtml">
  <head>
-  <base href='%(base)s' />
-  %(head_content)s
+  <base href='%(ww_untranslated__base)s' />
+  %(ww_untranslated__head_content)s
   %(title)s
   %(Head)s
  </head>
- <body %(html_attributes)s>
-  <form name="%(name)s" method='post' enctype='multipart/form-data' action='%(uri)s' id="%(html_id)s-_-body-form">
+ <body %(ww_untranslated__html_attributes)s>
+  <form name="%(ww_untranslated__html_id)s" method='post' enctype='multipart/form-data' action='%(ww_untranslated__uri)s' id="%(ww_untranslated__html_id)s-_-body-form">
    %(Body)s
   </form>
  </body>

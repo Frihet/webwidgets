@@ -264,7 +264,7 @@ class RadioInput(Base.ValueInput, Base.StaticComposite):
         result['checked'] = ['', 'checked'][self.value == self.get_group().value]
         result['disabled'] = ['', 'disabled="disabled"'][not self.get_active(self.path)],
         return """<input
-                   %(html_attributes)s
+                   %(ww_untranslated__html_attributes)s
                    type="radio"
                    name="%(name)s"
                    value="%(value)s"
@@ -376,9 +376,9 @@ class FileInput(Base.ValueInput, Base.StaticComposite):
         result = self.draw_children(output_options, include_attributes = True)
         result['disabled'] = ['', 'disabled="disabled"'][not self.get_active(self.path)]
 
-        return """<span %(html_attributes)s>
+        return """<span %(ww_untranslated__html_attributes)s>
                    %(Preview)s
-                   <input type="file" name="%(html_id)s" %(disabled)s id="%(html_id)s-_-input" />
+                   <input type="file" name="%(ww_untranslated__html_id)s" %(disabled)s id="%(ww_untranslated__html_id)s-_-input" />
                    %(Clear)s
                   </span>""" % result
 
