@@ -25,6 +25,8 @@ a:link, a:visited {
 body {
  margin: 0;
  padding: 0;
+ width: 100%;
+ height: 100%;
 }
 
 /* Some standard classes that can be attatched to rows in tables etc */
@@ -338,9 +340,9 @@ select {
 .Webwidgets-Widgets-Composite-Dialog {
  position: absolute;
  left: 20%;
- right: 20%;
+ width: 60%;
  top: 20%;
- bottom: 20%;
+ height: 60%;
  z-index: 1;
  margin: 0;
 }
