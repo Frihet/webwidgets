@@ -20,6 +20,15 @@
 
 import Base
 
+class AddressInput(object):
+    #### fixme ####
+    # name = "Locality loading"
+    # description = """Add machinery to load country, county, municipality and city
+    # listings. Add auto-submit to reload countys when changing
+    # country etc."""
+    #### end ####
+    pass
+
 class ApplicationWindow(object):
     class Body(object):
         class LogIn(object):
