@@ -171,6 +171,7 @@ class BaseTable(Base.Composite):
     
     columns = {}
     dependent_columns = {}
+    """column_name -> [column_name]"""
     sort = []
     rows = []
     page = 1
@@ -499,6 +500,10 @@ class Table(BaseTable, Base.ActionInput):
     disabled_functions = [] # ['function_name']
     disabled_columns = []
     old_sort = []
+    column_groups = []
+    """[column_group_name -> columnt_group_title]"""
+    column_groupings = {}
+    """[column_name -> column_group_name]"""
 
     button_bars = {'bottom':
                    Webwidgets.Utils.OrderedDict([('paging_buttons',  {'level': 0}),
@@ -680,6 +685,7 @@ class Table(BaseTable, Base.ActionInput):
                 'widget':self, 'path': sort_path}
         self.session.windows[self.win_id].fields[input_id] = self
 
+        # COlumn headings
         for column, title in visible_columns.iteritems():
             sort_active = self.get_active(sort_path + [column])
             info = {'input_id': input_id,
@@ -702,17 +708,38 @@ class Table(BaseTable, Base.ActionInput):
  <button type="submit" id="%(html_id)s-_-sort-%(column)s" %(disabled)s name="%(html_id)s-_-sort" value="%(sort)s">%(caption)s</button>
 </th>
 """ % info)
-        return headings
+
+        # Group headings
+        group_headings = []
+        for group_titles, group_columns in zip(self.column_groups, self.column_groupings):
+            group_row_headings = []
+            for column in visible_columns.iterkeys():
+	        if column in group_columns:
+                    if group_row_headings and group_row_headings[-1][0] == group_columns[column]:
+                        group_row_headings[-1][1] += 1
+                    else:
+                        group_row_headings.append([group_columns[column], 1])
+                else:
+                    group_row_headings.append([None, 1])
+            group_headings.append(["<th colspan='%(colspan)s'>%(title)s</th>" % {
+                                    'colspan': colspan,
+                                    'title': group_titles.get(group, '')
+                                   }
+                                  for (group, colspan)
+                                  in group_row_headings])
+
+        return group_headings + [headings]
 
     def append_headings(self, rows, headings, output_options):
-        rows.insert(0, {'cells': headings,
-                        'type': RenderedRowTypeHeading})
+        rows[0:0] = [{'cells': headings_row,
+                      'type': RenderedRowTypeHeading}
+                     for headings_row
+                     in headings]
 
     def mangle_rendered_rows(self, rendered_rows, visible_columns, reverse_dependent_columns, output_options):
         super(Table, self).mangle_rendered_rows(rendered_rows, visible_columns, reverse_dependent_columns, output_options)
 
         headings = self.draw_headings(visible_columns, reverse_dependent_columns, output_options)
-
         self.append_headings(rendered_rows, headings, output_options)
 
         return rendered_rows
