@@ -25,7 +25,7 @@
 the user to sort the rows and simultaneously group the rows according
 to their content and the sorting."""
 
-import Webwidgets.Constants, Webwidgets.Utils, re, math, cgi
+import Webwidgets.Constants, Webwidgets.Utils, re, math, cgi, types
 import Base
 
 column_allowed_name_re = re.compile("^[a-z_]*$")
@@ -170,8 +170,9 @@ class BaseTable(Base.Composite):
     """
     
     columns = {}
+    """{column_name: title | {"title":title, ...}}"""
     dependent_columns = {}
-    """column_name -> [column_name]"""
+    """{column_name: [column_name]}"""
     sort = []
     rows = []
     page = 1
@@ -271,11 +272,20 @@ class BaseTable(Base.Composite):
     def get_active_column(self, path):
         return self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, self.path + ['column'] + path)
 
+    def get_canonized_columns(self):
+        res = Webwidgets.Utils.OrderedDict()
+        for name, definition in self.columns.iteritems():
+            if isinstance(definition, types.StringTypes):
+                res[name] = {"title": definition}
+            else:
+                res[name] = definition
+        return res
+
     def visible_columns(self, output_options):
         # Optimisation: we could have used get_active and constructed a path...
-        return Webwidgets.Utils.OrderedDict([(name, description)
-                                             for (name, description)
-                                             in self.mangle_columns(self.columns, output_options).iteritems()
+        return Webwidgets.Utils.OrderedDict([(name, definition)
+                                             for (name, definition)
+                                             in self.mangle_columns(self.get_canonized_columns(), output_options).iteritems()
                                              if self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id,
                                                                            self.path + ['_', 'column', name])])
 
@@ -500,10 +510,8 @@ class Table(BaseTable, Base.ActionInput):
     disabled_functions = [] # ['function_name']
     disabled_columns = []
     old_sort = []
-    column_groups = []
+    column_groups = {}
     """[column_group_name -> columnt_group_title]"""
-    column_groupings = {}
-    """[column_name -> column_group_name]"""
 
     button_bars = {'bottom':
                    Webwidgets.Utils.OrderedDict([('paging_buttons',  {'level': 0}),
@@ -685,14 +693,14 @@ class Table(BaseTable, Base.ActionInput):
                 'widget':self, 'path': sort_path}
         self.session.windows[self.win_id].fields[input_id] = self
 
-        # COlumn headings
-        for column, title in visible_columns.iteritems():
+        # Column headings
+        for column, definition in visible_columns.iteritems():
             sort_active = self.get_active(sort_path + [column])
             info = {'input_id': input_id,
                     'html_id': widget_id,
                     'column': column,
                     'disabled': ['disabled="disabled"', ''][sort_active],
-                    'caption': self._(title, output_options),
+                    'caption': self._(definition["title"], output_options),
                     'ww_classes': sort_to_classes(self.sort, reverse_dependent_columns.get(column, column)),
                     'sort': sort_to_string(set_sort(self.sort, reverse_dependent_columns.get(column, column)))
                     }
@@ -711,19 +719,20 @@ class Table(BaseTable, Base.ActionInput):
 
         # Group headings
         group_headings = []
-        for group_titles, group_columns in zip(self.column_groups, self.column_groupings):
+        for group_row_name, group_row_def in self.column_groups.iteritems():
             group_row_headings = []
-            for column in visible_columns.iterkeys():
-	        if column in group_columns:
-                    if group_row_headings and group_row_headings[-1][0] == group_columns[column]:
+            for col_name, col_def in visible_columns.iteritems():
+	        if group_row_name in col_def:
+                    col_group = col_def[group_row_name]
+                    if group_row_headings and group_row_headings[-1][0] == col_group:
                         group_row_headings[-1][1] += 1
                     else:
-                        group_row_headings.append([group_columns[column], 1])
+                        group_row_headings.append([col_group, 1])
                 else:
                     group_row_headings.append([None, 1])
             group_headings.append(["<th colspan='%(colspan)s'>%(title)s</th>" % {
                                     'colspan': colspan,
-                                    'title': group_titles.get(group, '')
+                                    'title': group_row_def.get(group, '')
                                    }
                                   for (group, colspan)
                                   in group_row_headings])
