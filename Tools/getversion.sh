@@ -1,6 +1,6 @@
 #! /bin/bash
 
-. Tools/pkgdisk_config.sh
+. Tools/pkgdist_config.sh
 
 if [ "$pkgdist_repository" == "tla" ]; then
  pkgdist_title () { tla tree-version | sed -e "s+.*/\(.*\)--.*--.*+\1+g"; }

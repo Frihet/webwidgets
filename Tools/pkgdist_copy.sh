@@ -1,6 +1,6 @@
 #! /bin/bash
 
-. Tools/pkgdisk_config.sh
+. Tools/pkgdist_config.sh
 
 dstpath="$1"
 
