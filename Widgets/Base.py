@@ -581,11 +581,12 @@ class Composite(Widget):
             result = [None, ''][invisible_as_empty]
 
         if result is not None and getattr(child, 'system_errors', []):
-            result = self._(self.system_errors_format, output_options
-                            ) % {'tracebacks': '\n'.join([self._(self.system_error_format, output_options
-                                                                 ) % {'exception': cgi.escape(unicode(error[0])),
-                                                                      'traceback': error[1]}
-                                                          for error in child.system_errors])} + result
+            system_error_format = self._(self.system_error_format, output_options)
+            system_errors_format = self._(self.system_errors_format, output_options)
+            errors = [system_error_format % {'exception': cgi.escape(Webwidgets.Utils.convert_to_str_any_way_possible(error[0])),
+                                             'traceback': Webwidgets.Utils.convert_to_str_any_way_possible(error[1])}
+                      for error in child.system_errors]
+            result = system_errors_format % {'tracebacks': '\n'.join(errors)} + result
             del child.system_errors[:]
 
         if 'internal' in output_options and 'draw_wrapper' in output_options['internal']:

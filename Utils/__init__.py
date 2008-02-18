@@ -24,9 +24,40 @@
 Webwidgets and in implementing new widgets and other objects.
 """
 
-import itertools
+import itertools, types
 
 debug_class_loading = False
+
+def convert_to_str_any_way_possible(obj):
+    try:
+        if isinstance(obj, types.StringType):
+            return unicode(obj, errors="replace")
+        return unicode(obj)
+    except Exception, e:
+        try:
+            return str(obj)
+        except Exception, e2:
+            return '{' + convert_type_to_str_any_way_possible(obj) + ' @ ' + str(id(obj)) + ': ' +  objInfo(e) + '}'
+
+def convert_type_to_str_any_way_possible(obj):
+    try:
+        t = type(obj)
+    except Exception, e:
+        return '{' + objInfo(e) + '}'
+    return objInfo(t)
+
+def obj_info(obj):
+    res = []
+    t = type(obj)
+    res += [convert_to_str_any_way_possible(obj)]
+    if t == types.InstanceType:
+        klass = type(obj)
+        res += [obj_info(klass)]
+    elif t == types.ClassType:
+        klass = obj.__class__
+        res += [obj_info(klass)]
+    res += [convert_to_str_any_way_possible(t)]
+    return '[' + string.join(res, ' ') + ']'
 
 class ImmutableDict(dict):
     '''A hashable dict.'''
