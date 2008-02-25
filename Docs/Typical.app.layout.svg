@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1052.3622"
+   height="744.09448"
+   id="svg2"
+   sodipodi:version="0.32"
+   inkscape:version="0.45.1"
+   version="1.0"
+   sodipodi:docbase="/home/redhog/Webwidgets/Docs"
+   sodipodi:docname="Typical.app.layout.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     gridtolerance="10000"
+     guidetolerance="10"
+     objecttolerance="10"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="544.94284"
+     inkscape:cy="466.76158"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:grid-points="true"
+     width="1052.3622px"
+     height="744.09449px"
+     inkscape:window-width="1400"
+     inkscape:window-height="994"
+     inkscape:window-x="0"
+     inkscape:window-y="25" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#ffd5d5;stroke:#ff0000"
+       id="rect2236"
+       width="390"
+       height="70"
+       x="349.49997"
+       y="114.59448" />
+    <text
+       xml:space="preserve"
+       style="font-size:7.58562136px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="330.25937"
+       y="167.7769"
+       id="text2162"
+       transform="scale(1.0880502,0.9190752)"><tspan
+         sodipodi:role="line"
+         id="tspan2164"
+         x="330.25937"
+         y="167.7769"
+         style="font-size:30.34248543px;font-family:Bitstream Vera Serif">WW:Layout (WWML)</tspan></text>
+    <rect
+       style="fill:#ff8080;stroke:#ff0000"
+       id="rect3209"
+       width="390"
+       height="70"
+       x="349.49997"
+       y="184.59448" />
+    <text
+       xml:space="preserve"
+       style="font-size:7.58562136px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="330.25937"
+       y="243.94043"
+       id="text2166"
+       transform="scale(1.0880502,0.9190752)"><tspan
+         sodipodi:role="line"
+         id="tspan2168"
+         x="330.25937"
+         y="243.94043"
+         style="font-size:30.34248543px;font-family:Bitstream Vera Serif">WW:Callbacks (Py)</tspan></text>
+    <rect
+       style="fill:#ff2a2a;stroke:#ff0000"
+       id="rect3211"
+       width="390"
+       height="70"
+       x="349.49997"
+       y="254.59448" />
+    <text
+       xml:space="preserve"
+       style="font-size:7.58562136px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="328.7037"
+       y="320.10394"
+       id="text2170"
+       transform="scale(1.0880502,0.9190752)"><tspan
+         sodipodi:role="line"
+         id="tspan2172"
+         x="328.7037"
+         y="320.10394"
+         style="font-size:30.34248543px;fill:#000000;font-family:Bitstream Vera Serif">ORM:Callbacks (Py)</tspan></text>
+    <rect
+       style="fill:#d40000;stroke:#ff0000"
+       id="rect3213"
+       width="390"
+       height="90"
+       x="349.49997"
+       y="324.59448" />
+    <text
+       xml:space="preserve"
+       style="font-size:7.58562136px;font-style:normal;font-weight:normal;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="330.4075"
+       y="396.69711"
+       id="text2174"
+       transform="scale(1.0880502,0.9190752)"><tspan
+         sodipodi:role="line"
+         id="tspan2176"
+         x="330.4075"
+         y="396.69711"
+         style="font-size:30.34248543px;fill:#ffffff;font-family:Bitstream Vera Serif">ORM:Mapped objects</tspan><tspan
+         sodipodi:role="line"
+         x="330.4075"
+         y="434.62522"
+         style="font-size:30.34248543px;fill:#ffffff;font-family:Bitstream Vera Serif"
+         id="tspan3237">(Py)</tspan></text>
+    <rect
+       style="fill:#550000;stroke:#ff0000"
+       id="rect3215"
+       width="390"
+       height="80"
+       x="349.49997"
+       y="414.59448" />
+    <text
+       xml:space="preserve"
+       style="font-size:7.58562136px;font-style:normal;font-weight:normal;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="328.73334"
+       y="515.95294"
+       id="text2178"
+       transform="scale(1.0880502,0.9190752)"><tspan
+         sodipodi:role="line"
+         id="tspan2180"
+         x="328.73334"
+         y="515.95294"
+         style="font-size:30.34248543px;fill:#ffffff;font-family:Bitstream Vera Serif">DB:Tables (SQL)</tspan></text>
+    <rect
+       style="fill:#e5ffd5;stroke:#66ff00"
+       id="rect3223"
+       width="330"
+       height="140"
+       x="19.499979"
+       y="114.59448" />
+    <text
+       xml:space="preserve"
+       style="font-size:7.58562136px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="27.112698"
+       y="200.84805"
+       id="text2182"
+       transform="scale(1.0880502,0.9190752)"><tspan
+         sodipodi:role="line"
+         id="tspan2184"
+         x="27.112698"
+         y="200.84805"
+         style="font-size:30.34248543px;font-family:Bitstream Vera Serif">Webwidgets</tspan></text>
+    <rect
+       style="fill:#b3ff80;stroke:#66ff00;stroke-width:1.26256299"
+       id="rect3225"
+       width="329.73743"
+       height="159.53346"
+       x="19.63126"
+       y="254.72577" />
+    <text
+       xml:space="preserve"
+       style="font-size:7.58562136px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="22.308115"
+       y="320.42117"
+       id="text2186"
+       transform="scale(1.0880502,0.9190752)"><tspan
+         sodipodi:role="line"
+         id="tspan2188"
+         x="22.308115"
+         y="320.42117"
+         style="font-size:30.34248543px;font-family:Bitstream Vera Serif">ORM, e.g.</tspan><tspan
+         sodipodi:role="line"
+         x="22.308115"
+         y="358.34928"
+         style="font-size:30.34248543px;font-family:Bitstream Vera Serif"
+         id="tspan2194">SQLAlchemy</tspan></text>
+    <rect
+       style="fill:#338000;stroke:#66ff00;stroke-width:1.15369213"
+       id="rect3229"
+       width="329.84631"
+       height="119.84631"
+       x="19.576824"
+       y="414.67133" />
+    <rect
+       style="fill:#55d400;stroke:#66ff00;stroke-width:0.83500326"
+       id="rect3227"
+       width="229.66499"
+       height="90.164993"
+       x="19.41748"
+       y="354.51199" />
+    <text
+       xml:space="preserve"
+       style="font-size:7.58562136px;font-style:normal;font-weight:normal;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="21.84638"
+       y="430.6308"
+       id="text2190"
+       transform="scale(1.0880502,0.9190752)"><tspan
+         sodipodi:role="line"
+         id="tspan2192"
+         x="21.84638"
+         y="430.6308"
+         style="font-size:30.34248543px;fill:#ffffff;font-family:Bitstream Vera Serif">DB interface</tspan><tspan
+         sodipodi:role="line"
+         x="21.84638"
+         y="468.55891"
+         style="font-size:30.34248543px;fill:#ffffff;font-family:Bitstream Vera Serif"
+         id="tspan2196">e.g. psycopg</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:7.58562136px;font-style:normal;font-weight:normal;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="21.554197"
+       y="517.6748"
+       id="text2198"
+       transform="scale(1.0880502,0.9190752)"><tspan
+         sodipodi:role="line"
+         x="21.554197"
+         y="517.6748"
+         style="font-size:30.34248543px;fill:#ffffff;font-family:Bitstream Vera Serif"
+         id="tspan2202">Database, e.g.</tspan><tspan
+         sodipodi:role="line"
+         x="21.554197"
+         y="555.60291"
+         style="font-size:30.34248543px;fill:#ffffff;font-family:Bitstream Vera Serif"
+         id="tspan2206">PostgreSQL</tspan></text>
+    <rect
+       style="fill:#d7d7f4;stroke:#0000ff;stroke-width:0.99536812"
+       id="rect3217"
+       width="300.00464"
+       height="138.70392"
+       x="739.49768"
+       y="114.59216" />
+    <text
+       xml:space="preserve"
+       style="font-size:7.58562136px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="687.19586"
+       y="209.55646"
+       id="text2208"
+       transform="scale(1.0880502,0.9190752)"><tspan
+         sodipodi:role="line"
+         id="tspan2210"
+         x="687.19586"
+         y="209.55646"
+         style="font-size:30.34248543px;font-family:Bitstream Vera Serif">GUI widgets</tspan></text>
+    <rect
+       style="fill:#8787de;stroke:#0000ff;stroke-width:0.76426154"
+       id="rect3219"
+       width="300.23575"
+       height="70.036453"
+       x="739.38208"
+       y="254.1759" />
+    <text
+       xml:space="preserve"
+       style="font-size:7.58562136px;font-style:normal;font-weight:normal;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="688.78894"
+       y="320.95453"
+       id="text2212"
+       transform="scale(1.0880502,0.9190752)"><tspan
+         sodipodi:role="line"
+         id="tspan2214"
+         x="688.78894"
+         y="320.95453"
+         style="font-size:30.34248543px;fill:#ffffff;font-family:Bitstream Vera Serif">Application logic</tspan></text>
+    <rect
+       style="fill:#2c2ca0;stroke:#0000ff;stroke-width:1.18992269"
+       id="rect3221"
+       width="299.81009"
+       height="170.01755"
+       x="739.59497"
+       y="324.48196" />
+    <text
+       xml:space="preserve"
+       style="font-size:7.58562136px;font-style:normal;font-weight:normal;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="688.8468"
+       y="461.9801"
+       id="text2216"
+       transform="scale(1.0880502,0.9190752)"><tspan
+         sodipodi:role="line"
+         id="tspan2218"
+         x="688.8468"
+         y="461.9801"
+         style="font-size:30.34248543px;fill:#ffffff;font-family:Bitstream Vera Serif">Data model</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 349.49997,494.59448 C 349.49997,494.59448 384.49997,544.59448 429.49997,544.59448 C 474.49997,544.59448 506.99997,514.59448 529.49997,524.59448 C 551.99997,534.59448 559.49997,604.59448 559.49997,604.59448 C 559.49997,604.59448 566.99997,534.59448 589.49997,524.59448 C 611.99997,514.59448 641.99997,544.59448 679.49997,544.59448 C 716.99997,544.59448 739.49997,494.59448 739.49997,494.59448 L 739.49997,494.59448"
+       id="path3231"
+       sodipodi:nodetypes="czzczzcc" />
+    <text
+       xml:space="preserve"
+       style="font-size:7.58562136px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="349.12979"
+       y="684.15918"
+       id="text3233"
+       transform="scale(1.0880502,0.9190752)"><tspan
+         sodipodi:role="line"
+         id="tspan3235"
+         x="349.12979"
+         y="684.15918"
+         style="font-size:30.34248543px;font-family:Bitstream Vera Serif">Your application code</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:7.58562136px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="119.47978"
+       y="69.738014"
+       id="text3239"
+       transform="scale(1.0880502,0.9190752)"><tspan
+         sodipodi:role="line"
+         id="tspan3241"
+         x="119.47978"
+         y="69.738014"
+         style="font-size:30.34248543px;font-family:Bitstream Vera Serif">Components of a typical Webwidgets application</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.73637277px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 19.925661,538.16194 C 19.925661,538.16194 49.51288,570.23418 87.553591,570.23418 C 125.5943,570.23418 153.06814,550.99084 172.0885,557.40529 C 191.10885,563.81973 197.44897,608.72088 197.44897,608.72088 C 197.44897,608.72088 203.7891,563.81973 222.80945,557.40529 C 241.82981,550.99084 267.19027,570.23418 298.89087,570.23418 C 330.59146,570.23418 349.61182,538.16194 349.61182,538.16194 L 349.61182,538.16194"
+       id="path3267"
+       sodipodi:nodetypes="czzczzcc" />
+    <text
+       xml:space="preserve"
+       style="font-size:7.58562136px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="73.119301"
+       y="684.15918"
+       id="text3269"
+       transform="scale(1.0880502,0.9190752)"><tspan
+         sodipodi:role="line"
+         id="tspan3271"
+         x="73.119301"
+         y="684.15918"
+         style="font-size:30.34248543px;font-family:Bitstream Vera Serif">Support library</tspan></text>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.6456092px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 739.54561,499.11657 C 739.54561,499.11657 766.44079,526.23741 801.02029,526.23741 C 835.5998,526.23741 860.57388,509.96491 877.86363,515.38908 C 895.15338,520.81324 900.91663,558.78242 900.91663,558.78242 C 900.91663,558.78242 906.67989,520.81324 923.96964,515.38908 C 941.2594,509.96491 964.31239,526.23741 993.12865,526.23741 C 1021.945,526.23741 1039.2347,499.11657 1039.2347,499.11657 L 1039.2347,499.11657"
+       id="path3273"
+       sodipodi:nodetypes="czzczzcc" />
+    <text
+       xml:space="preserve"
+       style="font-size:7.58562136px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="716.47192"
+       y="640.63721"
+       id="text3275"
+       transform="scale(1.0880502,0.9190752)"><tspan
+         sodipodi:role="line"
+         id="tspan3277"
+         x="716.47192"
+         y="640.63721"
+         style="font-size:30.34248543px;font-family:Bitstream Vera Serif">Implemements</tspan></text>
+  </g>
+</svg>
