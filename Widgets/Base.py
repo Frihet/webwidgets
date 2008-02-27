@@ -287,7 +287,7 @@ class Widget(Object):
             #if key.startswith('_'): continue
             value = getattr(self, key)
             if isinstance(value, (type, types.MethodType)): continue
-	    res[key] = res['ww_untranslated__' + key] = str(value)
+	    res[key] = res['ww_untranslated__' + key] = unicode(value)
             try:
                 res[key] = self._(value, output_options)
             except:
