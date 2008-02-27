@@ -4,7 +4,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: 0.1\n"
-"POT-Creation-Date: Tue Jan 22 11:07:38 2008\n"
+"POT-Creation-Date: Fri Oct 26 11:35:32 2007\n"
 "PO-Revision-Date: DATEANDTIME\n"
 "Last-Translator: Egil Möller, Anette Furulund\n"
 "Language-Team: EMAIL\n"
@@ -25,9 +25,6 @@ msgstr "Fil"
 
 msgid "Filename"
 msgstr "Filnavn"
-
-msgid "Printable version"
-msgstr "Utskrivbar versjon"
 
 #~ msgid "&lt;No file&gt"
 #~ msgstr "&lt;Ingen fil&gt"
@@ -162,6 +159,9 @@ msgstr "Utskrivbar versjon"
 
 #~ msgid "Preview"
 #~ msgstr "Forhåndsvis"
+
+#~ msgid "Printable version"
+#~ msgstr "Utskrivbar versjon"
 
 #~ msgid "Really log out?"
 #~ msgstr "Vil du virkelig logge ut?"

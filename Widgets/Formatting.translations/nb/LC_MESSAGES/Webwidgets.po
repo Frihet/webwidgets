@@ -4,7 +4,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: 0.1\n"
-"POT-Creation-Date: Tue Jan 22 11:07:38 2008\n"
+"POT-Creation-Date: Fri Oct 26 11:35:32 2007\n"
 "PO-Revision-Date: DATEANDTIME\n"
 "Last-Translator: Egil Möller, Anette Furulund\n"
 "Language-Team: EMAIL\n"
@@ -20,9 +20,6 @@ msgstr ""
 msgid "&lt;No file&gt;"
 msgstr "&lt;Ingen fil&gt;"
 
-msgid ":"
-msgstr ""
-
 msgid "</div>\n"
 msgstr ""
 
@@ -30,6 +27,9 @@ msgid "</ul>"
 msgstr ""
 
 msgid "<div %(html_attributes)s>"
+msgstr ""
+
+msgid "<div %(html_attributes)s>%(child)s</div>"
 msgstr ""
 
 msgid "<li>%(child)s</li>"
@@ -40,19 +40,13 @@ msgid ""
 "\"stylesheet\" type=\"text/css\" />"
 msgstr ""
 
+msgid "<span %(html_attributes)s>%(child)s</span>"
+msgstr ""
+
 msgid "<style %(html_attributes)s type='text/css'>%(style)s</style>"
 msgstr ""
 
 msgid "<ul %(html_attributes)s>"
-msgstr ""
-
-msgid "Field"
-msgstr "Felt"
-
-msgid "div"
-msgstr ""
-
-msgid "span"
 msgstr ""
 
 msgid "text/html"
@@ -143,6 +137,9 @@ msgstr ""
 
 #~ msgid "False"
 #~ msgstr "Falsk"
+
+#~ msgid "Field"
+#~ msgstr "Felt"
 
 #~ msgid "File"
 #~ msgstr "Fil"

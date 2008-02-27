@@ -4,7 +4,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: 0.1\n"
-"POT-Creation-Date: Tue Jan 22 11:07:38 2008\n"
+"POT-Creation-Date: Fri Oct 26 11:35:32 2007\n"
 "PO-Revision-Date: DATEANDTIME\n"
 "Last-Translator: Egil Möller, Anette Furulund\n"
 "Language-Team: EMAIL\n"
