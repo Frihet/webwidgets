@@ -78,8 +78,9 @@ class Type(type):
 
 class Object(object):
     """Object is a more elaborate version of object, providing a few
-    extra utility methods, and some extra "magic" class attributes -
-    L{ww_classes}, L{ww_class_order_nr} and L{ww_class_path}."""
+    extra utility methods, some extra"magic" class attributes -
+    L{ww_classes}, L{ww_class_order_nr} and L{ww_class_path} and
+    model/model-filter handling."""
     
     __metaclass__ = Type
 
@@ -105,18 +106,31 @@ class Object(object):
     some ther class, this is the ww_class_path and __name__ of that
     other class joined. The path is dot-separated."""
 
+    model = None
+    View = None
+
     def __init__(self, **attrs):
-        """Creates a new widget
+        """Creates a new object
 
         @param attrs: Any attributes to set for the object.
         """
-        
         self.__dict__.update(attrs)
+
+        root_view = self.__dict__.get("root_view", self)
+        if getattr(self, 'View', None) is not None:
+            self.view = self.View(parent_view = self, root_view = root_view)
+        else:
+            self.view = root_view
 
     def derive(cls, name = None, **members):
         return types.TypeType(name or 'anonymous', (cls,), members)
     derive = classmethod(derive)
 
+    def __getattr__(self, name):
+        if self.model is None:
+            raise AttributeError(self, name)
+        return getattr(self.model, name)
+        
     def __str__(self):
         return str(unicode(self))
 

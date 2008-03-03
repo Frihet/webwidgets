@@ -35,6 +35,17 @@
   <w:UpdateButton id="Update" />
  </w:Fieldgroup>
 
+ <w:Fieldgroup id="Address">
+  <w:Field id="Co" Label=":Text:c/o"><w:Html id="Field" field_name="co" /></w:Field>
+  <w:Field id="Street" Label=":Text:Street"><w:Html id="Field" field_name="street" /></w:Field>
+  <w:Field id="Zip" Label=":Text:Post-code/zip code"><w:Html id="Field" field_name="zip" /></w:Field>
+  <w:Field id="City" Label=":Text:City"><w:Html id="Field" field_name="city" /></w:Field>
+  <w:Field id="Municipality" Label=":Text:Municipality"><w:Html id="Field" field_name="municipality" /></w:Field>
+  <w:Field id="County" Label=":Text:County/State"><w:Html id="Field" field_name="county" /></w:Field>
+  <w:Field id="Country" Label=":Text:Country"><w:Html id="Field" field_name="country" /></w:Field>
+  <w:UpdateButton id="Update" />
+ </w:Fieldgroup>
+
  <w:HtmlWindow
   id="ApplicationWindow"
   title="Application window">
