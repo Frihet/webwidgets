@@ -32,7 +32,10 @@ import types, xml.sax.saxutils, os.path, cgi, re, sys
 import Webwidgets.Utils, Webwidgets.Utils.Gettext, Webwidgets.Constants
 import Webwidgets.Utils.FileHandling
 import Webwidgets.Utils.Threads
+import traceback
 
+debug_exceptions = True
+                        
 class Type(type):
     ww_class_order_nr = Webwidgets.Utils.Threads.Counter()
 
@@ -521,9 +524,25 @@ class Text(Widget):
     def draw(self, output_options):
         return self._(self.html, output_options)
 
-class ChildNodes(Webwidgets.Utils.OrderedDict):
+class BaseChildNodes(object):
+    def __init__(self, node):
+        self.node = node
+        
+    def ensure(self):
+        for name in self.iterkeys():
+            value = self[name]
+            if isinstance(value, type) and issubclass(value, Widget):
+                self[name] = value(self.node.session, self.node.win_id)
+            if isinstance(value, Widget):
+                if self.node is value:
+                    raise Exception("Object's parent set to itself!", value)
+                
+                value.parent = self.node
+                value.name = name
+
+class ChildNodes(BaseChildNodes, Webwidgets.Utils.OrderedDict):
     """Dictionary of child widgets to a widget; any widgets inserted
-    in the dictionary will automatically have their name and parentn
+    in the dictionary will automatically have their name and parent
     member variables set correctly."""
     def __init__(self, node, *arg, **kw):
         """@param node: The widget the children held in this
@@ -531,17 +550,8 @@ class ChildNodes(Webwidgets.Utils.OrderedDict):
         @param arg: Sent to L{dict.__init__}
         @param kw: Sent to L{dict.__init__}
         """
-        self.node = node
-        super(ChildNodes, self).__init__(*arg, **kw)
-        self.ensure()
-
-    def ensure(self):
-        for name, value in self.iteritems():
-            if isinstance(value, Widget):
-                if self.node is value:
-                    raise Exception("Object's parent set to itself!", value)
-                value.parent = self.node
-                value.name = name
+        BaseChildNodes.__init__(self, node)
+        Webwidgets.Utils.OrderedDict.__init__(self, *arg, **kw)
 
     def __setitem__(self, *arg, **kw):
         super(ChildNodes, self).__setitem__(*arg, **kw)
@@ -553,6 +563,61 @@ class ChildNodes(Webwidgets.Utils.OrderedDict):
 
     def setdefault(self, *arg, **kw):
         super(ChildNodes, self).setdefault(*arg, **kw)
+        self.ensure()
+
+class ChildNodeList(BaseChildNodes, list):
+    """List of child widgets to a widget; any widgets inserted in the
+    list will automatically have their name and parent member
+    variables set correctly, the name being the index in the list."""
+    def __init__(self, node, *arg, **kw):
+        """@param node: The widget the children held in this
+        list are children to.
+        @param arg: Sent to L{list.__init__}
+        @param kw: Sent to L{list.__init__}
+        """
+        BaseChildNodes.__init__(self, node)
+        self.extend(*arg, **kw)
+    
+    def iteritems(self):
+        for index, value in enumerate(self):
+            yield (str(index), value)
+
+    def iterkeys(self):
+        for index in xrange(0, len(self)):
+            yield str(index)
+
+    def __getitem__(self, name):
+        if isinstance(name, (str, unicode)): name = int(name)
+        return super(ChildNodeList, self).__getitem__(name)
+
+    def __setitem__(self, name, value):
+        if isinstance(name, (str, unicode)): name = int(name)
+        super(ChildNodeList, self).__setitem__(name, value)
+        self.ensure()
+
+    def __delitem__(self, name):
+        if isinstance(name, (str, unicode)): name = int(name)
+        super(ChildNodeList, self).__delitem__(name)
+        self.ensure()
+
+    def extend(self, *arg, **kw):
+        super(ChildNodeList, self).extend(*arg, **kw)
+        self.ensure()
+
+    def append(self, *arg, **kw):
+        super(ChildNodeList, self).append(*arg, **kw)
+        self.ensure()
+
+    def insert(self, *arg, **kw):
+        super(ChildNodeList, self).insert(*arg, **kw)
+        self.ensure()
+
+    def reverse(self, *arg, **kw):
+        super(ChildNodeList, self).reverse(*arg, **kw)
+        self.ensure()
+    
+    def sort(self, *arg, **kw):
+        super(ChildNodeList, self).sort(*arg, **kw)
         self.ensure()
 
 class Composite(Widget):
@@ -595,6 +660,7 @@ class Composite(Widget):
                 try:
                     result = child.draw(output_options)
                 except Exception, e:
+                    if debug_exceptions: traceback.print_exc()
                     result = ''
                     import WebUtils.HTMLForException
                     child.system_errors.append(
@@ -658,6 +724,13 @@ class Composite(Widget):
                     fields.update(child.get_widgets_by_attribute(attribute))
         return fields
 
+    def get(self, name, default = None):
+        """@return: a child widget."""
+        try:
+            return self.get_child(name)
+        except KeyError:
+            return default
+        
     def __getitem__(self, name):
         """@return: a child widget."""
         return self.get_child(name)

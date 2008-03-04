@@ -77,62 +77,13 @@ def reverse_dependency(dependent_columns):
             res[dependent_column] = main
     return res
 
-class ChildNodeCells(Base.ChildNodes):
-    def __init__(self, node, row, *arg, **kw):
-        self.row = row
-        super(ChildNodeCells, self).__init__(node, *arg, **kw)
-
-    def ensure(self):
-        for name in self.iterkeys():
-            value = self[name]
-            if isinstance(value, type) and issubclass(value, Base.Widget):
-                value = self[name] = value(self.node.session, self.node.win_id)
-            if isinstance(value, Base.Widget):
-                value.parent = self.node
-                value.name = "cell_%s_%s" % (self.row, name)
-
-class ChildNodeRows(list):
-    def __init__(self, node, *arg, **kw):
-        super(ChildNodeRows, self).__init__(*arg, **kw)
-        self.node = node
-        self.ensure()
-    
+class TableRow(Base.StaticComposite): pass
+class ChildNodeRows(Base.ChildNodeList):
     def ensure(self):
         for index in xrange(0, len(self)):
-            if not isinstance(self[index], ChildNodeCells) or self[index].row != index:
-                self[index] = ChildNodeCells(self.node, index, self[index])
-
-    def __setitem__(self, *arg, **kw):
-        super(ChildNodeRows, self).__setitem__(*arg, **kw)
-        self.ensure()
-
-    def __delitem__(self, *arg, **kw):
-        super(ChildNodeRows, self).__delitem__(*arg, **kw)
-        self.ensure()
-
-    def __setslice__(self, *arg, **kw):
-        super(ChildNodeRows, self).__setslice__(*arg, **kw)
-        self.ensure()
-
-    def extend(self, *arg, **kw):
-        super(ChildNodeRows, self).extend(*arg, **kw)
-        self.ensure()
-
-    def append(self, *arg, **kw):
-        super(ChildNodeRows, self).append(*arg, **kw)
-        self.ensure()
-
-    def insert(self, *arg, **kw):
-        super(ChildNodeRows, self).insert(*arg, **kw)
-        self.ensure()
-
-    def reverse(self, *arg, **kw):
-        super(ChildNodeRows, self).reverse(*arg, **kw)
-        self.ensure()
-    
-    def sort(self, *arg, **kw):
-        super(ChildNodeRows, self).sort(*arg, **kw)
-        self.ensure()
+            if not isinstance(self[index], Base.Widget):
+                self[index] = TableRow(self.node.session, self.node.win_id, children = self[index])
+        Base.ChildNodeList.ensure(self)
 
 class RenderedRowType(object): pass
 class RenderedRowTypeRow(RenderedRowType): pass
@@ -242,12 +193,13 @@ class BaseTable(Base.Composite):
         raise NotImplementedError("reread")
     
     def get_children(self):
-        raise NotImplemented
+         self.rows.iteritems()
 
     def get_child(self, name):
-        dummy, row, column = name.split('_')
-        row = int(row)
-        return self.rows[row][column]
+        try:
+            return self.children[name]
+        except:
+            raise KeyError("No such child %s to %s" % (name, str(self)))
     
     def get_widgets_by_attribute(self, attribute = '__name__'):
         fields = Base.Widget.get_widgets_by_attribute(self, attribute)
@@ -372,8 +324,7 @@ class BaseTable(Base.Composite):
         else:
             html_class = row.get('ww_class', []) + ['column_first_level_%s' % first_level,
                                                     'column_last_level_%s' % last_level]
-            value = self.draw_child(self.path + ["cell_%s_%s" % (row.row, column_name)],
-                                    value, output_options, True)
+            value = row.draw_child(row.path + [column_name], value, output_options, True)
         return '<td rowspan="%(rowspan)s" colspan="%(colspan)s" class="%(class)s">%(content)s</td>' % {
             'rowspan': rowspan,
             'colspan': colspan,
@@ -404,7 +355,7 @@ class BaseTable(Base.Composite):
 
     def append_classes(self, rendered_rows, output_options):
         for rendered_row in rendered_rows:
-            rendered_row['class'] = (  ['row_' + ['even', 'odd'][rendered_row['row'].row % 2]]
+            rendered_row['class'] = (  ['row_' + ['even', 'odd'][int(rendered_row['row'].name) % 2]]
                                      + rendered_row['row'].get('ww_class', []))
 
     def mangle_rendered_rows(self, rendered_rows, visible_columns, reverse_dependent_columns, output_options):
@@ -480,12 +431,17 @@ class TableFilter(Base.Object):
     Filters = [BaseTableFilter]
     
     def mangle_row(self, row, output_options):
-        if 'printable_version' not in output_options and self.functions:
-            mangled_row = ChildNodeCells(row.node, row.row)
-            mangled_row.update(row)
+        if (    'printable_version' not in output_options
+            and self.functions
+            and isinstance(row, TableRow)):
+            # Copy the row and add the function columns
+            # Functions are never real widgets anyway, so it doesn't
+            # matter that we forget about these copies in between page loads :]
+            mangled_row = type(row)(row.session, row.win_id, children = row.children)
+            mangled_row.name = row.name
+            mangled_row.parent = row.parent
             for name in self.functions.iterkeys():
                 mangled_row[name] = FunctionCellInstance
-            mangled_row.row = row.row
             return mangled_row
         return row
 

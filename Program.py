@@ -29,7 +29,9 @@ application.
 import WebKit.Page
 import cgi, urllib, types, os, sys
 import Utils, Widgets, AccessManager, Constants
-import hotshot, pdb
+import hotshot, pdb, traceback
+
+debug_exceptions = True
 
 def decode_field(value):
     if isinstance(value, types.StringType):
@@ -217,6 +219,7 @@ class Program(WebKit.Page.Page):
                     except StopIteration:
                         return
                     except:
+                        if debug_exceptions: traceback.print_exc()
                         import WebUtils.HTMLForException
                         self.widget.system_errors.append(
                             (sys.exc_info()[1],
