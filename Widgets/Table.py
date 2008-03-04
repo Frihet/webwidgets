@@ -148,6 +148,51 @@ class SpecialCell(object):
     def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
         return ''
 
+class BaseTableFilter(Base.Object):
+    # API used by Table
+    
+    def get_rows(self, output_options):
+        if 'printable_version' in output_options or self.non_memory_storage:
+            return self.rows
+        return self.rows[(self.page - 1) * self.rows_per_page:
+                                self.page * self.rows_per_page]
+    def get_pages(self):
+        return int(math.ceil(float(len(self.rows)) / self.rows_per_page))
+    
+    def init(self):
+        self.reread()
+
+    def sort_changed(self, path, sort):
+        """Notification that the list sort order has changed."""
+        if path != self.path: return
+        self.reread()
+        
+    def page_changed(self, path, page):
+        """Notification that the user has changed page."""
+        if path != self.path: return
+        self.reread()
+
+    # Internal
+    
+    old_sort = []
+
+    def reread(self):
+        """Reload the list after a repaging/resorting here."""
+        if self.non_memory_storage:
+            self.filter.reread()
+        else:
+            def row_cmp(row1, row2):
+                for col, order in self.sort:
+                    diff = cmp(row1[col], row2[col])
+                    if diff:
+                        if order == 'desc': diff *= -1
+                    return diff
+                return 0
+
+            if self.sort != self.old_sort:
+                self.rows.sort(row_cmp)
+                self.old_sort = self.sort
+
 class BaseTable(Base.Composite):
     """Group By Ordering List is a special kind of table view that
     allows the user to sort the rows and simultaneously group the rows
@@ -183,65 +228,19 @@ class BaseTable(Base.Composite):
     rows_per_page = 10
     """This attribute is not used internally by the widget, but is
     intended to be used by the user-provide reread() method."""
+    Filters = [BaseTableFilter]
 
     def __init__(self, session, win_id, **attrs):
         Base.Composite.__init__(self, session, win_id, **attrs)
         self.rows = ChildNodeRows(self, self.rows)
-        self.reread()
+        self.init()
 
     def reread(self):
-        """Reload the list after a repaging/resorting here. This is
-        not a notification to allow for it to be called from __init__.
-
-        If you set non_memory_storage to True, you _must_ override this
-        method with your own sorter/loader function.
+        """Reload the list after a repaging/resorting here. If you set
+        non_memory_storage to True, you _must_ implement this method.
         """
-        def row_cmp(row1, row2):
-            for col, order in self.sort:
-                diff = cmp(row1[col], row2[col])
-                if diff:
-                    if order == 'desc': diff *= -1
-                return diff
-            return 0
-        
-        if self.sort != self.old_sort:
-            self.rows.sort(row_cmp)
-            self.old_sort = self.sort
-
-    def sort_changed(self, path, sort):
-        """Notification that the list sort order has changed."""
-        if path != self.path: return
-        self.reread()
-
-    def page_changed(self, path, page):
-        """Notification that the user has changed page."""
-        if path != self.path: return
-        self.reread()
-
-    def get_all_rows(self):
-        return self.rows
+        raise NotImplementedError("reread")
     
-    def get_rows(self):
-        if self.non_memory_storage:
-            return self.rows
-        return self.rows[(self.page - 1) * self.rows_per_page:
-                         self.page * self.rows_per_page]
-
-    def mangle_columns(self, columns, output_options):
-        return columns
-    
-    def mangle_row(self, row, output_options):
-        return row
-
-    def mangle_rows(self, rows, output_options):
-	return [self.mangle_row(row, output_options)
-                for row in rows]
-
-    def get_pages(self):
-        if self.non_memory_storage:
-            return self.pages        
-        return int(math.ceil(float(len(self.rows)) / self.rows_per_page))
-
     def get_children(self):
         raise NotImplemented
 
@@ -381,13 +380,6 @@ class BaseTable(Base.Composite):
             'class': ' '.join(html_class),
             'content': value}
 
-    def get_mangled_rows(self, output_options):
-        if 'printable_version' in output_options:
-            rows = self.get_all_rows()
-        else:
-            rows = self.get_rows()
-	return self.mangle_rows(rows, output_options)
-
     def draw_rows(self, visible_columns, reverse_dependent_columns, output_options):
         group_order = extend_to_dependent_columns(
             [column for column, dir in self.sort],
@@ -396,7 +388,7 @@ class BaseTable(Base.Composite):
                       if column in visible_columns] + [column for column in visible_columns
                                                      if column not in group_order]
 
-        rows = self.get_mangled_rows(output_options)
+        rows = self.filter.get_rows(output_options)
 
         # Why we need this test here: rows_to_tree would create an empty
         # top-node for an empty set of rows, which draw_tree would
@@ -484,6 +476,24 @@ class FunctionCell(SpecialCell):
 
 FunctionCellInstance = FunctionCell()
 
+class TableFilter(Base.Object):
+    Filters = [BaseTableFilter]
+    
+    def mangle_row(self, row, output_options):
+        if 'printable_version' not in output_options and self.functions:
+            mangled_row = ChildNodeCells(row.node, row.row)
+            mangled_row.update(row)
+            for name in self.functions.iterkeys():
+                mangled_row[name] = FunctionCellInstance
+            mangled_row.row = row.row
+            return mangled_row
+        return row
+
+    def get_rows(self, output_options):
+        return [self.mangle_row(row, output_options)
+                for row
+                in self.filter.get_rows(output_options)]        
+
 class Table(BaseTable, Base.ActionInput):
     """Group By Ordering List is a special kind of table view that
     allows the user to sort the rows and simultaneously group the rows
@@ -525,6 +535,7 @@ class Table(BaseTable, Base.ActionInput):
     # A button bar is drawn if it is active, or its level is >=
     # button_bars_level_force_min or there are other button bars with
     # level < that button bars' level that are to be drawn.
+    Filters = [TableFilter]
 
     def field_input(self, path, string_value):
         try:
@@ -579,15 +590,6 @@ class Table(BaseTable, Base.ActionInput):
             return res
         return columns
 
-    def mangle_row(self, row, output_options):
-        if 'printable_version' not in output_options and self.functions:
-            mangled_row = ChildNodeCells(row.node, row.row)
-            mangled_row.update(row)
-            for name in self.functions.iterkeys():
-                mangled_row[name] = FunctionCellInstance
-            mangled_row.row = row.row
-            return mangled_row
-        return row
 
     def draw_title_bar(self, config, output_options):
         title = getattr(self, 'title', None)

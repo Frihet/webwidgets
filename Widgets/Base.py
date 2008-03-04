@@ -137,6 +137,8 @@ class Object(object):
 
     def __getattr__(self, name):
         if self.model is None:
+            if self.filter is not self:
+                return getattr(self.filter, name)
             raise AttributeError(self, name)
         return getattr(self.model, name)
         
