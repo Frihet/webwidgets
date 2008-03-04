@@ -540,7 +540,7 @@ class BaseChildNodes(object):
                 value.parent = self.node
                 value.name = name
 
-class ChildNodes(BaseChildNodes, Webwidgets.Utils.OrderedDict):
+class ChildNodeDict(BaseChildNodes, Webwidgets.Utils.OrderedDict):
     """Dictionary of child widgets to a widget; any widgets inserted
     in the dictionary will automatically have their name and parent
     member variables set correctly."""
@@ -554,15 +554,15 @@ class ChildNodes(BaseChildNodes, Webwidgets.Utils.OrderedDict):
         Webwidgets.Utils.OrderedDict.__init__(self, *arg, **kw)
 
     def __setitem__(self, *arg, **kw):
-        super(ChildNodes, self).__setitem__(*arg, **kw)
+        super(ChildNodeDict, self).__setitem__(*arg, **kw)
         self.ensure()
 
     def update(self, *arg, **kw):
-        super(ChildNodes, self).update(*arg, **kw)
+        super(ChildNodeDict, self).update(*arg, **kw)
         self.ensure()
 
     def setdefault(self, *arg, **kw):
-        super(ChildNodes, self).setdefault(*arg, **kw)
+        super(ChildNodeDict, self).setdefault(*arg, **kw)
         self.ensure()
 
 class ChildNodeList(BaseChildNodes, list):
@@ -756,7 +756,7 @@ class StaticComposite(Composite):
         super(StaticComposite, self).__init__(
             session, win_id,
             **attrs)
-        self.children = ChildNodes(self, getattr(self, 'children', {}))
+        self.children = ChildNodeDict(self, getattr(self, 'children', {}))
 
         # Class members have no intrinsic order, so we sort them on
         # their order of creation, which if created through the Python

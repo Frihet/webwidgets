@@ -168,7 +168,7 @@ class Program(WebKit.Page.Page):
         name = None
 
         def __init__(self):
-            self.windows = Widgets.Base.ChildNodes(self)
+            self.windows = Widgets.Base.ChildNodeDict(self)
             self.notifications = []
             self.output = None
             self.program = None
