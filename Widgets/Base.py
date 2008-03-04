@@ -107,20 +107,29 @@ class Object(object):
     other class joined. The path is dot-separated."""
 
     model = None
-    View = None
+    """If non-None, any attribute not found on this object will be
+    searched for on this object."""
+    
+    Filters = []
+    """Filter is a set of classes that are to be instantiated and
+    chained together as filters for this object. Ech of these will
+    have its filter attribute set to the next one, except for the last
+    one, which will have it set to this very object."""
 
-    def __init__(self, **attrs):
+    def __init__(self, filter = None, **attrs):
         """Creates a new object
 
+        @param filter: The next filter when building a filter
+                       tree/chain. None for the root node, next filter
+                       in chain otherwise.
         @param attrs: Any attributes to set for the object.
         """
         self.__dict__.update(attrs)
 
-        root_view = self.__dict__.get("root_view", self)
-        if getattr(self, 'View', None) is not None:
-            self.view = self.View(parent_view = self, root_view = root_view)
-        else:
-            self.view = root_view
+        filter = filter or self
+        for Filter in reversed(self.Filters):
+            filter = Filter(filter = filter)
+        self.filter = filter
 
     def derive(cls, name = None, **members):
         return types.TypeType(name or 'anonymous', (cls,), members)
