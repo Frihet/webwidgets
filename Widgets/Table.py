@@ -145,24 +145,10 @@ class BaseTableFilter(Base.Object):
                 self.old_sort = self.sort
 
 class BaseTable(Base.Composite):
-    """Group By Ordering List is a special kind of table view that
-    allows the user to sort the rows and simultaneously group the rows
-    according to their content and the sorting.
-
-    The content is provided as a list of rows, each row a dictionary
-    of cell values (strings or widgets).
-
-    The list can optionally be paged, and the application asked to
-    provide the previous or next page of content when the page is
-    changed.
-
-    In addition, the application should provide a dictionary of column
-    titles and handle the resorted notigication, resorting the rows
-    according to the sorting specification. Note: This is the
-    responsibility of the application, as the list shown might be only
-    one page of a huge set of data, so that resorting actually changes
-    the content alltogether. In addition, this allows the sorting to
-    be done by e.g a database back-end.
+    """This is the basic version of L{Table}; it formats the table
+    itself, but does not include any user input controls for changing
+    the sorting order, the current page, or for operating on the rows
+    in the table.
     """
     
     columns = {}
@@ -172,7 +158,6 @@ class BaseTable(Base.Composite):
     sort = []
     rows = []
     page = 1
-    pages = 1
     non_memory_storage = False
     dont_merge_widgets = True
     dont_merge_columns = ()
