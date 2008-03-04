@@ -108,8 +108,19 @@ class BaseTableFilter(Base.Object):
         return self.rows[(self.page - 1) * self.rows_per_page:
                                 self.page * self.rows_per_page]
     def get_pages(self):
+        if self.non_memory_storage:
+            return self.filter.get_pages()
         return int(math.ceil(float(len(self.rows)) / self.rows_per_page))
     
+    def get_columns(self):
+        res = Webwidgets.Utils.OrderedDict()
+        for name, definition in self.columns.iteritems():
+            if isinstance(definition, types.StringTypes):
+                res[name] = {"title": definition}
+            else:
+                res[name] = definition
+        return res
+
     def init(self):
         self.reread()
 
@@ -176,23 +187,21 @@ class BaseTable(Base.Composite):
         non_memory_storage to True, you _must_ implement this method.
         """
         raise NotImplementedError("reread")
+
+    def get_pages(self):
+        """Returns the total number of pages. If you set
+        non_memory_storage to True, you _must_ implement this method.
+        """
+        raise NotImplementedError("get_pages")
     
     def get_children(self):
-         self.rows.iteritems()
+         self.filter.rows.iteritems()
 
     def get_child(self, name):
         try:
-            return self.children[name]
+            return self.filter.rows[name]
         except:
             raise KeyError("No such child %s to %s" % (name, str(self)))
-    
-    def get_widgets_by_attribute(self, attribute = '__name__'):
-        fields = Base.Widget.get_widgets_by_attribute(self, attribute)
-        for row in self.get_rows():
-            for column, child in row.iteritems():
-                if isinstance(child, Base.Widget):
-                    fields.update(child.get_widgets_by_attribute(attribute))
-        return fields
 
     def get_active(self, path):
         """@return: Whether the widget is allowing the user to acces
@@ -208,20 +217,11 @@ class BaseTable(Base.Composite):
     def get_active_column(self, path):
         return self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, self.path + ['column'] + path)
 
-    def get_canonized_columns(self):
-        res = Webwidgets.Utils.OrderedDict()
-        for name, definition in self.columns.iteritems():
-            if isinstance(definition, types.StringTypes):
-                res[name] = {"title": definition}
-            else:
-                res[name] = definition
-        return res
-
     def visible_columns(self, output_options):
         # Optimisation: we could have used get_active and constructed a path...
         return Webwidgets.Utils.OrderedDict([(name, definition)
                                              for (name, definition)
-                                             in self.mangle_columns(self.get_canonized_columns(), output_options).iteritems()
+                                             in self.mangle_columns(self.filter.get_columns(), output_options).iteritems()
                                              if self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id,
                                                                            self.path + ['_', 'column', name])])
 
@@ -548,14 +548,14 @@ class Table(BaseTable, Base.ActionInput):
         if page_active:
             self.session.windows[self.win_id].fields[page_id] = self
         back_active = page_active and self.page > 1
-        forward_active = page_active and self.page < self.get_pages()
+        forward_active = page_active and self.page < self.filter.get_pages()
         info = {'html_id': page_id,
                 'first': 1,
                 'previous': self.page - 1,
                 'page': self.page,
-                'pages': self.get_pages(),
+                'pages': self.filter.get_pages(),
                 'next': self.page + 1,
-                'last': self.get_pages(),
+                'last': self.filter.get_pages(),
                 'back_active': ['', 'disabled="disabled"'][not back_active],
                 'forward_active': ['', 'disabled="disabled"'][not forward_active],
                 }
