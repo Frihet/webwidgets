@@ -119,8 +119,9 @@ class Object(object):
     have its filter attribute set to the next one, except for the last
     one, which will have it set to this very object."""
 
-    def __init__(self, filter = None, **attrs):
+    def __init__(self, **attrs):
         """Creates a new object
+            raise AttributeError(self, name)
 
         @param filter: The next filter when building a filter
                        tree/chain. None for the root node, next filter
@@ -128,11 +129,15 @@ class Object(object):
         @param attrs: Any attributes to set for the object.
         """
         self.__dict__.update(attrs)
+        self.setup_filter()
 
-        filter = filter or self
-        for Filter in reversed(self.Filters):
-            filter = Filter(filter = filter)
-        self.filter = filter
+    def setup_filter(self, name = 'filter', filter_classes = None, filter = None, object = None):
+        if filter is None: filter = getattr(self, name, self)
+        if object is None: object = getattr(self, 'object', self)
+        if filter_classes is None: filter_classes = self.Filters
+        for filter_class in reversed(filter_classes):
+            filter = filter_class(filter = filter, object = object)
+        setattr(self, name, filter) 
 
     def derive(cls, name = None, **members):
         return types.TypeType(name or 'anonymous', (cls,), members)
@@ -140,8 +145,6 @@ class Object(object):
 
     def __getattr__(self, name):
         if self.model is None:
-            if self.filter is not self:
-                return getattr(self.filter, name)
             raise AttributeError(self, name)
         return getattr(self.model, name)
         
@@ -150,6 +153,13 @@ class Object(object):
 
     def __repr__(self):
         return str(self)
+
+class Model(Object):
+    pass
+
+class Filter(Object):
+    def __getattr__(self, name):
+        return getattr(self.filter, name)
 
 class Widget(Object):
     """Widget is the base class for all widgets. It manages class name

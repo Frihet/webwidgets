@@ -99,20 +99,27 @@ class SpecialCell(object):
     def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
         return ''
 
-class BaseTableFilter(Base.Object):
+class BaseTableFilter(Base.Filter):
     # API used by Table
     
+    def __init__(self, *arg, **kw):
+        Base.Object.__init__(self, *arg, **kw)
+        self.reread()
+
     def get_rows(self, output_options):
+        self.ensure()
+        rows = self.rows
         if 'printable_version' in output_options or self.non_memory_storage:
-            return self.rows
-        return self.rows[(self.page - 1) * self.rows_per_page:
-                                self.page * self.rows_per_page]
-    def get_pages(self):
+            return rows
+        return rows[(self.page - 1) * self.rows_per_page:
+                    self.page * self.rows_per_page]
+    
+    def get_pages(self, output_options):
         if self.non_memory_storage:
             return self.filter.get_pages()
-        return int(math.ceil(float(len(self.rows)) / self.rows_per_page))
-    
-    def get_columns(self):
+        return int(math.ceil(float(len(self.get_rows(output_options))) / self.rows_per_page))
+
+    def get_columns(self, output_options):
         res = Webwidgets.Utils.OrderedDict()
         for name, definition in self.columns.iteritems():
             if isinstance(definition, types.StringTypes):
@@ -121,28 +128,21 @@ class BaseTableFilter(Base.Object):
                 res[name] = definition
         return res
 
-    def init(self):
-        self.reread()
-
-    def sort_changed(self, path, sort):
-        """Notification that the list sort order has changed."""
-        if path != self.path: return
-        self.reread()
-        
-    def page_changed(self, path, page):
-        """Notification that the user has changed page."""
-        if path != self.path: return
-        self.reread()
-
     # Internal
     
-    old_sort = []
+    old_sort = None
+    old_page = None
+
+    def ensure(self):
+        """Reload the list after a repaging/resorting"""
+        if self.sort != self.old_sort or self.page != self.old_page:
+            self.reread()
 
     def reread(self):
-        """Reload the list after a repaging/resorting here."""
+        """Reload the list"""
         if self.non_memory_storage:
             self.filter.reread()
-        else:
+        elif self.sort != self.old_sort:
             def row_cmp(row1, row2):
                 for col, order in self.sort:
                     diff = cmp(row1[col], row2[col])
@@ -150,10 +150,9 @@ class BaseTableFilter(Base.Object):
                         if order == 'desc': diff *= -1
                     return diff
                 return 0
-
-            if self.sort != self.old_sort:
-                self.rows.sort(row_cmp)
-                self.old_sort = self.sort
+            self.rows.sort(row_cmp)
+        self.old_sort = self.sort
+        self.old_page = self.page
 
 class BaseTable(Base.Composite):
     """This is the basic version of L{Table}; it formats the table
@@ -180,7 +179,6 @@ class BaseTable(Base.Composite):
     def __init__(self, session, win_id, **attrs):
         Base.Composite.__init__(self, session, win_id, **attrs)
         self.rows = ChildNodeRows(self, self.rows)
-        self.init()
 
     def reread(self):
         """Reload the list after a repaging/resorting here. If you set
@@ -221,7 +219,7 @@ class BaseTable(Base.Composite):
         # Optimisation: we could have used get_active and constructed a path...
         return Webwidgets.Utils.OrderedDict([(name, definition)
                                              for (name, definition)
-                                             in self.mangle_columns(self.filter.get_columns(), output_options).iteritems()
+                                             in self.mangle_columns(self.filter.get_columns(output_options), output_options).iteritems()
                                              if self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id,
                                                                            self.path + ['_', 'column', name])])
 
@@ -412,9 +410,7 @@ class FunctionCell(SpecialCell):
 
 FunctionCellInstance = FunctionCell()
 
-class TableFilter(Base.Object):
-    Filters = [BaseTableFilter]
-    
+class TableFunctionColFilter(Base.Filter):
     def mangle_row(self, row, output_options):
         if (    'printable_version' not in output_options
             and self.functions
@@ -476,7 +472,7 @@ class Table(BaseTable, Base.ActionInput):
     # A button bar is drawn if it is active, or its level is >=
     # button_bars_level_force_min or there are other button bars with
     # level < that button bars' level that are to be drawn.
-    Filters = [TableFilter]
+    Filters = [TableFunctionColFilter] + BaseTable.Filters
 
     def field_input(self, path, string_value):
         try:
@@ -548,14 +544,14 @@ class Table(BaseTable, Base.ActionInput):
         if page_active:
             self.session.windows[self.win_id].fields[page_id] = self
         back_active = page_active and self.page > 1
-        forward_active = page_active and self.page < self.filter.get_pages()
+        forward_active = page_active and self.page < self.filter.get_pages(output_options)
         info = {'html_id': page_id,
                 'first': 1,
                 'previous': self.page - 1,
                 'page': self.page,
-                'pages': self.filter.get_pages(),
+                'pages': self.filter.get_pages(output_options),
                 'next': self.page + 1,
-                'last': self.filter.get_pages(),
+                'last': self.filter.get_pages(output_options),
                 'back_active': ['', 'disabled="disabled"'][not back_active],
                 'forward_active': ['', 'disabled="disabled"'][not forward_active],
                 }
