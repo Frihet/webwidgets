@@ -160,18 +160,20 @@ class BaseTable(Base.Composite):
     the sorting order, the current page, or for operating on the rows
     in the table.
     """
-    
-    columns = {}
-    """{column_name: title | {"title":title, ...}}"""
-    dependent_columns = {}
-    """{column_name: [column_name]}"""
-    sort = []
-    rows = []
-    page = 1
-    non_memory_storage = False
-    dont_merge_widgets = True
-    dont_merge_columns = ()
-    rows_per_page = 10
+
+    class Model(Base.Model):
+        columns = {}
+        """{column_name: title | {"title":title, ...}}"""
+        dependent_columns = {}
+        """{column_name: [column_name]}"""
+        sort = []
+        rows = []
+        page = 1
+        non_memory_storage = False
+        dont_merge_widgets = True
+        dont_merge_columns = ()
+        rows_per_page = 10
+
     """This attribute is not used internally by the widget, but is
     intended to be used by the user-provide reread() method."""
     Filters = [BaseTableFilter]
@@ -451,27 +453,29 @@ class Table(BaseTable, Base.ActionInput):
     be done by e.g a database back-end.
     """
     
-    argument_name = None
-    functions = {} # {'column_name': {'function_name': 'title'}}
-    group_functions = {} # {'function_name': 'title'}
-    disabled_functions = [] # ['function_name']
-    disabled_columns = []
-    old_sort = []
-    column_groups = {}
-    """[column_group_name -> columnt_group_title]"""
+    class Model(BaseTable.Model):
+        argument_name = None
+        functions = {} # {'column_name': {'function_name': 'title'}}
+        group_functions = {} # {'function_name': 'title'}
+        disabled_functions = [] # ['function_name']
+        disabled_columns = []
+        old_sort = []
+        column_groups = {}
+        """[column_group_name -> columnt_group_title]"""
 
-    button_bars = {'bottom':
-                   Webwidgets.Utils.OrderedDict([('paging_buttons',  {'level': 0}),
-                                                 ('printable_link',  {'level': 2,
-                                                                      'title': 'Printable version'}),
-                                                 ('group_functions', {'level': 1})]),
-                   'top':
-                   Webwidgets.Utils.OrderedDict([  #('title_bar', {'level': 2}),
-                                                 ])}
-    button_bars_level_force_min = 0
-    # A button bar is drawn if it is active, or its level is >=
-    # button_bars_level_force_min or there are other button bars with
-    # level < that button bars' level that are to be drawn.
+        button_bars = {'bottom':
+                       Webwidgets.Utils.OrderedDict([('paging_buttons',  {'level': 0}),
+                                                     ('printable_link',  {'level': 2,
+                                                                          'title': 'Printable version'}),
+                                                     ('group_functions', {'level': 1})]),
+                       'top':
+                       Webwidgets.Utils.OrderedDict([  #('title_bar', {'level': 2}),
+                                                     ])}
+        button_bars_level_force_min = 0
+        # A button bar is drawn if it is active, or its level is >=
+        # button_bars_level_force_min or there are other button bars with
+        # level < that button bars' level that are to be drawn.
+
     Filters = [TableFunctionColFilter] + BaseTable.Filters
 
     def field_input(self, path, string_value):

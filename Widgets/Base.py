@@ -113,6 +113,10 @@ class Object(object):
     """If non-None, any attribute not found on this object will be
     searched for on this object."""
     
+    Model = None
+    """If non-None and the model attribute is None, this class will be
+    instantiated and the instance placed in the model attribute."""
+
     Filters = []
     """Filter is a set of classes that are to be instantiated and
     chained together as filters for this object. Ech of these will
@@ -128,12 +132,16 @@ class Object(object):
                        in chain otherwise.
         @param attrs: Any attributes to set for the object.
         """
+        if "model" in attrs:
+            self.model = attrs.pop('model')
+        if self.model is None and self.Model is not None:
+            self.model = self.Model()
         self.__dict__.update(attrs)
         self.setup_filter()
 
     def setup_filter(self, name = 'filter', filter_classes = None, filter = None, object = None):
-        if filter is None: filter = getattr(self, name, self)
-        if object is None: object = getattr(self, 'object', self)
+        if filter is None: filter = self.__dict__.get(name, self)
+        if object is None: object = self.__dict__.get('object', self)
         if filter_classes is None: filter_classes = self.Filters
         for filter_class in reversed(filter_classes):
             filter = filter_class(filter = filter, object = object)
@@ -148,6 +156,20 @@ class Object(object):
             raise AttributeError(self, name)
         return getattr(self.model, name)
         
+    def __hasattr__(self, name):
+        return name in self.__dict__ or self.model is not None and hasattr(self.model, name)
+
+    def __setattr__(self, name, value):
+        if (   self.model is None
+            or name in self.__dict__
+            or not hasattr(self.model, name)):
+            object.__setattr__(self, name, value)
+        else:
+            setattr(self.model, name, value)
+
+    def __unicode__(self):
+        return object.__repr__(self)
+        
     def __str__(self):
         return str(unicode(self))
 
@@ -160,7 +182,17 @@ class Model(Object):
 class Filter(Object):
     def __getattr__(self, name):
         return getattr(self.filter, name)
+    
+    def __hasattr__(self, name):
+        return name in self.__dict__ or hasattr(self.filter, name)
 
+    def __setattr__(self, name, value):
+        if (   name in self.__dict__
+            or not hasattr(self.filter, name)):
+            object.__setattr__(self, name, value)
+        else:
+            setattr(self.filter, name, value)
+        
 class Widget(Object):
     """Widget is the base class for all widgets. It manages class name
     collection, attribute handling, child instantiation and
