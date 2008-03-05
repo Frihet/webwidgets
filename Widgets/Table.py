@@ -28,42 +28,6 @@ to their content and the sorting."""
 import Webwidgets.Constants, Webwidgets.Utils, re, math, cgi, types
 import Base
 
-column_allowed_name_re = re.compile("^[a-z_]*$")
-
-def set_sort(sort, key):
-    if sort and sort[0][0] == key:
-        res = [list(key) for key in sort]
-        res[0][1] = ['desc', 'asc'][res[0][1] == 'desc']
-    else:
-        res = [[key, 'desc']] + [orig_key for orig_key in sort
-                                 if orig_key[0] != key]
-    return res
-
-def string_to_sort(str):
-    if str == '': return []
-    return [key.split('-') for key in str.split('.')]
-
-def sort_to_string(sort):
-    return '.'.join(['-'.join(key) for key in sort])
-
-def sort_to_classes(sort, column):
-    ww_classes = []
-    for level, (key, order) in enumerate(sort):
-        if key == column:
-            ww_classes.append('column_sort_order_' + order)
-            ww_classes.append('column_sort_level_' + str(level))
-            break
-    return ' '.join(ww_classes)
-
-def sort_to_order_by(sort, quote = "`"):
-    order = []
-    for key, dir in sort:
-        assert column_allowed_name_re.match(key) is not None
-        order.append(quote + key + quote + ' ' + ['desc', 'asc'][dir == 'asc'])
-    if order:
-        return 'order by ' + ', '.join(order)
-    return ''
-
 def extend_to_dependent_columns(columns, dependent_columns):
     res = []
     for column in columns:
@@ -100,6 +64,9 @@ class SpecialCell(object):
         return ''
 
 class TableSimpleModelFilter(Base.Filter):
+    # left = TablePrintableFilter
+    # right = BaseTable.Model
+
     # API used by Table
     
     def __init__(self, *arg, **kw):
@@ -162,6 +129,9 @@ class TableSimpleModelFilter(Base.Filter):
         self.old_page = self.page
 
 class TablePrintableFilter(Base.Filter):
+    # left = BaseTable
+    # right = TableSimpleModelFilter
+    
     def get_rows(self, output_options):
         return self.filter.get_rows('printable_version' in output_options, output_options)
 
@@ -387,6 +357,45 @@ class BaseTable(Base.Composite):
         return self.session.windows[self.win_id].draw(output_options,
                                                      body = self.draw(output_options),
                                                      title = self.title)
+
+
+#### The main Table widget, with all bells and Whistles ####
+
+column_allowed_name_re = re.compile("^[a-z_]*$")
+
+def set_sort(sort, key):
+    if sort and sort[0][0] == key:
+        res = [list(key) for key in sort]
+        res[0][1] = ['desc', 'asc'][res[0][1] == 'desc']
+    else:
+        res = [[key, 'desc']] + [orig_key for orig_key in sort
+                                 if orig_key[0] != key]
+    return res
+
+def string_to_sort(str):
+    if str == '': return []
+    return [key.split('-') for key in str.split('.')]
+
+def sort_to_string(sort):
+    return '.'.join(['-'.join(key) for key in sort])
+
+def sort_to_classes(sort, column):
+    ww_classes = []
+    for level, (key, order) in enumerate(sort):
+        if key == column:
+            ww_classes.append('column_sort_order_' + order)
+            ww_classes.append('column_sort_level_' + str(level))
+            break
+    return ' '.join(ww_classes)
+
+def sort_to_order_by(sort, quote = "`"):
+    order = []
+    for key, dir in sort:
+        assert column_allowed_name_re.match(key) is not None
+        order.append(quote + key + quote + ' ' + ['desc', 'asc'][dir == 'asc'])
+    if order:
+        return 'order by ' + ', '.join(order)
+    return
 
 class FunctionCell(SpecialCell):
     html_class = ['functions']
