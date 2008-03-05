@@ -99,25 +99,32 @@ class SpecialCell(object):
     def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
         return ''
 
-class BaseTableFilter(Base.Filter):
+class TableSimpleModelFilter(Base.Filter):
     # API used by Table
     
     def __init__(self, *arg, **kw):
         Base.Object.__init__(self, *arg, **kw)
         self.reread()
 
-    def get_rows(self, output_options):
+    def get_rows(self, all, output_options):
         self.ensure()
-        rows = self.rows
-        if 'printable_version' in output_options or self.non_memory_storage:
-            return rows
-        return rows[(self.page - 1) * self.rows_per_page:
-                    self.page * self.rows_per_page]
+        if self.non_memory_storage:
+            if all:
+                return self.filter.get_rows(all, output_options)
+            else:
+                return self.rows
+        else:
+            if all:
+                return self.rows
+            else:
+                return self.rows[(self.page - 1) * self.rows_per_page:
+                                 self.page * self.rows_per_page]
     
     def get_pages(self, output_options):
         if self.non_memory_storage:
             return self.filter.get_pages()
-        return int(math.ceil(float(len(self.get_rows(output_options))) / self.rows_per_page))
+        else:
+            return int(math.ceil(float(len(self.rows)) / self.rows_per_page))
 
     def get_columns(self, output_options):
         res = Webwidgets.Utils.OrderedDict()
@@ -141,7 +148,7 @@ class BaseTableFilter(Base.Filter):
     def reread(self):
         """Reload the list"""
         if self.non_memory_storage:
-            self.filter.reread()
+            self.rows[:] = self.filter.get_rows(False, {})
         elif self.sort != self.old_sort:
             def row_cmp(row1, row2):
                 for col, order in self.sort:
@@ -153,6 +160,10 @@ class BaseTableFilter(Base.Filter):
             self.rows.sort(row_cmp)
         self.old_sort = self.sort
         self.old_page = self.page
+
+class TablePrintableFilter(Base.Filter):
+    def get_rows(self, output_options):
+        return self.filter.get_rows('printable_version' in output_options, output_options)
 
 class BaseTable(Base.Composite):
     """This is the basic version of L{Table}; it formats the table
@@ -176,15 +187,16 @@ class BaseTable(Base.Composite):
 
     """This attribute is not used internally by the widget, but is
     intended to be used by the user-provide reread() method."""
-    Filters = [BaseTableFilter]
+    Filters = [TablePrintableFilter, TableSimpleModelFilter]
 
     def __init__(self, session, win_id, **attrs):
         Base.Composite.__init__(self, session, win_id, **attrs)
         self.rows = ChildNodeRows(self, self.rows)
 
-    def reread(self):
-        """Reload the list after a repaging/resorting here. If you set
-        non_memory_storage to True, you _must_ implement this method.
+    def get_rows(self, all, output_options):
+        """Load the list after a repaging/resorting, or for a
+        printable version. If you set non_memory_storage to True, you
+        _must_ implement this method.
         """
         raise NotImplementedError("reread")
 
