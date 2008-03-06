@@ -37,14 +37,14 @@ def convert_to_str_any_way_possible(obj):
         try:
             return str(obj)
         except Exception, e2:
-            return '{' + convert_type_to_str_any_way_possible(obj) + ' @ ' + str(id(obj)) + ': ' +  objInfo(e) + '}'
+            return '{' + convert_type_to_str_any_way_possible(obj) + ' @ ' + str(id(obj)) + ': ' +  obj_info(e) + '}'
 
 def convert_type_to_str_any_way_possible(obj):
     try:
         t = type(obj)
     except Exception, e:
-        return '{' + objInfo(e) + '}'
-    return objInfo(t)
+        return '{' + obj_info(e) + '}'
+    return obj_info(t)
 
 def obj_info(obj):
     res = []
@@ -57,7 +57,7 @@ def obj_info(obj):
         klass = obj.__class__
         res += [obj_info(klass)]
     res += [convert_to_str_any_way_possible(t)]
-    return '[' + string.join(res, ' ') + ']'
+    return '[' + ' '.join(res) + ']'
 
 class ImmutableDict(dict):
     '''A hashable dict.'''
@@ -165,7 +165,12 @@ class WeakValueOrderedDict(OrderedDict):
     def __setitem__(self, key, value):
         if key not in self:
             self.order.append(key)
-        value = weakref.ref(value, lambda value: self._unref(key))
+        try:
+            value = weakref.ref(value, lambda value: self._unref(key))
+        except TypeError:
+            # Just pretend, for a second, that Python is sane and we
+            # can weakref anything. Ssshhh, you didn't see this :P
+            value = lambda : value
         dict.__setitem__(self, key, value)
 
     def iteritems(self):
