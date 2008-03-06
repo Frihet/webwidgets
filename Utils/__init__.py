@@ -24,7 +24,7 @@
 Webwidgets and in implementing new widgets and other objects.
 """
 
-import itertools, types
+import itertools, types, weakref
 
 debug_class_loading = False
 
@@ -125,15 +125,16 @@ class OrderedDict(dict):
         return self.order
 
     def pop(self, k, *arg):
-        if k in self:
-            self.order.remove(k)
-        return dict.pop(self, k, *arg)
+        try:
+            return self[k]
+        finally:
+            del res[k]
         
     def popitem(self):
-        if len(self) == 0: raise KeyError
-        key = self.order[0]
-        value = self.pop(key)
-        return (key, value)
+        for key in sekf.order:
+            value = self.pop(key)
+            return (key, value)
+        raise KeyError
             
     def setdefault(self, k, d = None):
         if k not in self:
@@ -151,6 +152,28 @@ class OrderedDict(dict):
     
     def sort(self, *arg, **kw):
         self.order.sort(*arg, **kw)
+
+class WeakValueOrderedDict(OrderedDict):
+    def _unref(self, key):
+        del self[key]
+               
+    def __getitem__(self, key):
+        res = dict.__getitem__(self, key)()
+        if res is None: raise KeyError(self, key)
+        return res
+    
+    def __setitem__(self, key, value):
+        if key not in self:
+            self.order.append(key)
+        value = weakref.ref(value, lambda value: self._unref(key))
+        dict.__setitem__(self, key, value)
+
+    def iteritems(self):
+        for key in self.iterkeys():
+            try:
+                yield (key, self[key])
+            except KeyError:
+                pass    
 
 class RelativePath(object):
     """RelativePath is a representation of a path that relative one
