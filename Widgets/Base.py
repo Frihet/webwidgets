@@ -777,6 +777,13 @@ class Composite(Widget):
         """@return: a child widget."""
         return self.get_child(name)
 
+    def __contains__(self, name):
+        try:
+            self.get_child(name)
+            return True
+        except:
+            return False
+        
     def __iter__(self):
         return self.get_children()
         
