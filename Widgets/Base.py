@@ -582,7 +582,20 @@ class BaseChildNodes(object):
                 value.parent = self.node
                 value.name = name
 
-class ChildNodeDict(BaseChildNodes, Webwidgets.Utils.OrderedDict):
+class BaseChildNodeDict(BaseChildNodes):
+    def __setitem__(self, *arg, **kw):
+        super(BaseChildNodeDict, self).__setitem__(*arg, **kw)
+        self.ensure()
+
+    def update(self, *arg, **kw):
+        super(BaseChildNodeDict, self).update(*arg, **kw)
+        self.ensure()
+
+    def setdefault(self, *arg, **kw):
+        super(BaseChildNodeDict, self).setdefault(*arg, **kw)
+        self.ensure()
+
+class ChildNodeDict(BaseChildNodeDict, Webwidgets.Utils.OrderedDict):
     """Dictionary of child widgets to a widget; any widgets inserted
     in the dictionary will automatically have their name and parent
     member variables set correctly."""
@@ -592,20 +605,21 @@ class ChildNodeDict(BaseChildNodes, Webwidgets.Utils.OrderedDict):
         @param arg: Sent to L{dict.__init__}
         @param kw: Sent to L{dict.__init__}
         """
-        BaseChildNodes.__init__(self, node)
+        BaseChildNodeDict.__init__(self, node)
         Webwidgets.Utils.OrderedDict.__init__(self, *arg, **kw)
 
-    def __setitem__(self, *arg, **kw):
-        super(ChildNodeDict, self).__setitem__(*arg, **kw)
-        self.ensure()
-
-    def update(self, *arg, **kw):
-        super(ChildNodeDict, self).update(*arg, **kw)
-        self.ensure()
-
-    def setdefault(self, *arg, **kw):
-        super(ChildNodeDict, self).setdefault(*arg, **kw)
-        self.ensure()
+class WeakChildNodeDict(BaseChildNodeDict, Webwidgets.Utils.WeakValueOrderedDict):
+    """Like ChildNodeDict but the dirctionbary only keeps a weak
+    reference to the children; this should be used to track/cache
+    children that are really stored in some other structure.."""
+    def __init__(self, node, *arg, **kw):
+        """@param node: The widget the children held in this
+        dictinary are children to.
+        @param arg: Sent to L{dict.__init__}
+        @param kw: Sent to L{dict.__init__}
+        """
+        BaseChildNodeDict.__init__(self, node)
+        Webwidgets.Utils.WeakValueOrderedDict.__init__(self, *arg, **kw)
 
 class ChildNodeList(BaseChildNodes, list):
     """List of child widgets to a widget; any widgets inserted in the
@@ -786,42 +800,16 @@ class Composite(Widget):
         
     def __iter__(self):
         return self.get_children()
-        
-class StaticComposite(Composite):
-    """Base class for all composite widgets, handling child class
-    instantiation, drawing of children and the visibility attribute of
-    children.
 
-    When instantiated, any class variables holding widget instances
-    are added to the instance member variable L{children}. In
-    addition, any class variables holding widget ww_classes (that do not
-    have L{ww_explicit_load} set to False) are instantiated
-    automatically and then added to L{children}.
-    """
-
+class DictComposite(Composite):
     ww_class_data__no_classes_name = True
+
+    ChildNodeDict = ChildNodeDict
     
     def __init__(self, session, win_id, **attrs):
-        super(StaticComposite, self).__init__(
-            session, win_id,
-            **attrs)
-        self.children = ChildNodeDict(self, getattr(self, 'children', {}))
-
-        # Class members have no intrinsic order, so we sort them on
-        # their order of creation, which if created through the Python
-        # class statement, is the same as their textual order :)
-        
-        child_classes = []
-        for name in dir(self):
-            if name in ('__class__', 'parent', 'window'): continue
-            value = getattr(self, name)
-            if isinstance(value, type) and issubclass(value, Widget) and not value.ww_explicit_load:
-                child_classes.append((name, value))
-                
-        child_classes.sort(lambda x, y: cmp(x[1].ww_class_order_nr, y[1].ww_class_order_nr))
-        
-        for (name, value) in child_classes:
-            self.children[name] = value(session, win_id)
+        super(DictComposite, self).__init__(
+            session, win_id, **attrs)
+        self.children = self.ChildNodeDict(self, getattr(self, 'children', {}))
 
     def get_children(self):
         return self.children.iteritems()
@@ -839,6 +827,43 @@ class StaticComposite(Composite):
     def __delitem__(self, name):
         """Deletes a child widget"""
         del self.children[name]
+
+class CachingComposite(DictComposite):
+    ChildNodeDict = WeakChildNodeDict
+    
+class StaticComposite(DictComposite):
+    """Base class for all composite widgets, handling child class
+    instantiation, drawing of children and the visibility attribute of
+    children.
+
+    When instantiated, any class variables holding widget instances
+    are added to the instance member variable L{children}. In
+    addition, any class variables holding widget ww_classes (that do not
+    have L{ww_explicit_load} set to False) are instantiated
+    automatically and then added to L{children}.
+    """
+
+    ww_class_data__no_classes_name = True
+    
+    def __init__(self, session, win_id, **attrs):
+        super(StaticComposite, self).__init__(
+            session, win_id, **attrs)
+
+        # Class members have no intrinsic order, so we sort them on
+        # their order of creation, which if created through the Python
+        # class statement, is the same as their textual order :)
+        
+        child_classes = []
+        for name in dir(self):
+            if name in ('__class__', 'parent', 'window'): continue
+            value = getattr(self, name)
+            if isinstance(value, type) and issubclass(value, Widget) and not value.ww_explicit_load:
+                child_classes.append((name, value))
+                
+        child_classes.sort(lambda x, y: cmp(x[1].ww_class_order_nr, y[1].ww_class_order_nr))
+        
+        for (name, value) in child_classes:
+            self.children[name] = value(session, win_id)
 
 class Input(Widget):
     """Base class for all input widgets, providing input field registration"""
