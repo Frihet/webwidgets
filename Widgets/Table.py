@@ -41,7 +41,10 @@ def reverse_dependency(dependent_columns):
             res[dependent_column] = main
     return res
 
-class TableRow(Base.StaticComposite): pass
+class TableRow(Base.StaticComposite):
+    def get_row_id(self):
+        return int(self.name)
+
 class ChildNodeRows(Base.ChildNodeList):
     def ensure(self):
         for index in xrange(0, len(self)):
@@ -86,7 +89,13 @@ class TableSimpleModelFilter(Base.Filter):
             else:
                 return self.rows[(self.page - 1) * self.rows_per_page:
                                  self.page * self.rows_per_page]
-    
+
+    def get_row(self, row_id):
+        if self.non_memory_storage:
+            return self.filter.get_rows(row_id)
+        else:
+            return self.rows[row_id]
+
     def get_pages(self, output_options):
         if self.non_memory_storage:
             return self.filter.get_pages()
@@ -194,7 +203,7 @@ class BaseTable(Base.Composite):
         sub_widget = self.path_to_subwidget_path(path)
 
         if not self.active: return False
-        return getattr(self, 'get_active_' + sub_widget[0])(sub_widget[1:])
+        return getattr(self.filter, 'get_active_' + sub_widget[0])(sub_widget[1:])
 
     def get_active_column(self, path):
         return self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, self.path + ['column'] + path)
@@ -400,7 +409,7 @@ def sort_to_order_by(sort, quote = "`"):
 class FunctionCell(SpecialCell):
     html_class = ['functions']
 
-    def draw_function(self, table, row_num, path, html_class, title, active, output_options):
+    def draw_function(self, table, row_id, path, html_class, title, active, output_options):
         return """<button
                    type="submit"
                    id="%(html_id)s-%(row)s"
@@ -412,10 +421,11 @@ class FunctionCell(SpecialCell):
                        'html_class': html_class,
                        'disabled': ['disabled="disabled"', ''][active],
                        'title': table._(title, output_options),
-                       'row': row_num}
+                       'row': row_id}
                        
     def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
         enabled_functions = row.get('ww_functions', True)
+        row_id = row.get_row_id()
         rendered_functions = []
         for function, title in table.functions[column_name].iteritems():
             if enabled_functions is not True and function not in enabled_functions:
@@ -425,7 +435,7 @@ class FunctionCell(SpecialCell):
                 table.session.windows[table.win_id].fields[Webwidgets.Utils.path_to_id(
                     table.path + ['_', 'function', function])] = table
             rendered_functions.append(self.draw_function(
-                table, row_num, ['function', function], function, title, active, output_options))
+                table, row_id, ['function', function], function, title, active, output_options))
         return ''.join(rendered_functions)
 
     def __cmp__(self, other):
@@ -434,6 +444,8 @@ class FunctionCell(SpecialCell):
 FunctionCellInstance = FunctionCell()
 
 class TableFunctionColFilter(Base.Filter):
+    # left = Table
+    # right = Table
     def mangle_row(self, row, output_options):
         if (    'printable_version' not in output_options
             and self.functions
@@ -505,7 +517,7 @@ class Table(BaseTable, Base.ActionInput):
         except Webwidgets.Constants.NotASubwidgetException:
             return
         if string_value != '':
-            getattr(self, 'field_input_' + sub_widget[0])(sub_widget[1:], string_value)
+            getattr(self.filter, 'field_input_' + sub_widget[0])(sub_widget[1:], string_value)
 
     def field_input_sort(self, path, string_value):
         self.sort = string_to_sort(string_value)
@@ -518,7 +530,7 @@ class Table(BaseTable, Base.ActionInput):
     
     def field_output(self, path):
         sub_widget = self.path_to_subwidget_path(path)
-        return getattr(self, 'field_output_' + sub_widget[0])(sub_widget[1:])
+        return getattr(self.filter, 'field_output_' + sub_widget[0])(sub_widget[1:])
 
     def field_output_sort(self, path):
         return [sort_to_string(self.sort)]
@@ -730,3 +742,61 @@ class Table(BaseTable, Base.ActionInput):
  %(buttons_bottom)s
 </div>
 """ % info
+
+
+#### Expandable table ####
+
+class ExpandCell(FunctionCell):
+    html_class = ['expand_col']
+    
+    def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
+        active = table.get_active(table.path + ['_', 'expand'])
+        if active:
+            table.session.windows[table.win_id].fields[Webwidgets.Utils.path_to_id(
+                table.path + ['_', 'expand'])] = table
+        expanded = row.get('ww_is_expanded', False)
+        return self.draw_function(table, row.get_row_id(), ['expand'],
+                                  ['expand', 'collapse'][expanded],
+                                  ['Expand', 'Collapse'][expanded],
+                                  active, output_options)
+
+ExpandCellInstance = ExpandCell()
+
+class TableExpandableFilter(Base.Filter):
+    # left = ExpandableTable
+    # right = Table
+
+    # API used by Table
+    def get_rows(self, output_options):
+        res = []
+        for row in self.filter.get_rows(output_options):
+            mangled_row = type(row)(row.session, row.win_id, children = row.children)
+            mangled_row.name = row.name
+            mangled_row.parent = row.parent
+            mangled_row['expand_col'] = ExpandCellInstance
+            res.append(mangled_row)
+
+            if 'ww_expansion' in row.children and row.get('ww_is_expanded', False):
+                res.append(row['ww_expansion'])
+        return res
+
+    def get_columns(self, output_options):
+        res = Webwidgets.Utils.OrderedDict(expand_col = {"title": ''})
+        res.update(self.filter.get_columns(output_options))
+        return res
+
+    def field_input_expand(self, path, string_value):
+        row = int(string_value)
+        row = self.get_row(row)
+        print "SET EXPAND", row
+        row['ww_is_expanded'] = not row.get('ww_is_expanded', False)
+
+    def field_output_expand(self, path):
+        return []
+
+    def get_active_expand(self, path):
+        return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['expand'] + path)
+
+class ExpandableTable(Table):
+    Filters = [TableExpandableFilter] + Table.Filters
+    
