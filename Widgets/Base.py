@@ -574,7 +574,7 @@ class BaseChildNodes(object):
         for name in self.iterkeys():
             value = self[name]
             if isinstance(value, type) and issubclass(value, Widget):
-                self[name] = value(self.node.session, self.node.win_id)
+                value = self[name] = value(self.node.session, self.node.win_id)
             if isinstance(value, Widget):
                 if self.node is value:
                     raise Exception("Object's parent set to itself!", value)
@@ -722,6 +722,10 @@ class Composite(Widget):
                     child.system_errors.append(
                         (sys.exc_info()[1],
                          WebUtils.HTMLForException.HTMLForException()))
+            elif isinstance(child, type) and issubclass(child, Widget):
+                raise Exception("The child %(child)s to %(self)s is a class, not an instance" % {
+                    'child': Webwidgets.Utils.obj_info(child),
+                    'self': Webwidgets.Utils.obj_info(self)})
             else:
                 result = self._(child, output_options)
         else:

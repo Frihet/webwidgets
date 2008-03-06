@@ -166,12 +166,12 @@ class WeakValueOrderedDict(OrderedDict):
         if key not in self:
             self.order.append(key)
         try:
-            value = weakref.ref(value, lambda value: self._unref(key))
+            refvalue = weakref.ref(value, lambda value: self._unref(key))
         except TypeError:
             # Just pretend, for a second, that Python is sane and we
             # can weakref anything. Ssshhh, you didn't see this :P
-            value = lambda : value
-        dict.__setitem__(self, key, value)
+            refvalue = lambda : value
+        dict.__setitem__(self, key, refvalue)
 
     def iteritems(self):
         for key in self.iterkeys():

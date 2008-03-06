@@ -41,16 +41,7 @@ def reverse_dependency(dependent_columns):
             res[dependent_column] = main
     return res
 
-class TableRow(Base.StaticComposite):
-    def get_row_id(self):
-        return int(self.name)
-
-class ChildNodeRows(Base.ChildNodeList):
-    def ensure(self):
-        for index in xrange(0, len(self)):
-            if not isinstance(self[index], Base.Widget):
-                self[index] = TableRow(self.node.session, self.node.win_id, children = self[index])
-        Base.ChildNodeList.ensure(self)
+class TableRow(Base.CachingComposite): pass
 
 class RenderedRowType(object): pass
 class RenderedRowTypeRow(RenderedRowType): pass
@@ -89,12 +80,6 @@ class TableSimpleModelFilter(Base.Filter):
             else:
                 return self.rows[(self.page - 1) * self.rows_per_page:
                                  self.page * self.rows_per_page]
-
-    def get_row(self, row_id):
-        if self.non_memory_storage:
-            return self.filter.get_rows(row_id)
-        else:
-            return self.rows[row_id]
 
     def get_pages(self, output_options):
         if self.non_memory_storage:
@@ -144,7 +129,7 @@ class TablePrintableFilter(Base.Filter):
     def get_rows(self, output_options):
         return self.filter.get_rows('printable_version' in output_options, output_options)
 
-class BaseTable(Base.Composite):
+class BaseTable(Base.CachingComposite):
     """This is the basic version of L{Table}; it formats the table
     itself, but does not include any user input controls for changing
     the sorting order, the current page, or for operating on the rows
@@ -168,10 +153,6 @@ class BaseTable(Base.Composite):
     intended to be used by the user-provide reread() method."""
     Filters = [TablePrintableFilter, TableSimpleModelFilter]
 
-    def __init__(self, session, win_id, **attrs):
-        Base.Composite.__init__(self, session, win_id, **attrs)
-        self.rows = ChildNodeRows(self, self.rows)
-
     def get_rows(self, all, output_options):
         """Load the list after a repaging/resorting, or for a
         printable version. If you set non_memory_storage to True, you
@@ -184,15 +165,6 @@ class BaseTable(Base.Composite):
         non_memory_storage to True, you _must_ implement this method.
         """
         raise NotImplementedError("get_pages")
-    
-    def get_children(self):
-         self.filter.rows.iteritems()
-
-    def get_child(self, name):
-        try:
-            return self.filter.rows[name]
-        except:
-            raise KeyError("No such child %s to %s" % (name, str(self)))
 
     def get_active(self, path):
         """@return: Whether the widget is allowing the user to acces
@@ -221,6 +193,7 @@ class BaseTable(Base.Composite):
                 'rows': 0,
                 'children':[]}
         for row_num, row in enumerate(rows):
+            row = self.child_for_row(row)
             node = tree
             node['rows'] += 1
             if 'ww_expanded' in row:
@@ -300,12 +273,24 @@ class BaseTable(Base.Composite):
         else:
             html_class = row.get('ww_class', []) + ['column_first_level_%s' % first_level,
                                                     'column_last_level_%s' % last_level]
-            value = row.draw_child(row.path + [column_name], value, output_options, True)
+            row_widget = self.child_for_row(row)
+            value = row_widget.draw_child(row_widget.path + [column_name], value, output_options, True)
         return '<td rowspan="%(rowspan)s" colspan="%(colspan)s" class="%(class)s">%(content)s</td>' % {
             'rowspan': rowspan,
             'colspan': colspan,
             'class': ' '.join(html_class),
             'content': value}
+
+    def get_row_id(self, row):
+        return str(row.get('ww_row_id', id(row)))
+    
+    def child_for_row(self, row):
+        row_id = self.get_row_id(row)
+        if row_id not in self.children:
+            if not isinstance(row, Webwidgets.Widget):
+                row = TableRow(self.session, self.win_id, children = row)
+            self.children[row_id] = row
+        return self.children[row_id]
 
     def draw_rows(self, visible_columns, reverse_dependent_columns, output_options):
         group_order = extend_to_dependent_columns(
@@ -330,8 +315,8 @@ class BaseTable(Base.Composite):
         return rendered_rows
 
     def append_classes(self, rendered_rows, output_options):
-        for rendered_row in rendered_rows:
-            rendered_row['class'] = (  ['row_' + ['even', 'odd'][int(rendered_row['row'].name) % 2]]
+        for row_num, rendered_row in enumerate(rendered_rows):
+            rendered_row['class'] = (  ['row_' + ['even', 'odd'][row_num % 2]]
                                      + rendered_row['row'].get('ww_class', []))
 
     def mangle_rendered_rows(self, rendered_rows, visible_columns, reverse_dependent_columns, output_options):
@@ -425,7 +410,7 @@ class FunctionCell(SpecialCell):
                        
     def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
         enabled_functions = row.get('ww_functions', True)
-        row_id = row.get_row_id()
+        row_id = table.get_row_id(row)
         rendered_functions = []
         for function, title in table.functions[column_name].iteritems():
             if enabled_functions is not True and function not in enabled_functions:
@@ -449,13 +434,15 @@ class TableFunctionColFilter(Base.Filter):
     def mangle_row(self, row, output_options):
         if (    'printable_version' not in output_options
             and self.functions
-            and isinstance(row, TableRow)):
+            and 'ww_expanded' not in row):
             # Copy the row and add the function columns
-            # Functions are never real widgets anyway, so it doesn't
-            # matter that we forget about these copies in between page loads :]
-            mangled_row = type(row)(row.session, row.win_id, children = row.children)
-            mangled_row.name = row.name
-            mangled_row.parent = row.parent
+            if isinstance(row, Base.Widget):
+                mangled_row = type(row)(row.session, row.win_id, children = row.children)
+                mangled_row.name = row.name
+                mangled_row.parent = row.parent
+            else:
+                mangled_row = dict()
+                mangled_row.update(row)
             for name in self.functions.iterkeys():
                 mangled_row[name] = FunctionCellInstance
             return mangled_row
@@ -755,7 +742,7 @@ class ExpandCell(FunctionCell):
             table.session.windows[table.win_id].fields[Webwidgets.Utils.path_to_id(
                 table.path + ['_', 'expand'])] = table
         expanded = row.get('ww_is_expanded', False)
-        return self.draw_function(table, row.get_row_id(), ['expand'],
+        return self.draw_function(table, table.get_row_id(row), ['expand'],
                                   ['expand', 'collapse'][expanded],
                                   ['Expand', 'Collapse'][expanded],
                                   active, output_options)
@@ -786,10 +773,8 @@ class TableExpandableFilter(Base.Filter):
         return res
 
     def field_input_expand(self, path, string_value):
-        row = int(string_value)
-        row = self.get_row(row)
-        print "SET EXPAND", row
-        row['ww_is_expanded'] = not row.get('ww_is_expanded', False)
+        row = self[string_value]
+        row.ww_is_expanded = not getattr(row, 'ww_is_expanded', False)
 
     def field_output_expand(self, path):
         return []
