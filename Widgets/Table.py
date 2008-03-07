@@ -43,6 +43,17 @@ def reverse_dependency(dependent_columns):
 
 class TableRow(Base.CachingComposite): pass
 
+def copy_row(row):
+    if isinstance(row, Base.Widget):
+        copy = type(row)(row.session, row.win_id, children = row.children)
+        copy.name = row.name
+        copy.parent = row.parent
+    else:
+        copy = dict()
+        copy.update(row)
+    copy['ww_row_id'] = row.get('ww_row_id', id(row))
+    return copy
+
 class RenderedRowType(object): pass
 class RenderedRowTypeRow(RenderedRowType): pass
 class RenderedRowTypeHeading(RenderedRowType): pass
@@ -80,6 +91,19 @@ class TableSimpleModelFilter(Base.Filter):
             else:
                 return self.rows[(self.page - 1) * self.rows_per_page:
                                  self.page * self.rows_per_page]
+
+    def get_row_id(self, row):
+        return str(row.get('ww_row_id', id(row)))
+    
+    def get_row_by_id(self, row_id):
+        if self.non_memory_storage:
+            self.filter.get_row_by_id(self, row_id)
+        else:
+            row_id = int(row_id)
+            for row in self.rows:
+                if row.get('ww_row_id', id(row)) == row_id:
+                    return row
+            raise KeyError(self, row_id)
 
     def get_pages(self, output_options):
         if self.non_memory_storage:
@@ -189,6 +213,10 @@ class BaseTable(Base.CachingComposite):
                                                                            self.path + ['_', 'column', name])])
 
     def rows_to_tree(self, rows, group_order):
+        print "TABLE", Webwidgets.Utils.obj_info(self)
+        print "    MODEL", id(self.model)
+        print "    FILTER", id(self.filter)
+        print "    ROWS", id(self.rows)
         tree = {'level': 0,
                 'rows': 0,
                 'children':[]}
@@ -281,11 +309,8 @@ class BaseTable(Base.CachingComposite):
             'class': ' '.join(html_class),
             'content': value}
 
-    def get_row_id(self, row):
-        return str(row.get('ww_row_id', id(row)))
-    
     def child_for_row(self, row):
-        row_id = self.get_row_id(row)
+        row_id = self.filter.get_row_id(row)
         if row_id not in self.children:
             if not isinstance(row, Webwidgets.Widget):
                 row = TableRow(self.session, self.win_id, children = row)
@@ -410,7 +435,7 @@ class FunctionCell(SpecialCell):
                        
     def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
         enabled_functions = row.get('ww_functions', True)
-        row_id = table.get_row_id(row)
+        row_id = table.filter.get_row_id(row)
         rendered_functions = []
         for function, title in table.functions[column_name].iteritems():
             if enabled_functions is not True and function not in enabled_functions:
@@ -436,13 +461,7 @@ class TableFunctionColFilter(Base.Filter):
             and self.functions
             and 'ww_expanded' not in row):
             # Copy the row and add the function columns
-            if isinstance(row, Base.Widget):
-                mangled_row = type(row)(row.session, row.win_id, children = row.children)
-                mangled_row.name = row.name
-                mangled_row.parent = row.parent
-            else:
-                mangled_row = dict()
-                mangled_row.update(row)
+            mangled_row = copy_row(row)
             for name in self.functions.iterkeys():
                 mangled_row[name] = FunctionCellInstance
             return mangled_row
@@ -742,7 +761,7 @@ class ExpandCell(FunctionCell):
             table.session.windows[table.win_id].fields[Webwidgets.Utils.path_to_id(
                 table.path + ['_', 'expand'])] = table
         expanded = row.get('ww_is_expanded', False)
-        return self.draw_function(table, table.get_row_id(row), ['expand'],
+        return self.draw_function(table, table.filter.get_row_id(row), ['expand'],
                                   ['expand', 'collapse'][expanded],
                                   ['Expand', 'Collapse'][expanded],
                                   active, output_options)
@@ -757,13 +776,11 @@ class TableExpandableFilter(Base.Filter):
     def get_rows(self, output_options):
         res = []
         for row in self.filter.get_rows(output_options):
-            mangled_row = type(row)(row.session, row.win_id, children = row.children)
-            mangled_row.name = row.name
-            mangled_row.parent = row.parent
+            mangled_row = copy_row(row)
             mangled_row['expand_col'] = ExpandCellInstance
             res.append(mangled_row)
 
-            if 'ww_expansion' in row.children and row.get('ww_is_expanded', False):
+            if 'ww_expansion' in row and row.get('ww_is_expanded', False):
                 res.append(row['ww_expansion'])
         return res
 
@@ -773,8 +790,8 @@ class TableExpandableFilter(Base.Filter):
         return res
 
     def field_input_expand(self, path, string_value):
-        row = self[string_value]
-        row.ww_is_expanded = not getattr(row, 'ww_is_expanded', False)
+        row = self.get_row_by_id(string_value)
+        row['ww_is_expanded'] = not row.get('ww_is_expanded', False)
 
     def field_output_expand(self, path):
         return []
