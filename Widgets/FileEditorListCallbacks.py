@@ -35,6 +35,10 @@ class Value(object):
             setattr(instance.file_editor.value, self.attribute, value)
 
 class FileEditorList(object):
+    def __init__(self, session, win_id, **attrs):
+        self.__dict__['rows'] = []
+        Webwidgets.Table.__init__(self, session, win_id, **attrs)
+        
     class NameInput(Webwidgets.StringInput):
         ww_explicit_load = True
         file_editor = None
@@ -99,4 +103,4 @@ class FileEditorList(object):
     value = FileListValue()
 
     def reset(self):
-        del self.rows[:]
+        self.rows = []
