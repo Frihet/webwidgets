@@ -153,7 +153,7 @@ class TablePrintableFilter(Base.Filter):
     def get_rows(self, output_options):
         return self.filter.get_rows('printable_version' in output_options, output_options)
 
-class BaseTable(Base.CachingComposite):
+class BaseTable(Base.CachingComposite, Base.DirectoryServer):
     """This is the basic version of L{Table}; it formats the table
     itself, but does not include any user input controls for changing
     the sorting order, the current page, or for operating on the rows
@@ -798,3 +798,9 @@ class TableExpandableFilter(Base.Filter):
 class ExpandableTable(Table):
     Filters = [TableExpandableFilter] + Table.Filters
     
+    def draw(self, output_options):
+        self.register_style_link(self.calculate_url({'widget_class': 'Webwidgets.ExpandableTable',
+                                                     'location': ['ExpandableTable.css']},
+                                                    {}))
+        return super(ExpandableTable, self).draw(output_options)
+
