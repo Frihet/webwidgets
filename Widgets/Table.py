@@ -213,10 +213,6 @@ class BaseTable(Base.CachingComposite):
                                                                            self.path + ['_', 'column', name])])
 
     def rows_to_tree(self, rows, group_order):
-        print "TABLE", Webwidgets.Utils.obj_info(self)
-        print "    MODEL", id(self.model)
-        print "    FILTER", id(self.filter)
-        print "    ROWS", id(self.rows)
         tree = {'level': 0,
                 'rows': 0,
                 'children':[]}
