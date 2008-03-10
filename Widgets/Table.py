@@ -76,6 +76,9 @@ class FunctionCell(SpecialCell):
     html_class = ['functions']
 
     def draw_function(self, table, row_id, path, html_class, title, active, output_options):
+        input_id = Webwidgets.Utils.path_to_id(table.path + ['_'] + path)
+        if active:
+            table.session.windows[table.win_id].fields[input_id] = table
         return """<button
                    type="submit"
                    id="%(html_id)s-%(row)s"
@@ -83,7 +86,7 @@ class FunctionCell(SpecialCell):
                    %(disabled)s
                    name="%(html_id)s"
                    value="%(row)s">%(title)s</button>""" % {
-                       'html_id': Webwidgets.Utils.path_to_id(table.path + ['_'] + path),
+                       'html_id': input_id,
                        'html_class': html_class,
                        'disabled': ['disabled="disabled"', ''][active],
                        'title': table._(title, output_options),
@@ -96,12 +99,12 @@ class FunctionCell(SpecialCell):
         for function, title in table.functions[column_name].iteritems():
             if enabled_functions is not True and function not in enabled_functions:
                 continue
-            active = table.get_active(table.path + ['_', 'function', function])
-            if active:
-                table.session.windows[table.win_id].fields[Webwidgets.Utils.path_to_id(
-                    table.path + ['_', 'function', function])] = table
-            rendered_functions.append(self.draw_function(
-                table, row_id, ['function', function], function, title, active, output_options))
+            rendered_functions.append(
+                self.draw_function(table, row_id,
+                                   ['function', function],
+                                   function, title,
+                                   table.get_active(table.path + ['_', 'function', function]),
+                                   output_options))
         return ''.join(rendered_functions)
 
     def __cmp__(self, other):
@@ -112,19 +115,19 @@ FunctionCellInstance = FunctionCell()
 class ExpandCell(FunctionCell):
     html_class = ['expand_col']
 
+    input_path = ['expand']
+
     def draw_expand(self, table, row, expanded, active, output_options):
-        return self.draw_function(table, table.filter.get_row_id(row), ['expand'],
+        return self.draw_function(table, table.filter.get_row_id(row), self.input_path,
                                   ['expand', 'collapse'][expanded],
                                   ['Expand', 'Collapse'][expanded],
                                   active, output_options)
     
     def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
-        active = table.get_active(table.path + ['_', 'expand'])
-        if active:
-            table.session.windows[table.win_id].fields[Webwidgets.Utils.path_to_id(
-                table.path + ['_', 'expand'])] = table
-        expanded = row.get('ww_is_expanded', False)
-        return self.draw_expand(table, row, expanded, active, output_options)
+        return self.draw_expand(table, row,
+                                row.get('ww_is_expanded', False),
+                                table.get_active(table.path + ['_', 'expand']),
+                                output_options)
 
 ExpandCellInstance = ExpandCell()
 
@@ -165,6 +168,8 @@ class TableSimpleModelFilter(Base.Filter):
                     current_visibility_depth = len(current_path)
                     if self.is_expanded_node(row):
                         current_visibility_depth += 1
+                else:
+                    
             if all:
                 return rows
             else:
@@ -198,6 +203,18 @@ class TableSimpleModelFilter(Base.Filter):
             else:
                 res[name] = definition
         return res
+
+    def field_input_expand(self, path, string_value):
+        if string_value in self.expand:
+            self.expand.remove(string_value)
+        else:
+            self.expand.append(string_value)
+
+    def field_output_expand(self, path):
+        return []
+
+    def get_active_expand(self, path):
+        return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['expand'] + path)
 
     # Internal
     
@@ -431,12 +448,12 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
                                                     'column_last_level_%s' % last_level]
             row_widget = self.child_for_row(row)
             value = row_widget.draw_child(row_widget.path + [column_name], value, output_options, True)
+
         expand_button = ""
-        if self.filter.is_expanded_node(row):
-            if rowspan > 1:
-                expand_button = "[-]"
-        else:
-            expand_button = "[+]"
+        expanded = self.filter.is_expanded_node(row)
+        if not expanded or rowspan > 1:
+            expand_button = ExpandCellInstance.draw_expand(self, row, expanded, True, output_options)
+            
         return '<td rowspan="%(rowspan)s" colspan="%(colspan)s" class="%(class)s">%(expand_button)s%(content)s</td>' % {
             'rowspan': rowspan,
             'colspan': colspan,
@@ -484,6 +501,9 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
         return table
 
     def draw(self, output_options):
+        self.register_style_link(self.calculate_url({'widget_class': 'Webwidgets.BaseTable',
+                                                     'location': ['Table.css']},
+                                                    {}))
         reverse_dependent_columns = reverse_dependency(self.dependent_columns)
         visible_columns = self.visible_columns(output_options)
         return self.mangle_output(
@@ -877,10 +897,3 @@ class TableExpandableFilter(Base.Filter):
 class ExpandableTable(Table):
     class RowFilters(Table.RowFilters):
         Filters = [TableExpandableFilter] + Table.RowFilters.Filters
-    
-    def draw(self, output_options):
-        self.register_style_link(self.calculate_url({'widget_class': 'Webwidgets.ExpandableTable',
-                                                     'location': ['ExpandableTable.css']},
-                                                    {}))
-        return super(ExpandableTable, self).draw(output_options)
-
