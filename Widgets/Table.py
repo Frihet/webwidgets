@@ -59,6 +59,10 @@ class RenderedRowTypeRow(RenderedRowType): pass
 class RenderedRowTypeHeading(RenderedRowType): pass
 
 class SpecialCell(object):
+    """SpecialCells are like mini-widgets that can be put in multiple
+    cells. They are usually singletons and should only be used when
+    subclassing BaseTable, not when actually using the Table."""
+    
     html_class = []
     def get_html_class(self,
         output_options, row, table,
@@ -67,6 +71,63 @@ class SpecialCell(object):
     
     def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
         return ''
+
+class FunctionCell(SpecialCell):
+    html_class = ['functions']
+
+    def draw_function(self, table, row_id, path, html_class, title, active, output_options):
+        return """<button
+                   type="submit"
+                   id="%(html_id)s-%(row)s"
+                   class="%(html_class)s"
+                   %(disabled)s
+                   name="%(html_id)s"
+                   value="%(row)s">%(title)s</button>""" % {
+                       'html_id': Webwidgets.Utils.path_to_id(table.path + ['_'] + path),
+                       'html_class': html_class,
+                       'disabled': ['disabled="disabled"', ''][active],
+                       'title': table._(title, output_options),
+                       'row': row_id}
+                       
+    def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
+        enabled_functions = row.get('ww_functions', True)
+        row_id = table.filter.get_row_id(row)
+        rendered_functions = []
+        for function, title in table.functions[column_name].iteritems():
+            if enabled_functions is not True and function not in enabled_functions:
+                continue
+            active = table.get_active(table.path + ['_', 'function', function])
+            if active:
+                table.session.windows[table.win_id].fields[Webwidgets.Utils.path_to_id(
+                    table.path + ['_', 'function', function])] = table
+            rendered_functions.append(self.draw_function(
+                table, row_id, ['function', function], function, title, active, output_options))
+        return ''.join(rendered_functions)
+
+    def __cmp__(self, other):
+        return -1
+
+FunctionCellInstance = FunctionCell()
+
+class ExpandCell(FunctionCell):
+    html_class = ['expand_col']
+
+    def draw_expand(self, table, row, expanded, active, output_options):
+        return self.draw_function(table, table.filter.get_row_id(row), ['expand'],
+                                  ['expand', 'collapse'][expanded],
+                                  ['Expand', 'Collapse'][expanded],
+                                  active, output_options)
+    
+    def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
+        active = table.get_active(table.path + ['_', 'expand'])
+        if active:
+            table.session.windows[table.win_id].fields[Webwidgets.Utils.path_to_id(
+                table.path + ['_', 'expand'])] = table
+        expanded = row.get('ww_is_expanded', False)
+        return self.draw_expand(table, row, expanded, active, output_options)
+
+ExpandCellInstance = ExpandCell()
+
 
 class TableSimpleModelFilter(Base.Filter):
     # left = TablePrintableFilter
@@ -170,15 +231,6 @@ class TableSimpleModelFilter(Base.Filter):
         self.old_page = self.page
         self.old_expand = self.expand
         self.old_default_expand = self.default_expand
-
-class TableMemoryModelFilter(Base.Filter):
-    def get_rows(self, all, output_options):
-        rows = self.filter.get_rows(all, output_options)
-        if not self.non_memory_storage:
-            if not all:
-                rows = rows[(self.page - 1) * self.rows_per_page:
-                            self.page * self.rows_per_page]
-        return rows
 
 class TablePrintableFilter(Base.Filter):
     # left = BaseTable
@@ -379,10 +431,17 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
                                                     'column_last_level_%s' % last_level]
             row_widget = self.child_for_row(row)
             value = row_widget.draw_child(row_widget.path + [column_name], value, output_options, True)
-        return '<td rowspan="%(rowspan)s" colspan="%(colspan)s" class="%(class)s">%(content)s</td>' % {
+        expand_button = ""
+        if self.filter.is_expanded_node(row):
+            if rowspan > 1:
+                expand_button = "[-]"
+        else:
+            expand_button = "[+]"
+        return '<td rowspan="%(rowspan)s" colspan="%(colspan)s" class="%(class)s">%(expand_button)s%(content)s</td>' % {
             'rowspan': rowspan,
             'colspan': colspan,
             'class': ' '.join(html_class),
+            'expand_button': expand_button,
             'content': value}
 
     def child_for_row(self, row):
@@ -483,43 +542,6 @@ def sort_to_order_by(sort, quote = "`"):
     if order:
         return 'order by ' + ', '.join(order)
     return
-
-class FunctionCell(SpecialCell):
-    html_class = ['functions']
-
-    def draw_function(self, table, row_id, path, html_class, title, active, output_options):
-        return """<button
-                   type="submit"
-                   id="%(html_id)s-%(row)s"
-                   class="%(html_class)s"
-                   %(disabled)s
-                   name="%(html_id)s"
-                   value="%(row)s">%(title)s</button>""" % {
-                       'html_id': Webwidgets.Utils.path_to_id(table.path + ['_'] + path),
-                       'html_class': html_class,
-                       'disabled': ['disabled="disabled"', ''][active],
-                       'title': table._(title, output_options),
-                       'row': row_id}
-                       
-    def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
-        enabled_functions = row.get('ww_functions', True)
-        row_id = table.filter.get_row_id(row)
-        rendered_functions = []
-        for function, title in table.functions[column_name].iteritems():
-            if enabled_functions is not True and function not in enabled_functions:
-                continue
-            active = table.get_active(table.path + ['_', 'function', function])
-            if active:
-                table.session.windows[table.win_id].fields[Webwidgets.Utils.path_to_id(
-                    table.path + ['_', 'function', function])] = table
-            rendered_functions.append(self.draw_function(
-                table, row_id, ['function', function], function, title, active, output_options))
-        return ''.join(rendered_functions)
-
-    def __cmp__(self, other):
-        return -1
-
-FunctionCellInstance = FunctionCell()
 
 class TableFunctionColFilter(Base.Filter):
     # left = Table
@@ -820,22 +842,6 @@ class Table(BaseTable, Base.ActionInput):
 
 
 #### Expandable table ####
-
-class ExpandCell(FunctionCell):
-    html_class = ['expand_col']
-    
-    def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
-        active = table.get_active(table.path + ['_', 'expand'])
-        if active:
-            table.session.windows[table.win_id].fields[Webwidgets.Utils.path_to_id(
-                table.path + ['_', 'expand'])] = table
-        expanded = row.get('ww_is_expanded', False)
-        return self.draw_function(table, table.filter.get_row_id(row), ['expand'],
-                                  ['expand', 'collapse'][expanded],
-                                  ['Expand', 'Collapse'][expanded],
-                                  active, output_options)
-
-ExpandCellInstance = ExpandCell()
 
 class TableExpandableFilter(Base.Filter):
     # left = ExpandableTable
