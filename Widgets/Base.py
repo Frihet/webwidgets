@@ -28,7 +28,7 @@ generic base ww_classes that can be used when implementing more elaborate
 widgets.
 """
 
-import types, xml.sax.saxutils, os.path, cgi, re, sys
+import types, xml.sax.saxutils, os.path, cgi, re, sys, weakref
 import Webwidgets.Utils, Webwidgets.Utils.Gettext, Webwidgets.Constants
 import Webwidgets.Utils.FileHandling
 import Webwidgets.Utils.Threads
@@ -571,12 +571,15 @@ class Text(Widget):
 class BaseChildNodes(object):
     def __init__(self, node):
         self.node = node
-        
+
+    def class_child_to_widget(self, cls):
+        return cls(self.node.session, self.node.win_id)
+
     def ensure(self):
         for name in self.iterkeys():
             value = self[name]
             if isinstance(value, type) and issubclass(value, Widget):
-                value = self[name] = value(self.node.session, self.node.win_id)
+                value = self[name] = self.class_child_to_widget(value)
             if isinstance(value, Widget):
                 if self.node is value:
                     raise Exception("Object's parent set to itself!", value)
@@ -620,8 +623,14 @@ class WeakChildNodeDict(BaseChildNodeDict, Webwidgets.Utils.WeakValueOrderedDict
         @param arg: Sent to L{dict.__init__}
         @param kw: Sent to L{dict.__init__}
         """
+        self.class_children = weakref.WeakKeyDictionary()
         BaseChildNodeDict.__init__(self, node)
         Webwidgets.Utils.WeakValueOrderedDict.__init__(self, *arg, **kw)
+
+    def class_child_to_widget(self, cls):
+        widget = BaseChildNodeDict.class_child_to_widget(self, cls)
+        self.class_children[cls] = widget
+        return widget
 
 class ChildNodeList(BaseChildNodes, list):
     """List of child widgets to a widget; any widgets inserted in the

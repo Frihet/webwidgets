@@ -78,6 +78,11 @@ class TableSimpleModelFilter(Base.Filter):
         Base.Object.__init__(self, *arg, **kw)
         self.reread()
 
+    def is_expanded_node(self, row):
+        a = self.get_row_id(row) in self.expand
+        b = self.default_expand # Invert the result if default_expand is not True
+        return (a and not b) or (b and not a) # a xor b 
+
     def get_rows(self, all, output_options):
         self.ensure()
         if self.non_memory_storage:
@@ -86,11 +91,24 @@ class TableSimpleModelFilter(Base.Filter):
             else:
                 return self.rows
         else:
+            rows = []
+            current_path = []
+            current_visibility_depth = 1
+            for row in self.rows:
+                while current_path and not self.is_child_row(row, current_path[-1], len(current_path)):
+                    del current_path[-1]
+                current_path.append(row)
+                
+                if len(current_path) <= current_visibility_depth:
+                    rows.append(row)
+                    current_visibility_depth = len(current_path)
+                    if self.is_expanded_node(row):
+                        current_visibility_depth += 1
             if all:
-                return self.rows
+                return rows
             else:
-                return self.rows[(self.page - 1) * self.rows_per_page:
-                                 self.page * self.rows_per_page]
+                return rows[(self.page - 1) * self.rows_per_page:
+                            self.page * self.rows_per_page]
 
     def get_row_id(self, row):
         return str(row.get('ww_row_id', id(row)))
@@ -124,10 +142,15 @@ class TableSimpleModelFilter(Base.Filter):
     
     old_sort = None
     old_page = None
+    old_expand = None
+    old_default_expand = None
 
     def ensure(self):
         """Reload the list after a repaging/resorting"""
-        if self.sort != self.old_sort or self.page != self.old_page:
+        if (   self.sort != self.old_sort
+            or self.page != self.old_page
+            or self.expand != self.old_expand
+            or self.default_expand != self.old_default_expand):
             self.reread()
 
     def reread(self):
@@ -145,6 +168,17 @@ class TableSimpleModelFilter(Base.Filter):
             self.rows.sort(row_cmp)
         self.old_sort = self.sort
         self.old_page = self.page
+        self.old_expand = self.expand
+        self.old_default_expand = self.default_expand
+
+class TableMemoryModelFilter(Base.Filter):
+    def get_rows(self, all, output_options):
+        rows = self.filter.get_rows(all, output_options)
+        if not self.non_memory_storage:
+            if not all:
+                rows = rows[(self.page - 1) * self.rows_per_page:
+                            self.page * self.rows_per_page]
+        return rows
 
 class TablePrintableFilter(Base.Filter):
     # left = BaseTable
@@ -158,16 +192,8 @@ class TableRowsToTreeFilter(Base.Filter):
     where rows that merges a cell with a previous row, are children of
     that previous row""" 
         
-    def get_group_order(self, output_options):
-        visible_columns = self.visible_columns(output_options)
-        group_order = extend_to_dependent_columns(
-            [column for column, dir in self.sort],
-            self.dependent_columns)
-        return  [column for column in group_order
-                 if column in visible_columns] + [column for column in visible_columns
-                                                  if column not in group_order]
     def get_tree(self, output_options):
-        group_order = self.get_group_order(output_options)
+        total_column_order = self.get_total_column_order(output_options)
         rows = self.filter.get_rows(output_options)
         tree = {'level': 0,
                 'rows': 0,
@@ -183,7 +209,7 @@ class TableRowsToTreeFilter(Base.Filter):
                                          'value': row['ww_expanded'],
                                          'children':[]})
             else:
-                for column in group_order:
+                for column in total_column_order:
                     merge = (    column not in self.dont_merge_columns
                              and node['children']
                              and 'value' in node['children'][-1]
@@ -213,15 +239,33 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
         """{column_name: title | {"title":title, ...}}"""
         dependent_columns = {}
         """{column_name: [column_name]}"""
-        sort = []
         rows = []
+        sort = []
         page = 1
+        expand = []
+        default_expand = True
+        """If true, all rows are expanded until collapsed, if false
+        all rows are collapsed until expanded. This reverses the
+        meaning of the expand attribute."""
         non_memory_storage = False
         dont_merge_widgets = True
         dont_merge_columns = ()
         rows_per_page = 10
         """This attribute is not used internally by the widget, but is
         intended to be used by the user-provide reread() method."""
+
+        def get_rows(self, all, output_options):
+            """Load the list after a repaging/resorting, or for a
+            printable version. If you set non_memory_storage to True, you
+            _must_ implement this method.
+            """
+            raise NotImplementedError("reread")
+
+        def get_pages(self):
+            """Returns the total number of pages. If you set
+            non_memory_storage to True, you _must_ implement this method.
+            """
+            raise NotImplementedError("get_pages")
 
     class RowFilters(Base.Filter):
         Filters = [TablePrintableFilter, TableSimpleModelFilter]
@@ -231,19 +275,24 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
 
     Filters = ["TreeFilters", "RowFilters"]
 
-    def get_rows(self, all, output_options):
-        """Load the list after a repaging/resorting, or for a
-        printable version. If you set non_memory_storage to True, you
-        _must_ implement this method.
-        """
-        raise NotImplementedError("reread")
-
-    def get_pages(self):
-        """Returns the total number of pages. If you set
-        non_memory_storage to True, you _must_ implement this method.
-        """
-        raise NotImplementedError("get_pages")
-
+    def is_child_row(self, child, parent, level = 1):
+        if 'ww_expanded' in parent: return False
+        if 'ww_expanded' in child: return True
+        total_column_order = self.get_total_column_order({})
+        for column in total_column_order[:level]:
+            if not (    column not in self.dont_merge_columns
+                    # This is just because virtual columns might be
+                    # added at a higher level than the one where this
+                    # is called.
+                    and column in parent
+                    and column in child
+                    and (   not self.dont_merge_widgets
+                         or (    not isinstance(parent[column], Base.Widget)
+                             and not isinstance(child[column], Base.Widget)))
+                    and parent[column] == child[column]):
+                return False
+        return True
+    
     def get_active(self, path):
         """@return: Whether the widget is allowing the user to acces
         a given part of it or not.
@@ -266,8 +315,18 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
                                              if self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id,
                                                                            self.path + ['_', 'column', name])])
 
+    def get_total_column_order(self, output_options):
+        visible_columns = self.visible_columns(output_options)
+        total_column_order = extend_to_dependent_columns(
+            [column for column, dir in self.sort],
+            self.dependent_columns)
+        return  [column for column in total_column_order
+                 if column in visible_columns] + [column for column in visible_columns
+                                                  if column not in total_column_order]
+
     def draw_tree(self, node, rows, output_options, first_level = 0, last_level = 0):
-        group_order = self.filter.get_group_order(output_options)
+        total_column_order = self.filter.get_total_column_order(output_options)
+        visible_columns = self.visible_columns(output_options)
         if node['children']:
             rendered_rows = []
             children = len(node['children'])
@@ -285,25 +344,25 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
         else:
             rendered_rows = []
             for row in xrange(node['top'], node['top'] + node['rows']):
-                rendered_rows.append({'cells':[''] * len(group_order),
+                rendered_rows.append({'cells':[''] * len(total_column_order),
                                       'type': RenderedRowTypeRow,
                                       'row': rows[row]})
         row = rendered_rows[0]['row']
         if 'value' in node:
             if 'ww_expanded' in row:
                 rendered_rows[0]['cells'] = [
-                    self.draw_extended_row(output_options, row, node['value'], group_order, node['top'], first_level, last_level)]
+                    self.draw_extended_row(output_options, row, node['value'], total_column_order, node['top'], first_level, last_level)]
             else:
-                column = group_order[node['level'] - 1]
-                rendered_rows[0]['cells'][node['level'] - 1
-                                          ] = self.draw_node(output_options, row, node, column, first_level, last_level)
+                column = total_column_order[node['level'] - 1]
+                column_position = visible_columns.keys().index(column)
+                rendered_rows[0]['cells'][column_position] = self.draw_node(output_options, row, node, column, first_level, last_level)
         return rendered_rows
 
     def draw_node(self, output_options, row, node, column, first_level, last_level):
         return self.draw_cell(output_options, row, node['value'], node['top'], column, node['rows'], 1, first_level, last_level)
 
-    def draw_extended_row(self, output_options, row, value, group_order, row_num, first_level, last_level):
-        return self.draw_cell(output_options, row, value, row_num, 'ww_expanded', 1, len(group_order), first_level, last_level)
+    def draw_extended_row(self, output_options, row, value, total_column_order, row_num, first_level, last_level):
+        return self.draw_cell(output_options, row, value, row_num, 'ww_expanded', 1, len(total_column_order), first_level, last_level)
 
     def draw_cell(self, output_options, row, value,
                   row_num, column_name, rowspan, colspan, first_level, last_level):
