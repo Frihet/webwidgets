@@ -144,6 +144,8 @@ class Object(object):
         if object is None: object = self.__dict__.get('object', self)
         if filter_classes is None: filter_classes = self.Filters
         for filter_class in reversed(filter_classes):
+            if isinstance(filter_class, (str, unicode)):
+                filter_class = getattr(self, filter_class)
             filter = filter_class(filter = filter, object = object)
         setattr(self, name, filter) 
 

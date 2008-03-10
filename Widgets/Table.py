@@ -153,6 +153,54 @@ class TablePrintableFilter(Base.Filter):
     def get_rows(self, output_options):
         return self.filter.get_rows('printable_version' in output_options, output_options)
 
+class TableRowsToTreeFilter(Base.Filter):
+    """This filter creates the virtual tree of the table content,
+    where rows that merges a cell with a previous row, are children of
+    that previous row""" 
+        
+    def get_group_order(self, output_options):
+        visible_columns = self.visible_columns(output_options)
+        group_order = extend_to_dependent_columns(
+            [column for column, dir in self.sort],
+            self.dependent_columns)
+        return  [column for column in group_order
+                 if column in visible_columns] + [column for column in visible_columns
+                                                  if column not in group_order]
+    def get_tree(self, output_options):
+        group_order = self.get_group_order(output_options)
+        rows = self.filter.get_rows(output_options)
+        tree = {'level': 0,
+                'rows': 0,
+                'children':[]}
+        for row_num, row in enumerate(rows):
+            row = self.child_for_row(row)
+            node = tree
+            node['rows'] += 1
+            if 'ww_expanded' in row:
+                node['children'].append({'level': node['level'] + 1,
+                                         'top': row_num,
+                                         'rows': 1,
+                                         'value': row['ww_expanded'],
+                                         'children':[]})
+            else:
+                for column in group_order:
+                    merge = (    column not in self.dont_merge_columns
+                             and node['children']
+                             and 'value' in node['children'][-1]
+                             and (   not self.dont_merge_widgets
+                                  or (    not isinstance(node['children'][-1]['value'], Base.Widget)
+                                      and not isinstance(row[column], Base.Widget)))
+                             and node['children'][-1]['value'] == row[column])
+                    if not merge:
+                        node['children'].append({'level': node['level'] + 1,
+                                                 'top': row_num,
+                                                 'rows': 0,
+                                                 'value': row[column],
+                                                 'children':[]})
+                    node = node['children'][-1]
+                    node['rows'] += 1
+        return (rows, tree)
+
 class BaseTable(Base.CachingComposite, Base.DirectoryServer):
     """This is the basic version of L{Table}; it formats the table
     itself, but does not include any user input controls for changing
@@ -172,10 +220,16 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
         dont_merge_widgets = True
         dont_merge_columns = ()
         rows_per_page = 10
+        """This attribute is not used internally by the widget, but is
+        intended to be used by the user-provide reread() method."""
 
-    """This attribute is not used internally by the widget, but is
-    intended to be used by the user-provide reread() method."""
-    Filters = [TablePrintableFilter, TableSimpleModelFilter]
+    class RowFilters(Base.Filter):
+        Filters = [TablePrintableFilter, TableSimpleModelFilter]
+
+    class TreeFilters(Base.Filter):
+        Filters = [TableRowsToTreeFilter]
+
+    Filters = ["TreeFilters", "RowFilters"]
 
     def get_rows(self, all, output_options):
         """Load the list after a repaging/resorting, or for a
@@ -212,40 +266,8 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
                                              if self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id,
                                                                            self.path + ['_', 'column', name])])
 
-    def rows_to_tree(self, rows, group_order):
-        tree = {'level': 0,
-                'rows': 0,
-                'children':[]}
-        for row_num, row in enumerate(rows):
-            row = self.child_for_row(row)
-            node = tree
-            node['rows'] += 1
-            if 'ww_expanded' in row:
-                node['children'].append({'level': node['level'] + 1,
-                                         'top': row_num,
-                                         'rows': 1,
-                                         'value': row['ww_expanded'],
-                                         'children':[]})
-            else:
-                for column in group_order:
-                    merge = (    column not in self.dont_merge_columns
-                             and node['children']
-                             and 'value' in node['children'][-1]
-                             and (   not self.dont_merge_widgets
-                                  or (    not isinstance(node['children'][-1]['value'], Base.Widget)
-                                      and not isinstance(row[column], Base.Widget)))
-                             and node['children'][-1]['value'] == row[column])
-                    if not merge:
-                        node['children'].append({'level': node['level'] + 1,
-                                                 'top': row_num,
-                                                 'rows': 0,
-                                                 'value': row[column],
-                                                 'children':[]})
-                    node = node['children'][-1]
-                    node['rows'] += 1
-        return tree
-
-    def draw_tree(self, node, rows, output_options, group_order, visible_columns, first_level = 0, last_level = 0):
+    def draw_tree(self, node, rows, output_options, first_level = 0, last_level = 0):
+        group_order = self.filter.get_group_order(output_options)
         if node['children']:
             rendered_rows = []
             children = len(node['children'])
@@ -259,30 +281,29 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
                 rendered_rows.extend(self.draw_tree(node['children'][child],
                                                     rows,
                                                     output_options,
-                                                    group_order, visible_columns,
                                                     sub_first, sub_last))
         else:
             rendered_rows = []
             for row in xrange(node['top'], node['top'] + node['rows']):
-                rendered_rows.append({'cells':[''] * len(visible_columns),
+                rendered_rows.append({'cells':[''] * len(group_order),
                                       'type': RenderedRowTypeRow,
                                       'row': rows[row]})
         row = rendered_rows[0]['row']
         if 'value' in node:
             if 'ww_expanded' in row:
                 rendered_rows[0]['cells'] = [
-                    self.draw_extended_row(output_options, row, node['value'], visible_columns, node['top'], first_level, last_level)]
+                    self.draw_extended_row(output_options, row, node['value'], group_order, node['top'], first_level, last_level)]
             else:
                 column = group_order[node['level'] - 1]
-                rendered_rows[0]['cells'][visible_columns.keys().index(column)
+                rendered_rows[0]['cells'][node['level'] - 1
                                           ] = self.draw_node(output_options, row, node, column, first_level, last_level)
         return rendered_rows
 
     def draw_node(self, output_options, row, node, column, first_level, last_level):
         return self.draw_cell(output_options, row, node['value'], node['top'], column, node['rows'], 1, first_level, last_level)
 
-    def draw_extended_row(self, output_options, row, value, visible_columns, row_num, first_level, last_level):
-        return self.draw_cell(output_options, row, value, row_num, 'ww_expanded', 1, len(visible_columns), first_level, last_level)
+    def draw_extended_row(self, output_options, row, value, group_order, row_num, first_level, last_level):
+        return self.draw_cell(output_options, row, value, row_num, 'ww_expanded', 1, len(group_order), first_level, last_level)
 
     def draw_cell(self, output_options, row, value,
                   row_num, column_name, rowspan, colspan, first_level, last_level):
@@ -314,23 +335,15 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
         return self.children[row_id]
 
     def draw_rows(self, visible_columns, reverse_dependent_columns, output_options):
-        group_order = extend_to_dependent_columns(
-            [column for column, dir in self.sort],
-            self.dependent_columns)
-        group_order = [column for column in group_order
-                      if column in visible_columns] + [column for column in visible_columns
-                                                     if column not in group_order]
-
-        rows = self.filter.get_rows(output_options)
+        rows, tree = self.filter.get_tree(output_options)
 
         # Why we need this test here: rows_to_tree would create an empty
         # top-node for an empty set of rows, which draw_tree would
         # render into a single row...
         if rows:
-            rendered_rows = self.draw_tree(self.rows_to_tree(rows, group_order),
+            rendered_rows = self.draw_tree(tree,
                                            rows,
-                                           output_options,
-                                           group_order, visible_columns)
+                                           output_options)
         else:
             rendered_rows = []
         return rendered_rows
@@ -511,7 +524,8 @@ class Table(BaseTable, Base.ActionInput):
         # button_bars_level_force_min or there are other button bars with
         # level < that button bars' level that are to be drawn.
 
-    Filters = [TableFunctionColFilter] + BaseTable.Filters
+    class RowFilters(BaseTable.RowFilters):
+        Filters = [TableFunctionColFilter] + BaseTable.RowFilters.Filters
 
     def field_input(self, path, string_value):
         try:
@@ -796,7 +810,8 @@ class TableExpandableFilter(Base.Filter):
         return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['expand'] + path)
 
 class ExpandableTable(Table):
-    Filters = [TableExpandableFilter] + Table.Filters
+    class RowFilters(Table.RowFilters):
+        Filters = [TableExpandableFilter] + Table.RowFilters.Filters
     
     def draw(self, output_options):
         self.register_style_link(self.calculate_url({'widget_class': 'Webwidgets.ExpandableTable',
