@@ -35,8 +35,8 @@ class MyWindow(object):
                              ('c', 'asc'),
                              ('d', 'asc')]
                 self.rows = []
-                for a in xrange(0, 4):
-                    for b in xrange(0, 4):
-                        for c in xrange(0, 4):
+                for a in xrange(0, 1):
+                    for b in xrange(0, 2):
+                        for c in xrange(0, 3):
                             for d in xrange(0, 4):
                                 self.rows.append({'a':a, 'b':b, 'c': c, 'd':d})

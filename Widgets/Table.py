@@ -75,7 +75,7 @@ class SpecialCell(object):
 class FunctionCell(SpecialCell):
     html_class = ['functions']
 
-    def draw_function(self, table, row_id, path, html_class, title, active, output_options):
+    def draw_function(self, table, row_id, value, path, html_class, title, active, output_options):
         input_id = Webwidgets.Utils.path_to_id(table.path + ['_'] + path)
         if active:
             table.session.windows[table.win_id].fields[input_id] = table
@@ -85,12 +85,13 @@ class FunctionCell(SpecialCell):
                    class="%(html_class)s"
                    %(disabled)s
                    name="%(html_id)s"
-                   value="%(row)s">%(title)s</button>""" % {
+                   value="%(value)s">%(title)s</button>""" % {
                        'html_id': input_id,
                        'html_class': html_class,
                        'disabled': ['disabled="disabled"', ''][active],
                        'title': table._(title, output_options),
-                       'row': row_id}
+                       'row': row_id,
+                       'value': value}
                        
     def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
         enabled_functions = row.get('ww_functions', True)
@@ -100,7 +101,7 @@ class FunctionCell(SpecialCell):
             if enabled_functions is not True and function not in enabled_functions:
                 continue
             rendered_functions.append(
-                self.draw_function(table, row_id,
+                self.draw_function(table, row_id, row_id,
                                    ['function', function],
                                    function, title,
                                    table.get_active(table.path + ['_', 'function', function]),
@@ -117,14 +118,17 @@ class ExpandCell(FunctionCell):
 
     input_path = ['expand']
 
-    def draw_expand(self, table, row, expanded, active, output_options):
-        return self.draw_function(table, table.filter.get_row_id(row), self.input_path,
+    def draw_expand(self, table, row_id, value, expanded, active, output_options):
+        return self.draw_function(table,
+                                  row_id, value,
+                                  self.input_path,
                                   ['expand', 'collapse'][expanded],
                                   ['Expand', 'Collapse'][expanded],
                                   active, output_options)
     
     def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
-        return self.draw_expand(table, row,
+        row_id = table.filter.get_row_id(row)
+        return self.draw_expand(table, row_id, row_id,
                                 row.get('ww_is_expanded', False),
                                 table.get_active(table.path + ['_', 'expand']),
                                 output_options)
@@ -148,8 +152,9 @@ class TableSimpleModelFilter(Base.Filter):
         self.old_default_expand = None
         self.reread()
 
-    def is_expanded_node(self, row):
-        a = self.get_row_id(row) in self.expand
+    def is_expanded_node(self, row, level):
+        expand = ("%s,%s" % (self.get_row_id(row), level))
+        a = expand in self.expand
         b = self.default_expand # Invert the result if default_expand is not True
         return (a and not b) or (b and not a) # a xor b 
 
@@ -163,23 +168,38 @@ class TableSimpleModelFilter(Base.Filter):
         else:
             rows = []
             current_path = []
-            current_visibility_depth = 1
-            if self.debug_expand: print "ROWS", self.sort
+            last_expanded = 0
+            if self.debug_expand: print "ROWS", self.sort, self.expand
             for row in self.rows:
-                while current_path and not self.is_child_row(row, current_path[-1], len(current_path)):
+                while current_path and self.row_common_sorted_columns(row, current_path[-1]) < len(current_path):
                     del current_path[-1]
+                current_path_len = len(current_path)
+                last_expanded = min(last_expanded, current_path_len)
+
+                if current_path:
+                    last_row = current_path[-1]
+                    row_common_sorted_columns = self.row_common_sorted_columns(row, last_row)
+                    for current_path_len in xrange(current_path_len, row_common_sorted_columns):
+                        if (    last_expanded == current_path_len
+                            and self.is_expanded_node(last_row, current_path_len + 1)):
+                            last_expanded += 1
+                        current_path.append(last_row)
+                    current_path_len = row_common_sorted_columns
+
+#                print "    PATHLEN:", current_path_len, "EXPANDED:", last_expanded
+#                print "    PATH: ", ", ".join([self.get_row_id(a) for a in current_path])
+
                 current_path.append(row)
-                
-                if len(current_path) <= current_visibility_depth:
+
+                if last_expanded == current_path_len:
                     rows.append(row)
-                    current_visibility_depth = len(current_path)
-                    if self.is_expanded_node(row):
-                        current_visibility_depth += 1
-                        if self.debug_expand: print "  " * len(current_path) + "[-]", row
+                    if self.is_expanded_node(row, last_expanded + 1):
+                        last_expanded += 1
+                        if self.debug_expand: print " . " * current_path_len + "[-]", row, self.get_row_id(row)
                     else:
-                        if self.debug_expand: print "  " * len(current_path) + "[+]", row
+                        if self.debug_expand: print " . " * current_path_len + "[+]", row, self.get_row_id(row)
                 else:
-                    if self.debug_expand: print "  " * len(current_path) + "[ ]", row
+                    if self.debug_expand: print " . " * current_path_len + "[ ]", row, self.get_row_id(row)
             if self.debug_expand: print "ENDROWS"
 
             if all:
@@ -355,11 +375,14 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
 
     Filters = ["TreeFilters", "RowFilters"]
 
-    def is_child_row(self, child, parent, level = 1):
-        if 'ww_expanded' in parent: return False
-        if 'ww_expanded' in child: return True
+    def row_common_sorted_columns(self, child, parent):
+        """Calculate the number of columns two rows have in common"""
+        if 'ww_expanded' in parent: return 0
         total_column_order = self.get_total_column_order({})
-        for column in total_column_order[:level]:
+        if 'ww_expanded' in child: return len(total_column_order)
+
+        level = 0
+        for column in total_column_order:
             if not (    column not in self.dont_merge_columns
                     # This is just because virtual columns might be
                     # added at a higher level than the one where this
@@ -370,8 +393,9 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
                          or (    not isinstance(parent[column], Base.Widget)
                              and not isinstance(child[column], Base.Widget)))
                     and parent[column] == child[column]):
-                return False
-        return True
+                break
+            level += 1
+        return level
     
     def get_active(self, path):
         """@return: Whether the widget is allowing the user to acces
@@ -435,23 +459,25 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
                 rendered_rows[0]['cells'] = [
                     self.draw_extended_row(
                     output_options, row, node['value'],
-                    total_column_order, node['top'], first_level, last_level, single)]
+                    total_column_order, node['top'], first_level, last_level, node['level'], single)]
             else:
                 column = total_column_order[node['level'] - 1]
                 column_position = visible_columns.keys().index(column)
                 rendered_rows[0]['cells'][column_position] = self.draw_node(
                     output_options, row, node,
-                    column, first_level, last_level, single)
+                    column, first_level, last_level, node['level'], single)
         return rendered_rows
 
-    def draw_node(self, output_options, row, node, column, first_level, last_level, single):
-        return self.draw_cell(output_options, row, node['value'], node['top'], column, node['rows'], 1, first_level, last_level, single)
+    def draw_node(self, output_options, row, node, column, first_level, last_level, node_level, single):
+        return self.draw_cell(
+            output_options, row, node['value'], node['top'], column, node['rows'], 1, first_level, last_level, node_level, single)
 
-    def draw_extended_row(self, output_options, row, value, total_column_order, row_num, first_level, last_level, single):
-        return self.draw_cell(output_options, row, value, row_num, 'ww_expanded', 1, len(total_column_order), first_level, last_level, single)
+    def draw_extended_row(self, output_options, row, value, total_column_order, row_num, first_level, last_level, node_level, single):
+        return self.draw_cell(
+            output_options, row, value, row_num, 'ww_expanded', 1, len(total_column_order), first_level, last_level, node_level, single)
 
     def draw_cell(self, output_options, row, value,
-                  row_num, column_name, rowspan, colspan, first_level, last_level, single):
+                  row_num, column_name, rowspan, colspan, first_level, last_level, node_level, single):
         html_class = []
         if isinstance(value, SpecialCell):
             html_class = value.get_html_class(
@@ -467,9 +493,14 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
             value = row_widget.draw_child(row_widget.path + [column_name], value, output_options, True)
 
         expand_button = ""
-        expanded = self.filter.is_expanded_node(row)
+        expanded = self.filter.is_expanded_node(row, node_level)
         if rowspan > 1 or (not expanded and not single):
-            expand_button = ExpandCellInstance.draw_expand(self, row, expanded, True, output_options)
+            row_id = self.filter.get_row_id(row)
+            expand_button = ExpandCellInstance.draw_expand(
+                self,
+                row_id,
+                '%s,%s' % (row_id, node_level),
+                expanded, True, output_options)
             
         return '<td rowspan="%(rowspan)s" colspan="%(colspan)s" class="%(class)s">%(expand_button)s%(content)s</td>' % {
             'rowspan': rowspan,
