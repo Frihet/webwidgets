@@ -136,10 +136,16 @@ class TableSimpleModelFilter(Base.Filter):
     # left = TablePrintableFilter
     # right = BaseTable.Model
 
+    debug_expand = True
+
     # API used by Table
     
     def __init__(self, *arg, **kw):
         Base.Object.__init__(self, *arg, **kw)
+        self.old_sort = None
+        self.old_page = None
+        self.old_expand = None
+        self.old_default_expand = None
         self.reread()
 
     def is_expanded_node(self, row):
@@ -158,6 +164,7 @@ class TableSimpleModelFilter(Base.Filter):
             rows = []
             current_path = []
             current_visibility_depth = 1
+            if self.debug_expand: print "ROWS", self.sort
             for row in self.rows:
                 while current_path and not self.is_child_row(row, current_path[-1], len(current_path)):
                     del current_path[-1]
@@ -168,8 +175,13 @@ class TableSimpleModelFilter(Base.Filter):
                     current_visibility_depth = len(current_path)
                     if self.is_expanded_node(row):
                         current_visibility_depth += 1
+                        if self.debug_expand: print "  " * len(current_path) + "[-]", row
+                    else:
+                        if self.debug_expand: print "  " * len(current_path) + "[+]", row
                 else:
-                    
+                    if self.debug_expand: print "  " * len(current_path) + "[ ]", row
+            if self.debug_expand: print "ENDROWS"
+
             if all:
                 return rows
             else:
@@ -217,12 +229,6 @@ class TableSimpleModelFilter(Base.Filter):
         return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['expand'] + path)
 
     # Internal
-    
-    old_sort = None
-    old_page = None
-    old_expand = None
-    old_default_expand = None
-
     def ensure(self):
         """Reload the list after a repaging/resorting"""
         if (   self.sort != self.old_sort
@@ -233,6 +239,11 @@ class TableSimpleModelFilter(Base.Filter):
 
     def reread(self):
         """Reload the list"""
+        if self.sort != self.old_sort:
+            print "XXX", self.sort, self.old_sort
+            # Reset the expansion when sorting is changed as the
+            # expansion applies to _a_sort_.
+            self.old_expand = self.expand = []
         if self.non_memory_storage:
             self.rows[:] = self.filter.get_rows(False, {})
         elif self.sort != self.old_sort:
@@ -393,7 +404,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
                  if column in visible_columns] + [column for column in visible_columns
                                                   if column not in total_column_order]
 
-    def draw_tree(self, node, rows, output_options, first_level = 0, last_level = 0):
+    def draw_tree(self, node, rows, output_options, first_level = 0, last_level = 0, single = False):
         total_column_order = self.filter.get_total_column_order(output_options)
         visible_columns = self.visible_columns(output_options)
         if node['children']:
@@ -409,7 +420,9 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
                 rendered_rows.extend(self.draw_tree(node['children'][child],
                                                     rows,
                                                     output_options,
-                                                    sub_first, sub_last))
+                                                    sub_first, sub_last,
+                                                    single or node['rows'] == 1
+                                                    ))
         else:
             rendered_rows = []
             for row in xrange(node['top'], node['top'] + node['rows']):
@@ -420,21 +433,25 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
         if 'value' in node:
             if 'ww_expanded' in row:
                 rendered_rows[0]['cells'] = [
-                    self.draw_extended_row(output_options, row, node['value'], total_column_order, node['top'], first_level, last_level)]
+                    self.draw_extended_row(
+                    output_options, row, node['value'],
+                    total_column_order, node['top'], first_level, last_level, single)]
             else:
                 column = total_column_order[node['level'] - 1]
                 column_position = visible_columns.keys().index(column)
-                rendered_rows[0]['cells'][column_position] = self.draw_node(output_options, row, node, column, first_level, last_level)
+                rendered_rows[0]['cells'][column_position] = self.draw_node(
+                    output_options, row, node,
+                    column, first_level, last_level, single)
         return rendered_rows
 
-    def draw_node(self, output_options, row, node, column, first_level, last_level):
-        return self.draw_cell(output_options, row, node['value'], node['top'], column, node['rows'], 1, first_level, last_level)
+    def draw_node(self, output_options, row, node, column, first_level, last_level, single):
+        return self.draw_cell(output_options, row, node['value'], node['top'], column, node['rows'], 1, first_level, last_level, single)
 
-    def draw_extended_row(self, output_options, row, value, total_column_order, row_num, first_level, last_level):
-        return self.draw_cell(output_options, row, value, row_num, 'ww_expanded', 1, len(total_column_order), first_level, last_level)
+    def draw_extended_row(self, output_options, row, value, total_column_order, row_num, first_level, last_level, single):
+        return self.draw_cell(output_options, row, value, row_num, 'ww_expanded', 1, len(total_column_order), first_level, last_level, single)
 
     def draw_cell(self, output_options, row, value,
-                  row_num, column_name, rowspan, colspan, first_level, last_level):
+                  row_num, column_name, rowspan, colspan, first_level, last_level, single):
         html_class = []
         if isinstance(value, SpecialCell):
             html_class = value.get_html_class(
@@ -451,7 +468,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
 
         expand_button = ""
         expanded = self.filter.is_expanded_node(row)
-        if not expanded or rowspan > 1:
+        if rowspan > 1 or (not expanded and not single):
             expand_button = ExpandCellInstance.draw_expand(self, row, expanded, True, output_options)
             
         return '<td rowspan="%(rowspan)s" colspan="%(colspan)s" class="%(class)s">%(expand_button)s%(content)s</td>' % {
