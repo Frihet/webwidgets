@@ -35,10 +35,10 @@ USA
 
    <w:Table id="Autoexpand" rows_per_page=":integer:20">
     <w:odict id="columns">
-     <w:string id="a">A</w:string>
-     <w:string id="b">B</w:string>
-     <w:string id="c">C</w:string>
-     <w:string id="d">D</w:string>
+     <w:string id="country">Country</w:string>
+     <w:string id="provider">Provider</w:string>
+     <w:string id="technology">Technology</w:string>
+     <w:string id="price">Price-range</w:string>
     </w:odict>
    </w:Table>
 

@@ -30,13 +30,13 @@ class MyWindow(object):
         class Autoexpand(object):
             def __init__(self, session, win_id, **attrs):
                 Webwidgets.Table.__init__(self, session, win_id, **attrs)
-                self.sort = [('a', 'asc'),
-                             ('b', 'asc'),
-                             ('c', 'asc'),
-                             ('d', 'asc')]
+                self.sort = [('country', 'asc'),
+                             ('provider', 'asc'),
+                             ('technology', 'asc'),
+                             ('price', 'asc')]
                 self.rows = []
-                for a in xrange(0, 1):
-                    for b in xrange(0, 2):
-                        for c in xrange(0, 3):
-                            for d in xrange(0, 4):
-                                self.rows.append({'a':a, 'b':b, 'c': c, 'd':d})
+                for country in ('SE', 'NO', 'FI', 'DK'):
+                    for provider  in ('Comm2', 'BandCorp', 'Fieacomm', 'OFelia'):
+                        for technology in ('modem', 'DSL1', 'DSL2', 'cable'):
+                            for price in ('100-200', '200-300', '300-400', '400-'):
+                                self.rows.append({'country':country, 'provider':provider, 'technology':technology, 'price':price})

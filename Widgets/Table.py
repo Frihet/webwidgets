@@ -140,7 +140,7 @@ class TableSimpleModelFilter(Base.Filter):
     # left = TablePrintableFilter
     # right = BaseTable.Model
 
-    debug_expand = True
+    debug_expand = False
 
     # API used by Table
     
@@ -153,7 +153,8 @@ class TableSimpleModelFilter(Base.Filter):
         self.reread()
 
     def is_expanded_node(self, row, level):
-        expand = ("%s,%s" % (self.get_row_id(row), level))
+        col = self.get_total_column_order({})[level - 1]
+        expand = ("%s,%s" % (self.get_row_id(row), col))
         a = expand in self.expand
         b = self.default_expand # Invert the result if default_expand is not True
         return (a and not b) or (b and not a) # a xor b 
@@ -185,9 +186,6 @@ class TableSimpleModelFilter(Base.Filter):
                             last_expanded += 1
                         current_path.append(last_row)
                     current_path_len = row_common_sorted_columns
-
-#                print "    PATHLEN:", current_path_len, "EXPANDED:", last_expanded
-#                print "    PATH: ", ", ".join([self.get_row_id(a) for a in current_path])
 
                 current_path.append(row)
 
@@ -259,11 +257,6 @@ class TableSimpleModelFilter(Base.Filter):
 
     def reread(self):
         """Reload the list"""
-        if self.sort != self.old_sort:
-            print "XXX", self.sort, self.old_sort
-            # Reset the expansion when sorting is changed as the
-            # expansion applies to _a_sort_.
-            self.old_expand = self.expand = []
         if self.non_memory_storage:
             self.rows[:] = self.filter.get_rows(False, {})
         elif self.sort != self.old_sort:
@@ -343,7 +336,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
         sort = []
         page = 1
         expand = []
-        default_expand = True
+        default_expand = False
         """If true, all rows are expanded until collapsed, if false
         all rows are collapsed until expanded. This reverses the
         meaning of the expand attribute."""
@@ -499,7 +492,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
             expand_button = ExpandCellInstance.draw_expand(
                 self,
                 row_id,
-                '%s,%s' % (row_id, node_level),
+                '%s,%s' % (row_id, column_name),
                 expanded, True, output_options)
             
         return '<td rowspan="%(rowspan)s" colspan="%(colspan)s" class="%(class)s">%(expand_button)s%(content)s</td>' % {
