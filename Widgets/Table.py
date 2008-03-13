@@ -154,8 +154,9 @@ class TableSimpleModelFilter(Base.Filter):
 
     def is_expanded_node(self, row, level):
         col = self.get_total_column_order({})[level - 1]
-        expand = ("%s,%s" % (self.get_row_id(row), col))
-        a = expand in self.expand
+        row_id = self.get_row_id(row)
+        a = (    row_id in self.expand
+             and col in self.expand[row_id]['expanded_cols'])
         b = self.default_expand # Invert the result if default_expand is not True
         return (a and not b) or (b and not a) # a xor b 
 
@@ -213,9 +214,8 @@ class TableSimpleModelFilter(Base.Filter):
         if self.non_memory_storage:
             self.filter.get_row_by_id(self, row_id)
         else:
-            row_id = int(row_id)
             for row in self.rows:
-                if row.get('ww_row_id', id(row)) == row_id:
+                if self.get_row_id(row) == row_id:
                     return row
             raise KeyError(self, row_id)
 
@@ -235,10 +235,16 @@ class TableSimpleModelFilter(Base.Filter):
         return res
 
     def field_input_expand(self, path, string_value):
-        if string_value in self.expand:
-            self.expand.remove(string_value)
+        row_id, col = string_value.split(',')
+        row = self.get_row_by_id(row_id)
+        if row_id not in self.expand:
+            self.expand[row_id] = {'row': row,
+                                   'expanded_cols': set((col,))}
         else:
-            self.expand.append(string_value)
+            if col not in self.expand[row_id]['expanded_cols']:
+                self.expand[row_id]['expanded_cols'].add(col)
+            else:
+                self.expand[row_id]['expanded_cols'].remove(col)
 
     def field_output_expand(self, path):
         return []
@@ -335,7 +341,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
         rows = []
         sort = []
         page = 1
-        expand = []
+        expand = {}
         default_expand = False
         """If true, all rows are expanded until collapsed, if false
         all rows are collapsed until expanded. This reverses the
