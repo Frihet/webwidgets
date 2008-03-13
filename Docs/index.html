@@ -345,7 +345,7 @@ class MyWindow(object):
 	class go(object):
   </pre></blockquote>
 
-  <p>The layout of the ww_classes defined inside each other in the
+  <p>The layout of the classes defined inside each other in the
   callbacks file exactly mirrors the widget tags in the Wwml file.
   Compare the above to the following exerpt:</p>
 
@@ -408,7 +408,7 @@ class MyWindow(object):
   
   <h3><a name="overview_design_statefull-widgets" />Statefull widgets</h3>
   <p>Each widget is implemented as a Python class. A web user session
-  then consists of one or more instance of such ww_classes.</p>
+  then consists of one or more instance of such classes.</p>
 
   <p>As these instances are part of the session, they survive between
   page-loads, and member variables of the widget, such as the one
@@ -512,7 +512,7 @@ class MyWindow(object):
   function.</p>
 
   <p class="rationale">It is practical to encapsulate child widget
-  ww_classes within the parent widget class as this makes the widget
+  classes within the parent widget class as this makes the widget
   more portable and parts of it more overrideable. The automatic
   instantiation solves the problem nine times out of ten in
   practice.</p>
@@ -561,7 +561,7 @@ class MyWindow(object):
 
   <h1><a name="wwml" />The Wwml user interface markup language</h1>
   <p class="intro">Wwml provides an alternative and much shorter
-  syntax for defining widget ww_classes than to define them using pure
+  syntax for defining widget classes than to define them using pure
   Python. It does however not add any extra functionality. That is,
   every Wwml construct can be mapped into an equivalent Python
   construct, and is indeed compiled to one when the Wwml file is
@@ -720,7 +720,7 @@ class MyFirstWidget(MyCallBacks.MyCallbackClass, MyModule.MyWidget):
   </pre></blockquote>
 
   <p>To reduce code overhead, callback binding recurses through
-  widgets so that child widgets are bound to member ww_classes:</p>
+  widgets so that child widgets are bound to member classes:</p>
 
   <p>Example:</p>
   <blockquote><pre>
@@ -744,7 +744,7 @@ class MyFirstWidget(MyCallBacks.MyCallbackClass, html):
 
   <h2><a name="wwml_search-paths-for-widgets" />Search paths for widgets</h2>
   <p>As already stated tag names are module paths to existing widget
-  ww_classes. But these paths need not be complete - they are looked up
+  classes. But these paths need not be complete - they are looked up
   along a search path of modules.</p>
 
   <p>Consider a search path consisting of <tt>MyProg.UI</tt>,
