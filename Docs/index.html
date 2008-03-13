@@ -54,6 +54,8 @@
      <li><a href="#overview-implementation">Implementation details</a></li>
     </ul></li>
    <li><a href="#wwml">Description of the Wwml user interface definition language</a></li>
+   <li><a href="#i18n-L10n">Internationalization and localization</a></li>
+
    <li><a href="ReferenceManual/index.html">Reference Manual</a></li>
    <li><a href="#license">GNU General Public License</a></li>
   </ul>
@@ -769,6 +771,59 @@ class MyFirstWidget(MyCallBacks.MyCallbackClass, html):
 &lt;/w:Html&gt;
   </pre></blockquote>
 
+  <!-- ################################################################ -->
+
+
+
+
+
+
+
+  <h1><a name="i18n-L10n" />Internationalization and localization</h1>
+
+  <p>The standard for translation of user interfaces in the Free
+  Software world is <a href="http://www.gnu.org/software/gettext/">GNU
+  gettext</a>. Webwidgets uses GNU gettext in conjunction with some
+  additional tools and automation features.</p>
+
+  <p>Translations in Webwidgets are widget specific, so that "File"
+  can be translated into e.g. Swedish into either "Arkiv" or "Fil"
+  depending on if it denotes the "File" menu or a file on the
+  harddisk. Translations are of course inherited when subclassing a
+  widget. Translations into the language 'en' for a widget in a file
+  <tt>foo/bar.py</tt> are located in the file
+  <tt>foo/bar.translations/en/LC_MESSAGES/Webwidgets.mo</tt>. The tool
+  <tt>compiletranslations.sh</tt> can be used to compile all
+  <tt>.po</tt>-files into corresponding <tt>.mo</tt>-files for all
+  widgets.</p>
+
+  <p>Traditionally gettext translation have been done manually by
+  calling a special function, often called <tt>_()</tt> on every
+  string to translate. This function loads the translation from a
+  gettext library. A tool logically called <tt>gettext</tt> is used to
+  extract all string constants surrounded by <tt>_()</tt> from the
+  source code to be used as basis for translation. However, this model
+  cannot handle strings from external sources such as an XML-file,
+  e.g. the Wwml sources in Webwidgets.</p>
+
+  <p>Webwidgets automatically translates all HTML format strings and
+  all attribute values when drawing widgets. In practice this means
+  that you never have to call <tt>_()</tt> yourself (but you can call
+  it yourself, as a method on the widget object, if need be).
+  Translatable strings for each widget can be gathered and put into
+  <tt>.pot</tt>-files using the tool <tt>wwgettext</tt> that loads the
+  python modules and gathers all class level attribute strings using
+  introspection. Translatable strings for a file <tt>foo/bar.py</tt>
+  are placed in <tt>foo/bar.translations/Webwidgets.pot</tt>.</p>
+
+  <p>It is sometimes useful to work with all translations in a single
+  file, as if Webwidgets did not localize translations to each widget.
+  This can be achieved using the two tools
+  <tt>collecttranslationtemplates.sh</tt> and
+  <tt>distributetranslations.sh</tt> that collects and merges
+  <tt>.pot</tt>-files and splits and distributes <tt>.po</tt>-files,
+  respectively.</p>
+ 
   <!-- ################################################################ -->
 
 
