@@ -162,18 +162,24 @@ class TableSimpleModelFilter(Base.Filter):
 
     def get_expand_tree(self):
         col_order = self.get_total_column_order({})
-        tree = {}
-        for row in self.expand.itervalues():
+        tree = (col_order[0], {})
+        for row_id, row in self.expand.iteritems():
+            if not row['expanded_cols']:
+                continue
             node = tree
-            for col in col_order:
+            for pos in xrange(0, len(col_order) - 1): # You can not expand/collapse the last column
+                col = col_order[pos]
                 value = row['row'][col]
-                if value not in node:
-                    node[value] = {}
-                node = node[value]
+                if value not in node[1]:
+                    next_col = col_order[pos + 1]
+                    node[1][value] = (next_col, {})
                 a = col not in row['expanded_cols']
                 b = self.default_expand
                 if (a and not b) or (b and not a): # a xor b
-                    break
+                     node[1][value] = (None, (row_id, row['row']))
+                if node[1][value][0] is None:
+                     break
+                node = node[1][value]
         return tree
 
     def get_rows(self, all, output_options):
@@ -185,37 +191,53 @@ class TableSimpleModelFilter(Base.Filter):
                 return self.rows
         else:
             rows = []
-            current_path = []
-            last_expanded = 0
-            if self.debug_expand: print "ROWS", self.sort, self.expand
-            for row in self.rows:
-                while current_path and self.row_common_sorted_columns(row, current_path[-1]) < len(current_path):
-                    del current_path[-1]
-                current_path_len = len(current_path)
-                last_expanded = min(last_expanded, current_path_len)
+            expand_tree = self.get_expand_tree()
+            
+            if self.default_expand:
+                print "TREE", expand_tree
+                for row in self.rows:
+                    col, values = expand_tree
+                    while col is not None and row[col] in values:
+                        col, values = values[row[col]]
+                    if col is not None or values[0] == self.get_row_id(row):
+                        rows.append(row)
+            else:
 
-                if current_path:
-                    last_row = current_path[-1]
-                    row_common_sorted_columns = self.row_common_sorted_columns(row, last_row)
-                    for current_path_len in xrange(current_path_len, row_common_sorted_columns):
-                        if (    last_expanded == current_path_len
-                            and self.is_expanded_node(last_row, current_path_len + 1)):
+
+                
+
+                rows = []
+                current_path = []
+                last_expanded = 0
+                if self.debug_expand: print "ROWS", self.sort, self.expand
+                for row in self.rows:
+                    while current_path and self.row_common_sorted_columns(row, current_path[-1]) < len(current_path):
+                        del current_path[-1]
+                    current_path_len = len(current_path)
+                    last_expanded = min(last_expanded, current_path_len)
+
+                    if current_path:
+                        last_row = current_path[-1]
+                        row_common_sorted_columns = self.row_common_sorted_columns(row, last_row)
+                        for current_path_len in xrange(current_path_len, row_common_sorted_columns):
+                            if (    last_expanded == current_path_len
+                                and self.is_expanded_node(last_row, current_path_len + 1)):
+                                last_expanded += 1
+                            current_path.append(last_row)
+                        current_path_len = row_common_sorted_columns
+
+                    current_path.append(row)
+
+                    if last_expanded == current_path_len:
+                        rows.append(row)
+                        if self.is_expanded_node(row, last_expanded + 1):
                             last_expanded += 1
-                        current_path.append(last_row)
-                    current_path_len = row_common_sorted_columns
-
-                current_path.append(row)
-
-                if last_expanded == current_path_len:
-                    rows.append(row)
-                    if self.is_expanded_node(row, last_expanded + 1):
-                        last_expanded += 1
-                        if self.debug_expand: print " . " * current_path_len + "[-]", row, self.get_row_id(row)
+                            if self.debug_expand: print " . " * current_path_len + "[-]", row, self.get_row_id(row)
+                        else:
+                            if self.debug_expand: print " . " * current_path_len + "[+]", row, self.get_row_id(row)
                     else:
-                        if self.debug_expand: print " . " * current_path_len + "[+]", row, self.get_row_id(row)
-                else:
-                    if self.debug_expand: print " . " * current_path_len + "[ ]", row, self.get_row_id(row)
-            if self.debug_expand: print "ENDROWS"
+                        if self.debug_expand: print " . " * current_path_len + "[ ]", row, self.get_row_id(row)
+                if self.debug_expand: print "ENDROWS"
 
             if all:
                 return rows
