@@ -160,6 +160,22 @@ class TableSimpleModelFilter(Base.Filter):
         b = self.default_expand # Invert the result if default_expand is not True
         return (a and not b) or (b and not a) # a xor b 
 
+    def get_expand_tree(self):
+        col_order = self.get_total_column_order({})
+        tree = {}
+        for row in self.expand.itervalues():
+            node = tree
+            for col in col_order:
+                value = row['row'][col]
+                if value not in node:
+                    node[value] = {}
+                node = node[value]
+                a = col not in row['expanded_cols']
+                b = self.default_expand
+                if (a and not b) or (b and not a): # a xor b
+                    break
+        return tree
+
     def get_rows(self, all, output_options):
         self.ensure()
         if self.non_memory_storage:
@@ -342,7 +358,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
         sort = []
         page = 1
         expand = {}
-        default_expand = False
+        default_expand = True
         """If true, all rows are expanded until collapsed, if false
         all rows are collapsed until expanded. This reverses the
         meaning of the expand attribute."""
