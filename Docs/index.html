@@ -50,11 +50,13 @@
    <li><a href="#introduction">Introduction to Webwidgets</a></li>
    <li><a href="#overview">Architecture overview</a>
     <ul>
-     <li><a href="#overview-design">Design</a></li>
-     <li><a href="#overview-implementation">Implementation details</a></li>
+     <li><a href="#overview_design">Design</a></li>
+     <li><a href="#overview_implementation">Implementation details</a></li>
     </ul></li>
    <li><a href="#wwml">Description of the Wwml user interface definition language</a></li>
    <li><a href="#i18n-L10n">Internationalization and localization</a></li>
+   <li><a href="#acl">Access control</a></li>
+   <li><a href="#security">Security</a></li>
 
    <li><a href="ReferenceManual/index.html">Reference Manual</a></li>
    <li><a href="#license">GNU General Public License</a></li>
@@ -388,7 +390,7 @@ class MyWindow(object):
 
 
   <h1><a name="overview" />Architecture overview</h1>
-  <h2><a name="overview-design" />Design</h2>
+  <h2><a name="overview_design" />Design</h2>
 
   <p class="intro">This document explains the overall architecture and
   design choices of Webwidgets. It answers both the how:s and the
@@ -780,11 +782,11 @@ class MyFirstWidget(MyCallBacks.MyCallbackClass, html):
 
 
   <h1><a name="i18n-L10n" />Internationalization and localization</h1>
-
-  <p>The standard for translation of user interfaces in the Free
-  Software world is <a href="http://www.gnu.org/software/gettext/">GNU
-  gettext</a>. Webwidgets uses GNU gettext in conjunction with some
-  additional tools and automation features.</p>
+  <p class="intro">The standard for translation of user interfaces in
+  the Free Software world is <a
+  href="http://www.gnu.org/software/gettext/">GNU gettext</a>.
+  Webwidgets uses GNU gettext in conjunction with some additional
+  tools and automation features.</p>
 
   <p>Translations in Webwidgets are widget specific, so that "File"
   can be translated into e.g. Swedish into either "Arkiv" or "Fil"
@@ -823,7 +825,100 @@ class MyFirstWidget(MyCallBacks.MyCallbackClass, html):
   <tt>distributetranslations.sh</tt> that collects and merges
   <tt>.pot</tt>-files and splits and distributes <tt>.po</tt>-files,
   respectively.</p>
- 
+
+  <!-- ################################################################ -->
+
+
+
+
+
+
+
+  <h1><a name="acl" />Access control</h1>
+  <p class="intro">Webwidgets provide a built-in access control
+  method, where access to individual widgets (both viewing and
+  changing values) can be controlled using a type of ACL (Access
+  Control List).</p>
+
+  <p>To enable this feature, you must override the
+  <tt>AccessManager</tt> class attribute when subclassing
+  <tt>Webwidgets.Program.Session</tt>.</p>
+
+  <p>AccessManager should be a subclass of
+  <tt>Webwidgets.ListAccessManager</tt> and provide a method
+  <tt>get_access_list()</tt> that returns an apropriate ACL list,
+  given the status of the current session (a user is logged in, the
+  user is of this or that type, is a member of this or that group,
+  etc).</p>
+
+  <p>The format of the ACL is a list of tripples <tt>(Allow, Scope, Path)</tt>.
+  The list is traversed from top to bottom, and the boolean <tt>Allow</tt>
+  attribute first row whose <tt>Path</tt> and <tt>Scope</tt> matches the widget and
+  action determines if the action is allowed or not.</p>
+
+  <p><tt>Path</tt> is a path to the widget, with the action and window
+  prepended. <tt>Scope</tt> is either <tt>SUBTREE</tt> or <tt>ONE</tt>
+  to match the path and all child widgets to that path, or to match
+  just that widget, respectively.</p>
+
+  <p>The actions that can start a path are <tt>EDIT</tt>,
+  <tt>REARRANGE</tt> and <tt>VIEW</tt>. The window is either
+  <tt>DEFAULT_WINDOW</tt> or a window name.</p>
+
+  <blockquote><pre>
+(True,  ONE,     (VIEW, DEFAULT_WINDOW, 'Body', 'LogIn', 'Application', 'Menu', 'AppMenu')),
+(False, SUBTREE, (VIEW, DEFAULT_WINDOW, 'Body', 'LogIn', 'Application', 'Menu', 'AppMenu')),
+(False, SUBTREE, (VIEW, DEFAULT_WINDOW, 'Body', 'LogIn', 'Application', 'Menu', 'AppMenu', 'Home', 'Stones'),
+(True,  SUBTREE, (VIEW, DEFAULT_WINDOW, 'Body', 'LogIn', 'Application', 'Menu', 'AppMenu', 'Home'),
+(True,  SUBTREE, (VIEW, DEFAULT_WINDOW, 'Body', 'LogIn', 'Application')),
+  </pre></blockquote>
+
+  <p>To ease the creation of these lists, you can set the
+  <tt>debug</tt> class attribute to <tt>True</tt> on your
+  <tt>AccessManager</tt> class. This will print the paths for all
+  attempts that Webwidgets does to access your widgets, and the
+  outcome of each attempt.</p>
+
+  <!-- ################################################################ -->
+
+
+
+
+
+
+
+  <h1><a name="security" />Security</h1>
+  <p class="intro">By default all Webwidgets applications run as the
+  same user, usually the "webkit" user. This chapter describes how to
+  improve this situation.</p>
+
+
+  <p>A webwidgets application does not normally run as the "apache"
+  user (as would e.g. most PHP applications). However, it does run as
+  whatever user the Webware AppServer it is installed under is run as,
+  and in most default setups that would be the "webkit" user, for all
+  Webwidgets applications. Sometimes, the AppServer even runs as
+  "root"(!).</p>
+
+  <p>Having your Webwidgets applications separate from the webserver
+  gives some extra security, but not much. Ideally, each Webwidgets
+  application should run as a separate user as to contain a possible
+  break-in to the smallest access possible. Such a setup is possible,
+  elthough a bit cumbersome, since each such user has to be allocated
+  a TCP port on localhost, and have a few lines in the apache config
+  added for it. However, <em>this approach is strongly
+  recommended.</em>. Also note that this is applicable to any Webware
+  application, not just to Webwidgets applications.</p>
+
+  <p>To set up such a system, create a user for each application. Set
+  up a Webware work-dir inside the home-directory of each of these.
+  Configure each to use a separate port (<tt>AdapterPort = PORT</tt>
+  in <tt>Configs/AppServer.config</tt>) and configure apache to
+  connect to that port for some URLs (<tt>WKServer localhost PORT</tt>
+  and <tt>SetHandler webkit-handler in httpd.conf</tt>). Then install
+  each application into one of these work-dirs
+  (<tt>Configs/Application.config</tt>).</p>
+
   <!-- ################################################################ -->
 
 
