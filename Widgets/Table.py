@@ -145,57 +145,12 @@ class TableSimpleModelFilter(Base.Filter):
     # API used by Table
     
     def __init__(self, *arg, **kw):
-        Base.Object.__init__(self, *arg, **kw)
+        Base.Filter.__init__(self, *arg, **kw)
         self.old_sort = None
         self.old_page = None
         self.old_expand = None
+	self.expand_version = 0
         self.old_default_expand = None
-        self.reread()
-
-    def is_expanded_node(self, row, level):
-        col = self.get_total_column_order({})[level - 1]
-        row_id = self.get_row_id(row)
-        a = (    row_id in self.expand
-             and col in self.expand[row_id]['expanded_cols'])
-        b = self.default_expand # Invert the result if default_expand is not True
-        return (a and not b) or (b and not a) # a xor b 
-
-    class ExpandTreeNode(object):
-        def __init__(self, col, values = None, toggled = False, rows = None):
-            self.col = col
-            self.values = values or {}
-            self.toggled = toggled
-            self.rows = rows or {}
-
-        def __str__(self, indent = ''):
-            return '%s%s=\n%s\n' % (indent,
-                                    self.col,
-                                    ''.join(['%s [%s]%s:\n%s' % (indent,
-                                                                 ['-', '+'][sub.toggled],
-                                                                 value,
-                                                                 sub.__str__(indent + '  '))
-                                             for (value, sub) in self.values.iteritems()]))
-
-    def get_expand_tree(self):
-        col_order = self.get_total_column_order({})
-
-        tree = self.ExpandTreeNode(col = col_order[0], toggled = not self.default_expand)
-
-        for row_id, row in self.expand.iteritems():
-            if not row['expanded_cols']:
-                continue
-            node = tree
-            for pos in xrange(0, len(col_order) - 1): # You can not expand/collapse the last column
-                col = col_order[pos]
-                value = row['row'][col]
-                if value not in node.values:
-                    next_col = col_order[pos + 1]
-                    node.values[value] = self.ExpandTreeNode(col=next_col)
-                node = node.values[value]
-                if col in row['expanded_cols']:
-                    node.toggled = True
-                    node.rows[row_id] = row['row']
-        return tree
 
     def get_rows(self, all, output_options):
         self.ensure()
@@ -238,11 +193,14 @@ class TableSimpleModelFilter(Base.Filter):
                             self.page * self.rows_per_page]
 
     def get_row_id(self, row):
-        return str(row.get('ww_row_id', id(row)))
+        if self.non_memory_storage:
+            return self.filter.get_row_id(row)
+        else:
+            return str(row.get('ww_row_id', id(row)))
     
     def get_row_by_id(self, row_id):
         if self.non_memory_storage:
-            self.filter.get_row_by_id(self, row_id)
+            return self.filter.get_row_by_id(row_id)
         else:
             for row in self.rows:
                 if self.get_row_id(row) == row_id:
@@ -275,6 +233,7 @@ class TableSimpleModelFilter(Base.Filter):
                 self.expand[row_id]['expanded_cols'].add(col)
             else:
                 self.expand[row_id]['expanded_cols'].remove(col)
+	self.expand_version += 1
 
     def field_output_expand(self, path):
         return []
@@ -287,7 +246,7 @@ class TableSimpleModelFilter(Base.Filter):
         """Reload the list after a repaging/resorting"""
         if (   self.sort != self.old_sort
             or self.page != self.old_page
-            or self.expand != self.old_expand
+            or self.expand_version != self.old_expand
             or self.default_expand != self.old_default_expand):
             self.reread()
 
@@ -306,7 +265,7 @@ class TableSimpleModelFilter(Base.Filter):
             self.rows.sort(row_cmp)
         self.old_sort = self.sort
         self.old_page = self.page
-        self.old_expand = self.expand
+        self.old_expand = self.expand_version
         self.old_default_expand = self.default_expand
 
 class TablePrintableFilter(Base.Filter):
@@ -388,7 +347,13 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
             printable version. If you set non_memory_storage to True, you
             _must_ implement this method.
             """
-            raise NotImplementedError("reread")
+            raise NotImplementedError("get_rows")
+
+        def get_row_by_id(self, row_id):
+            raise NotImplementedError("get_row_by_id")
+
+        def get_row_id(self, row):
+            raise NotImplementedError("get_row_id")
 
         def get_pages(self):
             """Returns the total number of pages. If you set
@@ -403,6 +368,51 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
         Filters = [TableRowsToTreeFilter]
 
     Filters = ["TreeFilters", "RowFilters"]
+
+    def is_expanded_node(self, row, level):
+        col = self.get_total_column_order({})[level - 1]
+        row_id = self.filter.get_row_id(row)
+        a = (    row_id in self.filter.expand
+             and col in self.filter.expand[row_id]['expanded_cols'])
+        b = self.filter.default_expand # Invert the result if default_expand is not True
+        return (a and not b) or (b and not a) # a xor b 
+
+    class ExpandTreeNode(object):
+        def __init__(self, col, values = None, toggled = False, rows = None):
+            self.col = col
+            self.values = values or {}
+            self.toggled = toggled
+            self.rows = rows or {}
+
+        def __str__(self, indent = ''):
+            return '%s%s=\n%s\n' % (indent,
+                                    self.col,
+                                    ''.join(['%s [%s]%s:\n%s' % (indent,
+                                                                 ['-', '+'][sub.toggled],
+                                                                 value,
+                                                                 sub.__str__(indent + '  '))
+                                             for (value, sub) in self.values.iteritems()]))
+
+    def get_expand_tree(self):
+        col_order = self.get_total_column_order({})
+
+        tree = self.ExpandTreeNode(col = col_order[0], toggled = not self.filter.default_expand)
+
+        for row_id, row in self.filter.expand.iteritems():
+            if not row['expanded_cols']:
+                continue
+            node = tree
+            for pos in xrange(0, len(col_order) - 1): # You can not expand/collapse the last column
+                col = col_order[pos]
+                value = row['row'][col]
+                if value not in node.values:
+                    next_col = col_order[pos + 1]
+                    node.values[value] = self.ExpandTreeNode(col=next_col)
+                node = node.values[value]
+                if col in row['expanded_cols']:
+                    node.toggled = True
+                    node.rows[row_id] = row['row']
+        return tree
 
     def row_common_sorted_columns(self, child, parent):
         """Calculate the number of columns two rows have in common"""

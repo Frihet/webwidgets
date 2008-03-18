@@ -1,4 +1,4 @@
-import elixir
+import elixir, itertools
 
 __session__ = None
 
@@ -7,6 +7,36 @@ class Service(elixir.entity.Entity):
     provider = elixir.Field(elixir.Unicode)
     technology = elixir.Field(elixir.Unicode)
     price = elixir.Field(elixir.Unicode)
+
+    def __getattr__(self, name):
+        if name == "ww_row_id":
+            return self.id
+        raise AttributeError
+
+    def iterkeys(self):
+        return itertools.imap(lambda col: col.name, type(self).table.columns)
+
+    def iteritems(self):
+        return itertools.imap(lambda name: (name, self[name]), self.iterkeys())
+
+    def itervalues(self):
+        return itertools.imap(lambda name: self[name], self.iterkeys())
+
+    def __iter__(self):
+        return self.iterkeys()
+
+    def __getitem__(self, name):
+        return getattr(self, name)
+
+    def get(self, name, default = None):
+        try:
+            return self[name]
+        except AttributeError:
+            if default is not None:
+                return default
+            raise AttributeError
+
+    
 
 elixir.setup_all(bind=None)
 
