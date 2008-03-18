@@ -28,6 +28,7 @@ Webwidgets.Program.Session.debug_send_notification = False
 class MyWindow(object):
     class Body(object):
         class Autoexpand(object):
+            default_expand = False
             def __init__(self, session, win_id, **attrs):
                 Webwidgets.Table.__init__(self, session, win_id, **attrs)
                 self.sort = [('country', 'asc'),

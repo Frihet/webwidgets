@@ -26,12 +26,15 @@ Webwidgets.Program.Session.debug_fields = False
 Webwidgets.Program.Session.debug_send_notification = False
 
 True_ = sqlalchemy.sql.text("(1 = 1)")
+False_ = sqlalchemy.sql.text("(1 = 2)")
 
 class SQLAlchemyFilter(Webwidgets.Filter):
     non_memory_storage = True
 
     def get_row_query(self, all, output_options):
         expand_tree = self.get_expand_tree()
+        query = self.session.db.query(Model.Service)
+        
         if self.default_expand:
             def tree_to_filter(node):
                 if node.toggled:
@@ -45,8 +48,33 @@ class SQLAlchemyFilter(Webwidgets.Filter):
                         return sqlalchemy.sql.case(whens, else_ = True_)
                     else:
                         return True_
+        else:
+            prev_row = Model.Service.table.alias()
+            # FIXME: prev_row.c.id + 1 == Model.Service.table.c.id
+            # does not work, since id:s are not in order for every
+            # sort! Must be the order of the current sort!
+            query = query.select_from(
+                Model.Service.table.outerjoin(
+                    prev_row,
+                    prev_row.c.id + 1 == Model.Service.table.c.id))
+
+            def tree_to_filter(node):
+                whens = []
+                for value, sub in node.values.iteritems():
+                    sub_query = False_
+                    if sub.toggled:
+                        sub_query = tree_to_filter(sub)
+                    whens.append((getattr(Model.Service.table.c, node.col) == value,
+                                 sub_query))
+                if whens:
+                    node_query = sqlalchemy.sql.case(whens, else_ = False_)
+                else:
+                    node_query = False_
+                return sqlalchemy.sql.case([(getattr(prev_row.c, node.col) == getattr(Model.Service.table.c, node.col), node_query)],
+                                           else_ = True_)
+            
         filter = tree_to_filter(expand_tree)
-        query = self.session.db.query(Model.Service).filter(filter)
+        query = query.filter(filter)
 
         for col, order in self.sort:
             query = query.order_by(getattr(getattr(Model.Service.table.c, col), order)())
@@ -55,8 +83,11 @@ class SQLAlchemyFilter(Webwidgets.Filter):
         if not all:
             query = query[(self.page - 1) * self.rows_per_page:
                           self.page * self.rows_per_page]
-
-        #print "QUERY", query
+            
+        print "EXPAND", self.expand
+        #print expand_tree
+        #print "QUERY"
+        #print query
         return query
 
     def get_rows(self, all, output_options):
@@ -74,6 +105,8 @@ class SQLAlchemyFilter(Webwidgets.Filter):
 class MyWindow(object):
     class Body(object):
         class Autoexpand(object):
+            default_expand = False
+            
             class RowFilters(Webwidgets.Table.RowFilters):
                 Filters = Webwidgets.Table.RowFilters.Filters + [SQLAlchemyFilter]
             
