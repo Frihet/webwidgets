@@ -160,9 +160,27 @@ class TableSimpleModelFilter(Base.Filter):
         b = self.default_expand # Invert the result if default_expand is not True
         return (a and not b) or (b and not a) # a xor b 
 
+    class ExpandTreeNode(object):
+        def __init__(self, col, values = None, toggled = False, rows = None):
+            self.col = col
+            self.values = values or {}
+            self.toggled = toggled
+            self.rows = rows or {}
+
+        def __str__(self, indent = ''):
+            return '%s%s=\n%s\n' % (indent,
+                                    self.col,
+                                    ''.join(['%s [%s]%s:\n%s' % (indent,
+                                                                 ['-', '+'][sub.toggled],
+                                                                 value,
+                                                                 sub.__str__(indent + '  '))
+                                             for (value, sub) in self.values.iteritems()]))
+
     def get_expand_tree(self):
         col_order = self.get_total_column_order({})
-        tree = (col_order[0], {})
+
+        tree = self.ExpandTreeNode(col = col_order[0], toggled = not self.default_expand)
+
         for row_id, row in self.expand.iteritems():
             if not row['expanded_cols']:
                 continue
@@ -170,16 +188,13 @@ class TableSimpleModelFilter(Base.Filter):
             for pos in xrange(0, len(col_order) - 1): # You can not expand/collapse the last column
                 col = col_order[pos]
                 value = row['row'][col]
-                if value not in node[1]:
+                if value not in node.values:
                     next_col = col_order[pos + 1]
-                    node[1][value] = (next_col, {})
-                a = col not in row['expanded_cols']
-                b = self.default_expand
-                if (a and not b) or (b and not a): # a xor b
-                     node[1][value] = (None, (row_id, row['row']))
-                if node[1][value][0] is None:
-                     break
-                node = node[1][value]
+                    node.values[value] = self.ExpandTreeNode(col=next_col)
+                node = node.values[value]
+                if col in row['expanded_cols']:
+                    node.toggled = True
+                    node.rows[row_id] = row['row']
         return tree
 
     def get_rows(self, all, output_options):
@@ -191,54 +206,31 @@ class TableSimpleModelFilter(Base.Filter):
                 return self.rows
         else:
             rows = []
-            expand_tree = self.get_expand_tree()
-            
+            expand_tree = self.get_expand_tree()            
             if self.default_expand:
-                print "TREE", expand_tree
+                # This is just an optimization which also just happens
+                # to be easily implementable in SQL :)
                 for row in self.rows:
-                    col, values = expand_tree
-                    while col is not None and row[col] in values:
-                        col, values = values[row[col]]
-                    if col is not None or values[0] == self.get_row_id(row):
+                    node = expand_tree
+                    while not node.toggled and row[node.col] in node.values:
+                        node = node.values[row[node.col]]
+                    if not node.toggled or self.get_row_id(row) in node.rows:
                         rows.append(row)
             else:
-
-
-                
-
-                rows = []
-                current_path = []
-                last_expanded = 0
-                if self.debug_expand: print "ROWS", self.sort, self.expand
+                last_row = None
                 for row in self.rows:
-                    while current_path and self.row_common_sorted_columns(row, current_path[-1]) < len(current_path):
-                        del current_path[-1]
-                    current_path_len = len(current_path)
-                    last_expanded = min(last_expanded, current_path_len)
-
-                    if current_path:
-                        last_row = current_path[-1]
-                        row_common_sorted_columns = self.row_common_sorted_columns(row, last_row)
-                        for current_path_len in xrange(current_path_len, row_common_sorted_columns):
-                            if (    last_expanded == current_path_len
-                                and self.is_expanded_node(last_row, current_path_len + 1)):
-                                last_expanded += 1
-                            current_path.append(last_row)
-                        current_path_len = row_common_sorted_columns
-
-                    current_path.append(row)
-
-                    if last_expanded == current_path_len:
+                    common = self.row_common_sorted_columns(row, last_row)
+                    expanded = True
+                    node = expand_tree
+                    for pos in xrange(0, common):
+                        if row[node.col] not in node.values or not node.values[row[node.col]].toggled:
+                            expanded = False
+                            break
+                        node = node.values[row[node.col]]
+                    if expanded:
                         rows.append(row)
-                        if self.is_expanded_node(row, last_expanded + 1):
-                            last_expanded += 1
-                            if self.debug_expand: print " . " * current_path_len + "[-]", row, self.get_row_id(row)
-                        else:
-                            if self.debug_expand: print " . " * current_path_len + "[+]", row, self.get_row_id(row)
-                    else:
-                        if self.debug_expand: print " . " * current_path_len + "[ ]", row, self.get_row_id(row)
-                if self.debug_expand: print "ENDROWS"
 
+                    last_row = row
             if all:
                 return rows
             else:
@@ -414,6 +406,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
 
     def row_common_sorted_columns(self, child, parent):
         """Calculate the number of columns two rows have in common"""
+        if parent is None or child is None: return 0
         if 'ww_expanded' in parent: return 0
         total_column_order = self.get_total_column_order({})
         if 'ww_expanded' in child: return len(total_column_order)
