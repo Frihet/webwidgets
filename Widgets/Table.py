@@ -696,7 +696,6 @@ class Table(BaseTable, Base.ActionInput):
         group_functions = {} # {'function_name': 'title'}
         disabled_functions = [] # ['function_name']
         disabled_columns = []
-        old_sort = []
         column_groups = {}
         """[column_group_name -> columnt_group_title]"""
 
