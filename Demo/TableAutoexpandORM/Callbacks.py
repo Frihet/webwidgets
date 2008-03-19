@@ -49,14 +49,34 @@ class SQLAlchemyFilter(Webwidgets.Filter):
                     else:
                         return True_
         else:
+            sort = self.sort + [('id', 'asc')]
+
+            prev_row_id = Model.Service.table.alias()
+            ands = []
+
+            row_cmp = False_
+            for col, order in reversed(sort):
+                prev_col = getattr(prev_row_id.c, col)
+                cur_col = getattr(Model.Service.table.c, col)
+                if order == 'asc':
+                    col_cmp = prev_col < cur_col
+                else:
+                    col_cmp = prev_col > cur_col
+                row_cmp = sqlalchemy.sql.or_(
+                    col_cmp, 
+                    sqlalchemy.sql.and_(prev_col == cur_col,
+                                        row_cmp))
+            prev_row_id_query = sqlalchemy.sql.select([prev_row_id.c.id], row_cmp)
+            for col, order in sort:
+                order = ['asc', 'desc'][order == 'asc'] # Sort backwards
+                prev_row_id_query = prev_row_id_query.order_by(getattr(getattr(prev_row_id.c, col), order)())
+            prev_row_id_query = prev_row_id_query.limit(1)
+            
             prev_row = Model.Service.table.alias()
-            # FIXME: prev_row.c.id + 1 == Model.Service.table.c.id
-            # does not work, since id:s are not in order for every
-            # sort! Must be the order of the current sort!
             query = query.select_from(
                 Model.Service.table.outerjoin(
                     prev_row,
-                    prev_row.c.id + 1 == Model.Service.table.c.id))
+                    prev_row.c.id == prev_row_id_query.as_scalar()))
 
             def tree_to_filter(node):
                 whens = []
@@ -76,7 +96,7 @@ class SQLAlchemyFilter(Webwidgets.Filter):
         filter = tree_to_filter(expand_tree)
         query = query.filter(filter)
 
-        for col, order in self.sort:
+        for col, order in sort:
             query = query.order_by(getattr(getattr(Model.Service.table.c, col), order)())
         query = query.order_by(Model.Service.table.c.id.asc())
         
@@ -84,10 +104,10 @@ class SQLAlchemyFilter(Webwidgets.Filter):
             query = query[(self.page - 1) * self.rows_per_page:
                           self.page * self.rows_per_page]
             
-        print "EXPAND", self.expand
+        #print "EXPAND", self.expand
         #print expand_tree
-        #print "QUERY"
-        #print query
+        print "QUERY"
+        print query
         return query
 
     def get_rows(self, all, output_options):
@@ -100,7 +120,7 @@ class SQLAlchemyFilter(Webwidgets.Filter):
         return str(row['id'])
 
     def get_pages(self):
-        return int(math.ceil(float(self.get_row_query(False, {}).count()) / self.rows_per_page))
+        return int(math.ceil(float(self.get_row_query(True, {}).count()) / self.rows_per_page))
 
 class MyWindow(object):
     class Body(object):
