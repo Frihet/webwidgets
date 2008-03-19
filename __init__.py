@@ -3,7 +3,7 @@
 # vim: set fileencoding=UTF-8 :
 
 """
-Webwidgets web developement framework
+Redback Webwidgets web developement framework
 
  - Copyright (C) 2006 uAnywhere, Egil Moeller <redhog@redhog.org>
 

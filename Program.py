@@ -104,7 +104,7 @@ class Program(WebKit.Page.Page):
         session = self.session()
         servlet = self.request().servletURI()
         if not session.hasValue(servlet):
-            session[servlet] = self.Session()
+            session[servlet] = self.Session(type(self))
         session[servlet].program = self
         fn = session[servlet].handle_request
 
@@ -167,10 +167,11 @@ class Program(WebKit.Page.Page):
         parent = None
         name = None
 
-        def __init__(self):
+        def __init__(self, Program):
             self.windows = Widgets.Base.ChildNodeDict(self)
             self.notifications = []
             self.output = None
+            self.Program = Program
             self.program = None
             self.AccessManager = self.AccessManager(self)
             self.session = self
