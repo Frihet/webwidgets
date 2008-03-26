@@ -780,19 +780,20 @@ class Table(BaseTable, Base.ActionInput):
             self.session.windows[self.win_id].arguments[self.argument_name + '_page'] = {
                 'widget':self, 'path': self.path + ['_', 'page']}
 
+        pages = self.filter.get_pages(output_options)
         page_id = Webwidgets.Utils.path_to_id(self.path + ['_', 'page'])
         page_active = self.get_active(self.path + ['_', 'page'])
         if page_active:
             self.session.windows[self.win_id].fields[page_id] = self
         back_active = page_active and self.page > 1
-        forward_active = page_active and self.page < self.filter.get_pages(output_options)
+        forward_active = page_active and self.page < pages
         info = {'html_id': page_id,
                 'first': 1,
                 'previous': self.page - 1,
                 'page': self.page,
-                'pages': self.filter.get_pages(output_options),
+                'pages': pages,
                 'next': self.page + 1,
-                'last': self.filter.get_pages(output_options),
+                'last': pages,
                 'back_active': ['', 'disabled="disabled"'][not back_active],
                 'forward_active': ['', 'disabled="disabled"'][not forward_active],
                 }

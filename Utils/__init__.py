@@ -318,28 +318,34 @@ class LocalizedImportError(ImportError):
 
 class ModuleDoesNotExistButWeDontCare(Exception): pass
 
+
+load_class_fail_cache = set()
+load_class_success_cache = {}
+
 def load_class(name, using = [], imp = None, global_dict = None, local_dict = None, module = None):
     if debug_class_loading: print "load_class: Importing %s using %s:" % (name, ' '.join(using))
 
     global_dict = global_dict or getattr(module, '__dict__', globals())
     local_dict = local_dict or locals()
     file = getattr(module, '__file__', '<Interactive>')
-    
+
     def load_class_absolute(name):
         if debug_class_loading: print "load_class:     Trying %s" % name
         components = name.split('.')
         mod = None
         prefix = list(components)
         while prefix:
-            try:
-                name = '.'.join(prefix)
-                if debug_class_loading: print "load_class:         Trying %s" % name
-                mod = (imp or __import__)(name, global_dict, local_dict)
-                break
-            except LocalizedImportError, e:
-                if e.location != name:
-                    raise
-                if debug_class_loading: print "load_class:             %s" % str(e)
+            name = '.'.join(prefix)
+            if debug_class_loading: print "load_class:         Trying %s" % name
+            if name not in load_class_fail_cache:
+                try:
+                    mod = (imp or __import__)(name, global_dict, local_dict)
+                    break
+                except LocalizedImportError, e:
+                    if e.location != name:
+                        raise
+                    if debug_class_loading: print "load_class:             %s" % str(e)
+                load_class_fail_cache.add(name)
             del prefix[-1]
         if mod is None:
             raise ModuleDoesNotExistButWeDontCare("Class does not exist:", name, using, file)
