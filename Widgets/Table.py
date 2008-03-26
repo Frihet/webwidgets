@@ -163,8 +163,6 @@ class TableSimpleModelFilter(Base.Filter):
             rows = []
             expand_tree = self.get_expand_tree()            
             if self.default_expand:
-                # This is just an optimization which also just happens
-                # to be easily implementable in SQL :)
                 for row in self.rows:
                     node = expand_tree
                     while not node.toggled and row[node.col] in node.values:
@@ -213,7 +211,7 @@ class TableSimpleModelFilter(Base.Filter):
         else:
             return int(math.ceil(float(len(self.rows)) / self.rows_per_page))
 
-    def get_columns(self, output_options):
+    def get_columns(self, output_options, only_sortable = False):
         res = Webwidgets.Utils.OrderedDict()
         for name, definition in self.columns.iteritems():
             if isinstance(definition, types.StringTypes):
@@ -394,7 +392,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
                                              for (value, sub) in self.values.iteritems()]))
 
     def get_expand_tree(self):
-        col_order = self.get_total_column_order({})
+        col_order = self.get_total_column_order({}, only_sortable = True)
 
         tree = self.ExpandTreeNode(col = col_order[0], toggled = not self.filter.default_expand)
 
@@ -418,7 +416,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
         """Calculate the number of columns two rows have in common"""
         if parent is None or child is None: return 0
         if 'ww_expanded' in parent: return 0
-        total_column_order = self.get_total_column_order({})
+        total_column_order = self.get_total_column_order({}, only_sortable = True)
         if 'ww_expanded' in child: return len(total_column_order)
 
         level = 0
@@ -451,16 +449,18 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
     def get_active_column(self, path):
         return self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, self.path + ['column'] + path)
 
-    def visible_columns(self, output_options):
+    def visible_columns(self, output_options, only_sortable = False):
         # Optimisation: we could have used get_active and constructed a path...
         return Webwidgets.Utils.OrderedDict([(name, definition)
                                              for (name, definition)
-                                             in self.mangle_columns(self.filter.get_columns(output_options), output_options).iteritems()
+                                             in self.mangle_columns(self.filter.get_columns(output_options, only_sortable),
+                                                                    output_options
+                                                                    ).iteritems()
                                              if self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id,
                                                                            self.path + ['_', 'column', name])])
 
-    def get_total_column_order(self, output_options):
-        visible_columns = self.visible_columns(output_options)
+    def get_total_column_order(self, output_options, only_sortable = False):
+        visible_columns = self.visible_columns(output_options, only_sortable = only_sortable)
         total_column_order = extend_to_dependent_columns(
             [column for column, dir in self.filter.sort],
             self.dependent_columns)
@@ -490,7 +490,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
         else:
             rendered_rows = []
             for row in xrange(node['top'], node['top'] + node['rows']):
-                rendered_rows.append({'cells':[''] * len(total_column_order),
+                rendered_rows.append({'cells':[''] * len(visible_columns),
                                       'type': RenderedRowTypeRow,
                                       'row': rows[row]})
         row = rendered_rows[0]['row']
@@ -990,7 +990,8 @@ class TableExpandableFilter(Base.Filter):
                 res.append(row['ww_expansion'])
         return res
 
-    def get_columns(self, output_options):
+    def get_columns(self, output_options, only_sortable = False):
+        if only_sortable: return self.filter.get_columns(output_options)
         res = Webwidgets.Utils.OrderedDict(expand_col = {"title": ''})
         res.update(self.filter.get_columns(output_options))
         return res
