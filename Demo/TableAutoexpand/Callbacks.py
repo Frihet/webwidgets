@@ -31,8 +31,9 @@ class MyWindow(object):
             default_expand = False
             def __init__(self, session, win_id, **attrs):
                 Webwidgets.Table.__init__(self, session, win_id, **attrs)
-                self.sort = [('country', 'asc'),
-                             ('provider', 'asc'),
+                self.pre_sort = [('country', 'asc'),
+                                 ]
+                self.sort = [('provider', 'asc'),
                              ('technology', 'asc'),
                              ('price', 'asc')]
                 self.rows = []

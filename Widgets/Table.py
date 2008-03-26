@@ -260,7 +260,7 @@ class TableSimpleModelFilter(Base.Filter):
                     diff = cmp(row1[col], row2[col])
                     if diff:
                         if order == 'desc': diff *= -1
-                    return diff
+                        return diff
                 return 0
             self.rows.sort(row_cmp)
         self.old_sort = self.sort
@@ -462,7 +462,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
     def get_total_column_order(self, output_options):
         visible_columns = self.visible_columns(output_options)
         total_column_order = extend_to_dependent_columns(
-            [column for column, dir in self.sort],
+            [column for column, dir in self.filter.sort],
             self.dependent_columns)
         return  [column for column in total_column_order
                  if column in visible_columns] + [column for column in visible_columns
@@ -651,6 +651,21 @@ def sort_to_order_by(sort, quote = "`"):
         return 'order by ' + ', '.join(order)
     return
 
+class TableSortFilter(Base.Filter):
+    class Sort(object):
+        def __get__(self, instance, owner):
+            if instance is None: instance = owner
+            return instance.pre_sort + instance.user_sort + instance.post_sort
+    sort = Sort()
+    
+    class UserSort(object):
+        def __get__(self, instance, owner):
+            if instance is None: instance = owner
+            return instance.filter.sort
+        def __set__(self, instance, value):
+            instance.filter.sort = value
+    user_sort = UserSort()
+    
 class TableFunctionColFilter(Base.Filter):
     # left = Table
     # right = Table
@@ -699,6 +714,10 @@ class Table(BaseTable, Base.ActionInput):
         column_groups = {}
         """[column_group_name -> columnt_group_title]"""
 
+        pre_sort = []
+        sort = []
+        post_sort = []
+        
         button_bars = {'bottom':
                        Webwidgets.Utils.OrderedDict([('paging_buttons',  {'level': 0}),
                                                      ('printable_link',  {'level': 2,
@@ -713,7 +732,7 @@ class Table(BaseTable, Base.ActionInput):
         # level < that button bars' level that are to be drawn.
 
     class RowFilters(BaseTable.RowFilters):
-        Filters = [TableFunctionColFilter] + BaseTable.RowFilters.Filters
+        Filters = [TableFunctionColFilter] + BaseTable.RowFilters.Filters + [TableSortFilter]
 
     def field_input(self, path, string_value):
         try:
@@ -724,7 +743,7 @@ class Table(BaseTable, Base.ActionInput):
             getattr(self.filter, 'field_input_' + sub_widget[0])(sub_widget[1:], string_value)
 
     def field_input_sort(self, path, string_value):
-        self.sort = string_to_sort(string_value)
+        self.filter.user_sort = string_to_sort(string_value)
     def field_input_page(self, path, string_value):
         self.page = int(string_value)
     def field_input_function(self, path, string_value):
@@ -737,7 +756,7 @@ class Table(BaseTable, Base.ActionInput):
         return getattr(self.filter, 'field_output_' + sub_widget[0])(sub_widget[1:])
 
     def field_output_sort(self, path):
-        return [sort_to_string(self.sort)]
+        return [sort_to_string(self.filter.user_sort)]
     def field_output_page(self, path):
         return [unicode(self.page)]
     def field_output_function(self, path):
@@ -746,7 +765,11 @@ class Table(BaseTable, Base.ActionInput):
         return []
 
     def get_active_sort(self, path):
-        if path and (  path[0] in self.disabled_columns
+        if path and (   path[0] in self.disabled_columns
+                     or [key for (key, order) in self.filter.pre_sort
+                         if key == path[0]]
+                     or [key for (key, order) in self.filter.post_sort
+                         if key == path[0]]
                      or path[0] in self.functions): return False
         return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['sort'] + path)
     def get_active_page(self, path):
@@ -882,8 +905,8 @@ class Table(BaseTable, Base.ActionInput):
                     'column': column,
                     'disabled': ['disabled="disabled"', ''][sort_active],
                     'caption': self._(definition["title"], output_options),
-                    'ww_classes': sort_to_classes(self.sort, reverse_dependent_columns.get(column, column)),
-                    'sort': sort_to_string(set_sort(self.sort, reverse_dependent_columns.get(column, column)))
+                    'ww_classes': sort_to_classes(self.filter.sort, reverse_dependent_columns.get(column, column)),
+                    'sort': sort_to_string(set_sort(self.filter.user_sort, reverse_dependent_columns.get(column, column)))
                     }
             if 'printable_version' in output_options:
                 headings.append("""
