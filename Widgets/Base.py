@@ -117,7 +117,7 @@ class Object(object):
     """If non-None and the model attribute is None, this class will be
     instantiated and the instance placed in the model attribute."""
 
-    Filters = []
+    WwFilters = []
     """Filter is a set of classes that are to be instantiated and
     chained together as filters for this object. Ech of these will
     have its filter attribute set to the next one, except for the last
@@ -127,7 +127,7 @@ class Object(object):
         """Creates a new object
             raise AttributeError(self, name)
 
-        @param filter: The next filter when building a filter
+        @param ww_filter: The next filter when building a filter
                        tree/chain. None for the root node, next filter
                        in chain otherwise.
         @param attrs: Any attributes to set for the object.
@@ -139,15 +139,15 @@ class Object(object):
         self.__dict__.update(attrs)
         self.setup_filter()
 
-    def setup_filter(self, name = 'filter', filter_classes = None, filter = None, object = None):
-        if filter is None: filter = self.__dict__.get(name, self)
+    def setup_filter(self, name = 'ww_filter', ww_filter_classes = None, ww_filter = None, object = None):
+        if ww_filter is None: ww_filter = self.__dict__.get(name, self)
         if object is None: object = self.__dict__.get('object', self)
-        if filter_classes is None: filter_classes = self.Filters
-        for filter_class in reversed(filter_classes):
+        if ww_filter_classes is None: ww_filter_classes = self.WwFilters
+        for filter_class in reversed(ww_filter_classes):
             if isinstance(filter_class, (str, unicode)):
                 filter_class = getattr(self, filter_class)
-            filter = filter_class(filter = filter, object = object)
-        setattr(self, name, filter) 
+            ww_filter = filter_class(ww_filter = ww_filter, object = object)
+        setattr(self, name, ww_filter) 
 
     def derive(cls, name = None, **members):
         return types.TypeType(name or 'anonymous', (cls,), members)
@@ -180,24 +180,24 @@ class Object(object):
 
 class Wrapper(Object):
     def __init__(self, model, *arg, **kw):
-        Object.__init__(self, model, filter = getattr(model, 'filter', None), *arg, **kw)
+        Object.__init__(self, model, ww_filter = getattr(model, 'ww_filter', None), *arg, **kw)
 
 class Model(Object):
     pass
 
 class Filter(Object):
     def __getattr__(self, name):
-        return getattr(self.filter, name)
+        return getattr(self.ww_filter, name)
     
     def __hasattr__(self, name):
-        return name in self.__dict__ or hasattr(self.filter, name)
+        return name in self.__dict__ or hasattr(self.ww_filter, name)
 
     def __setattr__(self, name, value):
         if (   name in self.__dict__
-            or not hasattr(self.filter, name)):
+            or not hasattr(self.ww_filter, name)):
             object.__setattr__(self, name, value)
         else:
-            setattr(self.filter, name, value)
+            setattr(self.ww_filter, name, value)
         
 class Widget(Object):
     """Widget is the base class for all widgets. It manages class name

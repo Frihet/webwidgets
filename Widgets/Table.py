@@ -112,7 +112,7 @@ class FunctionCell(SpecialCell):
                        
     def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
         enabled_functions = row.get('ww_functions', True)
-        row_id = table.filter.get_row_id(row)
+        row_id = table.ww_filter.get_row_id(row)
         rendered_functions = []
         for function, title in table.functions[column_name].iteritems():
             if enabled_functions is not True and function not in enabled_functions:
@@ -144,7 +144,7 @@ class ExpandCell(FunctionCell):
                                   active, output_options)
     
     def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
-        row_id = table.filter.get_row_id(row)
+        row_id = table.ww_filter.get_row_id(row)
         return self.draw_expand(table, row_id, row_id,
                                 row.get('ww_is_expanded', False),
                                 table.get_active(table.path + ['_', 'expand']),
@@ -173,7 +173,7 @@ class TableSimpleModelFilter(Base.Filter):
         self.ensure()
         if self.non_memory_storage:
             if all:
-                return self.filter.get_rows(all, output_options)
+                return self.ww_filter.get_rows(all, output_options)
             else:
                 return self.rows
         else:
@@ -209,13 +209,13 @@ class TableSimpleModelFilter(Base.Filter):
 
     def get_row_id(self, row):
         if self.non_memory_storage:
-            return self.filter.get_row_id(row)
+            return self.ww_filter.get_row_id(row)
         else:
             return str(row.get('ww_row_id', id(row)))
     
     def get_row_by_id(self, row_id):
         if self.non_memory_storage:
-            return self.filter.get_row_by_id(row_id)
+            return self.ww_filter.get_row_by_id(row_id)
         else:
             for row in self.rows:
                 if self.get_row_id(row) == row_id:
@@ -224,7 +224,7 @@ class TableSimpleModelFilter(Base.Filter):
 
     def get_pages(self, output_options):
         if self.non_memory_storage:
-            return self.filter.get_pages()
+            return self.ww_filter.get_pages()
         else:
             return int(math.ceil(float(len(self.rows)) / self.rows_per_page))
 
@@ -268,7 +268,7 @@ class TableSimpleModelFilter(Base.Filter):
     def reread(self):
         """Reload the list"""
         if self.non_memory_storage:
-            self.rows[:] = self.filter.get_rows(False, {})
+            self.rows[:] = self.ww_filter.get_rows(False, {})
         elif self.sort != self.old_sort:
             def row_cmp(row1, row2):
                 for col, order in self.sort:
@@ -288,7 +288,7 @@ class TablePrintableFilter(Base.Filter):
     # right = TableSimpleModelFilter
     
     def get_rows(self, output_options):
-        return self.filter.get_rows('printable_version' in output_options, output_options)
+        return self.ww_filter.get_rows('printable_version' in output_options, output_options)
 
 class TableRowsToTreeFilter(Base.Filter):
     """This filter creates the virtual tree of the table content,
@@ -297,7 +297,7 @@ class TableRowsToTreeFilter(Base.Filter):
         
     def get_tree(self, output_options):
         total_column_order = self.get_total_column_order(output_options)
-        rows = self.filter.get_rows(output_options)
+        rows = self.ww_filter.get_rows(output_options)
         tree = {'level': 0,
                 'rows': 0,
                 'children':[]}
@@ -377,19 +377,19 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
             raise NotImplementedError("get_pages")
 
     class RowFilters(Base.Filter):
-        Filters = [TablePrintableFilter, TableSimpleModelFilter]
+        WwFilters = [TablePrintableFilter, TableSimpleModelFilter]
 
     class TreeFilters(Base.Filter):
-        Filters = [TableRowsToTreeFilter]
+        WwFilters = [TableRowsToTreeFilter]
 
-    Filters = ["TreeFilters", "RowFilters"]
+    WwFilters = ["TreeFilters", "RowFilters"]
 
     def is_expanded_node(self, row, level):
         col = self.get_total_column_order({})[level - 1]
-        row_id = self.filter.get_row_id(row)
-        a = (    row_id in self.filter.expand
-             and col in self.filter.expand[row_id]['expanded_cols'])
-        b = self.filter.default_expand # Invert the result if default_expand is not True
+        row_id = self.ww_filter.get_row_id(row)
+        a = (    row_id in self.ww_filter.expand
+             and col in self.ww_filter.expand[row_id]['expanded_cols'])
+        b = self.ww_filter.default_expand # Invert the result if default_expand is not True
         return (a and not b) or (b and not a) # a xor b 
 
     class ExpandTreeNode(object):
@@ -411,9 +411,9 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
     def get_expand_tree(self):
         col_order = self.get_total_column_order({}, only_sortable = True)
 
-        tree = self.ExpandTreeNode(col = col_order[0], toggled = not self.filter.default_expand)
+        tree = self.ExpandTreeNode(col = col_order[0], toggled = not self.ww_filter.default_expand)
 
-        for row_id, row in self.filter.expand.iteritems():
+        for row_id, row in self.ww_filter.expand.iteritems():
             if not row['expanded_cols']:
                 continue
             node = tree
@@ -461,7 +461,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
         sub_widget = self.path_to_subwidget_path(path)
 
         if not self.active: return False
-        return getattr(self.filter, 'get_active_' + sub_widget[0])(sub_widget[1:])
+        return getattr(self.ww_filter, 'get_active_' + sub_widget[0])(sub_widget[1:])
 
     def get_active_column(self, path):
         return self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, self.path + ['column'] + path)
@@ -470,7 +470,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
         # Optimisation: we could have used get_active and constructed a path...
         return Webwidgets.Utils.OrderedDict([(name, definition)
                                              for (name, definition)
-                                             in self.mangle_columns(self.filter.get_columns(output_options, only_sortable),
+                                             in self.mangle_columns(self.ww_filter.get_columns(output_options, only_sortable),
                                                                     output_options
                                                                     ).iteritems()
                                              if self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id,
@@ -479,14 +479,14 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
     def get_total_column_order(self, output_options, only_sortable = False):
         visible_columns = self.visible_columns(output_options, only_sortable = only_sortable)
         total_column_order = extend_to_dependent_columns(
-            [column for column, dir in self.filter.sort],
+            [column for column, dir in self.ww_filter.sort],
             self.dependent_columns)
         return  [column for column in total_column_order
                  if column in visible_columns] + [column for column in visible_columns
                                                   if column not in total_column_order]
 
     def draw_tree(self, node, rows, output_options, first_level = 0, last_level = 0, single = False):
-        total_column_order = self.filter.get_total_column_order(output_options)
+        total_column_order = self.ww_filter.get_total_column_order(output_options)
         visible_columns = self.visible_columns(output_options)
         if node['children']:
             rendered_rows = []
@@ -550,9 +550,9 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
             value = row_widget.draw_child(row_widget.path + [column_name], value, output_options, True)
 
         expand_button = ""
-        expanded = self.filter.is_expanded_node(row, node_level)
+        expanded = self.ww_filter.is_expanded_node(row, node_level)
         if rowspan > 1 or (not expanded and not single):
-            row_id = self.filter.get_row_id(row)
+            row_id = self.ww_filter.get_row_id(row)
             expand_button = ExpandCellInstance.draw_expand(
                 self,
                 row_id,
@@ -567,16 +567,16 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
             'content': value}
 
     def child_for_row(self, row):
-        row_id = self.filter.get_row_id(row)
+        row_id = self.ww_filter.get_row_id(row)
         if row_id not in self.children:
-            #if hasattr(row, 'filter'): row = row.filter
+            #if hasattr(row, 'ww_filter'): row = row.ww_filter
             if not isinstance(row, Webwidgets.Widget):
                 row = TableRow(self.session, self.win_id, children = row)
             self.children[row_id] = row
         return self.children[row_id]
 
     def draw_rows(self, visible_columns, reverse_dependent_columns, output_options):
-        rows, tree = self.filter.get_tree(output_options)
+        rows, tree = self.ww_filter.get_tree(output_options)
 
         # Why we need this test here: rows_to_tree would create an empty
         # top-node for an empty set of rows, which draw_tree would
@@ -679,9 +679,9 @@ class TableSortFilter(Base.Filter):
     class UserSort(object):
         def __get__(self, instance, owner):
             if instance is None: instance = owner
-            return instance.filter.sort
+            return instance.ww_filter.sort
         def __set__(self, instance, value):
-            instance.filter.sort = value
+            instance.ww_filter.sort = value
     user_sort = UserSort()
     
 class TableFunctionColFilter(Base.Filter):
@@ -701,7 +701,7 @@ class TableFunctionColFilter(Base.Filter):
     def get_rows(self, output_options):
         return [self.mangle_row(row, output_options)
                 for row
-                in self.filter.get_rows(output_options)]        
+                in self.ww_filter.get_rows(output_options)]        
 
 class Table(BaseTable, Base.ActionInput):
     """Group By Ordering List is a special kind of table view that
@@ -750,7 +750,7 @@ class Table(BaseTable, Base.ActionInput):
         # level < that button bars' level that are to be drawn.
 
     class RowFilters(BaseTable.RowFilters):
-        Filters = [TableFunctionColFilter] + BaseTable.RowFilters.Filters + [TableSortFilter]
+        WwFilters = [TableFunctionColFilter] + BaseTable.RowFilters.WwFilters + [TableSortFilter]
 
     def field_input(self, path, string_value):
         try:
@@ -758,10 +758,10 @@ class Table(BaseTable, Base.ActionInput):
         except Webwidgets.Constants.NotASubwidgetException:
             return
         if string_value != '':
-            getattr(self.filter, 'field_input_' + sub_widget[0])(sub_widget[1:], string_value)
+            getattr(self.ww_filter, 'field_input_' + sub_widget[0])(sub_widget[1:], string_value)
 
     def field_input_sort(self, path, string_value):
-        self.filter.user_sort = string_to_sort(string_value)
+        self.ww_filter.user_sort = string_to_sort(string_value)
     def field_input_page(self, path, string_value):
         self.page = int(string_value)
     def field_input_function(self, path, string_value):
@@ -771,10 +771,10 @@ class Table(BaseTable, Base.ActionInput):
     
     def field_output(self, path):
         sub_widget = self.path_to_subwidget_path(path)
-        return getattr(self.filter, 'field_output_' + sub_widget[0])(sub_widget[1:])
+        return getattr(self.ww_filter, 'field_output_' + sub_widget[0])(sub_widget[1:])
 
     def field_output_sort(self, path):
-        return [sort_to_string(self.filter.user_sort)]
+        return [sort_to_string(self.ww_filter.user_sort)]
     def field_output_page(self, path):
         return [unicode(self.page)]
     def field_output_function(self, path):
@@ -784,9 +784,9 @@ class Table(BaseTable, Base.ActionInput):
 
     def get_active_sort(self, path):
         if path and (   path[0] in self.disabled_columns
-                     or [key for (key, order) in self.filter.pre_sort
+                     or [key for (key, order) in self.ww_filter.pre_sort
                          if key == path[0]]
-                     or [key for (key, order) in self.filter.post_sort
+                     or [key for (key, order) in self.ww_filter.post_sort
                          if key == path[0]]
                      or path[0] in self.functions): return False
         return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['sort'] + path)
@@ -821,7 +821,7 @@ class Table(BaseTable, Base.ActionInput):
             self.session.windows[self.win_id].arguments[self.argument_name + '_page'] = {
                 'widget':self, 'path': self.path + ['_', 'page']}
 
-        pages = self.filter.get_pages(output_options)
+        pages = self.ww_filter.get_pages(output_options)
         page_id = Webwidgets.Utils.path_to_id(self.path + ['_', 'page'])
         page_active = self.get_active(self.path + ['_', 'page'])
         if page_active:
@@ -923,8 +923,8 @@ class Table(BaseTable, Base.ActionInput):
                     'column': column,
                     'disabled': ['disabled="disabled"', ''][sort_active],
                     'caption': self._(definition["title"], output_options),
-                    'ww_classes': sort_to_classes(self.filter.sort, reverse_dependent_columns.get(column, column)),
-                    'sort': sort_to_string(set_sort(self.filter.user_sort, reverse_dependent_columns.get(column, column)))
+                    'ww_classes': sort_to_classes(self.ww_filter.sort, reverse_dependent_columns.get(column, column)),
+                    'sort': sort_to_string(set_sort(self.ww_filter.user_sort, reverse_dependent_columns.get(column, column)))
                     }
             if 'printable_version' in output_options:
                 headings.append("""
@@ -999,7 +999,7 @@ class TableExpandableFilter(Base.Filter):
     # API used by Table
     def get_rows(self, output_options):
         res = []
-        for row in self.filter.get_rows(output_options):
+        for row in self.ww_filter.get_rows(output_options):
             mangled_row = RowModelWrapper(model = row)
             mangled_row['expand_col'] = ExpandCellInstance
             res.append(mangled_row)
@@ -1009,9 +1009,9 @@ class TableExpandableFilter(Base.Filter):
         return res
 
     def get_columns(self, output_options, only_sortable = False):
-        if only_sortable: return self.filter.get_columns(output_options)
+        if only_sortable: return self.ww_filter.get_columns(output_options)
         res = Webwidgets.Utils.OrderedDict(expand_col = {"title": ''})
-        res.update(self.filter.get_columns(output_options))
+        res.update(self.ww_filter.get_columns(output_options))
         return res
 
     def field_input_expand(self, path, string_value):
@@ -1026,4 +1026,4 @@ class TableExpandableFilter(Base.Filter):
 
 class ExpandableTable(Table):
     class RowFilters(Table.RowFilters):
-        Filters = [TableExpandableFilter] + Table.RowFilters.Filters
+        WwFilters = [TableExpandableFilter] + Table.RowFilters.WwFilters
