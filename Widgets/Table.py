@@ -45,12 +45,8 @@ class TableRow(Base.CachingComposite): pass
 
 class RowModelWrapper(Base.Wrapper):
     def __init__(self, ww_model, *arg, **kw):
-        Base.Object.__init__(
-            self,
-            ww_model = ww_model,
-            ww_row_id = ww_model.get('ww_row_id', id(ww_model)),
-            *arg, **kw)
-        self.__dict__['items'] = {}
+        Base.Object.__init__(self, ww_model = ww_model, *arg, **kw)
+        self.__dict__['items'] = {'ww_row_id': ww_model.get('ww_row_id', id(ww_model))}
     def __setitem__(self, name, value):
         self.__dict__['items'][name] = value
     def __delitem__(self, name):
@@ -59,6 +55,11 @@ class RowModelWrapper(Base.Wrapper):
         if name in self.__dict__['items']:
             return self.__dict__['items'][name]
         return self.ww_model[name]
+    def get(self, name, value = None):
+        try:
+            return self[name]
+        except:
+            return value
     def iteritems(self):
         return itertools.chain(self.__dict__['items'].iteritems(),
                                self.ww_model.iteritems())
@@ -569,7 +570,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
     def child_for_row(self, row):
         row_id = self.ww_filter.get_row_id(row)
         if row_id not in self.children:
-            #if hasattr(row, 'ww_filter'): row = row.ww_filter
+            if hasattr(row, 'ww_filter'): row = row.ww_filter
             if not isinstance(row, Webwidgets.Widget):
                 row = TableRow(self.session, self.win_id, children = row)
             self.children[row_id] = row
@@ -684,6 +685,11 @@ class TableSortFilter(Base.Filter):
             instance.ww_filter.sort = value
     user_sort = UserSort()
     
+class TableRowWrapperFilter(Base.Filter):
+    def get_rows(self, output_options):
+        return [RowModelWrapper(ww_model = row)
+                for row in self.ww_filter.get_rows(output_options)]
+
 class TableFunctionColFilter(Base.Filter):
     # left = Table
     # right = Table
@@ -691,11 +697,8 @@ class TableFunctionColFilter(Base.Filter):
         if (    'printable_version' not in output_options
             and self.functions
             and 'ww_expanded' not in row):
-            # Copy the row and add the function columns
-            mangled_row = RowModelWrapper(ww_model = row)
             for name in self.functions.iterkeys():
-                mangled_row[name] = FunctionCellInstance
-            return mangled_row
+                row[name] = FunctionCellInstance
         return row
 
     def get_rows(self, output_options):
@@ -750,7 +753,7 @@ class Table(BaseTable, Base.ActionInput):
         # level < that button bars' level that are to be drawn.
 
     class RowFilters(BaseTable.RowFilters):
-        WwFilters = [TableFunctionColFilter] + BaseTable.RowFilters.WwFilters + [TableSortFilter]
+        WwFilters = [TableFunctionColFilter, TableRowWrapperFilter] + BaseTable.RowFilters.WwFilters + [TableSortFilter]
 
     def field_input(self, path, string_value):
         try:
@@ -1000,12 +1003,11 @@ class TableExpandableFilter(Base.Filter):
     def get_rows(self, output_options):
         res = []
         for row in self.ww_filter.get_rows(output_options):
-            mangled_row = RowModelWrapper(ww_model = row)
-            mangled_row['expand_col'] = ExpandCellInstance
-            res.append(mangled_row)
+            row['expand_col'] = ExpandCellInstance
+            res.append(row)
 
             if 'ww_expansion' in row and row.get('ww_is_expanded', False):
-                res.append(row['ww_expansion'])
+                res.append(RowModelWrapper(ww_model = row['ww_expansion']))
         return res
 
     def get_columns(self, output_options, only_sortable = False):
