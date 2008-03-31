@@ -377,13 +377,13 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
             """
             raise NotImplementedError("get_pages")
 
-    class RowFilters(Base.Filter):
+    class RowsFilters(Base.Filter):
         WwFilters = [TablePrintableFilter, TableSimpleModelFilter]
 
     class TreeFilters(Base.Filter):
         WwFilters = [TableRowsToTreeFilter]
 
-    WwFilters = ["TreeFilters", "RowFilters"]
+    WwFilters = ["TreeFilters", "RowsFilters"]
 
     def is_expanded_node(self, row, level):
         col = self.get_total_column_order({})[level - 1]
@@ -752,8 +752,8 @@ class Table(BaseTable, Base.ActionInput):
         # button_bars_level_force_min or there are other button bars with
         # level < that button bars' level that are to be drawn.
 
-    class RowFilters(BaseTable.RowFilters):
-        WwFilters = [TableFunctionColFilter, TableRowWrapperFilter] + BaseTable.RowFilters.WwFilters + [TableSortFilter]
+    class RowsFilters(BaseTable.RowsFilters):
+        WwFilters = [TableFunctionColFilter, TableRowWrapperFilter] + BaseTable.RowsFilters.WwFilters + [TableSortFilter]
 
     def field_input(self, path, string_value):
         try:
@@ -1027,5 +1027,5 @@ class TableExpandableFilter(Base.Filter):
         return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['expand'] + path)
 
 class ExpandableTable(Table):
-    class RowFilters(Table.RowFilters):
-        WwFilters = [TableExpandableFilter] + Table.RowFilters.WwFilters
+    class RowsFilters(Table.RowsFilters):
+        WwFilters = [TableExpandableFilter] + Table.RowsFilters.WwFilters
