@@ -43,35 +43,6 @@ def reverse_dependency(dependent_columns):
 
 class TableRow(Base.CachingComposite): pass
 
-class RowModelWrapper(Base.Wrapper):
-    def __init__(self, ww_model, *arg, **kw):
-        Base.Object.__init__(self, ww_model = ww_model, *arg, **kw)
-        self.__dict__['items'] = {'ww_row_id': ww_model.get('ww_row_id', id(ww_model))}
-    def __setitem__(self, name, value):
-        self.__dict__['items'][name] = value
-    def __delitem__(self, name):
-        del self.__dict__['items'][name]
-    def __getitem__(self, name):
-        if name in self.__dict__['items']:
-            return self.__dict__['items'][name]
-        return self.ww_model[name]
-    def get(self, name, value = None):
-        try:
-            return self[name]
-        except:
-            return value
-    def iteritems(self):
-        return itertools.chain(self.__dict__['items'].iteritems(),
-                               self.ww_model.iteritems())
-    def iterkeys(self):
-        return itertools.imap(lambda (name, value): name,
-                              self.iteritems())
-    def itervalues(self):
-        return itertools.imap(lambda (name, value): value,
-                              self.iteritems())
-    def __iter__(self):
-        return self.iterkeys()
-
 class RenderedRowType(object): pass
 class RenderedRowTypeRow(RenderedRowType): pass
 class RenderedRowTypeHeading(RenderedRowType): pass
@@ -291,6 +262,11 @@ class TablePrintableFilter(Base.Filter):
     def get_rows(self, output_options):
         return self.ww_filter.get_rows('printable_version' in output_options, output_options)
 
+class TableRowWrapperFilter(Base.Filter):
+    def get_rows(self, output_options):
+        return [self.TableRowModelWrapper(table = self.object, ww_model = row)
+                for row in self.ww_filter.get_rows(output_options)]
+
 class TableRowsToTreeFilter(Base.Filter):
     """This filter creates the virtual tree of the table content,
     where rows that merges a cell with a previous row, are children of
@@ -378,12 +354,43 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
             raise NotImplementedError("get_pages")
 
     class RowsFilters(Base.Filter):
-        WwFilters = [TablePrintableFilter, TableSimpleModelFilter]
+        WwFilters = [TableRowWrapperFilter, TablePrintableFilter, TableSimpleModelFilter]
 
     class TreeFilters(Base.Filter):
         WwFilters = [TableRowsToTreeFilter]
 
     WwFilters = ["TreeFilters", "RowsFilters"]
+
+    class TableRowModelWrapper(Base.Wrapper):
+        def __init__(self, ww_model, *arg, **kw):
+            Base.Object.__init__(self, ww_model = ww_model, *arg, **kw)
+            self.__dict__['items'] = {}
+            self['ww_row_id'] = ww_model.get('ww_row_id', id(ww_model))
+            
+        def __setitem__(self, name, value):
+            self.__dict__['items'][name] = value
+        def __delitem__(self, name):
+            del self.__dict__['items'][name]
+        def __getitem__(self, name):
+            if name in self.__dict__['items']:
+                return self.__dict__['items'][name]
+            return self.ww_model[name]
+        def get(self, name, value = None):
+            try:
+                return self[name]
+            except:
+                return value
+        def iteritems(self):
+            return itertools.chain(self.__dict__['items'].iteritems(),
+                                   self.ww_model.iteritems())
+        def iterkeys(self):
+            return itertools.imap(lambda (name, value): name,
+                                  self.iteritems())
+        def itervalues(self):
+            return itertools.imap(lambda (name, value): value,
+                                  self.iteritems())
+        def __iter__(self):
+            return self.iterkeys()
 
     def is_expanded_node(self, row, level):
         col = self.get_total_column_order({})[level - 1]
@@ -572,6 +579,9 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
         if row_id not in self.children:
             if hasattr(row, 'ww_filter'): row = row.ww_filter
             if not isinstance(row, Webwidgets.Widget):
+                #if not isinstance(row, dict):
+                #    row = dict([(name, getattr(row, name)),
+                #                for name in self.visible_columns({}, True)])
                 row = TableRow(self.session, self.win_id, children = row)
             self.children[row_id] = row
         return self.children[row_id]
@@ -685,11 +695,6 @@ class TableSortFilter(Base.Filter):
             instance.ww_filter.sort = value
     user_sort = UserSort()
     
-class TableRowWrapperFilter(Base.Filter):
-    def get_rows(self, output_options):
-        return [RowModelWrapper(ww_model = row)
-                for row in self.ww_filter.get_rows(output_options)]
-
 class TableFunctionColFilter(Base.Filter):
     # left = Table
     # right = Table
@@ -753,7 +758,7 @@ class Table(BaseTable, Base.ActionInput):
         # level < that button bars' level that are to be drawn.
 
     class RowsFilters(BaseTable.RowsFilters):
-        WwFilters = [TableFunctionColFilter, TableRowWrapperFilter] + BaseTable.RowsFilters.WwFilters + [TableSortFilter]
+        WwFilters = [TableFunctionColFilter] + BaseTable.RowsFilters.WwFilters + [TableSortFilter]
 
     def field_input(self, path, string_value):
         try:
@@ -1007,7 +1012,7 @@ class TableExpandableFilter(Base.Filter):
             res.append(row)
 
             if 'ww_expansion' in row and row.get('ww_is_expanded', False):
-                res.append(RowModelWrapper(ww_model = row['ww_expansion']))
+                res.append(self.TableRowModelWrapper(ww_model = row['ww_expansion']))
         return res
 
     def get_columns(self, output_options, only_sortable = False):
