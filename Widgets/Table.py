@@ -25,7 +25,7 @@
 the user to sort the rows and simultaneously group the rows according
 to their content and the sorting."""
 
-import Webwidgets.Constants, Webwidgets.Utils, re, math, cgi, types
+import Webwidgets.Constants, Webwidgets.Utils, re, math, cgi, types, itertools
 import Base
 
 def extend_to_dependent_columns(columns, dependent_columns):
@@ -43,16 +43,33 @@ def reverse_dependency(dependent_columns):
 
 class TableRow(Base.CachingComposite): pass
 
-def copy_row(row):
-    if isinstance(row, Base.Widget):
-        copy = type(row)(row.session, row.win_id, children = row.children)
-        copy.name = row.name
-        copy.parent = row.parent
-    else:
-        copy = dict()
-        copy.update(row)
-    copy['ww_row_id'] = row.get('ww_row_id', id(row))
-    return copy
+class RowModelWrapper(Base.Wrapper):
+    def __init__(self, model, *arg, **kw):
+        Base.Object.__init__(
+            self,
+            model = model,
+            ww_row_id = model.get('ww_row_id', id(model)),
+            *arg, **kw)
+        self.__dict__['items'] = {}
+    def __setitem__(self, name, value):
+        self.__dict__['items'][name] = value
+    def __delitem__(self, name):
+        del self.__dict__['items'][name]
+    def __getitem__(self, name):
+        if name in self.__dict__['items']:
+            return self.__dict__['items'][name]
+        return self.model[name]
+    def iteritems(self):
+        return itertools.chain(self.__dict__['items'].iteritems(),
+                               self.model.iteritems())
+    def iterkeys(self):
+        return itertools.imap(lambda (name, value): name,
+                              self.iteritems())
+    def itervalues(self):
+        return itertools.imap(lambda (name, value): value,
+                              self.iteritems())
+    def __iter__(self):
+        return self.iterkeys()
 
 class RenderedRowType(object): pass
 class RenderedRowTypeRow(RenderedRowType): pass
@@ -552,6 +569,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
     def child_for_row(self, row):
         row_id = self.filter.get_row_id(row)
         if row_id not in self.children:
+            #if hasattr(row, 'filter'): row = row.filter
             if not isinstance(row, Webwidgets.Widget):
                 row = TableRow(self.session, self.win_id, children = row)
             self.children[row_id] = row
@@ -674,7 +692,7 @@ class TableFunctionColFilter(Base.Filter):
             and self.functions
             and 'ww_expanded' not in row):
             # Copy the row and add the function columns
-            mangled_row = copy_row(row)
+            mangled_row = RowModelWrapper(model = row)
             for name in self.functions.iterkeys():
                 mangled_row[name] = FunctionCellInstance
             return mangled_row
@@ -982,7 +1000,7 @@ class TableExpandableFilter(Base.Filter):
     def get_rows(self, output_options):
         res = []
         for row in self.filter.get_rows(output_options):
-            mangled_row = copy_row(row)
+            mangled_row = RowModelWrapper(model = row)
             mangled_row['expand_col'] = ExpandCellInstance
             res.append(mangled_row)
 

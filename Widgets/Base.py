@@ -178,6 +178,10 @@ class Object(object):
     def __repr__(self):
         return str(self)
 
+class Wrapper(Object):
+    def __init__(self, model, *arg, **kw):
+        Object.__init__(self, model, filter = getattr(model, 'filter', None), *arg, **kw)
+
 class Model(Object):
     pass
 
