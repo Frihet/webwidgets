@@ -833,7 +833,11 @@ class DictComposite(Composite):
         try:
             return self.children[name]
         except:
-            raise KeyError("No such child %s to %s" % (name, str(self)))
+            try:
+                e = sys.exc_info()
+                raise KeyError, ("No such child %s to %s" % (name, str(self)), e[1]), e[2]
+            finally:
+                del e
 
     def __setitem__(self, name, value):
         """Adds a new child widget"""
