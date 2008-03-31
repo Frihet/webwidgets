@@ -44,11 +44,11 @@ def reverse_dependency(dependent_columns):
 class TableRow(Base.CachingComposite): pass
 
 class RowModelWrapper(Base.Wrapper):
-    def __init__(self, model, *arg, **kw):
+    def __init__(self, ww_model, *arg, **kw):
         Base.Object.__init__(
             self,
-            model = model,
-            ww_row_id = model.get('ww_row_id', id(model)),
+            ww_model = ww_model,
+            ww_row_id = ww_model.get('ww_row_id', id(ww_model)),
             *arg, **kw)
         self.__dict__['items'] = {}
     def __setitem__(self, name, value):
@@ -58,10 +58,10 @@ class RowModelWrapper(Base.Wrapper):
     def __getitem__(self, name):
         if name in self.__dict__['items']:
             return self.__dict__['items'][name]
-        return self.model[name]
+        return self.ww_model[name]
     def iteritems(self):
         return itertools.chain(self.__dict__['items'].iteritems(),
-                               self.model.iteritems())
+                               self.ww_model.iteritems())
     def iterkeys(self):
         return itertools.imap(lambda (name, value): name,
                               self.iteritems())
@@ -155,7 +155,7 @@ ExpandCellInstance = ExpandCell()
 
 class TableSimpleModelFilter(Base.Filter):
     # left = TablePrintableFilter
-    # right = BaseTable.Model
+    # right = BaseTable.WwModel
 
     debug_expand = False
 
@@ -337,7 +337,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
     in the table.
     """
 
-    class Model(Base.Model):
+    class WwModel(Base.Model):
         columns = {}
         """{column_name: title | {"title":title, ...}}"""
         dependent_columns = {}
@@ -692,7 +692,7 @@ class TableFunctionColFilter(Base.Filter):
             and self.functions
             and 'ww_expanded' not in row):
             # Copy the row and add the function columns
-            mangled_row = RowModelWrapper(model = row)
+            mangled_row = RowModelWrapper(ww_model = row)
             for name in self.functions.iterkeys():
                 mangled_row[name] = FunctionCellInstance
             return mangled_row
@@ -723,7 +723,7 @@ class Table(BaseTable, Base.ActionInput):
     be done by e.g a database back-end.
     """
     
-    class Model(BaseTable.Model):
+    class WwModel(BaseTable.WwModel):
         argument_name = None
         functions = {} # {'column_name': {'function_name': 'title'}}
         group_functions = {} # {'function_name': 'title'}
@@ -1000,7 +1000,7 @@ class TableExpandableFilter(Base.Filter):
     def get_rows(self, output_options):
         res = []
         for row in self.ww_filter.get_rows(output_options):
-            mangled_row = RowModelWrapper(model = row)
+            mangled_row = RowModelWrapper(ww_model = row)
             mangled_row['expand_col'] = ExpandCellInstance
             res.append(mangled_row)
 

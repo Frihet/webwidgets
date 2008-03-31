@@ -109,11 +109,11 @@ class Object(object):
     some ther class, this is the ww_class_path and __name__ of that
     other class joined. The path is dot-separated."""
 
-    model = None
+    ww_model = None
     """If non-None, any attribute not found on this object will be
     searched for on this object."""
     
-    Model = None
+    WwModel = None
     """If non-None and the model attribute is None, this class will be
     instantiated and the instance placed in the model attribute."""
 
@@ -132,10 +132,10 @@ class Object(object):
                        in chain otherwise.
         @param attrs: Any attributes to set for the object.
         """
-        if "model" in attrs:
-            self.model = attrs.pop('model')
-        if self.model is None and self.Model is not None:
-            self.model = self.Model()
+        if "ww_model" in attrs:
+            self.ww_model = attrs.pop('ww_model')
+        if self.ww_model is None and self.WwModel is not None:
+            self.ww_model = self.WwModel()
         self.__dict__.update(attrs)
         self.setup_filter()
 
@@ -154,20 +154,20 @@ class Object(object):
     derive = classmethod(derive)
 
     def __getattr__(self, name):
-        if self.model is None:
+        if self.ww_model is None:
             raise AttributeError(self, name)
-        return getattr(self.model, name)
+        return getattr(self.ww_model, name)
         
     def __hasattr__(self, name):
-        return name in self.__dict__ or self.model is not None and hasattr(self.model, name)
+        return name in self.__dict__ or self.ww_model is not None and hasattr(self.ww_model, name)
 
     def __setattr__(self, name, value):
-        if (   self.model is None
+        if (   self.ww_model is None
             or name in self.__dict__
-            or not hasattr(self.model, name)):
+            or not hasattr(self.ww_model, name)):
             object.__setattr__(self, name, value)
         else:
-            setattr(self.model, name, value)
+            setattr(self.ww_model, name, value)
 
     def __unicode__(self):
         return object.__repr__(self)
@@ -179,8 +179,8 @@ class Object(object):
         return str(self)
 
 class Wrapper(Object):
-    def __init__(self, model, *arg, **kw):
-        Object.__init__(self, model, ww_filter = getattr(model, 'ww_filter', None), *arg, **kw)
+    def __init__(self, ww_model, *arg, **kw):
+        Object.__init__(self, ww_model, ww_filter = getattr(ww_model, 'ww_filter', None), *arg, **kw)
 
 class Model(Object):
     pass
