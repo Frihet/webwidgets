@@ -180,17 +180,26 @@ class Object(object):
 
 class Wrapper(Object):
     def __init__(self, ww_model, **attrs):
-        Object.__init__(self, ww_model, ww_filter = getattr(ww_model, 'ww_filter', None), **attrs)
+        if hasattr(ww_model, 'ww_filter'):
+            attrs['ww_filter'] = ww_model.ww_filter
+        Object.__init__(self, ww_model = ww_model, **attrs)
 
 class PersistentWrapper(Wrapper):
     def __new__(cls, ww_model, **attrs):
         if 'wrappers' not in cls.__dict__:
                 cls.wrappers = {}
         if id(ww_model) not in cls.wrappers:
-            cls.wrappers[id(ww_model)] = Object.__new__(cls, ww_model, **attrs)
+            wrapper = cls.wrappers[id(ww_model)] = Wrapper.__new__(cls, ww_model = ww_model, **attrs)
+            wrapper.ww_first_init(ww_model = ww_model, **attrs)
         else:
-            cls.wrappers[id(ww_model)].__dict__.update(attrs)
-        return cls.wrappers[id(ww_model)]
+            wrapper = cls.wrappers[id(ww_model)]
+        return wrapper
+
+    def __init__(self, *arg, **kw):
+        self.__dict__.update(kw)
+    
+    def ww_first_init(self, *arg, **kw):
+        Wrapper.__init__(self, *arg, **kw)
 
 class Model(Object):
     pass

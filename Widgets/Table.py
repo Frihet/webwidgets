@@ -183,10 +183,11 @@ class TableSimpleModelFilter(Base.Filter):
         if self.non_memory_storage:
             return self.ww_filter.get_row_id(row)
         else:
-            if isinstance(row, dict):
-                return str(row.get('ww_row_id', id(row)))
-            else:
-                return str(getattr(row, 'ww_row_id', id(row)))
+            return id(row)
+            #if isinstance(row, dict):
+            #    return str(row.get('ww_row_id', id(row)))
+            #else:
+            #    return str(getattr(row, 'ww_row_id', id(row)))
     
     def get_row_by_id(self, row_id):
         if self.non_memory_storage:
@@ -269,6 +270,9 @@ class TableRowWrapperFilter(Base.Filter):
     def get_rows(self, output_options):
         return [self.TableRowModelWrapper(table = self.object, ww_model = row)
                 for row in self.ww_filter.get_rows(output_options)]
+
+    def get_row_id(self, row):
+        return self.ww_filter.get_row_id(row.ww_model)
 
     def get_row_by_id(self, row_id):
         return self.TableRowModelWrapper(
@@ -361,19 +365,23 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
             """
             raise NotImplementedError("get_pages")
 
+    class SourceFilters(Base.Filter):
+        WwFilters = [TableSimpleModelFilter]
+
     class RowsFilters(Base.Filter):
-        WwFilters = [TableRowWrapperFilter, TablePrintableFilter, TableSimpleModelFilter]
+        WwFilters = [TableRowWrapperFilter, TablePrintableFilter]
 
     class TreeFilters(Base.Filter):
         WwFilters = [TableRowsToTreeFilter]
 
-    WwFilters = ["TreeFilters", "RowsFilters"]
+    WwFilters = ["TreeFilters", "RowsFilters", "SourceFilters"]
 
     class TableRowModelWrapper(Base.PersistentWrapper):
-        def __init__(self, ww_model, *arg, **kw):
-            Base.Object.__init__(self, ww_model = ww_model, *arg, **kw)
+        def ww_first_init(self, ww_model, *arg, **kw):
+            Base.PersistentWrapper.ww_first_init(self, ww_model = ww_model, *arg, **kw)
             self.__dict__['items'] = {}
 
+            # FIXME: Just remove this stuff I guess? Shouldn't be used...
             if isinstance(ww_model, dict):
                 self.ww_row_id = ww_model.get('ww_row_id', id(ww_model))
             else:
@@ -772,7 +780,7 @@ class Table(BaseTable, Base.ActionInput):
     def field_input_page(self, path, string_value):
         self.page = int(string_value)
     def field_input_function(self, path, string_value):
-        self.notify('function', path[0], int(string_value))
+        self.notify('function', path[0], string_value)
     def field_input_group_function(self, path, string_value):
         self.notify('group_function', path[0])
     
