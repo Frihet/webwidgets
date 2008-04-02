@@ -83,7 +83,7 @@ class FunctionCell(SpecialCell):
                        'value': value}
                        
     def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
-        enabled_functions = row.get('ww_functions', True)
+        enabled_functions = getattr(row, 'ww_functions', True)
         row_id = table.ww_filter.get_row_id(row)
         rendered_functions = []
         for function, title in table.functions[column_name].iteritems():
@@ -118,7 +118,7 @@ class ExpandCell(FunctionCell):
     def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
         row_id = table.ww_filter.get_row_id(row)
         return self.draw_expand(table, row_id, row_id,
-                                row.get('ww_is_expanded', False),
+                                getattr(row, 'ww_is_expanded', False),
                                 table.get_active(table.path + ['_', 'expand']),
                                 output_options)
 
@@ -183,7 +183,10 @@ class TableSimpleModelFilter(Base.Filter):
         if self.non_memory_storage:
             return self.ww_filter.get_row_id(row)
         else:
-            return str(row.get('ww_row_id', id(row)))
+            if isinstance(row, dict):
+                return str(row.get('ww_row_id', id(row)))
+            else:
+                return str(getattr(row, 'ww_row_id', id(row)))
     
     def get_row_by_id(self, row_id):
         if self.non_memory_storage:
@@ -267,6 +270,11 @@ class TableRowWrapperFilter(Base.Filter):
         return [self.TableRowModelWrapper(table = self.object, ww_model = row)
                 for row in self.ww_filter.get_rows(output_options)]
 
+    def get_row_by_id(self, row_id):
+        return self.TableRowModelWrapper(
+            table = self.object,
+            ww_model = self.ww_filter.get_row_by_id(row_id))
+    
 class TableRowsToTreeFilter(Base.Filter):
     """This filter creates the virtual tree of the table content,
     where rows that merges a cell with a previous row, are children of
@@ -279,14 +287,14 @@ class TableRowsToTreeFilter(Base.Filter):
                 'rows': 0,
                 'children':[]}
         for row_num, row in enumerate(rows):
-            row = self.child_for_row(row)
+            child_row = self.child_for_row(row)
             node = tree
             node['rows'] += 1
-            if 'ww_expanded' in row:
+            if 'ww_expanded' in child_row:
                 node['children'].append({'level': node['level'] + 1,
                                          'top': row_num,
                                          'rows': 1,
-                                         'value': row['ww_expanded'],
+                                         'value': child_row['ww_expanded'],
                                          'children':[]})
             else:
                 for column in total_column_order:
@@ -295,13 +303,13 @@ class TableRowsToTreeFilter(Base.Filter):
                              and 'value' in node['children'][-1]
                              and (   not self.dont_merge_widgets
                                   or (    not isinstance(node['children'][-1]['value'], Base.Widget)
-                                      and not isinstance(row[column], Base.Widget)))
-                             and node['children'][-1]['value'] == row[column])
+                                      and not isinstance(child_row[column], Base.Widget)))
+                             and node['children'][-1]['value'] == child_row[column])
                     if not merge:
                         node['children'].append({'level': node['level'] + 1,
                                                  'top': row_num,
                                                  'rows': 0,
-                                                 'value': row[column],
+                                                 'value': child_row[column],
                                                  'children':[]})
                     node = node['children'][-1]
                     node['rows'] += 1
@@ -361,36 +369,23 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
 
     WwFilters = ["TreeFilters", "RowsFilters"]
 
-    class TableRowModelWrapper(Base.Wrapper):
+    class TableRowModelWrapper(Base.PersistentWrapper):
         def __init__(self, ww_model, *arg, **kw):
             Base.Object.__init__(self, ww_model = ww_model, *arg, **kw)
             self.__dict__['items'] = {}
-            self['ww_row_id'] = ww_model.get('ww_row_id', id(ww_model))
-            
-        def __setitem__(self, name, value):
-            self.__dict__['items'][name] = value
-        def __delitem__(self, name):
-            del self.__dict__['items'][name]
-        def __getitem__(self, name):
-            if name in self.__dict__['items']:
-                return self.__dict__['items'][name]
-            return self.ww_model[name]
-        def get(self, name, value = None):
-            try:
-                return self[name]
-            except:
-                return value
-        def iteritems(self):
-            return itertools.chain(self.__dict__['items'].iteritems(),
-                                   self.ww_model.iteritems())
-        def iterkeys(self):
-            return itertools.imap(lambda (name, value): name,
-                                  self.iteritems())
-        def itervalues(self):
-            return itertools.imap(lambda (name, value): value,
-                                  self.iteritems())
-        def __iter__(self):
-            return self.iterkeys()
+
+            if isinstance(ww_model, dict):
+                self.ww_row_id = ww_model.get('ww_row_id', id(ww_model))
+            else:
+                self.ww_row_id = getattr(ww_model, 'ww_row_id', id(ww_model))
+
+        def __getattr__(self, name):
+            if isinstance(self.ww_model, dict):
+                if name not in self.ww_model:
+                    raise AttributeError(self.ww_model, name)
+                return self.ww_model[name]
+            else:
+                return getattr(self.ww_model, name)
 
     def is_expanded_node(self, row, level):
         col = self.get_total_column_order({})[level - 1]
@@ -427,7 +422,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
             node = tree
             for pos in xrange(0, len(col_order) - 1): # You can not expand/collapse the last column
                 col = col_order[pos]
-                value = row['row'][col]
+                value = getattr(row['row'], col)
                 if value not in node.values:
                     next_col = col_order[pos + 1]
                     node.values[value] = self.ExpandTreeNode(col=next_col)
@@ -520,7 +515,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
                                       'row': rows[row]})
         row = rendered_rows[0]['row']
         if 'value' in node:
-            if 'ww_expanded' in row:
+            if hasattr(row, 'ww_expanded'):
                 rendered_rows[0]['cells'] = [
                     self.draw_extended_row(
                     output_options, row, node['value'],
@@ -552,8 +547,8 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
                 output_options, row, self,
                 row_num, column_name, rowspan, colspan, first_level, last_level)
         else:
-            html_class = row.get('ww_class', []) + ['column_first_level_%s' % first_level,
-                                                    'column_last_level_%s' % last_level]
+            html_class = getattr(row, 'ww_class', []) + ['column_first_level_%s' % first_level,
+                                                         'column_last_level_%s' % last_level]
             row_widget = self.child_for_row(row)
             value = row_widget.draw_child(row_widget.path + [column_name], value, output_options, True)
 
@@ -579,10 +574,13 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
         if row_id not in self.children:
             if hasattr(row, 'ww_filter'): row = row.ww_filter
             if not isinstance(row, Webwidgets.Widget):
-                #if not isinstance(row, dict):
-                #    row = dict([(name, getattr(row, name)),
-                #                for name in self.visible_columns({}, True)])
-                row = TableRow(self.session, self.win_id, children = row)
+                if hasattr(row, 'ww_expanded'):
+                    children = {'ww_expanded': row.ww_expanded}
+                else:
+                    children = dict([(name, getattr(row, name))
+                                     for name in self.visible_columns({})])
+                row = TableRow(self.session, self.win_id,
+                               children = children)
             self.children[row_id] = row
         return self.children[row_id]
 
@@ -603,16 +601,16 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
     def append_classes(self, rendered_rows, output_options):
         for row_num, rendered_row in enumerate(rendered_rows):
             rendered_row['class'] = (  ['row_' + ['even', 'odd'][row_num % 2]]
-                                     + rendered_row['row'].get('ww_class', []))
+                                     + getattr(rendered_row['row'], 'ww_class', []))
 
     def mangle_rendered_rows(self, rendered_rows, visible_columns, reverse_dependent_columns, output_options):
         self.append_classes(rendered_rows, output_options)
         return rendered_rows
 
-    def draw_table(self, rows, output_options):
+    def draw_table(self, rendered_rows, output_options):
         return "<table>%s</table>" % '\n'.join(['<tr class="%s">%s</tr>' % (' '.join(row.get('class', [])),
                                                                             ''.join(row.get('cells', [])))
-                                                for row in rows])
+                                                for row in rendered_rows])
     
     def mangle_output(self, table, output_options):
         return table
@@ -623,6 +621,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
                                                     {}))
         reverse_dependent_columns = reverse_dependency(self.dependent_columns)
         visible_columns = self.visible_columns(output_options)
+
         return self.mangle_output(
             self.draw_table(
                 self.mangle_rendered_rows(
@@ -701,9 +700,9 @@ class TableFunctionColFilter(Base.Filter):
     def mangle_row(self, row, output_options):
         if (    'printable_version' not in output_options
             and self.functions
-            and 'ww_expanded' not in row):
+            and not hasattr(row, 'ww_expanded')):
             for name in self.functions.iterkeys():
-                row[name] = FunctionCellInstance
+                setattr(row, name, FunctionCellInstance)
         return row
 
     def get_rows(self, output_options):
@@ -1008,11 +1007,11 @@ class TableExpandableFilter(Base.Filter):
     def get_rows(self, output_options):
         res = []
         for row in self.ww_filter.get_rows(output_options):
-            row['expand_col'] = ExpandCellInstance
+            row.expand_col = ExpandCellInstance
             res.append(row)
 
-            if 'ww_expansion' in row and row.get('ww_is_expanded', False):
-                res.append(self.TableRowModelWrapper(ww_model = row['ww_expansion']))
+            if hasattr(row, 'ww_expansion') and getattr(row, 'ww_is_expanded', False):
+                res.append(self.TableRowModelWrapper(ww_model = row.ww_expansion))
         return res
 
     def get_columns(self, output_options, only_sortable = False):
@@ -1023,7 +1022,7 @@ class TableExpandableFilter(Base.Filter):
 
     def field_input_expand(self, path, string_value):
         row = self.get_row_by_id(string_value)
-        row['ww_is_expanded'] = not row.get('ww_is_expanded', False)
+        row.ww_is_expanded = not getattr(row, 'ww_is_expanded', False)
 
     def field_output_expand(self, path):
         return []

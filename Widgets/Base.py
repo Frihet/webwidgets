@@ -179,8 +179,18 @@ class Object(object):
         return str(self)
 
 class Wrapper(Object):
-    def __init__(self, ww_model, *arg, **kw):
-        Object.__init__(self, ww_model, ww_filter = getattr(ww_model, 'ww_filter', None), *arg, **kw)
+    def __init__(self, ww_model, **attrs):
+        Object.__init__(self, ww_model, ww_filter = getattr(ww_model, 'ww_filter', None), **attrs)
+
+class PersistentWrapper(Wrapper):
+    def __new__(cls, ww_model, **attrs):
+        if 'wrappers' not in cls.__dict__:
+                cls.wrappers = {}
+        if id(ww_model) not in cls.wrappers:
+            cls.wrappers[id(ww_model)] = Object.__new__(cls, ww_model, **attrs)
+        else:
+            cls.wrappers[id(ww_model)].__dict__.update(attrs)
+        return cls.wrappers[id(ww_model)]
 
 class Model(Object):
     pass
