@@ -183,11 +183,7 @@ class TableSimpleModelFilter(Base.Filter):
         if self.non_memory_storage:
             return self.ww_filter.get_row_id(row)
         else:
-            return id(row)
-            #if isinstance(row, dict):
-            #    return str(row.get('ww_row_id', id(row)))
-            #else:
-            #    return str(getattr(row, 'ww_row_id', id(row)))
+            return str(id(row))
     
     def get_row_by_id(self, row_id):
         if self.non_memory_storage:
@@ -272,12 +268,13 @@ class TableRowWrapperFilter(Base.Filter):
                 for row in self.ww_filter.get_rows(output_options)]
 
     def get_row_id(self, row):
-        return self.ww_filter.get_row_id(row.ww_model)
+        return "wrap_" + self.ww_filter.get_row_id(row.ww_model)
 
     def get_row_by_id(self, row_id):
+        assert row_id.startswith("wrap_")
         return self.TableRowModelWrapper(
             table = self.object,
-            ww_model = self.ww_filter.get_row_by_id(row_id))
+            ww_model = self.ww_filter.get_row_by_id(row_id[5:]))
     
 class TableRowsToTreeFilter(Base.Filter):
     """This filter creates the virtual tree of the table content,
@@ -291,29 +288,29 @@ class TableRowsToTreeFilter(Base.Filter):
                 'rows': 0,
                 'children':[]}
         for row_num, row in enumerate(rows):
-            child_row = self.child_for_row(row)
             node = tree
             node['rows'] += 1
-            if 'ww_expanded' in child_row:
+            if hasattr(row.ww_filter, 'ww_expanded'):
                 node['children'].append({'level': node['level'] + 1,
                                          'top': row_num,
                                          'rows': 1,
-                                         'value': child_row['ww_expanded'],
+                                         'value': row.ww_filter.ww_expanded,
                                          'children':[]})
             else:
                 for column in total_column_order:
+                    col_value = getattr(row.ww_filter, column)
                     merge = (    column not in self.dont_merge_columns
                              and node['children']
                              and 'value' in node['children'][-1]
                              and (   not self.dont_merge_widgets
                                   or (    not isinstance(node['children'][-1]['value'], Base.Widget)
-                                      and not isinstance(child_row[column], Base.Widget)))
-                             and node['children'][-1]['value'] == child_row[column])
+                                      and not isinstance(col_value, Base.Widget)))
+                             and node['children'][-1]['value'] == col_value)
                     if not merge:
                         node['children'].append({'level': node['level'] + 1,
                                                  'top': row_num,
                                                  'rows': 0,
-                                                 'value': child_row[column],
+                                                 'value': col_value,
                                                  'children':[]})
                     node = node['children'][-1]
                     node['rows'] += 1
@@ -557,7 +554,12 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
         else:
             html_class = getattr(row, 'ww_class', []) + ['column_first_level_%s' % first_level,
                                                          'column_last_level_%s' % last_level]
+            # We're just caching child-parent relationships - if a
+            # child disappears, so be it. That's up to our model, not
+            # us...
             row_widget = self.child_for_row(row)
+            if column_name not in row_widget.children or row_widget.children[column_name] is not value:
+                row_widget.children[column_name] = value
             value = row_widget.draw_child(row_widget.path + [column_name], value, output_options, True)
 
         expand_button = ""
@@ -580,16 +582,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
     def child_for_row(self, row):
         row_id = self.ww_filter.get_row_id(row)
         if row_id not in self.children:
-            if hasattr(row, 'ww_filter'): row = row.ww_filter
-            if not isinstance(row, Webwidgets.Widget):
-                if hasattr(row, 'ww_expanded'):
-                    children = {'ww_expanded': row.ww_expanded}
-                else:
-                    children = dict([(name, getattr(row, name))
-                                     for name in self.visible_columns({})])
-                row = TableRow(self.session, self.win_id,
-                               children = children)
-            self.children[row_id] = row
+            self.children[row_id] = TableRow(self.session, self.win_id)
         return self.children[row_id]
 
     def draw_rows(self, visible_columns, reverse_dependent_columns, output_options):
