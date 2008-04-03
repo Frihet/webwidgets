@@ -149,8 +149,11 @@ class Object(object):
             ww_filter = filter_class(ww_filter = ww_filter, object = object)
         setattr(self, name, ww_filter) 
 
-    def derive(cls, name = None, **members):
-        return types.TypeType(name or 'anonymous', (cls,), members)
+    def derive(cls, *clss, **members):
+        name = 'anonymous'
+        if 'name' in members:
+            name = members.pop('name')
+        return types.TypeType(name, (cls,) + clss, members)
     derive = classmethod(derive)
 
     def __getattr__(self, name):
