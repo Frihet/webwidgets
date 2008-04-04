@@ -220,7 +220,20 @@ class Filter(Object):
             object.__setattr__(self, name, value)
         else:
             setattr(self.ww_filter, name, value)
-        
+
+class RenameFilter(Filter):
+    """This filter renames one or more attributes using a dictionary
+    mapping in the name_map attribute."""
+    def __getattr__(self, name):
+        return getattr(self.ww_filter, self.ww_filter.name_map.get(name, name))
+
+    def __setattr__(self, name, value):
+        setattr(self.ww_filter, self.ww_filter.name_map.get(name, name), value)
+
+class RenameWrapper(Wrapper):
+    WwFilters = [RenameFilter]
+    
+
 class Widget(Object):
     """Widget is the base class for all widgets. It manages class name
     collection, attribute handling, child instantiation and
@@ -1020,11 +1033,12 @@ class ValueInput(Input):
     the value hold by the widget."""
 
     original_value = ''
-    
-    value = ''
 
-    multiple = False
-    """Handle multiple values"""
+    class WwModel(Model):
+        value = ''
+
+        multiple = False
+        """Handle multiple values"""
 
     def reset(self):
         self.ww_filter.value = self.ww_filter.original_value
