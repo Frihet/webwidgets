@@ -577,7 +577,7 @@ class Widget(Object):
 
     def __setattr__(self, name, value):
         if not hasattr(self, name) or value is not getattr(self, name):
-            object.__setattr__(self, name, value)    
+            Object.__setattr__(self, name, value)    
             self.notify('%s_changed' % name, value)
 
 class Text(Widget):
@@ -1027,16 +1027,16 @@ class ValueInput(Input):
     """Handle multiple values"""
 
     def reset(self):
-        self.value = self.original_value
+        self.ww_filter.value = self.ww_filter.original_value
 
     def field_input(self, path, *values):
         if not self.multiple:
             values = values[0]
-        self.value = values
+        self.ww_filter.value = values
 
     def field_output(self, path):
-        values = self.value
-        if not self.multiple or not isinstance(values, types.ListType):
+        values = self.ww_filter.value
+        if not self.ww_filter.multiple or not isinstance(values, types.ListType):
             values = [values]
         return [unicode(value) for value in values]
 
@@ -1046,10 +1046,10 @@ class ValueInput(Input):
         make sure to call the base class implementation, as the value
         will be reset otherwise."""
         if path != self.path: return
-        self.error = None
+        self.ww_filter.error = None
 
     def __cmp__(self, other):
-        return cmp(self.value, other)
+        return cmp(self.ww_filter.value, other)
 
 class ActionInput(Input):
     """Base class for all input widgets that only fires some
