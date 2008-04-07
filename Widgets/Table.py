@@ -478,9 +478,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
         # Optimisation: we could have used get_active and constructed a path...
         return Webwidgets.Utils.OrderedDict([(name, definition)
                                              for (name, definition)
-                                             in self.mangle_columns(self.ww_filter.get_columns(output_options, only_sortable),
-                                                                    output_options
-                                                                    ).iteritems()
+                                             in self.ww_filter.get_columns(output_options, only_sortable).iteritems()
                                              if self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id,
                                                                            self.path + ['_', 'column', name])])
 
@@ -711,6 +709,18 @@ class TableFunctionColFilter(Base.Filter):
                 for row
                 in self.ww_filter.get_rows(output_options)]        
 
+    def get_columns(self, output_options, only_sortable):
+        if (   only_sortable
+            or (    'printable_version' in output_options
+                and self.functions)):
+            res = Webwidgets.Utils.OrderedDict(self.ww_filter.get_columns(output_options, only_sortable))
+            for key in self.functions.iterkeys():
+                if key in res:
+                    del res[key]
+            return res
+        else:
+            return self.ww_filter.get_columns(output_options, only_sortable)
+    
 class Table(BaseTable, Base.ActionInput):
     """Group By Ordering List is a special kind of table view that
     allows the user to sort the rows and simultaneously group the rows
@@ -806,17 +816,6 @@ class Table(BaseTable, Base.ActionInput):
     def get_active_group_function(self, path):
         if path[0] in self.disabled_functions: return False
         return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, self.path + ['group_function'] + path)
-
-    def mangle_columns(self, columns, output_options):
-        if 'printable_version' in output_options and self.functions:
-            res = {}
-            res.update(columns)
-            for key in self.functions.iterkeys():
-                if key in res:
-                    del res[key]
-            return res
-        return columns
-
 
     def draw_title_bar(self, config, output_options):
         title = getattr(self, 'title', None)
@@ -1016,9 +1015,9 @@ class TableExpandableFilter(Base.Filter):
         return res
 
     def get_columns(self, output_options, only_sortable = False):
-        if only_sortable: return self.ww_filter.get_columns(output_options)
+        if only_sortable: return self.ww_filter.get_columns(output_options, only_sortable)
         res = Webwidgets.Utils.OrderedDict(expand_col = {"title": ''})
-        res.update(self.ww_filter.get_columns(output_options))
+        res.update(self.ww_filter.get_columns(output_options, only_sortable))
         return res
 
     def field_input_expand(self, path, string_value):
