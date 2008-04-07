@@ -118,7 +118,7 @@ class ExpandCell(FunctionCell):
     def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
         row_id = table.ww_filter.get_row_id(row)
         return self.draw_expand(table, row_id, row_id,
-                                getattr(row, 'ww_is_expanded', False),
+                                getattr(row.ww_filter, 'ww_is_expanded', False),
                                 table.get_active(table.path + ['_', 'expand']),
                                 output_options)
 
@@ -211,7 +211,7 @@ class TableSimpleModelFilter(Base.Filter):
 
     def field_input_expand(self, path, string_value):
         row_id, col = string_value.split(',')
-        row = self.get_row_by_id(row_id)
+        row = self.object.ww_filter.get_row_by_id(row_id)
         if row_id not in self.expand:
             self.expand[row_id] = {'row': row,
                                    'expanded_cols': set((col,))}
@@ -271,7 +271,8 @@ class TableRowWrapperFilter(Base.Filter):
         return "wrap_" + self.ww_filter.get_row_id(row.ww_model)
 
     def get_row_by_id(self, row_id):
-        assert row_id.startswith("wrap_")
+        if not row_id.startswith("wrap_"):
+            raise Exception("Invalid row-id %s (should have started with 'wrap_')" % row_id)
         return self.TableRowModelWrapper(
             table = self.object,
             ww_model = self.ww_filter.get_row_by_id(row_id[5:]))
@@ -1007,11 +1008,14 @@ class TableExpandableFilter(Base.Filter):
     def get_rows(self, output_options):
         res = []
         for row in self.ww_filter.get_rows(output_options):
-            row.expand_col = ExpandCellInstance
+            row.ww_filter.expand_col = ExpandCellInstance
             res.append(row)
 
-            if hasattr(row, 'ww_expansion') and getattr(row, 'ww_is_expanded', False):
-                res.append(self.TableRowModelWrapper(ww_model = row.ww_expansion))
+            if hasattr(row.ww_filter, 'ww_expansion') and getattr(row.ww_filter, 'ww_is_expanded', False):
+                res.append(self.TableRowModelWrapper(
+                    table = self.object,
+                    ww_is_expansion_parent = row,
+                    ww_model = row.ww_filter.ww_expansion))
         return res
 
     def get_columns(self, output_options, only_sortable = False):
@@ -1021,14 +1025,30 @@ class TableExpandableFilter(Base.Filter):
         return res
 
     def field_input_expand(self, path, string_value):
-        row = self.get_row_by_id(string_value)
-        row.ww_is_expanded = not getattr(row, 'ww_is_expanded', False)
+        row = self.object.ww_filter.get_row_by_id(string_value)
+        row.ww_filter.ww_is_expanded = not getattr(row.ww_filter, 'ww_is_expanded', False)
 
     def field_output_expand(self, path):
         return []
 
     def get_active_expand(self, path):
         return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['expand'] + path)
+
+    def get_row_id(self, row):
+        if hasattr(row, 'ww_is_expansion_parent'):
+            return "child_" + self.ww_filter.get_row_id(row.ww_is_expansion_parent)
+        return "parent_" + self.ww_filter.get_row_id(row)
+
+    def get_row_by_id(self, row_id):
+        if row_id.startswith("child_"):
+            parent = self.ww_filter.get_row_by_id(row_id[6:])
+            return self.TableRowModelWrapper(
+                table = self.object,
+                ww_is_expansion_parent = parent,
+                ww_model = parent.ww_filter.ww_expansion)
+        elif row_id.startswith("parent_"):
+            return self.ww_filter.get_row_by_id(row_id[7:])
+        raise Exception("Invalid row-id %s (should have started with 'child_' or 'parent_')" % row_id)
 
 class ExpandableTable(Table):
     class RowsFilters(Table.RowsFilters):
