@@ -556,7 +556,7 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
             # child disappears, so be it. That's up to our model, not
             # us...
             row_widget = self.child_for_row(row)
-            if column_name not in row_widget.children or row_widget.children[column_name] is not value:
+            if row_widget.children.get(column_name, None) is not value:
                 row_widget.children[column_name] = value
             value = row_widget.draw_child(row_widget.path + [column_name], value, output_options, True)
 
