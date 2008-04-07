@@ -615,8 +615,7 @@ class BaseChildNodes(object):
         return cls(self.node.session, self.node.win_id)
 
     def ensure(self):
-        for name in self.iterkeys():
-            value = self[name]
+        for name, value in self.iteritems():
             if isinstance(value, type) and issubclass(value, Widget):
                 value = self[name] = self.class_child_to_widget(value)
             if isinstance(value, Widget):
