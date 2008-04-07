@@ -147,7 +147,7 @@ class Object(object):
             if isinstance(filter_class, (str, unicode)):
                 filter_class = getattr(self, filter_class)
             ww_filter = filter_class(ww_filter = ww_filter, object = object)
-        setattr(self, name, ww_filter) 
+        self.__dict__[name] = ww_filter
 
     def derive(cls, *clss, **members):
         name = 'anonymous'
@@ -1034,11 +1034,11 @@ class ValueInput(Input):
 
     original_value = ''
 
+    multiple = False
+    """Handle multiple values"""
+
     class WwModel(Model):
         value = ''
-
-        multiple = False
-        """Handle multiple values"""
 
     def reset(self):
         self.ww_filter.value = self.ww_filter.original_value
