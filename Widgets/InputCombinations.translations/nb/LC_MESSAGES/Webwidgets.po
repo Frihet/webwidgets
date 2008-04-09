@@ -4,14 +4,21 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: 0.1\n"
-"POT-Creation-Date: Fri Oct 26 11:35:32 2007\n"
+"POT-Creation-Date: Tue Jan 22 11:07:38 2008\n"
 "PO-Revision-Date: DATEANDTIME\n"
 "Last-Translator: Egil Möller, Anette Furulund\n"
 "Language-Team: EMAIL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 
-msgid "%(Dialogs)s%(LogIn)s"
+msgid ""
+"\n"
+"\n"
+"   %(Dialogs)s\n"
+"\n"
+"   %(LogIn)s\n"
+"\n"
+"  "
 msgstr ""
 
 msgid "AddressInput"
@@ -71,13 +78,7 @@ msgstr "Postkode"
 msgid "Street"
 msgstr "Gate"
 
-msgid "Webwidgets"
-msgstr ""
-
 msgid "Webwidgets.Widgets.InputCombinationCallbacks"
-msgstr ""
-
-msgid "Webwidgets.Widgets.InputCombinationsCallbacks"
 msgstr ""
 
 msgid "Zip"
@@ -85,6 +86,9 @@ msgstr "Postkode"
 
 msgid "c/o"
 msgstr "c/o"
+
+msgid "city"
+msgstr "by"
 
 msgid "co"
 msgstr "co"
@@ -252,9 +256,6 @@ msgstr ""
 
 #~ msgid "anonymous"
 #~ msgstr "anonym"
-
-#~ msgid "city"
-#~ msgstr "by"
 
 #~ msgid "default"
 #~ msgstr "default"

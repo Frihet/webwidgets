@@ -25,623 +25,8 @@
 the user to sort the rows and simultaneously group the rows according
 to their content and the sorting."""
 
-import Webwidgets.Constants, Webwidgets.Utils, re, math, cgi, types, itertools
+import Webwidgets.Constants, Webwidgets.Utils, re, math, cgi
 import Base
-
-def extend_to_dependent_columns(columns, dependent_columns):
-    res = []
-    for column in columns:
-        res.extend([column] + dependent_columns.get(column, []))
-    return res
-
-def reverse_dependency(dependent_columns):
-    res = {}
-    for main, dependent in dependent_columns.iteritems():
-        for dependent_column in dependent:
-            res[dependent_column] = main
-    return res
-
-class TableRow(Base.CachingComposite): pass
-
-class RenderedRowType(object): pass
-class RenderedRowTypeRow(RenderedRowType): pass
-class RenderedRowTypeHeading(RenderedRowType): pass
-
-class SpecialCell(object):
-    """SpecialCells are like mini-widgets that can be put in multiple
-    cells. They are usually singletons and should only be used when
-    subclassing BaseTable, not when actually using the Table."""
-    
-    html_class = []
-    def get_html_class(self,
-        output_options, row, table,
-        row_num, column_name, rowspan, colspan, first_level, last_level):
-        return self.html_class
-    
-    def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
-        return ''
-
-class FunctionCell(SpecialCell):
-    html_class = ['functions']
-
-    def draw_function(self, table, row_id, value, path, html_class, title, active, output_options):
-        input_id = Webwidgets.Utils.path_to_id(table.path + ['_'] + path)
-        if active:
-            table.session.windows[table.win_id].fields[input_id] = table
-        return """<button
-                   type="submit"
-                   id="%(html_id)s-%(row)s"
-                   class="%(html_class)s"
-                   %(disabled)s
-                   name="%(html_id)s"
-                   value="%(value)s">%(title)s</button>""" % {
-                       'html_id': input_id,
-                       'html_class': html_class,
-                       'disabled': ['disabled="disabled"', ''][active],
-                       'title': table._(title, output_options),
-                       'row': row_id,
-                       'value': value}
-                       
-    def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
-        enabled_functions = getattr(row, 'ww_functions', True)
-        row_id = table.ww_filter.get_row_id(row)
-        rendered_functions = []
-        for function, title in table.functions[column_name].iteritems():
-            if enabled_functions is not True and function not in enabled_functions:
-                continue
-            rendered_functions.append(
-                self.draw_function(table, row_id, row_id,
-                                   ['function', function],
-                                   function, title,
-                                   table.get_active(table.path + ['_', 'function', function]),
-                                   output_options))
-        return ''.join(rendered_functions)
-
-    def __cmp__(self, other):
-        return -1
-
-FunctionCellInstance = FunctionCell()
-
-class ExpandCell(FunctionCell):
-    html_class = ['expand_col']
-
-    input_path = ['expand']
-
-    def draw_expand(self, table, row_id, value, expanded, active, output_options):
-        return self.draw_function(table,
-                                  row_id, value,
-                                  self.input_path,
-                                  ['expand', 'collapse'][expanded],
-                                  ['Expand', 'Collapse'][expanded],
-                                  active, output_options)
-    
-    def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
-        row_id = table.ww_filter.get_row_id(row)
-        return self.draw_expand(table, row_id, row_id,
-                                getattr(row.ww_filter, 'ww_is_expanded', False),
-                                table.get_active(table.path + ['_', 'expand']),
-                                output_options)
-
-ExpandCellInstance = ExpandCell()
-
-
-class TableSimpleModelFilter(Base.Filter):
-    # left = TablePrintableFilter
-    # right = BaseTable.WwModel
-
-    debug_expand = False
-
-    # API used by Table
-    
-    def __init__(self, *arg, **kw):
-        Base.Filter.__init__(self, *arg, **kw)
-        self.old_sort = None
-        self.old_page = None
-        self.old_expand = None
-	self.expand_version = 0
-        self.old_default_expand = None
-
-    def get_rows(self, all, output_options):
-        self.ensure()
-        if self.non_memory_storage:
-            if all:
-                return self.ww_filter.get_rows(all, output_options)
-            else:
-                return self.rows
-        else:
-            rows = []
-            expand_tree = self.get_expand_tree()            
-            if self.default_expand:
-                for row in self.rows:
-                    node = expand_tree
-                    while not node.toggled and row[node.col] in node.values:
-                        node = node.values[row[node.col]]
-                    if not node.toggled or self.get_row_id(row) in node.rows:
-                        rows.append(row)
-            else:
-                last_row = None
-                for row in self.rows:
-                    common = self.row_common_sorted_columns(row, last_row)
-                    expanded = True
-                    node = expand_tree
-                    for pos in xrange(0, common):
-                        if row[node.col] not in node.values or not node.values[row[node.col]].toggled:
-                            expanded = False
-                            break
-                        node = node.values[row[node.col]]
-                    if expanded:
-                        rows.append(row)
-
-                    last_row = row
-            if all:
-                return rows
-            else:
-                return rows[(self.page - 1) * self.rows_per_page:
-                            self.page * self.rows_per_page]
-
-    def get_row_id(self, row):
-        if self.non_memory_storage:
-            return self.ww_filter.get_row_id(row)
-        else:
-            return str(id(row))
-    
-    def get_row_by_id(self, row_id):
-        if self.non_memory_storage:
-            return self.ww_filter.get_row_by_id(row_id)
-        else:
-            for row in self.rows:
-                if self.get_row_id(row) == row_id:
-                    return row
-            raise KeyError(self, row_id)
-
-    def get_pages(self, output_options):
-        if self.non_memory_storage:
-            return self.ww_filter.get_pages()
-        else:
-            return int(math.ceil(float(len(self.rows)) / self.rows_per_page))
-
-    def get_columns(self, output_options, only_sortable = False):
-        res = Webwidgets.Utils.OrderedDict()
-        for name, definition in self.columns.iteritems():
-            if isinstance(definition, types.StringTypes):
-                res[name] = {"title": definition}
-            else:
-                res[name] = definition
-        return res
-
-    def field_input_expand(self, path, string_value):
-        row_id, col = string_value.split(',')
-        row = self.object.ww_filter.get_row_by_id(row_id)
-        if row_id not in self.expand:
-            self.expand[row_id] = {'row': row,
-                                   'expanded_cols': set((col,))}
-        else:
-            if col not in self.expand[row_id]['expanded_cols']:
-                self.expand[row_id]['expanded_cols'].add(col)
-            else:
-                self.expand[row_id]['expanded_cols'].remove(col)
-	self.expand_version += 1
-
-    def field_output_expand(self, path):
-        return []
-
-    def get_active_expand(self, path):
-        return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['expand'] + path)
-
-    # Internal
-    def ensure(self):
-        """Reload the list after a repaging/resorting"""
-        if (   self.sort != self.old_sort
-            or self.page != self.old_page
-            or self.expand_version != self.old_expand
-            or self.default_expand != self.old_default_expand):
-            self.reread()
-
-    def reread(self):
-        """Reload the list"""
-        if self.non_memory_storage:
-            self.rows[:] = self.ww_filter.get_rows(False, {})
-        elif self.sort != self.old_sort:
-            def row_cmp(row1, row2):
-                for col, order in self.sort:
-                    diff = cmp(row1[col], row2[col])
-                    if diff:
-                        if order == 'desc': diff *= -1
-                        return diff
-                return 0
-            self.rows.sort(row_cmp)
-        self.old_sort = self.sort
-        self.old_page = self.page
-        self.old_expand = self.expand_version
-        self.old_default_expand = self.default_expand
-
-class TablePrintableFilter(Base.Filter):
-    # left = BaseTable
-    # right = TableSimpleModelFilter
-    
-    def get_rows(self, output_options):
-        return self.ww_filter.get_rows('printable_version' in output_options, output_options)
-
-class TableRowWrapperFilter(Base.Filter):
-    def get_rows(self, output_options):
-        return [self.TableRowModelWrapper(table = self.object, ww_model = row)
-                for row in self.ww_filter.get_rows(output_options)]
-
-    def get_row_id(self, row):
-        return "wrap_" + self.ww_filter.get_row_id(row.ww_model)
-
-    def get_row_by_id(self, row_id):
-        if not row_id.startswith("wrap_"):
-            raise Exception("Invalid row-id %s (should have started with 'wrap_')" % row_id)
-        return self.TableRowModelWrapper(
-            table = self.object,
-            ww_model = self.ww_filter.get_row_by_id(row_id[5:]))
-    
-class TableRowsToTreeFilter(Base.Filter):
-    """This filter creates the virtual tree of the table content,
-    where rows that merges a cell with a previous row, are children of
-    that previous row""" 
-        
-    def get_tree(self, output_options):
-        total_column_order = self.get_total_column_order(output_options)
-        rows = self.ww_filter.get_rows(output_options)
-        tree = {'level': 0,
-                'rows': 0,
-                'children':[]}
-        for row_num, row in enumerate(rows):
-            node = tree
-            node['rows'] += 1
-            if hasattr(row.ww_filter, 'ww_expanded'):
-                node['children'].append({'level': node['level'] + 1,
-                                         'top': row_num,
-                                         'rows': 1,
-                                         'value': row.ww_filter.ww_expanded,
-                                         'children':[]})
-            else:
-                for column in total_column_order:
-                    col_value = getattr(row.ww_filter, column)
-                    merge = (    column not in self.dont_merge_columns
-                             and node['children']
-                             and 'value' in node['children'][-1]
-                             and (   not self.dont_merge_widgets
-                                  or (    not isinstance(node['children'][-1]['value'], Base.Widget)
-                                      and not isinstance(col_value, Base.Widget)))
-                             and node['children'][-1]['value'] == col_value)
-                    if not merge:
-                        node['children'].append({'level': node['level'] + 1,
-                                                 'top': row_num,
-                                                 'rows': 0,
-                                                 'value': col_value,
-                                                 'children':[]})
-                    node = node['children'][-1]
-                    node['rows'] += 1
-        return (rows, tree)
-
-class BaseTable(Base.CachingComposite, Base.DirectoryServer):
-    """This is the basic version of L{Table}; it formats the table
-    itself, but does not include any user input controls for changing
-    the sorting order, the current page, or for operating on the rows
-    in the table.
-    """
-
-    class WwModel(Base.Model):
-        columns = {}
-        """{column_name: title | {"title":title, ...}}"""
-        dependent_columns = {}
-        """{column_name: [column_name]}"""
-        rows = []
-        sort = []
-        page = 1
-        expand = {}
-        default_expand = True
-        """If true, all rows are expanded until collapsed, if false
-        all rows are collapsed until expanded. This reverses the
-        meaning of the expand attribute."""
-        non_memory_storage = False
-        dont_merge_widgets = True
-        dont_merge_columns = ()
-        rows_per_page = 10
-        """This attribute is not used internally by the widget, but is
-        intended to be used by the user-provide reread() method."""
-
-        def get_rows(self, all, output_options):
-            """Load the list after a repaging/resorting, or for a
-            printable version. If you set non_memory_storage to True, you
-            _must_ implement this method.
-            """
-            raise NotImplementedError("get_rows")
-
-        def get_row_by_id(self, row_id):
-            raise NotImplementedError("get_row_by_id")
-
-        def get_row_id(self, row):
-            raise NotImplementedError("get_row_id")
-
-        def get_pages(self):
-            """Returns the total number of pages. If you set
-            non_memory_storage to True, you _must_ implement this method.
-            """
-            raise NotImplementedError("get_pages")
-
-    class SourceFilters(Base.Filter):
-        WwFilters = [TableSimpleModelFilter]
-
-    class RowsFilters(Base.Filter):
-        WwFilters = [TableRowWrapperFilter, TablePrintableFilter]
-
-    class TreeFilters(Base.Filter):
-        WwFilters = [TableRowsToTreeFilter]
-
-    WwFilters = ["TreeFilters", "RowsFilters", "SourceFilters"]
-
-    class TableRowModelWrapper(Base.PersistentWrapper):
-        def ww_first_init(self, ww_model, *arg, **kw):
-            Base.PersistentWrapper.ww_first_init(self, ww_model = ww_model, *arg, **kw)
-            self.__dict__['items'] = {}
-
-            # FIXME: Just remove this stuff I guess? Shouldn't be used...
-            if isinstance(ww_model, dict):
-                self.ww_row_id = ww_model.get('ww_row_id', id(ww_model))
-            else:
-                self.ww_row_id = getattr(ww_model, 'ww_row_id', id(ww_model))
-
-        def __getattr__(self, name):
-            if isinstance(self.ww_model, dict):
-                if name not in self.ww_model:
-                    raise AttributeError(self.ww_model, name)
-                return self.ww_model[name]
-            else:
-                return getattr(self.ww_model, name)
-
-    def is_expanded_node(self, row, level):
-        col = self.get_total_column_order({})[level - 1]
-        row_id = self.ww_filter.get_row_id(row)
-        a = (    row_id in self.ww_filter.expand
-             and col in self.ww_filter.expand[row_id]['expanded_cols'])
-        b = self.ww_filter.default_expand # Invert the result if default_expand is not True
-        return (a and not b) or (b and not a) # a xor b 
-
-    class ExpandTreeNode(object):
-        def __init__(self, col, values = None, toggled = False, rows = None):
-            self.col = col
-            self.values = values or {}
-            self.toggled = toggled
-            self.rows = rows or {}
-
-        def __str__(self, indent = ''):
-            return '%s%s=\n%s\n' % (indent,
-                                    self.col,
-                                    ''.join(['%s [%s]%s:\n%s' % (indent,
-                                                                 ['-', '+'][sub.toggled],
-                                                                 value,
-                                                                 sub.__str__(indent + '  '))
-                                             for (value, sub) in self.values.iteritems()]))
-
-    def get_expand_tree(self):
-        col_order = self.get_total_column_order({}, only_sortable = True)
-
-        tree = self.ExpandTreeNode(col = col_order[0], toggled = not self.ww_filter.default_expand)
-
-        for row_id, row in self.ww_filter.expand.iteritems():
-            if not row['expanded_cols']:
-                continue
-            node = tree
-            for pos in xrange(0, len(col_order) - 1): # You can not expand/collapse the last column
-                col = col_order[pos]
-                value = getattr(row['row'], col)
-                if value not in node.values:
-                    next_col = col_order[pos + 1]
-                    node.values[value] = self.ExpandTreeNode(col=next_col)
-                node = node.values[value]
-                if col in row['expanded_cols']:
-                    node.toggled = True
-                    node.rows[row_id] = row['row']
-        return tree
-
-    def row_common_sorted_columns(self, child, parent):
-        """Calculate the number of columns two rows have in common"""
-        if parent is None or child is None: return 0
-        if 'ww_expanded' in parent: return 0
-        total_column_order = self.get_total_column_order({}, only_sortable = True)
-        if 'ww_expanded' in child: return len(total_column_order)
-
-        level = 0
-        for column in total_column_order:
-            if not (    column not in self.dont_merge_columns
-                    # This is just because virtual columns might be
-                    # added at a higher level than the one where this
-                    # is called.
-                    and column in parent
-                    and column in child
-                    and (   not self.dont_merge_widgets
-                         or (    not isinstance(parent[column], Base.Widget)
-                             and not isinstance(child[column], Base.Widget)))
-                    and parent[column] == child[column]):
-                break
-            level += 1
-        return level
-    
-    def get_active(self, path):
-        """@return: Whether the widget is allowing the user to acces
-        a given part of it or not.
-        """
-        
-        widget_path = self.path
-        sub_widget = self.path_to_subwidget_path(path)
-
-        if not self.active: return False
-        return getattr(self.ww_filter, 'get_active_' + sub_widget[0])(sub_widget[1:])
-
-    def get_active_column(self, path):
-        return self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, self.path + ['column'] + path)
-
-    def visible_columns(self, output_options, only_sortable = False):
-        # Optimisation: we could have used get_active and constructed a path...
-        return Webwidgets.Utils.OrderedDict([(name, definition)
-                                             for (name, definition)
-                                             in self.ww_filter.get_columns(output_options, only_sortable).iteritems()
-                                             if self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id,
-                                                                           self.path + ['_', 'column', name])])
-
-    def get_total_column_order(self, output_options, only_sortable = False):
-        visible_columns = self.visible_columns(output_options, only_sortable = only_sortable)
-        total_column_order = extend_to_dependent_columns(
-            [column for column, dir in self.ww_filter.sort],
-            self.dependent_columns)
-        return  [column for column in total_column_order
-                 if column in visible_columns] + [column for column in visible_columns
-                                                  if column not in total_column_order]
-
-    def draw_tree(self, node, rows, output_options, first_level = 0, last_level = 0, single = False):
-        total_column_order = self.ww_filter.get_total_column_order(output_options)
-        visible_columns = self.visible_columns(output_options)
-        if node['children']:
-            rendered_rows = []
-            children = len(node['children'])
-            for child in xrange(0, children):
-                sub_first = first_level
-                sub_last = last_level
-                if child != 0:
-                    sub_first += 1
-                if child != children - 1:
-                    sub_last += 1
-                rendered_rows.extend(self.draw_tree(node['children'][child],
-                                                    rows,
-                                                    output_options,
-                                                    sub_first, sub_last,
-                                                    single or node['rows'] == 1
-                                                    ))
-        else:
-            rendered_rows = []
-            for row in xrange(node['top'], node['top'] + node['rows']):
-                rendered_rows.append({'cells':[''] * len(visible_columns),
-                                      'type': RenderedRowTypeRow,
-                                      'row': rows[row]})
-        row = rendered_rows[0]['row']
-        if 'value' in node:
-            if hasattr(row, 'ww_expanded'):
-                rendered_rows[0]['cells'] = [
-                    self.draw_extended_row(
-                    output_options, row, node['value'],
-                    total_column_order, node['top'], first_level, last_level, node['level'], single)]
-            else:
-                column = total_column_order[node['level'] - 1]
-                column_position = visible_columns.keys().index(column)
-                rendered_rows[0]['cells'][column_position] = self.draw_node(
-                    output_options, row, node,
-                    column, first_level, last_level, node['level'], single)
-        return rendered_rows
-
-    def draw_node(self, output_options, row, node, column, first_level, last_level, node_level, single):
-        return self.draw_cell(
-            output_options, row, node['value'], node['top'], column, node['rows'], 1, first_level, last_level, node_level, single)
-
-    def draw_extended_row(self, output_options, row, value, total_column_order, row_num, first_level, last_level, node_level, single):
-        return self.draw_cell(
-            output_options, row, value, row_num, 'ww_expanded', 1, len(total_column_order), first_level, last_level, node_level, single)
-
-    def draw_cell(self, output_options, row, value,
-                  row_num, column_name, rowspan, colspan, first_level, last_level, node_level, single):
-        html_class = []
-        if isinstance(value, SpecialCell):
-            html_class = value.get_html_class(
-                output_options, row, self,
-                row_num, column_name, rowspan, colspan, first_level, last_level)
-            value = value.draw_cell(
-                output_options, row, self,
-                row_num, column_name, rowspan, colspan, first_level, last_level)
-        else:
-            html_class = getattr(row, 'ww_class', []) + ['column_first_level_%s' % first_level,
-                                                         'column_last_level_%s' % last_level]
-            # We're just caching child-parent relationships - if a
-            # child disappears, so be it. That's up to our model, not
-            # us...
-            row_widget = self.child_for_row(row)
-            if row_widget.children.get(column_name, None) is not value:
-                row_widget.children[column_name] = value
-            value = row_widget.draw_child(row_widget.path + [column_name], value, output_options, True)
-
-        expand_button = ""
-        expanded = self.ww_filter.is_expanded_node(row, node_level)
-        if rowspan > 1 or (not expanded and not single):
-            row_id = self.ww_filter.get_row_id(row)
-            expand_button = ExpandCellInstance.draw_expand(
-                self,
-                row_id,
-                '%s,%s' % (row_id, column_name),
-                expanded, True, output_options)
-            
-        return '<td rowspan="%(rowspan)s" colspan="%(colspan)s" class="%(class)s">%(expand_button)s%(content)s</td>' % {
-            'rowspan': rowspan,
-            'colspan': colspan,
-            'class': ' '.join(html_class),
-            'expand_button': expand_button,
-            'content': value}
-
-    def child_for_row(self, row):
-        row_id = self.ww_filter.get_row_id(row)
-        if row_id not in self.children:
-            self.children[row_id] = TableRow(self.session, self.win_id)
-        return self.children[row_id]
-
-    def draw_rows(self, visible_columns, reverse_dependent_columns, output_options):
-        rows, tree = self.ww_filter.get_tree(output_options)
-
-        # Why we need this test here: rows_to_tree would create an empty
-        # top-node for an empty set of rows, which draw_tree would
-        # render into a single row...
-        if rows:
-            rendered_rows = self.draw_tree(tree,
-                                           rows,
-                                           output_options)
-        else:
-            rendered_rows = []
-        return rendered_rows
-
-    def append_classes(self, rendered_rows, output_options):
-        for row_num, rendered_row in enumerate(rendered_rows):
-            rendered_row['class'] = (  ['row_' + ['even', 'odd'][row_num % 2]]
-                                     + getattr(rendered_row['row'], 'ww_class', []))
-
-    def mangle_rendered_rows(self, rendered_rows, visible_columns, reverse_dependent_columns, output_options):
-        self.append_classes(rendered_rows, output_options)
-        return rendered_rows
-
-    def draw_table(self, rendered_rows, output_options):
-        return "<table>%s</table>" % '\n'.join(['<tr class="%s">%s</tr>' % (' '.join(row.get('class', [])),
-                                                                            ''.join(row.get('cells', [])))
-                                                for row in rendered_rows])
-    
-    def mangle_output(self, table, output_options):
-        return table
-
-    def draw(self, output_options):
-        self.register_style_link(self.calculate_url({'widget_class': 'Webwidgets.BaseTable',
-                                                     'location': ['Table.css']},
-                                                    {}))
-        reverse_dependent_columns = reverse_dependency(self.dependent_columns)
-        visible_columns = self.visible_columns(output_options)
-
-        return self.mangle_output(
-            self.draw_table(
-                self.mangle_rendered_rows(
-                    self.draw_rows(visible_columns, reverse_dependent_columns, output_options),
-                    visible_columns, reverse_dependent_columns, output_options),
-                output_options),
-            output_options)
-
-    def output(self, output_options):
-        return {Webwidgets.Constants.OUTPUT: self.draw_printable_version(output_options),
-               'Content-type': 'text/html'
-               }
-
-    def draw_printable_version(self, output_options):
-        return self.session.windows[self.win_id].draw(output_options,
-                                                     body = self.draw(output_options),
-                                                     title = self.title)
-
-
-#### The main Table widget, with all bells and Whistles ####
 
 column_allowed_name_re = re.compile("^[a-z_]*$")
 
@@ -677,51 +62,417 @@ def sort_to_order_by(sort, quote = "`"):
         order.append(quote + key + quote + ' ' + ['desc', 'asc'][dir == 'asc'])
     if order:
         return 'order by ' + ', '.join(order)
-    return
+    return ''
 
-class TableSortFilter(Base.Filter):
-    class Sort(object):
-        def __get__(self, instance, owner):
-            if instance is None: instance = owner
-            return instance.pre_sort + instance.user_sort + instance.post_sort
-    sort = Sort()
+def extend_to_dependent_columns(columns, dependent_columns):
+    res = []
+    for column in columns:
+        res.extend([column] + dependent_columns.get(column, []))
+    return res
+
+def reverse_dependency(dependent_columns):
+    res = {}
+    for main, dependent in dependent_columns.iteritems():
+        for dependent_column in dependent:
+            res[dependent_column] = main
+    return res
+
+class ChildNodeCells(Base.ChildNodes):
+    def __init__(self, node, row, *arg, **kw):
+        self.row = row
+        super(ChildNodeCells, self).__init__(node, *arg, **kw)
+
+    def ensure(self):
+        for name in self.iterkeys():
+            value = self[name]
+            if isinstance(value, type) and issubclass(value, Base.Widget):
+                value = self[name] = value(self.node.session, self.node.win_id)
+            if isinstance(value, Base.Widget):
+                value.parent = self.node
+                value.name = "cell_%s_%s" % (self.row, name)
+
+class ChildNodeRows(list):
+    def __init__(self, node, *arg, **kw):
+        super(ChildNodeRows, self).__init__(*arg, **kw)
+        self.node = node
+        self.ensure()
     
-    class UserSort(object):
-        def __get__(self, instance, owner):
-            if instance is None: instance = owner
-            return instance.ww_filter.sort
-        def __set__(self, instance, value):
-            instance.ww_filter.sort = value
-    user_sort = UserSort()
+    def ensure(self):
+        for index in xrange(0, len(self)):
+            if not isinstance(self[index], ChildNodeCells) or self[index].row != index:
+                self[index] = ChildNodeCells(self.node, index, self[index])
+
+    def __setitem__(self, *arg, **kw):
+        super(ChildNodeRows, self).__setitem__(*arg, **kw)
+        self.ensure()
+
+    def __delitem__(self, *arg, **kw):
+        super(ChildNodeRows, self).__delitem__(*arg, **kw)
+        self.ensure()
+
+    def __setslice__(self, *arg, **kw):
+        super(ChildNodeRows, self).__setslice__(*arg, **kw)
+        self.ensure()
+
+    def extend(self, *arg, **kw):
+        super(ChildNodeRows, self).extend(*arg, **kw)
+        self.ensure()
+
+    def append(self, *arg, **kw):
+        super(ChildNodeRows, self).append(*arg, **kw)
+        self.ensure()
+
+    def insert(self, *arg, **kw):
+        super(ChildNodeRows, self).insert(*arg, **kw)
+        self.ensure()
+
+    def reverse(self, *arg, **kw):
+        super(ChildNodeRows, self).reverse(*arg, **kw)
+        self.ensure()
     
-class TableFunctionColFilter(Base.Filter):
-    # left = Table
-    # right = Table
+    def sort(self, *arg, **kw):
+        super(ChildNodeRows, self).sort(*arg, **kw)
+        self.ensure()
+
+class RenderedRowType(object): pass
+class RenderedRowTypeRow(RenderedRowType): pass
+class RenderedRowTypeHeading(RenderedRowType): pass
+
+class SpecialCell(object):
+    html_class = []
+    def get_html_class(self,
+        output_options, row, table,
+        row_num, column_name, rowspan, colspan, first_level, last_level):
+        return self.html_class
+    
+    def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
+        return ''
+
+class BaseTable(Base.Composite):
+    """Group By Ordering List is a special kind of table view that
+    allows the user to sort the rows and simultaneously group the rows
+    according to their content and the sorting.
+
+    The content is provided as a list of rows, each row a dictionary
+    of cell values (strings or widgets).
+
+    The list can optionally be paged, and the application asked to
+    provide the previous or next page of content when the page is
+    changed.
+
+    In addition, the application should provide a dictionary of column
+    titles and handle the resorted notigication, resorting the rows
+    according to the sorting specification. Note: This is the
+    responsibility of the application, as the list shown might be only
+    one page of a huge set of data, so that resorting actually changes
+    the content alltogether. In addition, this allows the sorting to
+    be done by e.g a database back-end.
+    """
+    
+    columns = {}
+    dependent_columns = {}
+    sort = []
+    rows = []
+    page = 1
+    pages = 1
+    non_memory_storage = False
+    dont_merge_widgets = True
+    dont_merge_columns = ()
+    rows_per_page = 10
+    """This attribute is not used internally by the widget, but is
+    intended to be used by the user-provide reread() method."""
+
+    def __init__(self, session, win_id, **attrs):
+        Base.Composite.__init__(self, session, win_id, **attrs)
+        self.rows = ChildNodeRows(self, self.rows)
+        self.reread()
+
+    def reread(self):
+        """Reload the list after a repaging/resorting here. This is
+        not a notification to allow for it to be called from __init__.
+
+        If you set non_memory_storage to True, you _must_ override this
+        method with your own sorter/loader function.
+        """
+        def row_cmp(row1, row2):
+            for col, order in self.sort:
+                diff = cmp(row1[col], row2[col])
+                if diff:
+                    if order == 'desc': diff *= -1
+                return diff
+            return 0
+        
+        if self.sort != self.old_sort:
+            self.rows.sort(row_cmp)
+            self.old_sort = self.sort
+
+    def sort_changed(self, path, sort):
+        """Notification that the list sort order has changed."""
+        if path != self.path: return
+        self.reread()
+
+    def page_changed(self, path, page):
+        """Notification that the user has changed page."""
+        if path != self.path: return
+        self.reread()
+
+    def get_all_rows(self):
+        return self.rows
+    
+    def get_rows(self):
+        if self.non_memory_storage:
+            return self.rows
+        return self.rows[(self.page - 1) * self.rows_per_page:
+                         self.page * self.rows_per_page]
+
+    def mangle_columns(self, columns, output_options):
+        return columns
+    
     def mangle_row(self, row, output_options):
-        if (    'printable_version' not in output_options
-            and self.functions
-            and not hasattr(row, 'ww_expanded')):
-            for name in self.functions.iterkeys():
-                setattr(row, name, FunctionCellInstance)
         return row
 
-    def get_rows(self, output_options):
-        return [self.mangle_row(row, output_options)
-                for row
-                in self.ww_filter.get_rows(output_options)]        
+    def mangle_rows(self, rows, output_options):
+	return [self.mangle_row(row, output_options)
+                for row in rows]
 
-    def get_columns(self, output_options, only_sortable):
-        if (   only_sortable
-            or (    'printable_version' in output_options
-                and self.functions)):
-            res = Webwidgets.Utils.OrderedDict(self.ww_filter.get_columns(output_options, only_sortable))
-            for key in self.functions.iterkeys():
-                if key in res:
-                    del res[key]
-            return res
-        else:
-            return self.ww_filter.get_columns(output_options, only_sortable)
+    def get_pages(self):
+        if self.non_memory_storage:
+            return self.pages        
+        return int(math.ceil(float(len(self.rows)) / self.rows_per_page))
+
+    def get_children(self):
+        raise NotImplemented
+
+    def get_child(self, name):
+        dummy, row, column = name.split('_')
+        row = int(row)
+        return self.rows[row][column]
     
+    def get_widgets_by_attribute(self, attribute = '__name__'):
+        fields = Base.Widget.get_widgets_by_attribute(self, attribute)
+        for row in self.get_rows():
+            for column, child in row.iteritems():
+                if isinstance(child, Base.Widget):
+                    fields.update(child.get_widgets_by_attribute(attribute))
+        return fields
+
+    def get_active(self, path):
+        """@return: Whether the widget is allowing the user to acces
+        a given part of it or not.
+        """
+        
+        widget_path = self.path
+        sub_widget = self.path_to_subwidget_path(path)
+
+        if not self.active: return False
+        return getattr(self, 'get_active_' + sub_widget[0])(sub_widget[1:])
+
+    def get_active_column(self, path):
+        return self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, self.path + ['column'] + path)
+
+    def visible_columns(self, output_options):
+        # Optimisation: we could have used get_active and constructed a path...
+        return Webwidgets.Utils.OrderedDict([(name, description)
+                                             for (name, description)
+                                             in self.mangle_columns(self.columns, output_options).iteritems()
+                                             if self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id,
+                                                                           self.path + ['_', 'column', name])])
+
+    def rows_to_tree(self, rows, group_order):
+        tree = {'level': 0,
+                'rows': 0,
+                'children':[]}
+        for row_num, row in enumerate(rows):
+            node = tree
+            node['rows'] += 1
+            if 'ww_expanded' in row:
+                node['children'].append({'level': node['level'] + 1,
+                                         'top': row_num,
+                                         'rows': 1,
+                                         'value': row['ww_expanded'],
+                                         'children':[]})
+            else:
+                for column in group_order:
+                    merge = (    column not in self.dont_merge_columns
+                             and node['children']
+                             and 'value' in node['children'][-1]
+                             and (   not self.dont_merge_widgets
+                                  or (    not isinstance(node['children'][-1]['value'], Base.Widget)
+                                      and not isinstance(row[column], Base.Widget)))
+                             and node['children'][-1]['value'] == row[column])
+                    if not merge:
+                        node['children'].append({'level': node['level'] + 1,
+                                                 'top': row_num,
+                                                 'rows': 0,
+                                                 'value': row[column],
+                                                 'children':[]})
+                    node = node['children'][-1]
+                    node['rows'] += 1
+        return tree
+
+    def draw_tree(self, node, rows, output_options, group_order, visible_columns, first_level = 0, last_level = 0):
+        if node['children']:
+            rendered_rows = []
+            children = len(node['children'])
+            for child in xrange(0, children):
+                sub_first = first_level
+                sub_last = last_level
+                if child != 0:
+                    sub_first += 1
+                if child != children - 1:
+                    sub_last += 1
+                rendered_rows.extend(self.draw_tree(node['children'][child],
+                                                    rows,
+                                                    output_options,
+                                                    group_order, visible_columns,
+                                                    sub_first, sub_last))
+        else:
+            rendered_rows = []
+            for row in xrange(node['top'], node['top'] + node['rows']):
+                rendered_rows.append({'cells':[''] * len(visible_columns),
+                                      'type': RenderedRowTypeRow,
+                                      'row': rows[row]})
+        row = rendered_rows[0]['row']
+        if 'value' in node:
+            if 'ww_expanded' in row:
+                rendered_rows[0]['cells'] = [
+                    self.draw_extended_row(output_options, row, node['value'], visible_columns, node['top'], first_level, last_level)]
+            else:
+                column = group_order[node['level'] - 1]
+                rendered_rows[0]['cells'][visible_columns.keys().index(column)
+                                          ] = self.draw_node(output_options, row, node, column, first_level, last_level)
+        return rendered_rows
+
+    def draw_node(self, output_options, row, node, column, first_level, last_level):
+        return self.draw_cell(output_options, row, node['value'], node['top'], column, node['rows'], 1, first_level, last_level)
+
+    def draw_extended_row(self, output_options, row, value, visible_columns, row_num, first_level, last_level):
+        return self.draw_cell(output_options, row, value, row_num, 'ww_expanded', 1, len(visible_columns), first_level, last_level)
+
+    def draw_cell(self, output_options, row, value,
+                  row_num, column_name, rowspan, colspan, first_level, last_level):
+        html_class = []
+        if isinstance(value, SpecialCell):
+            html_class = value.get_html_class(
+                output_options, row, self,
+                row_num, column_name, rowspan, colspan, first_level, last_level)
+            value = value.draw_cell(
+                output_options, row, self,
+                row_num, column_name, rowspan, colspan, first_level, last_level)
+        else:
+            html_class = row.get('ww_class', []) + ['column_first_level_%s' % first_level,
+                                                    'column_last_level_%s' % last_level]
+            value = self.draw_child(self.path + ["cell_%s_%s" % (row.row, column_name)],
+                                    value, output_options, True)
+        return '<td rowspan="%(rowspan)s" colspan="%(colspan)s" class="%(class)s">%(content)s</td>' % {
+            'rowspan': rowspan,
+            'colspan': colspan,
+            'class': ' '.join(html_class),
+            'content': value}
+
+    def get_mangled_rows(self, output_options):
+        if 'printable_version' in output_options:
+            rows = self.get_all_rows()
+        else:
+            rows = self.get_rows()
+	return self.mangle_rows(rows, output_options)
+
+    def draw_rows(self, visible_columns, reverse_dependent_columns, output_options):
+        group_order = extend_to_dependent_columns(
+            [column for column, dir in self.sort],
+            self.dependent_columns)
+        group_order = [column for column in group_order
+                      if column in visible_columns] + [column for column in visible_columns
+                                                     if column not in group_order]
+
+        rows = self.get_mangled_rows(output_options)
+
+        # Why we need this test here: rows_to_tree would create an empty
+        # top-node for an empty set of rows, which draw_tree would
+        # render into a single row...
+        if rows:
+            rendered_rows = self.draw_tree(self.rows_to_tree(rows, group_order),
+                                           rows,
+                                           output_options,
+                                           group_order, visible_columns)
+        else:
+            rendered_rows = []
+        return rendered_rows
+
+    def append_classes(self, rendered_rows, output_options):
+        for rendered_row in rendered_rows:
+            rendered_row['class'] = (  ['row_' + ['even', 'odd'][rendered_row['row'].row % 2]]
+                                     + rendered_row['row'].get('ww_class', []))
+
+    def mangle_rendered_rows(self, rendered_rows, visible_columns, reverse_dependent_columns, output_options):
+        self.append_classes(rendered_rows, output_options)
+        return rendered_rows
+
+    def draw_table(self, rows, output_options):
+        return "<table>%s</table>" % '\n'.join(['<tr class="%s">%s</tr>' % (' '.join(row.get('class', [])),
+                                                                            ''.join(row.get('cells', [])))
+                                                for row in rows])
+    
+    def mangle_output(self, table, output_options):
+        return table
+
+    def draw(self, output_options):
+        reverse_dependent_columns = reverse_dependency(self.dependent_columns)
+        visible_columns = self.visible_columns(output_options)
+        return self.mangle_output(
+            self.draw_table(
+                self.mangle_rendered_rows(
+                    self.draw_rows(visible_columns, reverse_dependent_columns, output_options),
+                    visible_columns, reverse_dependent_columns, output_options),
+                output_options),
+            output_options)
+
+    def output(self, output_options):
+        return {Webwidgets.Constants.OUTPUT: self.draw_printable_version(output_options),
+               'Content-type': 'text/html'
+               }
+
+    def draw_printable_version(self, output_options):
+        return self.session.windows[self.win_id].draw(output_options,
+                                                     body = self.draw(output_options),
+                                                     title = self.title)
+
+class FunctionCell(SpecialCell):
+    html_class = ['functions']
+
+    def draw_function(self, table, row_num, path, html_class, title, active, output_options):
+        return """<button
+                   type="submit"
+                   id="%(html_id)s-%(row)s"
+                   class="%(html_class)s"
+                   %(disabled)s
+                   name="%(html_id)s"
+                   value="%(row)s">%(title)s</button>""" % {
+                       'html_id': Webwidgets.Utils.path_to_id(table.path + ['_'] + path),
+                       'html_class': html_class,
+                       'disabled': ['disabled="disabled"', ''][active],
+                       'title': table._(title, output_options),
+                       'row': row_num}
+                       
+    def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
+        enabled_functions = row.get('ww_functions', True)
+        rendered_functions = []
+        for function, title in table.functions[column_name].iteritems():
+            if enabled_functions is not True and function not in enabled_functions:
+                continue
+            active = table.get_active(table.path + ['_', 'function', function])
+            if active:
+                table.session.windows[table.win_id].fields[Webwidgets.Utils.path_to_id(
+                    table.path + ['_', 'function', function])] = table
+            rendered_functions.append(self.draw_function(
+                table, row_num, ['function', function], function, title, active, output_options))
+        return ''.join(rendered_functions)
+
+    def __cmp__(self, other):
+        return -1
+
+FunctionCellInstance = FunctionCell()
+
 class Table(BaseTable, Base.ActionInput):
     """Group By Ordering List is a special kind of table view that
     allows the user to sort the rows and simultaneously group the rows
@@ -742,34 +493,25 @@ class Table(BaseTable, Base.ActionInput):
     be done by e.g a database back-end.
     """
     
-    class WwModel(BaseTable.WwModel):
-        argument_name = None
-        functions = {} # {'column_name': {'function_name': 'title'}}
-        group_functions = {} # {'function_name': 'title'}
-        disabled_functions = [] # ['function_name']
-        disabled_columns = []
-        column_groups = {}
-        """[column_group_name -> columnt_group_title]"""
+    argument_name = None
+    functions = {} # {'column_name': {'function_name': 'title'}}
+    group_functions = {} # {'function_name': 'title'}
+    disabled_functions = [] # ['function_name']
+    disabled_columns = []
+    old_sort = []
 
-        pre_sort = []
-        sort = []
-        post_sort = []
-        
-        button_bars = {'bottom':
-                       Webwidgets.Utils.OrderedDict([('paging_buttons',  {'level': 0}),
-                                                     ('printable_link',  {'level': 2,
-                                                                          'title': 'Printable version'}),
-                                                     ('group_functions', {'level': 1})]),
-                       'top':
-                       Webwidgets.Utils.OrderedDict([  #('title_bar', {'level': 2}),
-                                                     ])}
-        button_bars_level_force_min = 0
-        # A button bar is drawn if it is active, or its level is >=
-        # button_bars_level_force_min or there are other button bars with
-        # level < that button bars' level that are to be drawn.
-
-    class RowsFilters(BaseTable.RowsFilters):
-        WwFilters = [TableFunctionColFilter] + BaseTable.RowsFilters.WwFilters + [TableSortFilter]
+    button_bars = {'bottom':
+                   Webwidgets.Utils.OrderedDict([('paging_buttons',  {'level': 0}),
+                                                 ('printable_link',  {'level': 2,
+                                                                      'title': 'Printable version'}),
+                                                 ('group_functions', {'level': 1})]),
+                   'top':
+                   Webwidgets.Utils.OrderedDict([  #('title_bar', {'level': 2}),
+                                                 ])}
+    button_bars_level_force_min = 0
+    # A button bar is drawn if it is active, or its level is >=
+    # button_bars_level_force_min or there are other button bars with
+    # level < that button bars' level that are to be drawn.
 
     def field_input(self, path, string_value):
         try:
@@ -777,23 +519,23 @@ class Table(BaseTable, Base.ActionInput):
         except Webwidgets.Constants.NotASubwidgetException:
             return
         if string_value != '':
-            getattr(self.ww_filter, 'field_input_' + sub_widget[0])(sub_widget[1:], string_value)
+            getattr(self, 'field_input_' + sub_widget[0])(sub_widget[1:], string_value)
 
     def field_input_sort(self, path, string_value):
-        self.ww_filter.user_sort = string_to_sort(string_value)
+        self.sort = string_to_sort(string_value)
     def field_input_page(self, path, string_value):
         self.page = int(string_value)
     def field_input_function(self, path, string_value):
-        self.notify('function', path[0], string_value)
+        self.notify('function', path[0], int(string_value))
     def field_input_group_function(self, path, string_value):
         self.notify('group_function', path[0])
     
     def field_output(self, path):
         sub_widget = self.path_to_subwidget_path(path)
-        return getattr(self.ww_filter, 'field_output_' + sub_widget[0])(sub_widget[1:])
+        return getattr(self, 'field_output_' + sub_widget[0])(sub_widget[1:])
 
     def field_output_sort(self, path):
-        return [sort_to_string(self.ww_filter.user_sort)]
+        return [sort_to_string(self.sort)]
     def field_output_page(self, path):
         return [unicode(self.page)]
     def field_output_function(self, path):
@@ -802,11 +544,7 @@ class Table(BaseTable, Base.ActionInput):
         return []
 
     def get_active_sort(self, path):
-        if path and (   path[0] in self.disabled_columns
-                     or [key for (key, order) in self.ww_filter.pre_sort
-                         if key == path[0]]
-                     or [key for (key, order) in self.ww_filter.post_sort
-                         if key == path[0]]
+        if path and (  path[0] in self.disabled_columns
                      or path[0] in self.functions): return False
         return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['sort'] + path)
     def get_active_page(self, path):
@@ -817,6 +555,26 @@ class Table(BaseTable, Base.ActionInput):
     def get_active_group_function(self, path):
         if path[0] in self.disabled_functions: return False
         return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, self.path + ['group_function'] + path)
+
+    def mangle_columns(self, columns, output_options):
+        if 'printable_version' in output_options and self.functions:
+            res = {}
+            res.update(columns)
+            for key in self.functions.iterkeys():
+                if key in res:
+                    del res[key]
+            return res
+        return columns
+
+    def mangle_row(self, row, output_options):
+        if 'printable_version' not in output_options and self.functions:
+            mangled_row = ChildNodeCells(row.node, row.row)
+            mangled_row.update(row)
+            for name in self.functions.iterkeys():
+                mangled_row[name] = FunctionCellInstance
+            mangled_row.row = row.row
+            return mangled_row
+        return row
 
     def draw_title_bar(self, config, output_options):
         title = getattr(self, 'title', None)
@@ -829,20 +587,19 @@ class Table(BaseTable, Base.ActionInput):
             self.session.windows[self.win_id].arguments[self.argument_name + '_page'] = {
                 'widget':self, 'path': self.path + ['_', 'page']}
 
-        pages = self.ww_filter.get_pages(output_options)
         page_id = Webwidgets.Utils.path_to_id(self.path + ['_', 'page'])
         page_active = self.get_active(self.path + ['_', 'page'])
         if page_active:
             self.session.windows[self.win_id].fields[page_id] = self
         back_active = page_active and self.page > 1
-        forward_active = page_active and self.page < pages
+        forward_active = page_active and self.page < self.get_pages()
         info = {'html_id': page_id,
                 'first': 1,
                 'previous': self.page - 1,
                 'page': self.page,
-                'pages': pages,
+                'pages': self.get_pages(),
                 'next': self.page + 1,
-                'last': pages,
+                'last': self.get_pages(),
                 'back_active': ['', 'disabled="disabled"'][not back_active],
                 'forward_active': ['', 'disabled="disabled"'][not forward_active],
                 }
@@ -923,16 +680,15 @@ class Table(BaseTable, Base.ActionInput):
                 'widget':self, 'path': sort_path}
         self.session.windows[self.win_id].fields[input_id] = self
 
-        # Column headings
-        for column, definition in visible_columns.iteritems():
+        for column, title in visible_columns.iteritems():
             sort_active = self.get_active(sort_path + [column])
             info = {'input_id': input_id,
                     'html_id': widget_id,
                     'column': column,
                     'disabled': ['disabled="disabled"', ''][sort_active],
-                    'caption': self._(definition["title"], output_options),
-                    'ww_classes': sort_to_classes(self.ww_filter.sort, reverse_dependent_columns.get(column, column)),
-                    'sort': sort_to_string(set_sort(self.ww_filter.user_sort, reverse_dependent_columns.get(column, column)))
+                    'caption': self._(title, output_options),
+                    'ww_classes': sort_to_classes(self.sort, reverse_dependent_columns.get(column, column)),
+                    'sort': sort_to_string(set_sort(self.sort, reverse_dependent_columns.get(column, column)))
                     }
             if 'printable_version' in output_options:
                 headings.append("""
@@ -946,39 +702,17 @@ class Table(BaseTable, Base.ActionInput):
  <button type="submit" id="%(html_id)s-_-sort-%(column)s" %(disabled)s name="%(html_id)s-_-sort" value="%(sort)s">%(caption)s</button>
 </th>
 """ % info)
-
-        # Group headings
-        group_headings = []
-        for group_row_name, group_row_def in self.column_groups.iteritems():
-            group_row_headings = []
-            for col_name, col_def in visible_columns.iteritems():
-	        if group_row_name in col_def:
-                    col_group = col_def[group_row_name]
-                    if group_row_headings and group_row_headings[-1][0] == col_group:
-                        group_row_headings[-1][1] += 1
-                    else:
-                        group_row_headings.append([col_group, 1])
-                else:
-                    group_row_headings.append([None, 1])
-            group_headings.append(["<th colspan='%(colspan)s'>%(title)s</th>" % {
-                                    'colspan': colspan,
-                                    'title': group_row_def.get(group, '')
-                                   }
-                                  for (group, colspan)
-                                  in group_row_headings])
-
-        return group_headings + [headings]
+        return headings
 
     def append_headings(self, rows, headings, output_options):
-        rows[0:0] = [{'cells': headings_row,
-                      'type': RenderedRowTypeHeading}
-                     for headings_row
-                     in headings]
+        rows.insert(0, {'cells': headings,
+                        'type': RenderedRowTypeHeading})
 
     def mangle_rendered_rows(self, rendered_rows, visible_columns, reverse_dependent_columns, output_options):
         super(Table, self).mangle_rendered_rows(rendered_rows, visible_columns, reverse_dependent_columns, output_options)
 
         headings = self.draw_headings(visible_columns, reverse_dependent_columns, output_options)
+
         self.append_headings(rendered_rows, headings, output_options)
 
         return rendered_rows
@@ -996,60 +730,3 @@ class Table(BaseTable, Base.ActionInput):
  %(buttons_bottom)s
 </div>
 """ % info
-
-
-#### Expandable table ####
-
-class TableExpandableFilter(Base.Filter):
-    # left = ExpandableTable
-    # right = Table
-
-    # API used by Table
-    def get_rows(self, output_options):
-        res = []
-        for row in self.ww_filter.get_rows(output_options):
-            row.ww_filter.expand_col = ExpandCellInstance
-            res.append(row)
-
-            if hasattr(row.ww_filter, 'ww_expansion') and getattr(row.ww_filter, 'ww_is_expanded', False):
-                res.append(self.TableRowModelWrapper(
-                    table = self.object,
-                    ww_is_expansion_parent = row,
-                    ww_model = row.ww_filter.ww_expansion))
-        return res
-
-    def get_columns(self, output_options, only_sortable = False):
-        if only_sortable: return self.ww_filter.get_columns(output_options, only_sortable)
-        res = Webwidgets.Utils.OrderedDict(expand_col = {"title": ''})
-        res.update(self.ww_filter.get_columns(output_options, only_sortable))
-        return res
-
-    def field_input_expand(self, path, string_value):
-        row = self.object.ww_filter.get_row_by_id(string_value)
-        row.ww_filter.ww_is_expanded = not getattr(row.ww_filter, 'ww_is_expanded', False)
-
-    def field_output_expand(self, path):
-        return []
-
-    def get_active_expand(self, path):
-        return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['expand'] + path)
-
-    def get_row_id(self, row):
-        if hasattr(row, 'ww_is_expansion_parent'):
-            return "child_" + self.ww_filter.get_row_id(row.ww_is_expansion_parent)
-        return "parent_" + self.ww_filter.get_row_id(row)
-
-    def get_row_by_id(self, row_id):
-        if row_id.startswith("child_"):
-            parent = self.ww_filter.get_row_by_id(row_id[6:])
-            return self.TableRowModelWrapper(
-                table = self.object,
-                ww_is_expansion_parent = parent,
-                ww_model = parent.ww_filter.ww_expansion)
-        elif row_id.startswith("parent_"):
-            return self.ww_filter.get_row_by_id(row_id[7:])
-        raise Exception("Invalid row-id %s (should have started with 'child_' or 'parent_')" % row_id)
-
-class ExpandableTable(Table):
-    class RowsFilters(Table.RowsFilters):
-        WwFilters = [TableExpandableFilter] + Table.RowsFilters.WwFilters

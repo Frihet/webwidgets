@@ -28,14 +28,11 @@ generic base ww_classes that can be used when implementing more elaborate
 widgets.
 """
 
-import types, xml.sax.saxutils, os.path, cgi, re, sys, weakref
+import types, xml.sax.saxutils, os.path, cgi, re, sys
 import Webwidgets.Utils, Webwidgets.Utils.Gettext, Webwidgets.Constants
 import Webwidgets.Utils.FileHandling
 import Webwidgets.Utils.Threads
-import traceback
 
-debug_exceptions = True
-                        
 class Type(type):
     ww_class_order_nr = Webwidgets.Utils.Threads.Counter()
 
@@ -81,9 +78,8 @@ class Type(type):
 
 class Object(object):
     """Object is a more elaborate version of object, providing a few
-    extra utility methods, some extra"magic" class attributes -
-    L{ww_classes}, L{ww_class_order_nr} and L{ww_class_path} and
-    model/model-filter handling."""
+    extra utility methods, and some extra "magic" class attributes -
+    L{ww_classes}, L{ww_class_order_nr} and L{ww_class_path}."""
     
     __metaclass__ = Type
 
@@ -109,130 +105,23 @@ class Object(object):
     some ther class, this is the ww_class_path and __name__ of that
     other class joined. The path is dot-separated."""
 
-    ww_model = None
-    """If non-None, any attribute not found on this object will be
-    searched for on this object."""
-    
-    WwModel = None
-    """If non-None and the model attribute is None, this class will be
-    instantiated and the instance placed in the model attribute."""
-
-    WwFilters = []
-    """Filter is a set of classes that are to be instantiated and
-    chained together as filters for this object. Ech of these will
-    have its filter attribute set to the next one, except for the last
-    one, which will have it set to this very object."""
-
     def __init__(self, **attrs):
-        """Creates a new object
-            raise AttributeError(self, name)
+        """Creates a new widget
 
-        @param ww_filter: The next filter when building a filter
-                       tree/chain. None for the root node, next filter
-                       in chain otherwise.
         @param attrs: Any attributes to set for the object.
         """
-        if "ww_model" in attrs:
-            self.ww_model = attrs.pop('ww_model')
-        if self.ww_model is None and self.WwModel is not None:
-            self.ww_model = self.WwModel()
+        
         self.__dict__.update(attrs)
-        self.setup_filter()
 
-    def setup_filter(self, name = 'ww_filter', ww_filter_classes = None, ww_filter = None, object = None):
-        if ww_filter is None: ww_filter = self.__dict__.get(name, self)
-        if object is None: object = self.__dict__.get('object', self)
-        if ww_filter_classes is None: ww_filter_classes = self.WwFilters
-        for filter_class in reversed(ww_filter_classes):
-            if isinstance(filter_class, (str, unicode)):
-                filter_class = getattr(self, filter_class)
-            ww_filter = filter_class(ww_filter = ww_filter, object = object)
-        self.__dict__[name] = ww_filter
-
-    def derive(cls, *clss, **members):
-        name = 'anonymous'
-        if 'name' in members:
-            name = members.pop('name')
-        return types.TypeType(name, (cls,) + clss, members)
+    def derive(cls, name = None, **members):
+        return types.TypeType(name or 'anonymous', (cls,), members)
     derive = classmethod(derive)
 
-    def __getattr__(self, name):
-        if self.ww_model is None:
-            raise AttributeError(self, name)
-        return getattr(self.ww_model, name)
-        
-    def __hasattr__(self, name):
-        return name in self.__dict__ or self.ww_model is not None and hasattr(self.ww_model, name)
-
-    def __setattr__(self, name, value):
-        if (   self.ww_model is None
-            or name in self.__dict__
-            or not hasattr(self.ww_model, name)):
-            object.__setattr__(self, name, value)
-        else:
-            setattr(self.ww_model, name, value)
-
-    def __unicode__(self):
-        return object.__repr__(self)
-        
     def __str__(self):
         return str(unicode(self))
 
     def __repr__(self):
         return str(self)
-
-class Wrapper(Object):
-    def __init__(self, ww_model, **attrs):
-        if hasattr(ww_model, 'ww_filter'):
-            attrs['ww_filter'] = ww_model.ww_filter
-        Object.__init__(self, ww_model = ww_model, **attrs)
-
-class PersistentWrapper(Wrapper):
-    def __new__(cls, ww_model, **attrs):
-        if 'wrappers' not in cls.__dict__:
-                cls.wrappers = {}
-        if id(ww_model) not in cls.wrappers:
-            wrapper = cls.wrappers[id(ww_model)] = Wrapper.__new__(cls, ww_model = ww_model, **attrs)
-            wrapper.ww_first_init(ww_model = ww_model, **attrs)
-        else:
-            wrapper = cls.wrappers[id(ww_model)]
-        return wrapper
-
-    def __init__(self, *arg, **kw):
-        self.__dict__.update(kw)
-    
-    def ww_first_init(self, *arg, **kw):
-        Wrapper.__init__(self, *arg, **kw)
-
-class Model(Object):
-    pass
-
-class Filter(Object):
-    def __getattr__(self, name):
-        return getattr(self.ww_filter, name)
-    
-    def __hasattr__(self, name):
-        return name in self.__dict__ or hasattr(self.ww_filter, name)
-
-    def __setattr__(self, name, value):
-        if (   name in self.__dict__
-            or not hasattr(self.ww_filter, name)):
-            object.__setattr__(self, name, value)
-        else:
-            setattr(self.ww_filter, name, value)
-
-class RenameFilter(Filter):
-    """This filter renames one or more attributes using a dictionary
-    mapping in the name_map attribute."""
-    def __getattr__(self, name):
-        return getattr(self.ww_filter, self.ww_filter.name_map.get(name, name))
-
-    def __setattr__(self, name, value):
-        setattr(self.ww_filter, self.ww_filter.name_map.get(name, name), value)
-
-class RenameWrapper(Wrapper):
-    WwFilters = [RenameFilter]
-    
 
 class Widget(Object):
     """Widget is the base class for all widgets. It manages class name
@@ -398,7 +287,7 @@ class Widget(Object):
             #if key.startswith('_'): continue
             value = getattr(self, key)
             if isinstance(value, (type, types.MethodType)): continue
-	    res[key] = res['ww_untranslated__' + key] = unicode(value)
+	    res[key] = res['ww_untranslated__' + key] = str(value)
             try:
                 res[key] = self._(value, output_options)
             except:
@@ -590,7 +479,7 @@ class Widget(Object):
 
     def __setattr__(self, name, value):
         if not hasattr(self, name) or value is not getattr(self, name):
-            Object.__setattr__(self, name, value)    
+            object.__setattr__(self, name, value)    
             self.notify('%s_changed' % name, value)
 
 class Text(Widget):
@@ -607,40 +496,9 @@ class Text(Widget):
     def draw(self, output_options):
         return self._(self.html, output_options)
 
-class BaseChildNodes(object):
-    def __init__(self, node):
-        self.node = node
-
-    def class_child_to_widget(self, cls):
-        return cls(self.node.session, self.node.win_id)
-
-    def ensure(self):
-        for name, value in self.iteritems():
-            if isinstance(value, type) and issubclass(value, Widget):
-                value = self[name] = self.class_child_to_widget(value)
-            if isinstance(value, Widget):
-                if self.node is value:
-                    raise Exception("Object's parent set to itself!", value)
-                
-                value.parent = self.node
-                value.name = name
-
-class BaseChildNodeDict(BaseChildNodes):
-    def __setitem__(self, *arg, **kw):
-        super(BaseChildNodeDict, self).__setitem__(*arg, **kw)
-        self.ensure()
-
-    def update(self, *arg, **kw):
-        super(BaseChildNodeDict, self).update(*arg, **kw)
-        self.ensure()
-
-    def setdefault(self, *arg, **kw):
-        super(BaseChildNodeDict, self).setdefault(*arg, **kw)
-        self.ensure()
-
-class ChildNodeDict(BaseChildNodeDict, Webwidgets.Utils.OrderedDict):
+class ChildNodes(Webwidgets.Utils.OrderedDict):
     """Dictionary of child widgets to a widget; any widgets inserted
-    in the dictionary will automatically have their name and parent
+    in the dictionary will automatically have their name and parentn
     member variables set correctly."""
     def __init__(self, node, *arg, **kw):
         """@param node: The widget the children held in this
@@ -648,81 +506,28 @@ class ChildNodeDict(BaseChildNodeDict, Webwidgets.Utils.OrderedDict):
         @param arg: Sent to L{dict.__init__}
         @param kw: Sent to L{dict.__init__}
         """
-        BaseChildNodeDict.__init__(self, node)
-        Webwidgets.Utils.OrderedDict.__init__(self, *arg, **kw)
-
-class WeakChildNodeDict(BaseChildNodeDict, Webwidgets.Utils.WeakValueOrderedDict):
-    """Like ChildNodeDict but the dirctionbary only keeps a weak
-    reference to the children; this should be used to track/cache
-    children that are really stored in some other structure.."""
-    def __init__(self, node, *arg, **kw):
-        """@param node: The widget the children held in this
-        dictinary are children to.
-        @param arg: Sent to L{dict.__init__}
-        @param kw: Sent to L{dict.__init__}
-        """
-        self.class_children = weakref.WeakKeyDictionary()
-        BaseChildNodeDict.__init__(self, node)
-        Webwidgets.Utils.WeakValueOrderedDict.__init__(self, *arg, **kw)
-
-    def class_child_to_widget(self, cls):
-        widget = BaseChildNodeDict.class_child_to_widget(self, cls)
-        self.class_children[cls] = widget
-        return widget
-
-class ChildNodeList(BaseChildNodes, list):
-    """List of child widgets to a widget; any widgets inserted in the
-    list will automatically have their name and parent member
-    variables set correctly, the name being the index in the list."""
-    def __init__(self, node, *arg, **kw):
-        """@param node: The widget the children held in this
-        list are children to.
-        @param arg: Sent to L{list.__init__}
-        @param kw: Sent to L{list.__init__}
-        """
-        BaseChildNodes.__init__(self, node)
-        self.extend(*arg, **kw)
-    
-    def iteritems(self):
-        for index, value in enumerate(self):
-            yield (str(index), value)
-
-    def iterkeys(self):
-        for index in xrange(0, len(self)):
-            yield str(index)
-
-    def __getitem__(self, name):
-        if isinstance(name, (str, unicode)): name = int(name)
-        return super(ChildNodeList, self).__getitem__(name)
-
-    def __setitem__(self, name, value):
-        if isinstance(name, (str, unicode)): name = int(name)
-        super(ChildNodeList, self).__setitem__(name, value)
+        self.node = node
+        super(ChildNodes, self).__init__(*arg, **kw)
         self.ensure()
 
-    def __delitem__(self, name):
-        if isinstance(name, (str, unicode)): name = int(name)
-        super(ChildNodeList, self).__delitem__(name)
+    def ensure(self):
+        for name, value in self.iteritems():
+            if isinstance(value, Widget):
+                if self.node is value:
+                    raise Exception("Object's parent set to itself!", value)
+                value.parent = self.node
+                value.name = name
+
+    def __setitem__(self, *arg, **kw):
+        super(ChildNodes, self).__setitem__(*arg, **kw)
         self.ensure()
 
-    def extend(self, *arg, **kw):
-        super(ChildNodeList, self).extend(*arg, **kw)
+    def update(self, *arg, **kw):
+        super(ChildNodes, self).update(*arg, **kw)
         self.ensure()
 
-    def append(self, *arg, **kw):
-        super(ChildNodeList, self).append(*arg, **kw)
-        self.ensure()
-
-    def insert(self, *arg, **kw):
-        super(ChildNodeList, self).insert(*arg, **kw)
-        self.ensure()
-
-    def reverse(self, *arg, **kw):
-        super(ChildNodeList, self).reverse(*arg, **kw)
-        self.ensure()
-    
-    def sort(self, *arg, **kw):
-        super(ChildNodeList, self).sort(*arg, **kw)
+    def setdefault(self, *arg, **kw):
+        super(ChildNodes, self).setdefault(*arg, **kw)
         self.ensure()
 
 class Composite(Widget):
@@ -765,28 +570,22 @@ class Composite(Widget):
                 try:
                     result = child.draw(output_options)
                 except Exception, e:
-                    if debug_exceptions: traceback.print_exc()
                     result = ''
                     import WebUtils.HTMLForException
                     child.system_errors.append(
                         (sys.exc_info()[1],
                          WebUtils.HTMLForException.HTMLForException()))
-            elif isinstance(child, type) and issubclass(child, Widget):
-                raise Exception("The child %(child)s to %(self)s is a class, not an instance" % {
-                    'child': Webwidgets.Utils.obj_info(child),
-                    'self': Webwidgets.Utils.obj_info(self)})
             else:
                 result = self._(child, output_options)
         else:
             result = [None, ''][invisible_as_empty]
 
         if result is not None and getattr(child, 'system_errors', []):
-            system_error_format = self._(self.system_error_format, output_options)
-            system_errors_format = self._(self.system_errors_format, output_options)
-            errors = [system_error_format % {'exception': cgi.escape(Webwidgets.Utils.convert_to_str_any_way_possible(error[0])),
-                                             'traceback': Webwidgets.Utils.convert_to_str_any_way_possible(error[1])}
-                      for error in child.system_errors]
-            result = system_errors_format % {'tracebacks': '\n'.join(errors)} + result
+            result = self._(self.system_errors_format, output_options
+                            ) % {'tracebacks': '\n'.join([self._(self.system_error_format, output_options
+                                                                 ) % {'exception': cgi.escape(unicode(error[0])),
+                                                                      'traceback': error[1]}
+                                                          for error in child.system_errors])} + result
             del child.system_errors[:]
 
         if 'internal' in output_options and 'draw_wrapper' in output_options['internal']:
@@ -833,62 +632,14 @@ class Composite(Widget):
                     fields.update(child.get_widgets_by_attribute(attribute))
         return fields
 
-    def get(self, name, default = None):
-        """@return: a child widget."""
-        try:
-            return self.get_child(name)
-        except KeyError:
-            return default
-        
     def __getitem__(self, name):
         """@return: a child widget."""
         return self.get_child(name)
 
-    def __contains__(self, name):
-        try:
-            self.get_child(name)
-            return True
-        except:
-            return False
-        
     def __iter__(self):
         return self.get_children()
-
-class DictComposite(Composite):
-    ww_class_data__no_classes_name = True
-
-    ChildNodeDict = ChildNodeDict
-    
-    def __init__(self, session, win_id, **attrs):
-        super(DictComposite, self).__init__(
-            session, win_id, **attrs)
-        self.children = self.ChildNodeDict(self, getattr(self, 'children', {}))
-
-    def get_children(self):
-        return self.children.iteritems()
-
-    def get_child(self, name):
-        try:
-            return self.children[name]
-        except:
-            try:
-                e = sys.exc_info()
-                raise KeyError, ("No such child %s to %s" % (name, str(self)), e[1]), e[2]
-            finally:
-                del e
-
-    def __setitem__(self, name, value):
-        """Adds a new child widget"""
-        self.children[name] = value
-
-    def __delitem__(self, name):
-        """Deletes a child widget"""
-        del self.children[name]
-
-class CachingComposite(DictComposite):
-    ChildNodeDict = WeakChildNodeDict
-    
-class StaticComposite(DictComposite):
+        
+class StaticComposite(Composite):
     """Base class for all composite widgets, handling child class
     instantiation, drawing of children and the visibility attribute of
     children.
@@ -904,7 +655,9 @@ class StaticComposite(DictComposite):
     
     def __init__(self, session, win_id, **attrs):
         super(StaticComposite, self).__init__(
-            session, win_id, **attrs)
+            session, win_id,
+            **attrs)
+        self.children = ChildNodes(self, getattr(self, 'children', {}))
 
         # Class members have no intrinsic order, so we sort them on
         # their order of creation, which if created through the Python
@@ -921,6 +674,23 @@ class StaticComposite(DictComposite):
         
         for (name, value) in child_classes:
             self.children[name] = value(session, win_id)
+
+    def get_children(self):
+        return self.children.iteritems()
+
+    def get_child(self, name):
+        try:
+            return self.children[name]
+        except:
+            raise KeyError("No such child %s to %s" % (name, str(self)))
+
+    def __setitem__(self, name, value):
+        """Adds a new child widget"""
+        self.children[name] = value
+
+    def __delitem__(self, name):
+        """Deletes a child widget"""
+        del self.children[name]
 
 class Input(Widget):
     """Base class for all input widgets, providing input field registration"""
@@ -1032,24 +802,23 @@ class ValueInput(Input):
     the value hold by the widget."""
 
     original_value = ''
+    
+    value = ''
 
     multiple = False
     """Handle multiple values"""
 
-    class WwModel(Model):
-        value = ''
-
     def reset(self):
-        self.ww_filter.value = self.ww_filter.original_value
+        self.value = self.original_value
 
     def field_input(self, path, *values):
         if not self.multiple:
             values = values[0]
-        self.ww_filter.value = values
+        self.value = values
 
     def field_output(self, path):
-        values = self.ww_filter.value
-        if not self.ww_filter.multiple or not isinstance(values, types.ListType):
+        values = self.value
+        if not self.multiple or not isinstance(values, types.ListType):
             values = [values]
         return [unicode(value) for value in values]
 
@@ -1059,10 +828,10 @@ class ValueInput(Input):
         make sure to call the base class implementation, as the value
         will be reset otherwise."""
         if path != self.path: return
-        self.ww_filter.error = None
+        self.error = None
 
     def __cmp__(self, other):
-        return cmp(self.ww_filter.value, other)
+        return cmp(self.value, other)
 
 class ActionInput(Input):
     """Base class for all input widgets that only fires some
