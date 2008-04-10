@@ -677,50 +677,7 @@ def sort_to_order_by(sort, quote = "`"):
         order.append(quote + key + quote + ' ' + ['desc', 'asc'][dir == 'asc'])
     if order:
         return 'order by ' + ', '.join(order)
-    return
-
-class TableSortFilter(Base.Filter):
-    class Sort(object):
-        def __get__(self, instance, owner):
-            if instance is None: instance = owner
-            return instance.pre_sort + instance.user_sort + instance.post_sort
-    sort = Sort()
-    
-    class UserSort(object):
-        def __get__(self, instance, owner):
-            if instance is None: instance = owner
-            return instance.ww_filter.sort
-        def __set__(self, instance, value):
-            instance.ww_filter.sort = value
-    user_sort = UserSort()
-    
-class TableFunctionColFilter(Base.Filter):
-    # left = Table
-    # right = Table
-    def mangle_row(self, row, output_options):
-        if (    'printable_version' not in output_options
-            and self.functions
-            and not hasattr(row, 'ww_expanded')):
-            for name in self.functions.iterkeys():
-                setattr(row, name, FunctionCellInstance)
-        return row
-
-    def get_rows(self, output_options):
-        return [self.mangle_row(row, output_options)
-                for row
-                in self.ww_filter.get_rows(output_options)]        
-
-    def get_columns(self, output_options, only_sortable):
-        if (   only_sortable
-            or (    'printable_version' in output_options
-                and self.functions)):
-            res = Webwidgets.Utils.OrderedDict(self.ww_filter.get_columns(output_options, only_sortable))
-            for key in self.functions.iterkeys():
-                if key in res:
-                    del res[key]
-            return res
-        else:
-            return self.ww_filter.get_columns(output_options, only_sortable)
+    return    
     
 class Table(BaseTable, Base.ActionInput):
     """Group By Ordering List is a special kind of table view that
@@ -769,7 +726,50 @@ class Table(BaseTable, Base.ActionInput):
         # level < that button bars' level that are to be drawn.
 
     class RowsFilters(BaseTable.RowsFilters):
-        WwFilters = [TableFunctionColFilter] + BaseTable.RowsFilters.WwFilters + [TableSortFilter]
+        WwFilters = ["TableFunctionColFilter"] + BaseTable.RowsFilters.WwFilters + ["TableSortFilter"]
+
+        class TableFunctionColFilter(Base.Filter):
+            # left = Table
+            # right = Table
+            def mangle_row(self, row, output_options):
+                if (    'printable_version' not in output_options
+                    and self.functions
+                    and not hasattr(row, 'ww_expanded')):
+                    for name in self.functions.iterkeys():
+                        setattr(row, name, FunctionCellInstance)
+                return row
+
+            def get_rows(self, output_options):
+                return [self.mangle_row(row, output_options)
+                        for row
+                        in self.ww_filter.get_rows(output_options)]        
+
+            def get_columns(self, output_options, only_sortable):
+                if (   only_sortable
+                    or (    'printable_version' in output_options
+                        and self.functions)):
+                    res = Webwidgets.Utils.OrderedDict(self.ww_filter.get_columns(output_options, only_sortable))
+                    for key in self.functions.iterkeys():
+                        if key in res:
+                            del res[key]
+                    return res
+                else:
+                    return self.ww_filter.get_columns(output_options, only_sortable)
+
+        class TableSortFilter(Base.Filter):
+            class Sort(object):
+                def __get__(self, instance, owner):
+                    if instance is None: instance = owner
+                    return instance.pre_sort + instance.user_sort + instance.post_sort
+            sort = Sort()
+
+            class UserSort(object):
+                def __get__(self, instance, owner):
+                    if instance is None: instance = owner
+                    return instance.ww_filter.sort
+                def __set__(self, instance, value):
+                    instance.ww_filter.sort = value
+            user_sort = UserSort()
 
     def field_input(self, path, string_value):
         try:
@@ -997,59 +997,56 @@ class Table(BaseTable, Base.ActionInput):
 </div>
 """ % info
 
-
-#### Expandable table ####
-
-class TableExpandableFilter(Base.Filter):
-    # left = ExpandableTable
-    # right = Table
-
-    # API used by Table
-    def get_rows(self, output_options):
-        res = []
-        for row in self.ww_filter.get_rows(output_options):
-            row.ww_filter.expand_col = ExpandCellInstance
-            res.append(row)
-
-            if hasattr(row.ww_filter, 'ww_expansion') and getattr(row.ww_filter, 'ww_is_expanded', False):
-                res.append(self.TableRowModelWrapper(
-                    table = self.object,
-                    ww_is_expansion_parent = row,
-                    ww_model = row.ww_filter.ww_expansion))
-        return res
-
-    def get_columns(self, output_options, only_sortable = False):
-        if only_sortable: return self.ww_filter.get_columns(output_options, only_sortable)
-        res = Webwidgets.Utils.OrderedDict(expand_col = {"title": ''})
-        res.update(self.ww_filter.get_columns(output_options, only_sortable))
-        return res
-
-    def field_input_expand(self, path, string_value):
-        row = self.object.ww_filter.get_row_by_id(string_value)
-        row.ww_filter.ww_is_expanded = not getattr(row.ww_filter, 'ww_is_expanded', False)
-
-    def field_output_expand(self, path):
-        return []
-
-    def get_active_expand(self, path):
-        return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['expand'] + path)
-
-    def get_row_id(self, row):
-        if hasattr(row, 'ww_is_expansion_parent'):
-            return "child_" + self.ww_filter.get_row_id(row.ww_is_expansion_parent)
-        return "parent_" + self.ww_filter.get_row_id(row)
-
-    def get_row_by_id(self, row_id):
-        if row_id.startswith("child_"):
-            parent = self.ww_filter.get_row_by_id(row_id[6:])
-            return self.TableRowModelWrapper(
-                table = self.object,
-                ww_is_expansion_parent = parent,
-                ww_model = parent.ww_filter.ww_expansion)
-        elif row_id.startswith("parent_"):
-            return self.ww_filter.get_row_by_id(row_id[7:])
-        raise Exception("Invalid row-id %s (should have started with 'child_' or 'parent_')" % row_id)
-
 class ExpandableTable(Table):
     class RowsFilters(Table.RowsFilters):
-        WwFilters = [TableExpandableFilter] + Table.RowsFilters.WwFilters
+        WwFilters = ["TableExpandableFilter"] + Table.RowsFilters.WwFilters
+
+        class TableExpandableFilter(Base.Filter):
+            # left = ExpandableTable
+            # right = Table
+
+            # API used by Table
+            def get_rows(self, output_options):
+                res = []
+                for row in self.ww_filter.get_rows(output_options):
+                    row.ww_filter.expand_col = ExpandCellInstance
+                    res.append(row)
+
+                    if hasattr(row.ww_filter, 'ww_expansion') and getattr(row.ww_filter, 'ww_is_expanded', False):
+                        res.append(self.TableRowModelWrapper(
+                            table = self.object,
+                            ww_is_expansion_parent = row,
+                            ww_model = row.ww_filter.ww_expansion))
+                return res
+
+            def get_columns(self, output_options, only_sortable = False):
+                if only_sortable: return self.ww_filter.get_columns(output_options, only_sortable)
+                res = Webwidgets.Utils.OrderedDict(expand_col = {"title": ''})
+                res.update(self.ww_filter.get_columns(output_options, only_sortable))
+                return res
+
+            def field_input_expand(self, path, string_value):
+                row = self.object.ww_filter.get_row_by_id(string_value)
+                row.ww_filter.ww_is_expanded = not getattr(row.ww_filter, 'ww_is_expanded', False)
+
+            def field_output_expand(self, path):
+                return []
+
+            def get_active_expand(self, path):
+                return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['expand'] + path)
+
+            def get_row_id(self, row):
+                if hasattr(row, 'ww_is_expansion_parent'):
+                    return "child_" + self.ww_filter.get_row_id(row.ww_is_expansion_parent)
+                return "parent_" + self.ww_filter.get_row_id(row)
+
+            def get_row_by_id(self, row_id):
+                if row_id.startswith("child_"):
+                    parent = self.ww_filter.get_row_by_id(row_id[6:])
+                    return self.TableRowModelWrapper(
+                        table = self.object,
+                        ww_is_expansion_parent = parent,
+                        ww_model = parent.ww_filter.ww_expansion)
+                elif row_id.startswith("parent_"):
+                    return self.ww_filter.get_row_by_id(row_id[7:])
+                raise Exception("Invalid row-id %s (should have started with 'child_' or 'parent_')" % row_id)
