@@ -82,7 +82,8 @@ class StringInput(Base.ValueInput):
 class IntegerInput(StringInput):
     error_string = "Integers must only contain the digits 0-9"
     original_value = None
-    value = None
+    class WwModel(Base.ValueInput.WwModel):
+        value = None
     def field_input(self, path, string_value):
         try:
             if string_value == '':
@@ -101,7 +102,8 @@ class IntegerInput(StringInput):
 class FloatInput(StringInput):
     error_string = "Numbers must only contain the digits 0-9, period '.' and the exp. separator 'e'"
     original_value = None
-    value = None
+    class WwModel(Base.ValueInput.WwModel):
+        value = None
     def field_input(self, path, string_value):
         try:
             if string_value == '':
@@ -132,7 +134,8 @@ class NewPasswordInput(Formatting.Html, Base.ValueInput):
     repeated twice and the two values entered are compared. A
     value_changed is only propagated if the two values matches"""
     __wwml_html_override__ = False
-    value = ''
+    class WwModel(Base.ValueInput.WwModel):
+        value = ''
     html = """
     <span %(html_attributes)s>
      %(input1)s
@@ -274,7 +277,8 @@ class RadioInput(Base.ValueInput, Base.StaticComposite):
 
 class Checkbox(Base.ValueInput):
     """Boolean input widget - it's value can either be true or false."""
-    value = False
+    class WwModel(Base.ValueInput.WwModel):
+        value = False
     def draw(self, output_options):
         super(Checkbox, self).draw(output_options)
         checked = ["", 'checked="checked"'][not not self.value]
@@ -294,13 +298,16 @@ class ListInput(Base.ValueInput, Base.StaticComposite):
     """Scrollable list of selectable items. The list can optionally
     allow the user to select multiple items."""
     
-    multiple = False
-    """Allow the user to select multiple items."""
-    
-    size = 0
-    """Size of the widget."""
+    original_value = []
 
-    original_value = value = []
+    class WwModel(Base.ValueInput.WwModel):
+        value = []
+
+        multiple = False
+        """Allow the user to select multiple items."""
+
+        size = 0
+        """Size of the widget."""
 
     def draw(self, output_options):
         Base.ValueInput.draw(self, output_options)
@@ -331,7 +338,9 @@ class ListInput(Base.ValueInput, Base.StaticComposite):
 
 class FileInput(Base.ValueInput, Base.StaticComposite):
     """File upload box"""
-    original_value = value = None
+    original_value = None
+    class WwModel(Base.ValueInput.WwModel):
+        value = None
     
     def field_input(self, path, field_value):
         if path == self.path:
@@ -391,7 +400,9 @@ class ToggleButton(Base.ValueInput, Button):
 
     true_title = 'True'
     false_title = 'False'
-    original_value = value = False
+    original_value = False
+    class WwModel(Base.ValueInput.WwModel):
+        value = False
 
     class HtmlClass(object):
         def __init__(self):
@@ -423,7 +434,9 @@ class ToggleButton(Base.ValueInput, Button):
         return []
 
 class FieldStorageInput(Base.ValueInput):
-    original_value = value = None
+    original_value = None
+    class WwModel(Base.ValueInput.WwModel):
+        value = None
 
     def field_input(self, path, string_value):
         if self.value is None:

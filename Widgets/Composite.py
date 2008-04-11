@@ -108,9 +108,17 @@ class StaticDialog(InfoFrame):
         buttons = Buttons()
 
 class Dialog(StaticDialog):
+    remove_on_close = False
+    
+    def close(self):
+        if self.remove_on_close:
+            del self.parent[self.name]
+        else:
+            self.visible = False
+
     def selected(self, path, value):
         if path != self.path: return
-        self.visible = False
+        self.close()
 
 class Tabset(Base.StaticComposite):
     def get_pages(self, path = []):

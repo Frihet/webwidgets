@@ -46,3 +46,4 @@ class ApplicationWindow(object):
     def add_dialog(self, dialog, name = None):
         if name is None: name = str(len(self['Body']['Dialogs'].children))
         self['Body']['Dialogs'][name] = dialog
+        dialog.remove_on_close = True
