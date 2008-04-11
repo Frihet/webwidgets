@@ -150,13 +150,15 @@ class TableSimpleModelFilter(Base.Filter):
                 return self.rows
         else:
             rows = []
-            expand_tree = self.get_expand_tree()            
+            expand_tree = self.get_expand_tree()
             if self.default_expand:
                 for row in self.rows:
                     node = expand_tree
-                    while not node.toggled and row[node.col] in node.values:
-                        node = node.values[row[node.col]]
-                    if not node.toggled or self.get_row_id(row) in node.rows:
+                    while (    not node.toggled
+                           and self.get_row_col(row, node.col) in node.values):
+                        node = node.values[self.get_row_col(row, node.col)]
+                    if (   not node.toggled
+                        or self.get_row_id(row) in node.rows):
                         rows.append(row)
             else:
                 last_row = None
@@ -165,10 +167,11 @@ class TableSimpleModelFilter(Base.Filter):
                     expanded = True
                     node = expand_tree
                     for pos in xrange(0, common):
-                        if row[node.col] not in node.values or not node.values[row[node.col]].toggled:
+                        if (   self.get_row_col(row, node.col) not in node.values
+                            or not node.values[self.get_row_col(row, node.col)].toggled):
                             expanded = False
                             break
-                        node = node.values[row[node.col]]
+                        node = node.values[self.get_row_col(row, node.col)]
                     if expanded:
                         rows.append(row)
 
@@ -178,6 +181,12 @@ class TableSimpleModelFilter(Base.Filter):
             else:
                 return rows[(self.page - 1) * self.rows_per_page:
                             self.page * self.rows_per_page]
+
+    def get_row_col(self, row, col):
+        if isinstance(row, dict):
+            return row[col]
+        else:
+            return getattr(row, col)
 
     def get_row_id(self, row):
         if self.non_memory_storage:
