@@ -124,8 +124,8 @@ class ExpandCell(FunctionCell):
 
 ExpandCellInstance = ExpandCell()
 
-class TableSimpleModelFilter(Base.Filter):
-    # left = TablePrintableFilter
+class RowsSimpleModelFilter(Base.Filter):
+    # left = RowsPrintableFilter
     # right = BaseTable.WwModel
 
     debug_expand = False
@@ -263,16 +263,16 @@ class TableSimpleModelFilter(Base.Filter):
         self.old_expand = self.expand_version
         self.old_default_expand = self.default_expand
 
-class TablePrintableFilter(Base.Filter):
+class RowsPrintableFilter(Base.Filter):
     # left = BaseTable
-    # right = TableSimpleModelFilter
+    # right = RowsSimpleModelFilter
     
     def get_rows(self, output_options):
         return self.ww_filter.get_rows('printable_version' in output_options, output_options)
 
-class TableRowWrapperFilter(Base.Filter):
+class RowsRowWrapperFilter(Base.Filter):
     def get_rows(self, all, output_options):
-        return [self.TableRowModelWrapper(table = self.object, ww_model = row)
+        return [self.RowsRowModelWrapper(table = self.object, ww_model = row)
                 for row in self.ww_filter.get_rows(all, output_options)]
 
     def get_row_id(self, row):
@@ -281,7 +281,7 @@ class TableRowWrapperFilter(Base.Filter):
     def get_row_by_id(self, row_id):
         if not row_id.startswith("wrap_"):
             raise Exception("Invalid row-id %s (should have started with 'wrap_')" % row_id)
-        return self.TableRowModelWrapper(
+        return self.RowsRowModelWrapper(
             table = self.object,
             ww_model = self.ww_filter.get_row_by_id(row_id[5:]))
     
@@ -325,32 +325,14 @@ class TableRowsToTreeFilter(Base.Filter):
                     node['rows'] += 1
         return (rows, tree)
 
-class BaseTable(Base.CachingComposite, Base.DirectoryServer):
-    """This is the basic version of L{Table}; it formats the table
-    itself, but does not include any user input controls for changing
-    the sorting order, the current page, or for operating on the rows
-    in the table.
-    """
-
+class RowsComposite(Base.CachingComposite):
     class WwModel(Base.Model):
-        columns = {}
-        """{column_name: title | {"title":title, ...}}"""
-        dependent_columns = {}
-        """{column_name: [column_name]}"""
         rows = []
         sort = []
         page = 1
         expand = {}
-        default_expand = True
-        """If true, all rows are expanded until collapsed, if false
-        all rows are collapsed until expanded. This reverses the
-        meaning of the expand attribute."""
         non_memory_storage = False
-        dont_merge_widgets = True
-        dont_merge_columns = ()
         rows_per_page = 10
-        """This attribute is not used internally by the widget, but is
-        intended to be used by the user-provide reread() method."""
 
         def get_rows(self, all, output_options):
             """Load the list after a repaging/resorting, or for a
@@ -370,22 +352,22 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
             non_memory_storage to True, you _must_ implement this method.
             """
             raise NotImplementedError("get_pages")
-
+    
     class SourceFilters(Base.Filter):
-        WwFilters = [TableSimpleModelFilter]
+        WwFilters = ["RowsSimpleModelFilter"]
+        class RowsSimpleModelFilter(RowsSimpleModelFilter): pass
 
     class RowsFilters(Base.Filter):
-        WwFilters = [TableRowWrapperFilter]
+        WwFilters = ["RowsRowWrapperFilter"]
+        class RowsRowWrapperFilter(RowsRowWrapperFilter): pass
 
     class OutputOptionsFilters(Base.Filter):
-        WwFilters = [TablePrintableFilter]
+        WwFilters = ["RowsPrintableFilter"]
+        class RowsPrintableFilter(RowsPrintableFilter): pass
 
-    class TreeFilters(Base.Filter):
-        WwFilters = [TableRowsToTreeFilter]
+    WwFilters = ["OutputOptionsFilters", "RowsFilters", "SourceFilters"]
 
-    WwFilters = ["TreeFilters", "OutputOptionsFilters", "RowsFilters", "SourceFilters"]
-
-    class TableRowModelWrapper(Base.PersistentWrapper):
+    class RowsRowModelWrapper(Base.PersistentWrapper):
         def ww_first_init(self, ww_model, *arg, **kw):
             Base.PersistentWrapper.ww_first_init(self, ww_model = ww_model, *arg, **kw)
             self.__dict__['items'] = {}
@@ -403,6 +385,32 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
                 return self.ww_model[name]
             else:
                 return getattr(self.ww_model, name)
+
+class BaseTable(RowsComposite, Base.DirectoryServer):
+    """This is the basic version of L{Table}; it formats the table
+    itself, but does not include any user input controls for changing
+    the sorting order, the current page, or for operating on the rows
+    in the table.
+    """
+
+    class WwModel(RowsComposite.WwModel):
+        columns = {}
+        """{column_name: title | {"title":title, ...}}"""
+        dependent_columns = {}
+        """{column_name: [column_name]}"""
+        expand = {}
+        default_expand = True
+        """If true, all rows are expanded until collapsed, if false
+        all rows are collapsed until expanded. This reverses the
+        meaning of the expand attribute."""
+        dont_merge_widgets = True
+        dont_merge_columns = ()
+
+    class TreeFilters(Base.Filter):
+        WwFilters = ["TableRowsToTreeFilter"]
+        class TableRowsToTreeFilter(TableRowsToTreeFilter): pass
+
+    WwFilters = ["TreeFilters"] + RowsComposite.WwFilters
 
     def is_expanded_node(self, row, level):
         col = self.get_total_column_order({})[level - 1]
