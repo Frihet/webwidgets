@@ -1031,13 +1031,13 @@ class ValueInput(Input):
     (e.g. all butt buttons). It defines a notification for changing
     the value hold by the widget."""
 
-    original_value = ''
-
-    multiple = False
-    """Handle multiple values"""
-
     class WwModel(Model):
         value = ''
+
+        original_value = ''
+
+        multiple = False
+        """Handle multiple values"""
 
     def reset(self):
         self.ww_filter.value = self.ww_filter.original_value

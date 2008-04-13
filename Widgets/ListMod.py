@@ -32,11 +32,16 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
 
         column_separator = ' '
         
-        multiple = False
+        multiple = True
         """Allow the user to select multiple items."""
 
         size = 0
         """Size of the widget."""
+
+    WwFilters = RowsMod.RowsComposite.WwFilters + ["ValueFilters"]
+
+    class ValueFilters(Base.Filter):
+        WwFilters = []
 
     def draw_options(self, output_options):
         return ["""<option %(selected)s value="%(value)s">
@@ -56,7 +61,7 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
          %(options)s
          </select>""" % {
             'html_attributes': self.draw_html_attributes(self.path),
-            'multiple': self.multiple and 'multiple' or '',
+            'multiple': self.ww_filter.multiple and 'multiple' or '',
             'size': self.size != 0 and 'size="%s"' % self.size or '',
             'name': Webwidgets.Utils.path_to_id(self.path),
             'disabled': ['', 'disabled="disabled"'][not self.get_active(self.path)],
@@ -72,3 +77,19 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
         if not self.value:
             return ['']
         return [self.ww_filter.get_row_id_from_row_model(row) for row in self.value]
+
+class RowsSingleValueListInput(RowsListInput):
+    class ValueFilters(RowsListInput.ValueFilters):
+        WwFilters = ["SingleValueFilter"] + RowsListInput.ValueFilters.WwFilters
+
+        class SingleValueFilter(Base.Filter):
+            multiple = False
+
+            class Value(object):
+                def __get__(self, owner, instance):
+                    return [instance.ww_filter.value]
+
+                def __set__(self, instance, value):
+                    instance.ww_filter.value = value[0]
+
+            value = Value()
