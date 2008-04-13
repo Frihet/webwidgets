@@ -58,6 +58,7 @@ if __name__ == "Webwidgets":
     from Widgets.Input import *
     from Widgets.Composite import *
     from Widgets.Tree import *
+    from Widgets.RowsMod import *
     from Widgets.BaseTableMod import *
     from Widgets.TableMod import *
     from Widgets.LogIn import *
