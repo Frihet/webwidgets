@@ -41,7 +41,7 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
     def draw_options(self, output_options):
         return ["""<option %(selected)s value="%(value)s">
                     %(description)s
-                   </option>""" % {'selected': self.ww_filter.get_row_id(row) in self.value and 'selected="selected"' or '',
+                   </option>""" % {'selected': row.ww_model in self.value and 'selected="selected"' or '',
                                    'value': self.ww_filter.get_row_id(row),
                                    'description': self.column_separator.join(
                                        [self.draw_cell(row, column_name, getattr(row, column_name), output_options)
@@ -64,11 +64,11 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
             }
 
     def field_input(self, path, *string_values):
-        self.value = [value
+        self.value = [self.ww_filter.get_row_by_id(value).ww_model
                       for value in string_values
                       if value]
-                
+
     def field_output(self, path):
         if not self.value:
             return ['']
-        return self.value
+        return [self.ww_filter.get_row_id_from_row_model(row) for row in self.value]
