@@ -1,4 +1,3 @@
-#! /bin/env python
 # -*- coding: UTF-8 -*-
 # vim: set fileencoding=UTF-8 :
 
@@ -19,10 +18,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-"""Group By Ordering List is a special kind of table view that allows
-the user to sort the rows and simultaneously group the rows according
-to their content and the sorting."""
 
 import Webwidgets.Constants, Webwidgets.Utils, re, math, cgi, types, itertools
 import Base
@@ -365,3 +360,11 @@ class RowsComposite(Base.CachingComposite):
             self.children[row_id] = RowsRowWidget(self.session, self.win_id)
         return self.children[row_id]
 
+    def draw_cell(self, row, column_name, value, output_options):
+        # We're just caching child-parent relationships - if a
+        # child disappears, so be it. That's up to our model, not
+        # us...
+        row_widget = self.child_for_row(row)
+        if row_widget.children.get(column_name, None) is not value:
+            row_widget.children[column_name] = value
+        return row_widget.draw_child(row_widget.path + [column_name], value, output_options, True)

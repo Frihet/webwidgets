@@ -43,7 +43,7 @@ class SpecialCell(object):
         row_num, column_name, rowspan, colspan, first_level, last_level):
         return self.html_class
     
-    def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
+    def draw_table_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
         return ''
 
 class FunctionCell(SpecialCell):
@@ -67,7 +67,7 @@ class FunctionCell(SpecialCell):
                        'row': row_id,
                        'value': value}
                        
-    def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
+    def draw_table_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
         enabled_functions = getattr(row, 'ww_functions', True)
         row_id = table.ww_filter.get_row_id(row)
         rendered_functions = []
@@ -100,7 +100,7 @@ class ExpandCell(FunctionCell):
                                   ['Expand', 'Collapse'][expanded],
                                   active, output_options)
     
-    def draw_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
+    def draw_table_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
         row_id = table.ww_filter.get_row_id(row)
         return self.draw_expand(table, row_id, row_id,
                                 getattr(row.ww_filter, 'ww_is_expanded', False),
@@ -217,33 +217,27 @@ class BaseTable(RowsMod.RowsComposite, Base.DirectoryServer):
         return rendered_rows
 
     def draw_node(self, output_options, row, node, column, first_level, last_level, node_level, single):
-        return self.draw_cell(
+        return self.draw_table_cell(
             output_options, row, node['value'], node['top'], column, node['rows'], 1, first_level, last_level, node_level, single)
 
     def draw_extended_row(self, output_options, row, value, total_column_order, row_num, first_level, last_level, node_level, single):
-        return self.draw_cell(
+        return self.draw_table_cell(
             output_options, row, value, row_num, 'ww_expanded', 1, len(total_column_order), first_level, last_level, node_level, single)
 
-    def draw_cell(self, output_options, row, value,
+    def draw_table_cell(self, output_options, row, value,
                   row_num, column_name, rowspan, colspan, first_level, last_level, node_level, single):
         html_class = []
         if isinstance(value, SpecialCell):
             html_class = value.get_html_class(
                 output_options, row, self,
                 row_num, column_name, rowspan, colspan, first_level, last_level)
-            value = value.draw_cell(
+            value = value.draw_table_cell(
                 output_options, row, self,
                 row_num, column_name, rowspan, colspan, first_level, last_level)
         else:
             html_class = getattr(row, 'ww_class', []) + ['column_first_level_%s' % first_level,
                                                          'column_last_level_%s' % last_level]
-            # We're just caching child-parent relationships - if a
-            # child disappears, so be it. That's up to our model, not
-            # us...
-            row_widget = self.child_for_row(row)
-            if row_widget.children.get(column_name, None) is not value:
-                row_widget.children[column_name] = value
-            value = row_widget.draw_child(row_widget.path + [column_name], value, output_options, True)
+            value = self.draw_cell(row, column_name, value, output_options)
 
         expand_button = ""
         expanded = self.ww_filter.is_expanded_node(row, node_level)
