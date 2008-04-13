@@ -48,6 +48,7 @@ class RowsSimpleModelFilter(Base.Filter):
         else:
             rows = []
             expand_tree = self.get_expand_tree()
+            
             if self.default_expand:
                 for row in self.rows:
                     node = expand_tree
@@ -212,6 +213,11 @@ class RowsComposite(Base.CachingComposite):
         dont_merge_columns = ()
 
         non_memory_storage = False
+
+        def __init__(self):
+            self.expand = dict(self.expand)
+            self.sort = list(self.sort)
+            self.rows = list(self.rows)
 
         def get_rows(self, all, output_options):
             """Load the list after a repaging/resorting, or for a
