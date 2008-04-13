@@ -878,27 +878,29 @@ class Table(BaseTable, Base.ActionInput):
             'location': cgi.escape(location),
             })
 
+    def draw_group_function(self, path, html_class, title, output_options):
+        path = self.path + ['_'] + path
+        active = self.get_active(path)
+        if active:
+            self.register_input(path)
+        return """<button
+                   type="submit"
+                   id="%(html_id)s"
+                   class="%(html_class)s"
+                   %(disabled)s
+                   name="%(html_id)s"
+                   value="selected">%(title)s</button>""" % {
+                   'html_id': Webwidgets.Utils.path_to_id(path),
+                   'html_class': html_class,
+                   'disabled': ['disabled="disabled"', ''][active],
+                   'title': self._(title, output_options)}
+
     def draw_group_functions(self, config, output_options):
-        function_active = {}
-        for function in self.group_functions:
-            function_active[function] = self.get_active(self.path + ['_', 'group_function', function])
-
-        for function in self.group_functions:
-            if function_active[function]:
-                self.session.windows[self.win_id].fields[Webwidgets.Utils.path_to_id(self.path + ['_', 'group_function', function])] = self
-
-        res = '\n'.join([
-            """<button
-                type="submit"
-                id="%(html_id)s"
-                class="%(html_class)s"
-                %(disabled)s
-                name="%(html_id)s"
-                value="selected">%(title)s</button>""" % {'html_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'group_function', function]),
-                                                          'html_class': function,
-                                                          'disabled': ['disabled="disabled"', ''][function_active[function]],
-                                                          'title': self._(title, output_options)}
-            for function, title in self.group_functions.iteritems()])
+        res = '\n'.join([self.draw_group_function(['group_function', function],
+                                                  function,
+                                                  title,
+                                                  output_options)
+                         for function, title in self.group_functions.iteritems()])
         return (res != '', res)
 
     def draw_buttons(self, position, output_options):
@@ -910,9 +912,10 @@ class Table(BaseTable, Base.ActionInput):
         button_bars_level_min = self.button_bars_level_force_min
         button_bars = Webwidgets.Utils.OrderedDict()
         for name, config in configs.iteritems():
-            button_bars[name] = getattr(self, 'draw_' + name)(config, output_options)
-            if button_bars[name][0]:
-                 button_bars_level_min = min(config['level'], button_bars_level_min)
+            if hasattr(self, 'draw_' + name):
+                button_bars[name] = getattr(self, 'draw_' + name)(config, output_options)
+                if button_bars[name][0]:
+                     button_bars_level_min = min(config['level'], button_bars_level_min)
 
         button_bars_html = ''.join([html
                                     for name, (active, html) in button_bars.iteritems()
