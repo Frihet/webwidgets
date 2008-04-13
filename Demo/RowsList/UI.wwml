@@ -42,6 +42,15 @@ USA
     </w:odict>
    </w:RowsListInput>
  
+   <w:RowsSingleValueListInput id="List2" rows_per_page=":integer:20">
+    <w:odict id="columns">
+     <w:string id="country">Country</w:string>
+     <w:string id="provider">Provider</w:string>
+     <w:string id="technology">Technology</w:string>
+     <w:string id="price">Price-range</w:string>
+    </w:odict>
+   </w:RowsSingleValueListInput>
+
    <w:Button id="Submit" title="Submit" />
 
   </w:Html>

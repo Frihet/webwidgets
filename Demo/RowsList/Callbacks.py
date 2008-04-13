@@ -41,3 +41,17 @@ class MyWindow(object):
                         for technology in ('modem', 'DSL1', 'DSL2', 'cable'):
                             for price in ('100-200', '200-300', '300-400', '400-'):
                                 self.rows.append({'country':country, 'provider':provider, 'technology':technology, 'price':price})
+        class List2(object):
+            def __init__(self, session, win_id, **attrs):
+                Webwidgets.RowsListInput.__init__(self, session, win_id, **attrs)
+                self.pre_sort = [('country', 'asc'),
+                                 ]
+                self.sort = [('provider', 'asc'),
+                             ('technology', 'asc'),
+                             ('price', 'asc')]
+                self.rows = []
+                for country in ('SE', 'NO', 'FI', 'DK'):
+                    for provider  in ('Comm2', 'BandCorp', 'Fieacomm', 'OFelia'):
+                        for technology in ('modem', 'DSL1', 'DSL2', 'cable'):
+                            for price in ('100-200', '200-300', '300-400', '400-'):
+                                self.rows.append({'country':country, 'provider':provider, 'technology':technology, 'price':price})

@@ -43,17 +43,29 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
     class ValueFilters(Base.Filter):
         WwFilters = []
 
+    def draw_option(self, selected, value, description, output_options):
+        return """<option %(selected)s value="%(value)s">
+                   %(description)s
+                  </option>""" % {'selected': selected and 'selected="selected"' or '',
+                                  'value': value,
+                                  'description': description}
+    def draw_row(self, row, output_options):
+        return self.draw_option(
+            row.ww_model in self.ww_filter.value,
+            self.ww_filter.get_row_id(row),
+            self.column_separator.join(
+                [self.draw_cell(row, column_name, getattr(row, column_name), output_options)
+                 for (column_name, column_def)
+                 in self.visible_columns(output_options).iteritems()]),
+            output_options)
+        
     def draw_options(self, output_options):
-        return ["""<option %(selected)s value="%(value)s">
-                    %(description)s
-                   </option>""" % {'selected': row.ww_model in self.value and 'selected="selected"' or '',
-                                   'value': self.ww_filter.get_row_id(row),
-                                   'description': self.column_separator.join(
-                                       [self.draw_cell(row, column_name, getattr(row, column_name), output_options)
-                                        for (column_name, column_def)
-                                        in self.visible_columns(output_options).iteritems()])}
-                for row in self.ww_filter.get_rows(output_options)]
-
+        none = []
+        if not self.ww_filter.multiple:
+            none = [self.draw_option(not self.ww_filter.value, "", "&lt;None selected&gt;", output_options)]
+        return none + [self.draw_row(row, output_options)
+                       for row in self.ww_filter.get_rows(output_options)]
+    
     def draw(self, output_options):
         Base.ValueInput.draw(self, output_options)
 
@@ -69,14 +81,14 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
             }
 
     def field_input(self, path, *string_values):
-        self.value = [self.ww_filter.get_row_by_id(value).ww_model
-                      for value in string_values
-                      if value]
+        self.ww_filter.value = [self.ww_filter.get_row_by_id(value).ww_model
+                                for value in string_values
+                                if value]
 
     def field_output(self, path):
-        if not self.value:
+        if not self.ww_filter.value:
             return ['']
-        return [self.ww_filter.get_row_id_from_row_model(row) for row in self.value]
+        return [self.ww_filter.get_row_id_from_row_model(row) for row in self.ww_filter.value]
 
 class RowsSingleValueListInput(RowsListInput):
     class ValueFilters(RowsListInput.ValueFilters):
