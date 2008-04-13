@@ -401,7 +401,7 @@ class ExpandableTable(Table):
                     res.append(row)
 
                     if hasattr(row.ww_filter, 'ww_expansion') and getattr(row.ww_filter, 'ww_is_expanded', False):
-                        res.append(self.TableRowModelWrapper(
+                        res.append(self.RowsRowModelWrapper(
                             table = self.object,
                             ww_is_expansion_parent = row,
                             ww_model = row.ww_filter.ww_expansion))
@@ -431,7 +431,7 @@ class ExpandableTable(Table):
             def get_row_by_id(self, row_id):
                 if row_id.startswith("child_"):
                     parent = self.ww_filter.get_row_by_id(row_id[6:])
-                    return self.TableRowModelWrapper(
+                    return self.RowsRowModelWrapper(
                         table = self.object,
                         ww_is_expansion_parent = parent,
                         ww_model = parent.ww_filter.ww_expansion)

@@ -189,14 +189,31 @@ class RowsRowWrapperFilter(Base.Filter):
             ww_model = self.ww_filter.get_row_by_id(row_id[5:]))
     
 
+class RowsRowWidget(Base.CachingComposite): pass
+
 class RowsComposite(Base.CachingComposite):
     class WwModel(Base.Model):
         rows = []
         sort = []
+
         page = 1
+
         expand = {}
-        non_memory_storage = False
+        default_expand = True
+        """If true, all rows are expanded until collapsed, if false
+        all rows are collapsed until expanded. This reverses the
+        meaning of the expand attribute."""
+
         rows_per_page = 10
+
+        columns = {}
+        """{column_name: title | {"title":title, ...}}"""
+        dependent_columns = {}
+        """{column_name: [column_name]}"""
+        dont_merge_widgets = True
+        dont_merge_columns = ()
+
+        non_memory_storage = False
 
         def get_rows(self, all, output_options):
             """Load the list after a repaging/resorting, or for a
@@ -249,3 +266,102 @@ class RowsComposite(Base.CachingComposite):
                 return self.ww_model[name]
             else:
                 return getattr(self.ww_model, name)
+
+    class ExpandTreeNode(object):
+        def __init__(self, col, values = None, toggled = False, rows = None):
+            self.col = col
+            self.values = values or {}
+            self.toggled = toggled
+            self.rows = rows or {}
+
+        def __str__(self, indent = ''):
+            return '%s%s=\n%s\n' % (indent,
+                                    self.col,
+                                    ''.join(['%s [%s]%s:\n%s' % (indent,
+                                                                 ['-', '+'][sub.toggled],
+                                                                 value,
+                                                                 sub.__str__(indent + '  '))
+                                             for (value, sub) in self.values.iteritems()]))
+
+
+    def row_common_sorted_columns(self, child, parent):
+        """Calculate the number of columns two rows have in common"""
+        if parent is None or child is None: return 0
+        if 'ww_expanded' in parent: return 0
+        total_column_order = self.get_total_column_order({}, only_sortable = True)
+        if 'ww_expanded' in child: return len(total_column_order)
+
+        level = 0
+        for column in total_column_order:
+            if not (    column not in self.dont_merge_columns
+                    # This is just because virtual columns might be
+                    # added at a higher level than the one where this
+                    # is called.
+                    and column in parent
+                    and column in child
+                    and (   not self.dont_merge_widgets
+                         or (    not isinstance(parent[column], Base.Widget)
+                             and not isinstance(child[column], Base.Widget)))
+                    and parent[column] == child[column]):
+                break
+            level += 1
+        return level
+
+    def get_expand_tree(self):
+        col_order = self.get_total_column_order({}, only_sortable = True)
+
+        tree = self.ExpandTreeNode(col = col_order[0], toggled = not self.ww_filter.default_expand)
+
+        for row_id, row in self.ww_filter.expand.iteritems():
+            if not row['expanded_cols']:
+                continue
+            node = tree
+            for pos in xrange(0, len(col_order) - 1): # You can not expand/collapse the last column
+                col = col_order[pos]
+                value = getattr(row['row'], col)
+                if value not in node.values:
+                    next_col = col_order[pos + 1]
+                    node.values[value] = self.ExpandTreeNode(col=next_col)
+                node = node.values[value]
+                if col in row['expanded_cols']:
+                    node.toggled = True
+                    node.rows[row_id] = row['row']
+        return tree
+
+    def is_expanded_node(self, row, level):
+        col = self.get_total_column_order({})[level - 1]
+        row_id = self.ww_filter.get_row_id(row)
+        a = (    row_id in self.ww_filter.expand
+             and col in self.ww_filter.expand[row_id]['expanded_cols'])
+        b = self.ww_filter.default_expand # Invert the result if default_expand is not True
+        return (a and not b) or (b and not a) # a xor b 
+
+    def visible_columns(self, output_options, only_sortable = False):
+        # Optimisation: we could have used get_active and constructed a path...
+        return Webwidgets.Utils.OrderedDict([(name, definition)
+                                             for (name, definition)
+                                             in self.ww_filter.get_columns(output_options, only_sortable).iteritems()
+                                             if self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id,
+                                                                           self.path + ['_', 'column', name])])
+
+    def extend_to_dependent_columns(self, columns, dependent_columns):
+        res = []
+        for column in columns:
+            res.extend([column] + dependent_columns.get(column, []))
+        return res
+
+    def get_total_column_order(self, output_options, only_sortable = False):
+        visible_columns = self.visible_columns(output_options, only_sortable = only_sortable)
+        total_column_order = self.extend_to_dependent_columns(
+            [column for column, dir in self.ww_filter.sort],
+            self.dependent_columns)
+        return  [column for column in total_column_order
+                 if column in visible_columns] + [column for column in visible_columns
+                                                  if column not in total_column_order]
+
+    def child_for_row(self, row):
+        row_id = self.ww_filter.get_row_id(row)
+        if row_id not in self.children:
+            self.children[row_id] = RowsRowWidget(self.session, self.win_id)
+        return self.children[row_id]
+
