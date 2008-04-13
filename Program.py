@@ -393,7 +393,10 @@ class Program(WebKit.Page.Page):
             output_options.update(base_options)
 
             obj = Utils.load_class(output_options['widget_class'])
-            assert issubclass(obj, Program.Session) or issubclass(obj, Widgets.Base.Widget)
+            if not (isinstance(obj, type)
+                    and (   issubclass(obj, Program.Session)
+                         or issubclass(obj, Widgets.Base.Widget))):
+                raise Exception("Expected session or widget. Got", obj)
             fn_name = 'class_output'
             if 'aspect' in output_options:
                 fn_name += '_' + output_options['aspect']
