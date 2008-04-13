@@ -272,9 +272,9 @@ class TablePrintableFilter(Base.Filter):
         return self.ww_filter.get_rows('printable_version' in output_options, output_options)
 
 class TableRowWrapperFilter(Base.Filter):
-    def get_rows(self, output_options):
+    def get_rows(self, all, output_options):
         return [self.TableRowModelWrapper(table = self.object, ww_model = row)
-                for row in self.ww_filter.get_rows(output_options)]
+                for row in self.ww_filter.get_rows(all, output_options)]
 
     def get_row_id(self, row):
         return "wrap_" + self.ww_filter.get_row_id(row.ww_model)
@@ -376,12 +376,15 @@ class BaseTable(Base.CachingComposite, Base.DirectoryServer):
         WwFilters = [TableSimpleModelFilter]
 
     class RowsFilters(Base.Filter):
-        WwFilters = [TableRowWrapperFilter, TablePrintableFilter]
+        WwFilters = [TableRowWrapperFilter]
+
+    class OutputOptionsFilters(Base.Filter):
+        WwFilters = [TablePrintableFilter]
 
     class TreeFilters(Base.Filter):
         WwFilters = [TableRowsToTreeFilter]
 
-    WwFilters = ["TreeFilters", "RowsFilters", "SourceFilters"]
+    WwFilters = ["TreeFilters", "OutputOptionsFilters", "RowsFilters", "SourceFilters"]
 
     class TableRowModelWrapper(Base.PersistentWrapper):
         def ww_first_init(self, ww_model, *arg, **kw):
@@ -748,10 +751,10 @@ class Table(BaseTable, Base.ActionInput):
                         setattr(row, name, FunctionCellInstance)
                 return row
 
-            def get_rows(self, output_options):
+            def get_rows(self, all, output_options):
                 return [self.mangle_row(row, output_options)
                         for row
-                        in self.ww_filter.get_rows(output_options)]        
+                        in self.ww_filter.get_rows(all, output_options)]        
 
             def get_columns(self, output_options, only_sortable):
                 if (   only_sortable
@@ -1018,9 +1021,9 @@ class ExpandableTable(Table):
             # right = Table
 
             # API used by Table
-            def get_rows(self, output_options):
+            def get_rows(self, all, output_options):
                 res = []
-                for row in self.ww_filter.get_rows(output_options):
+                for row in self.ww_filter.get_rows(all, output_options):
                     row.ww_filter.expand_col = ExpandCellInstance
                     res.append(row)
 
