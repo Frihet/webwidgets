@@ -964,6 +964,7 @@ class Input(Widget):
                     dominants = dominants.union(base.__input_dominants__)
             members['_input_level'] = max([0] + [sub._input_level
                                                 for sub in subordinates]) + 1
+            # FIXME: This does _not_ find descendants of dominants, so it does not work. At all.
             def raise_dominants(dominants, input_level):
                 for dom in dominants:
                     if dom._input_level <= input_level:
@@ -1087,14 +1088,20 @@ class ValueInput(Input):
     def __cmp__(self, other):
         return cmp(self.ww_filter.value, other)
 
-class ActionInput(Input):
-    """Base class for all input widgets that only fires some
-    notification and don't hold a value of some kind."""
+class MixedInput(Input):
+    """Base class for composiute input widgets that fires
+    notifications and hold values."""
 
     __input_subordinates__ = (ValueInput,)
 
     def field_output(self, path):
         return []
+
+class ActionInput(MixedInput):
+    """Base class for all input widgets that only fires some
+    notification and don't hold a value of some kind."""
+
+    __input_subordinates__ = (MixedInput,)
 
 class SingleActionInput(ActionInput):
     """Base class for all input widgets that only fires a single

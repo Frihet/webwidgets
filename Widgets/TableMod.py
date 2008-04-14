@@ -98,7 +98,7 @@ class SelectionCell(BaseTableMod.SpecialCell):
 
 SelectionCellInstance = SelectionCell()
 
-class Table(BaseTableMod.BaseTable, Base.ActionInput):
+class Table(BaseTableMod.BaseTable, Base.MixedInput):
     """Group By Ordering List is a special kind of table view that
     allows the user to sort the rows and simultaneously group the rows
     according to their content and the sorting.
@@ -117,7 +117,7 @@ class Table(BaseTableMod.BaseTable, Base.ActionInput):
     the content alltogether. In addition, this allows the sorting to
     be done by e.g a database back-end.
     """
-    
+
     class WwModel(BaseTableMod.BaseTable.WwModel):
         argument_name = None
         functions = {} # {'column_name': {'function_name': 'title'}}
