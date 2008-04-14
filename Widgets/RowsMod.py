@@ -134,7 +134,7 @@ class RowsSimpleModelFilter(Base.Filter):
     # Internal
     def ensure(self):
         """Reload the list after a repaging/resorting"""
-        if (   self.sort != self.old_sort
+        if (   self.object.ww_filter.sort != self.old_sort
             or self.page != self.old_page
             or self.expand_version != self.old_expand
             or self.default_expand != self.old_default_expand):
@@ -144,16 +144,16 @@ class RowsSimpleModelFilter(Base.Filter):
         """Reload the list"""
         if self.non_memory_storage:
             self.rows[:] = self.ww_filter.get_rows(False, {})
-        elif self.sort != self.old_sort:
+        elif self.object.ww_filter.sort != self.old_sort:
             def row_cmp(row1, row2):
-                for col, order in self.sort:
+                for col, order in self.object.ww_filter.sort:
                     diff = cmp(row1[col], row2[col])
                     if diff:
                         if order == 'desc': diff *= -1
                         return diff
                 return 0
             self.rows.sort(row_cmp)
-        self.old_sort = self.sort
+        self.old_sort = self.object.ww_filter.sort
         self.old_page = self.page
         self.old_expand = self.expand_version
         self.old_default_expand = self.default_expand
