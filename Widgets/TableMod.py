@@ -146,6 +146,10 @@ class Table(BaseTableMod.BaseTable, Base.ActionInput):
 
         selection = []
 
+        def __init__(self):
+            self.selection = list(self.selection)
+            BaseTableMod.BaseTable.WwModel.__init__(self)
+
     class RowsFilters(BaseTableMod.BaseTable.RowsFilters):
         WwFilters = ["SelectionColFilter",
                      "TableFunctionColFilter"] + BaseTableMod.BaseTable.RowsFilters.WwFilters + ["TableSortFilter"]
@@ -488,6 +492,7 @@ class ExpandableTable(Table):
                 return res
 
             def field_input_expand(self, path, string_value):
+                if string_value == '': return
                 row = self.object.ww_filter.get_row_by_id(string_value)
                 row.ww_filter.ww_is_expanded = not getattr(row.ww_filter, 'ww_is_expanded', False)
 
