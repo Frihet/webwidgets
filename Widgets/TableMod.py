@@ -64,6 +64,40 @@ def sort_to_order_by(sort, quote = "`"):
         return 'order by ' + ', '.join(order)
     return    
     
+class SelectionCell(BaseTableMod.SpecialCell):
+    html_class = ['functions']
+
+    def draw_selectbox(self, table, value, path, html_class, active, checked, output_options):
+        input_id = Webwidgets.Utils.path_to_id(table.path + ['_'] + path)
+        if active:
+            table.session.windows[table.win_id].fields[input_id] = table
+        return """<input
+                   type="checkbox"
+                   id="%(html_id)s"
+                   class="%(html_class)s"
+                   name="%(html_id)s"
+                   value="%(value)s"
+                   %(checked)s
+                   %(disabled)s />""" % {
+                   'html_id': input_id,
+                   'html_class': html_class,
+                   'value': value,
+                   'checked': ["", 'checked="checked"'][not not checked],
+                   'disabled': ['disabled="disabled"', ''][not not active]}
+
+    def draw_table_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
+        row_id = table.ww_filter.get_row_id(row)
+        return self.draw_selectbox(
+            table, row_id, ['selection'], "selection",
+            table.get_active(table.path + ['_', 'selection']),
+            row.ww_model in table.ww_filter.selection,
+            output_options)
+
+    def __cmp__(self, other):
+        return -1
+
+SelectionCellInstance = SelectionCell()
+
 class Table(BaseTableMod.BaseTable, Base.ActionInput):
     """Group By Ordering List is a special kind of table view that
     allows the user to sort the rows and simultaneously group the rows
@@ -110,9 +144,23 @@ class Table(BaseTableMod.BaseTable, Base.ActionInput):
         # button_bars_level_force_min or there are other button bars with
         # level < that button bars' level that are to be drawn.
 
-    class RowsFilters(BaseTableMod.BaseTable.RowsFilters):
-        WwFilters = ["TableFunctionColFilter"] + BaseTableMod.BaseTable.RowsFilters.WwFilters + ["TableSortFilter"]
+        selection = []
 
+    class RowsFilters(BaseTableMod.BaseTable.RowsFilters):
+        WwFilters = ["SelectionColFilter",
+                     "TableFunctionColFilter"] + BaseTableMod.BaseTable.RowsFilters.WwFilters + ["TableSortFilter"]
+
+        class SelectionColFilter(Base.Filter):
+            def mangle_row(self, row, output_options):
+                if 'printable_version' not in output_options:
+                    setattr(row, "selection_col", SelectionCellInstance)
+                return row
+
+            def get_rows(self, all, output_options):
+                return [self.mangle_row(row, output_options)
+                        for row
+                        in self.ww_filter.get_rows(all, output_options)]
+            
         class TableFunctionColFilter(Base.Filter):
             # left = Table
             # right = Table
@@ -156,27 +204,46 @@ class Table(BaseTableMod.BaseTable, Base.ActionInput):
                     instance.ww_filter.sort = value
             user_sort = UserSort()
 
-    def field_input(self, path, string_value):
+    def field_input(self, path, *string_values):
         try:
             sub_widget = self.path_to_subwidget_path(path)
         except Webwidgets.Constants.NotASubwidgetException:
             return
-        if string_value != '':
-            getattr(self.ww_filter, 'field_input_' + sub_widget[0])(sub_widget[1:], string_value)
+        getattr(self.ww_filter, 'field_input_' + sub_widget[0])(sub_widget[1:], *string_values)
 
+    def field_input_expand(self, path, string_value):
+        if string_value == '': return
+        row_id, col = string_value.split(',')
+        self.ww_filter.expand_row(row_id, col)
     def field_input_sort(self, path, string_value):
+        if string_value == '': return
         self.ww_filter.user_sort = string_to_sort(string_value)
     def field_input_page(self, path, string_value):
+        if string_value == '': return
         self.page = int(string_value)
     def field_input_function(self, path, string_value):
+        if string_value == '': return
         self.notify('function', path[0], string_value)
     def field_input_group_function(self, path, string_value):
+        if string_value == '': return
         self.notify('group_function', path[0])
-    
+    def field_input_selection(self, path, *string_values):
+        if len(string_values) == 1 and not string_values[0]:
+            string_values = []
+        for row in self.ww_filter.get_rows({}):
+            row_id = self.ww_filter.get_row_id(row)
+            if row_id in string_values:
+                if row not in self.ww_filter.selection:
+                    self.ww_filter.selection.append(row.ww_model)
+            else:
+                if row in self.ww_filter.selection:
+                    self.ww_filter.selection.remove(row.ww_model)
+        
+    def field_output_expand(self, path):
+        return []
     def field_output(self, path):
         sub_widget = self.path_to_subwidget_path(path)
         return getattr(self.ww_filter, 'field_output_' + sub_widget[0])(sub_widget[1:])
-
     def field_output_sort(self, path):
         return [sort_to_string(self.ww_filter.user_sort)]
     def field_output_page(self, path):
@@ -185,7 +252,12 @@ class Table(BaseTableMod.BaseTable, Base.ActionInput):
         return []
     def field_output_group_function(self, path):
         return []
+    def field_output_selection(self, path):
+        return [self.ww_filter.get_row_id_from_row_model(row)
+                for row in self.ww_filter.selection]
 
+    def get_active_expand(self, path):
+        return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['expand'] + path)
     def get_active_sort(self, path):
         if path and (   path[0] in self.disabled_columns
                      or [key for (key, order) in self.ww_filter.pre_sort
@@ -202,6 +274,8 @@ class Table(BaseTableMod.BaseTable, Base.ActionInput):
     def get_active_group_function(self, path):
         if path[0] in self.disabled_functions: return False
         return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, self.path + ['group_function'] + path)
+    def get_active_selection(self, path):
+        return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, self.path + ['selection'] + path)
 
     def draw_title_bar(self, config, output_options):
         title = getattr(self, 'title', None)

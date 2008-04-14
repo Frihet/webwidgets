@@ -119,8 +119,7 @@ class RowsSimpleModelFilter(Base.Filter):
                 res[name] = definition
         return res
 
-    def field_input_expand(self, path, string_value):
-        row_id, col = string_value.split(',')
+    def expand_row(self, row_id, col):
         row = self.object.ww_filter.get_row_by_id(row_id)
         if row_id not in self.expand:
             self.expand[row_id] = {'row': row,
@@ -131,12 +130,6 @@ class RowsSimpleModelFilter(Base.Filter):
             else:
                 self.expand[row_id]['expanded_cols'].remove(col)
 	self.expand_version += 1
-
-    def field_output_expand(self, path):
-        return []
-
-    def get_active_expand(self, path):
-        return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['expand'] + path)
 
     # Internal
     def ensure(self):

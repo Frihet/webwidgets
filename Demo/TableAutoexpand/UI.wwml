@@ -35,12 +35,15 @@ USA
 
    <w:Table id="Autoexpand" rows_per_page=":integer:20">
     <w:odict id="columns">
+     <w:string id="selection_col">Country</w:string>
      <w:string id="country">Country</w:string>
      <w:string id="provider">Provider</w:string>
      <w:string id="technology">Technology</w:string>
      <w:string id="price">Price-range</w:string>
     </w:odict>
    </w:Table>
+
+   <w:Button id="Update" title="Update" />
 
   </w:Html>
  </w:HtmlWindow>
