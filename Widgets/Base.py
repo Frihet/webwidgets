@@ -139,15 +139,35 @@ class Object(object):
         self.__dict__.update(attrs)
         self.setup_filter()
 
+    def get_filter(cls, filter_class):
+        if isinstance(filter_class, (str, unicode)):
+            filter_class = getattr(cls, filter_class)
+        return filter_class
+    get_filter = classmethod(get_filter)
+
     def setup_filter(self, name = 'ww_filter', ww_filter_classes = None, ww_filter = None, object = None):
         if ww_filter is None: ww_filter = self.__dict__.get(name, self)
         if object is None: object = self.__dict__.get('object', self)
         if ww_filter_classes is None: ww_filter_classes = self.WwFilters
         for filter_class in reversed(ww_filter_classes):
-            if isinstance(filter_class, (str, unicode)):
-                filter_class = getattr(self, filter_class)
-            ww_filter = filter_class(ww_filter = ww_filter, object = object)
+            ww_filter = self.get_filter(filter_class)(ww_filter = ww_filter, object = object)
         self.__dict__[name] = ww_filter
+
+    def print_filter_class_stack(cls, ww_filter_classes = None, indent = ''):
+        if ww_filter_classes is None: ww_filter_classes = cls.WwFilters
+        return indent + '%s.%s\n%s' % (cls.__module__, cls.__name__,
+                                         ''.join([cls.get_filter(filter).print_filter_class_stack(indent = indent + '  ')
+                                                  for filter in ww_filter_classes]))
+    print_filter_class_stack = classmethod(print_filter_class_stack)
+
+    def print_filter_instance_stack(self, name = 'ww_filter'):
+        ww_filter = getattr(self, name)
+        ww_filters = []
+        while ww_filter is not self and ww_filter is not self.ww_model:
+            ww_filters.append(ww_filter)
+            ww_filter = ww_filter.ww_filter
+        return '\n'.join(["%s.%s @ %s" % (type(ww_filter).__module__, type(ww_filter).__name__, id(ww_filter)) 
+                          for ww_filter in ww_filters]) + '\n'
 
     def derive(cls, *clss, **members):
         name = 'anonymous'
