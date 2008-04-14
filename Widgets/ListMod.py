@@ -98,10 +98,17 @@ class RowsSingleValueListInput(RowsListInput):
             multiple = False
 
             class Value(object):
-                def __get__(self, owner, instance):
-                    return [instance.ww_filter.value]
+                def __get__(self, instance, owner):
+                    if instance is None: return None
+                    if instance.ww_filter.value is None:
+                        return []
+                    else:
+                        return [instance.ww_filter.value]
 
                 def __set__(self, instance, value):
-                    instance.ww_filter.value = value[0]
+                    if not value:
+                        instance.ww_filter.value = None
+                    else:
+                        instance.ww_filter.value = value[0]
 
             value = Value()

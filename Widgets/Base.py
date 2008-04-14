@@ -212,10 +212,13 @@ class Filter(Object):
         return getattr(self.ww_filter, name)
     
     def __hasattr__(self, name):
-        return name in self.__dict__ or hasattr(self.ww_filter, name)
+        return (   name in self.__dict__
+                or hasattr(type(self), name)
+                or hasattr(self.ww_filter, name))
 
     def __setattr__(self, name, value):
         if (   name in self.__dict__
+            or hasattr(type(self), name)
             or not hasattr(self.ww_filter, name)):
             object.__setattr__(self, name, value)
         else:

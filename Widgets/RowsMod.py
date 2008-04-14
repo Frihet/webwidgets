@@ -205,7 +205,7 @@ class RowsComposite(Base.CachingComposite):
 
         rows_per_page = 10
 
-        columns = {}
+        columns = {'title': 'Title'}
         """{column_name: title | {"title":title, ...}}"""
         dependent_columns = {}
         """{column_name: [column_name]}"""
