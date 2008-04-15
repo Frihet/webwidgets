@@ -4,7 +4,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: 0.1\n"
-"POT-Creation-Date: Fri Oct 26 11:35:32 2007\n"
+"POT-Creation-Date: Tue Apr 15 14:25:16 2008\n"
 "PO-Revision-Date: DATEANDTIME\n"
 "Last-Translator: EMAIL\n"
 "Language-Team: EMAIL\n"
@@ -12,5 +12,26 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 
 msgid "Printable version"
+msgstr ""
+
+msgid "bottom"
+msgstr ""
+
+msgid "group_functions"
+msgstr ""
+
+msgid "level"
+msgstr ""
+
+msgid "paging_buttons"
+msgstr ""
+
+msgid "printable_link"
+msgstr ""
+
+msgid "title"
+msgstr ""
+
+msgid "top"
 msgstr ""
 

@@ -4,25 +4,38 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: 0.1\n"
-"POT-Creation-Date: Fri Oct 26 11:35:32 2007\n"
+"POT-Creation-Date: Tue Apr 15 14:25:16 2008\n"
 "PO-Revision-Date: DATEANDTIME\n"
 "Last-Translator: EMAIL\n"
 "Language-Team: EMAIL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 
-msgid "%(FileLabel)s%(File)s%(Action)s"
+msgid "\n"
+"   %(FileLabel)s\n"
+"   %(File)s\n"
+"   %(Action)s\n"
+"  "
+msgstr ""
+
+msgid "\n"
+"  <div class='top'>\n"
+"\n"
+"   %(DownloadLink)s\n"
+"   %(Hide)s\n"
+"  </div>\n"
+"\n"
+"\n"
+"  %(InfoGroup)s\n"
+"\n"
+"  %(Editors)s\n"
+"\n"
+"  %(Upload)s\n"
+"\n"
+" "
 msgstr ""
 
 msgid "1/File"
-msgstr ""
-
-msgid "<div class='top'>\n"
-"%(DownloadLink)s%(Hide)s</div>\n"
-"%(InfoGroup)s%(Editors)s%(Upload)s"
-msgstr ""
-
-msgid "Action"
 msgstr ""
 
 msgid "All files"
@@ -31,28 +44,7 @@ msgstr ""
 msgid "CSS stylesheet"
 msgstr ""
 
-msgid "Clear"
-msgstr ""
-
-msgid "DownloadLink"
-msgstr ""
-
 msgid "Edit file"
-msgstr ""
-
-msgid "Editors"
-msgstr ""
-
-msgid "Field"
-msgstr ""
-
-msgid "File"
-msgstr ""
-
-msgid "FileEditor"
-msgstr ""
-
-msgid "FileLabel"
 msgstr ""
 
 msgid "Filename"
@@ -61,19 +53,7 @@ msgstr ""
 msgid "HTML document"
 msgstr ""
 
-msgid "Hide"
-msgstr ""
-
 msgid "Hide editor"
-msgstr ""
-
-msgid "InfoGroup"
-msgstr ""
-
-msgid "Label"
-msgstr ""
-
-msgid "Name"
 msgstr ""
 
 msgid "No file"
@@ -85,39 +65,15 @@ msgstr ""
 msgid "Plain text"
 msgstr ""
 
-msgid "Preview"
-msgstr ""
-
 msgid "Upload"
 msgstr ""
 
 msgid "Upload file: "
 msgstr ""
 
-msgid "Webwidgets.Widgets.FileEditorCallbacks"
-msgstr ""
-
-msgid "default"
-msgstr ""
-
 msgid "div"
 msgstr ""
 
-msgid "http://freecode.no/xml/namespaces/wwml-1.0"
-msgstr ""
-
-msgid "http://www.w3.org/TR/REC-html40"
-msgstr ""
-
 msgid "none"
-msgstr ""
-
-msgid "text__css"
-msgstr ""
-
-msgid "text__html"
-msgstr ""
-
-msgid "text__plain"
 msgstr ""
 

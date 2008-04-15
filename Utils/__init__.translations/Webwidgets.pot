@@ -4,25 +4,118 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: 0.1\n"
-"POT-Creation-Date: Fri Oct 26 11:35:32 2007\n"
+"POT-Creation-Date: Wed Apr 09 18:32:50 2008\n"
 "PO-Revision-Date: DATEANDTIME\n"
 "Last-Translator: EMAIL\n"
 "Language-Team: EMAIL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 
-msgid "Delete"
+msgid "A"
+msgstr ""
+
+msgid "Add new bundle"
+msgstr ""
+
+msgid "Category"
+msgstr ""
+
+msgid "D"
 msgstr ""
 
 msgid "Description"
 msgstr ""
 
-msgid "Edit"
+msgid "E"
 msgstr ""
 
-msgid "File"
+msgid "Gross"
 msgstr ""
 
-msgid "Filename"
+msgid "Gross deduction"
+msgstr ""
+
+msgid "Model"
+msgstr ""
+
+msgid "Nett deduction"
+msgstr ""
+
+msgid "Printable version"
+msgstr ""
+
+msgid "Procurement cost"
+msgstr ""
+
+msgid "Products"
+msgstr ""
+
+msgid "Rent"
+msgstr ""
+
+msgid "Sales price"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "add"
+msgstr ""
+
+msgid "category"
+msgstr ""
+
+msgid "delete"
+msgstr ""
+
+msgid "description"
+msgstr ""
+
+msgid "edit"
+msgstr ""
+
+msgid "function_col"
+msgstr ""
+
+msgid "gross"
+msgstr ""
+
+msgid "gross_deduction"
+msgstr ""
+
+msgid "group_functions"
+msgstr ""
+
+msgid "level"
+msgstr ""
+
+msgid "model"
+msgstr ""
+
+msgid "nett_deduction"
+msgstr ""
+
+msgid "paging_buttons"
+msgstr ""
+
+msgid "printable_link"
+msgstr ""
+
+msgid "procurement_cost"
+msgstr ""
+
+msgid "products_str"
+msgstr ""
+
+msgid "rent"
+msgstr ""
+
+msgid "sales_price"
+msgstr ""
+
+msgid "title"
+msgstr ""
+
+msgid "type"
 msgstr ""
 

@@ -4,7 +4,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: 0.1\n"
-"POT-Creation-Date: Fri Oct 26 11:35:32 2007\n"
+"POT-Creation-Date: Tue Apr 15 14:25:16 2008\n"
 "PO-Revision-Date: DATEANDTIME\n"
 "Last-Translator: EMAIL\n"
 "Language-Team: EMAIL\n"
@@ -14,10 +14,31 @@ msgstr ""
 msgid "\n"
 msgstr ""
 
+msgid "\n"
+"<html>\n"
+" <head>\n"
+"  %(content)s\n"
+" </head>\n"
+" <body>\n"
+"  <p>\n"
+"   <h1>Head1</h1>\n"
+"   <p>Some text.</p>\n"
+"   <p>\n"
+"    <h2>Head1</h2>\n"
+"    <p>Some text and <a href='http://google.com'>a link</a>.</p>\n"
+"   </p>\n"
+"  </p>\n"
+" </body>\n"
+"</html>\n"
+msgstr ""
+
 msgid "%(child)s"
 msgstr ""
 
 msgid "&lt;No file&gt;"
+msgstr ""
+
+msgid ":"
 msgstr ""
 
 msgid "</div>\n"
@@ -29,24 +50,51 @@ msgstr ""
 msgid "<div %(html_attributes)s>"
 msgstr ""
 
-msgid "<div %(html_attributes)s>%(child)s</div>"
-msgstr ""
-
 msgid "<li>%(child)s</li>"
-msgstr ""
-
-msgid "<link %(html_attributes)s href=\"%(style)s\" title=\"%(title)s\" rel=\"stylesheet\" type=\"text/css\" />"
-msgstr ""
-
-msgid "<span %(html_attributes)s>%(child)s</span>"
-msgstr ""
-
-msgid "<style %(html_attributes)s type='text/css'>%(style)s</style>"
 msgstr ""
 
 msgid "<ul %(html_attributes)s>"
 msgstr ""
 
+msgid "Field"
+msgstr ""
+
+msgid "default"
+msgstr ""
+
+msgid "empty"
+msgstr ""
+
+msgid "height"
+msgstr ""
+
+msgid "image/gif"
+msgstr ""
+
+msgid "image/jpeg"
+msgstr ""
+
+msgid "image/png"
+msgstr ""
+
+msgid "include_label"
+msgstr ""
+
+msgid "inline"
+msgstr ""
+
+msgid "invisible"
+msgstr ""
+
+msgid "merge"
+msgstr ""
+
+msgid "text/css"
+msgstr ""
+
 msgid "text/html"
+msgstr ""
+
+msgid "width"
 msgstr ""
 

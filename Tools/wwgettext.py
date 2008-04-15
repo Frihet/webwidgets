@@ -31,7 +31,8 @@ excluded_types = set([id(MethodWrapperType), id(BuiltinFunctionOrMethod)])
 excluded_names = set(['ww_classes', 'ww_class_path',
                       '__dict__', '__builtins__', '__file__', '__path__', '__doc__', '__module__', '__name__',
                       'func_dict', 'func_doc', 'func_globals', 'func_name', 'func_code',
-                      'co_code'])
+                      'co_code',
+                      'ww_classes', 'classid', 'ww_class_data', 'id'])
 
 def collect_recurse(obj, name, pool, res, level, mod, **options):
     if (   id(obj) in pool
@@ -43,20 +44,23 @@ def collect_recurse(obj, name, pool, res, level, mod, **options):
     if isinstance(obj, types.ModuleType):
         new_mod_name = getattr(obj, '__name__', None)
         new_mod = obj
-    if hasattr(obj, '__module__'):
+    if hasattr(obj, '__dict__') and '__module__' in obj.__dict__:
         if obj.__module__ != mod:
             new_mod_name = obj.__module__
             new_mod = sys.modules.get(new_mod_name, None)
     if new_mod_name:
         if 'single-module' in options and mod is not None:
             return res
-        mod = new_mod_name
+        mod = new_mod
         if mod not in res:
             res[mod] = {'module': new_mod,
                         'strings': set()}
 
     if 'verbose-collection' in options:
-        sys.stderr.write((" " * level) + name + '\n')
+        preview = ""
+        if isinstance(obj, (str, unicode)) and 'preview' in options:
+            preview = "= " + repr(obj[:options['preview-size']])
+        sys.stderr.write((" " * level) + mod.__name__ + ":" + name + preview + '\n')
 
     if isinstance(obj, (str, unicode)):
         if 'debug' in options:
@@ -67,6 +71,7 @@ def collect_recurse(obj, name, pool, res, level, mod, **options):
             collect_recurse(sub_obj, str(name), pool, res, level + 1, mod, **options)
     elif isinstance(obj, dict):
         for name, sub_obj in obj.items():
+            collect_recurse(name, str(name) + ':name', pool, res, level + 1, mod, **options)
             collect_recurse(sub_obj, str(name), pool, res, level + 1, mod, **options)
     else:
         if hasattr(obj, '__bases__') and hasattr(obj, '__dict__'):
@@ -75,7 +80,7 @@ def collect_recurse(obj, name, pool, res, level, mod, **options):
             
             for name, sub_obj in obj.__dict__.iteritems():
                 if name in excluded_names: continue
-                collect_recurse(sub_obj, name, pool, res, level + 1, mod, **options)
+                collect_recurse(sub_obj, str(name), pool, res, level + 1, mod, **options)
         else:
             for name in dir(obj):
                 if name in excluded_names: continue
@@ -130,7 +135,7 @@ def output(strs):
     return ''.join(res)
 
 if __name__ == "__main__":
-    options = {}
+    options = {'preview-size': 20}
     args = list(sys.argv[1:])
     for pos in xrange(len(args) - 1, -1, -1):
         if args[pos].startswith('--'):
@@ -166,6 +171,12 @@ Where the available options are:
     --verbose-output
     --verbose-collection
         
+    --preview
+        Print (part of) gathered strings whith --verbose-collection
+    
+    --preview-size=size
+        Max-length for strings to print.
+
         """
         sys.exit(0)
     
