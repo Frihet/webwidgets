@@ -132,10 +132,10 @@ class Object(object):
                        in chain otherwise.
         @param attrs: Any attributes to set for the object.
         """
-        if "ww_model" in attrs:
-            self.ww_model = attrs.pop('ww_model')
-        if self.ww_model is None and self.WwModel is not None:
-            self.ww_model = self.WwModel()
+        if 'ww_model' in attrs and attrs['ww_model'] is None:
+            del attrs['ww_model']
+        if 'ww_model' not in attrs and self.WwModel is not None:
+            attrs['ww_model'] = self.WwModel()
         self.__dict__.update(attrs)
         self.setup_filter()
 
