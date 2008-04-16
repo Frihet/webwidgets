@@ -147,9 +147,9 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         selection = []
 
         def __init__(self):
+            super(Table.WwModel, self).__init__()
             self.selection = list(self.selection)
-            BaseTableMod.BaseTable.WwModel.__init__(self)
-
+            
     class RowsFilters(BaseTableMod.BaseTable.RowsFilters):
         WwFilters = ["SelectionColFilter",
                      "TableFunctionColFilter"] + BaseTableMod.BaseTable.RowsFilters.WwFilters + ["TableSortFilter"]

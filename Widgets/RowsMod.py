@@ -208,6 +208,7 @@ class RowsComposite(Base.CachingComposite):
         non_memory_storage = False
 
         def __init__(self):
+            super(RowsComposite.WwModel, self).__init__()
             self.expand = dict(self.expand)
             self.sort = list(self.sort)
             self.rows = list(self.rows)
