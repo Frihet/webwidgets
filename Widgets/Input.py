@@ -281,7 +281,7 @@ class Checkbox(Base.ValueInput):
         value = False
     def draw(self, output_options):
         super(Checkbox, self).draw(output_options)
-        checked = ["", 'checked="checked"'][not not self.value]
+        checked = ["", 'checked="checked"'][not not self.ww_filter.value]
         return '<input %(html_attributes)s type="checkbox" name="%(name)s" value="checked" %(checked)s %(disabled)s />' % {
             'html_attributes': self.draw_html_attributes(self.path),
             'name': Webwidgets.Utils.path_to_id(self.path),
@@ -289,10 +289,10 @@ class Checkbox(Base.ValueInput):
             'disabled': ['', 'disabled="disabled"'][not self.get_active(self.path)]}
 
     def field_input(self, path, string_value):
-        self.value = (string_value == "checked")
+        self.ww_filter.value = (string_value == "checked")
 
     def field_output(self, path):
-        return [['', 'checked'][not not self.value]]
+        return [['', 'checked'][not not self.ww_filter.value]]
 
 class ListInput(Base.ValueInput, Base.StaticComposite):
     """Scrollable list of selectable items. The list can optionally
