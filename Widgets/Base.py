@@ -177,14 +177,21 @@ class Object(object):
     derive = classmethod(derive)
 
     def __getattr__(self, name):
+        """Lookup order: self, self.ww_model, self.parent"""
         if self.ww_model is None:
             raise AttributeError(self, name)
         return getattr(self.ww_model, name)
         
     def __hasattr__(self, name):
-        return name in self.__dict__ or self.ww_model is not None and hasattr(self.ww_model, name)
+        """Lookup order: self.__dict__, self.ww_model"""
+        # FIXME: Search type(self) (didn't bother) and self.parent (too slow!!!) too...
+        return (   name in self.__dict__
+                or (    self.ww_model is not None
+                    and hasattr(self.ww_model, name)))
 
     def __setattr__(self, name, value):
+        # Note: We never set values on parent, only self and
+        # self.ww_model
         if (   self.ww_model is None
             or name in self.__dict__
             or not hasattr(self.ww_model, name)):
@@ -378,11 +385,11 @@ class Widget(Object):
             res = res[name]
         return res
 
-    def get_widgets_by_attribute(self, attribute = '__name__', direction_down = True):
+    def get_widgets_by_attribute(self, attribute = '__name__', direction_down = True, recursive = True):
 	res = {}
 	if not direction_down and self.parent:
             if hasattr(self.parent, 'get_widgets_by_attribute'):
-                res.update(self.parent.get_widgets_by_attribute(attribute, False))
+                res.update(self.parent.get_widgets_by_attribute(attribute, direction_down, recursive))
         if hasattr(self, attribute):
             res[getattr(self, attribute)] = self
         elif hasattr(type(self), attribute):
@@ -848,12 +855,12 @@ class Composite(Widget):
         """@return: a child widget."""
         raise NotImplemented
 
-    def get_widgets_by_attribute(self, attribute = '__name__', direction_down = True):
-        fields = Widget.get_widgets_by_attribute(self, attribute, direction_down)
-        if direction_down:
+    def get_widgets_by_attribute(self, attribute = '__name__', direction_down = True, recursive = True):
+        fields = Widget.get_widgets_by_attribute(self, attribute, direction_down, recursive)
+        if direction_down and (recursive or not fields):
             for name, child in self:
                 if isinstance(child, Widget):
-                    fields.update(child.get_widgets_by_attribute(attribute))
+                    fields.update(child.get_widgets_by_attribute(attribute, direction_down, recursive))
         return fields
 
     def get(self, name, default = None):
