@@ -107,17 +107,17 @@ class FloatInput(StringInput):
     def field_input(self, path, string_value):
         try:
             if string_value == '':
-                self.value = None
+                self.ww_filter.value = None
             else:
-                self.value = float(string_value)
+                self.ww_filter.value = float(string_value)
         except ValueError, e:
-            self.value = None
-            self.error = self.error_string
+            self.ww_filter.value = None
+            self.ww_filter.error = self.error_string
                 
     def field_output(self, path):
-        if self.value is None:
+        if self.ww_filter.value is None:
             return ['']
-        return [str(self.value)]
+        return [str(self.ww_filter.value)]
 
 class PasswordInput(Base.ValueInput):
     """Like StringInput, but hides the user input"""
