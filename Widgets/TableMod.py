@@ -366,8 +366,8 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         button_bars_level_min = self.button_bars_level_force_min
         button_bars = Webwidgets.Utils.OrderedDict()
         for name, config in configs.iteritems():
-            if hasattr(self, 'draw_' + name):
-                button_bars[name] = getattr(self, 'draw_' + name)(config, output_options)
+            if hasattr(self.ww_filter, 'draw_' + name):
+                button_bars[name] = getattr(self.ww_filter, 'draw_' + name)(config, output_options)
                 if button_bars[name][0]:
                      button_bars_level_min = min(config['level'], button_bars_level_min)
 
@@ -517,3 +517,90 @@ class ExpandableTable(Table):
                 elif row_id.startswith("parent_"):
                     return self.ww_filter.get_row_by_id(row_id[7:])
                 raise Exception("Invalid row-id %s (should have started with 'child_' or 'parent_')" % row_id)
+
+class EditFunctionCell(BaseTableMod.FunctionCell):
+    html_class = ['edit_function_col']
+
+    input_path = ['edit']
+
+    edit_function_titles = {'edit': 'Edit',
+                            'save': 'Save',
+                            'revert': 'Revert',
+                            'delete': 'Delete'}
+
+    def draw_edit_function(self, table, row_id, is_editing, active, output_options):
+        if is_editing:
+            functions = ('save', 'revert', 'delete')
+        else:
+            functions = ('edit', 'delete')
+            
+        res = ''
+        for function in functions:
+            res += self.draw_function(table,
+                                      row_id, row_id,
+                                      ['edit_function', function],
+                                      function,
+                                      self.edit_function_titles[function],
+                                      active, output_options)
+        return res
+    
+    def draw_table_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
+        row_id = table.ww_filter.get_row_id(row)
+        return self.draw_edit_function(table, row_id,
+                                       row.ww_filter.is_editing(),
+                                       table.get_active(table.path + ['_', 'edit_function']),
+                                       output_options)
+
+EditFunctionCellInstance = EditFunctionCell()
+
+class EditableTable(Table):
+    class RowsRowModelWrapper(Table.RowsRowModelWrapper):
+        WwFilters = ["EditingFilters"] + Table.RowsRowModelWrapper.WwFilters
+        class EditingFilters(Base.Filter): pass
+
+    class RowsFilters(Table.RowsFilters):
+        WwFilters = ["TableEditableFilter"] + Table.RowsFilters.WwFilters
+    
+        class TableEditableFilter(Base.Filter):
+            def get_rows(self, all, output_options):
+                res = []
+                for row in self.ww_filter.get_rows(all, output_options):
+                    row.edit_function_col = EditFunctionCellInstance
+                    res.append(row)
+                return res
+
+            def field_input_edit_function(self, path, string_value):
+                if string_value == '': return
+                row = self.object.ww_filter.get_row_by_id(string_value)
+                function = path[0]	
+                if function == "edit":
+                    row.ww_filter.edit()
+                elif function == "revert":
+                    row.ww_filter.revert()
+                elif function == "save":
+                    row.ww_filter.save()
+                elif function == "delete":
+                    row.ww_filter.delete()
+                    
+            def field_output_edit_function(self, path):
+                return []
+
+            def get_active_edit_function(self, path):
+                return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, self.path + ['edit'] + path)
+
+            def field_input_edit_group_function(self, path, string_value):
+                if string_value == '': return
+                if path[0] == "new":
+                    self.pre_rows.append(self.DBModel(ww_is_new = True))
+
+            def field_output_edit_group_function(self, path):
+                return []
+
+            def draw_edit_group_function(self, config, output_options):
+                return True, self.draw_group_function(['edit_group_function', "new"],
+                                                      "new",
+                                                      "Add new",
+                                                      output_options)
+
+            def get_active_edit_group_function(self, path):
+                return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, self.path + ['edit_group_function'] + path)

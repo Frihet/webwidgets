@@ -247,6 +247,9 @@ class RowsComposite(Base.CachingComposite):
     WwFilters = ["OutputOptionsFilters", "RowsFilters", "SourceFilters"]
 
     class RowsRowModelWrapper(Base.PersistentWrapper):
+        WwFilters = ["RowFilters"]
+        class RowFilters(Base.Filter): pass
+
         def ww_first_init(self, ww_model, *arg, **kw):
             Base.PersistentWrapper.ww_first_init(self, ww_model = ww_model, *arg, **kw)
             self.__dict__['items'] = {}
