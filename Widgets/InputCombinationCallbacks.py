@@ -18,16 +18,25 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import Base
+import Base, ListMod, LocationInput, LocationInputLocations
 
 class AddressInput(object):
-    #### fixme ####
-    # name = "Locality loading"
-    # description = """Add machinery to load country, county, municipality and city
-    # listings. Add auto-submit to reload countys when changing
-    # country etc."""
-    #### end ####
-    pass
+    class Country(object):
+        class Field(object):
+            def value_changed(self, path, value):
+                self.parent.parent['County']['Field'].ww_filter.region_prefix = [self.value]
+            def draw(self, output_options):
+                self.register_submit_action(self.path, 'change')
+                return LocationInput.CountryInput.draw(self, output_options)
+    
+    class County(object):
+        class Field(object):
+            def value_changed(self, path, value):
+                self.parent.parent['Municipality']['Field'].ww_filter.region_prefix = (
+                    self.ww_filter.region_prefix + [self.value])
+            def draw(self, output_options):
+                self.register_submit_action(self.path, 'change')
+                return LocationInput.CountyInput.draw(self, output_options)
 
 class ApplicationWindow(object):
     class Body(object):

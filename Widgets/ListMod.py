@@ -28,6 +28,8 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
     original_value = []
 
     class WwModel(RowsMod.RowsComposite.WwModel, Base.ValueInput.WwModel):
+        rows_per_page = 0
+        
         value = []
 
         column_separator = ' '
@@ -91,6 +93,9 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
         return [self.ww_filter.get_row_id_from_row_model(row) for row in self.ww_filter.value]
 
 class RowsSingleValueListInput(RowsListInput):
+    class WwModel(RowsListInput.WwModel):
+        value = None
+
     class ValueFilters(RowsListInput.ValueFilters):
         WwFilters = ["SingleValueFilter"] + RowsListInput.ValueFilters.WwFilters
 

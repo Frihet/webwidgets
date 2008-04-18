@@ -29,9 +29,9 @@
   <w:Field id="Street" Label=":Text:Street"><w:StringInput id="Field" field_name="street" /></w:Field>
   <w:Field id="Zip" Label=":Text:Post-code/zip code"><w:StringInput id="Field" field_name="zip" /></w:Field>
   <w:Field id="City" Label=":Text:City"><w:StringInput id="Field" field_name="city" /></w:Field>
-  <w:Field id="Municipality" Label=":Text:Municipality"><w:ListInput id="Field" field_name="municipality" /></w:Field>
-  <w:Field id="County" Label=":Text:County/State"><w:ListInput id="Field" field_name="county" /></w:Field>
-  <w:Field id="Country" Label=":Text:Country"><w:ListInput id="Field" field_name="country" /></w:Field>
+  <w:Field id="Municipality" Label=":Text:Municipality"><w:MunicipalityInput id="Field" field_name="municipality" /></w:Field>
+  <w:Field id="County" Label=":Text:County/State"><w:CountyInput id="Field" field_name="county" /></w:Field>
+  <w:Field id="Country" Label=":Text:Country"><w:CountryInput id="Field" field_name="country" /></w:Field>
   <w:UpdateButton id="Update" />
  </w:Fieldgroup>
 

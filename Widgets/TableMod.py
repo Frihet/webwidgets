@@ -604,3 +604,4 @@ class EditableTable(Table):
 
             def get_active_edit_group_function(self, path):
                 return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, self.path + ['edit_group_function'] + path)
+

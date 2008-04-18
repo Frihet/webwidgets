@@ -71,4 +71,5 @@ if __name__ == "Webwidgets":
     from Widgets.FileEditor import *
     from Widgets.FileEditorList import *
     from Widgets.MainMenu import *
+    from Widgets.LocationInput import *
     from Widgets.InputCombinations import *

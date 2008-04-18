@@ -74,7 +74,7 @@ class RowsSimpleModelFilter(Base.Filter):
                         rows.append(row)
 
                     last_row = row
-            if all:
+            if all or self.rows_per_page == 0:
                 return rows
             else:
                 return rows[(self.page - 1) * self.rows_per_page:

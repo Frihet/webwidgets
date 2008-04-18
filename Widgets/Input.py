@@ -335,7 +335,6 @@ class ListInput(Base.ValueInput, Base.StaticComposite):
             'options': options
             }
 
-
 class FileInput(Base.ValueInput, Base.StaticComposite):
     """File upload box"""
     original_value = None
