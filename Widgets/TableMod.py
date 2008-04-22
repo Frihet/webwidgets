@@ -528,7 +528,7 @@ class EditFunctionCell(BaseTableMod.FunctionCell):
                             'revert': 'Revert',
                             'delete': 'Delete'}
 
-    def draw_edit_function(self, table, row_id, is_editing, active, output_options):
+    def draw_edit_function(self, table, row_id, is_editing, output_options):
         if is_editing:
             functions = ('save', 'revert', 'delete')
         else:
@@ -541,19 +541,29 @@ class EditFunctionCell(BaseTableMod.FunctionCell):
                                       ['edit_function', function],
                                       function,
                                       self.edit_function_titles[function],
-                                      active, output_options)
+                                      table.get_active(table.path + ['_', 'edit_function', function]),
+                                      output_options)
         return res
     
     def draw_table_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
         row_id = table.ww_filter.get_row_id(row)
         return self.draw_edit_function(table, row_id,
                                        row.ww_filter.is_editing(),
-                                       table.get_active(table.path + ['_', 'edit_function']),
                                        output_options)
 
 EditFunctionCellInstance = EditFunctionCell()
 
 class EditableTable(Table):
+    class WwModel(Table.WwModel):
+        edit_operations = {'edit': True,
+                           'revert': True,
+                           'save': True,
+                           'delete': True,
+                           'new': True}
+        
+        edit_columns = {'ww_default': True}
+        edit_new_columns = {'ww_default': True}
+
     class RowsRowModelWrapper(Table.RowsRowModelWrapper):
         WwFilters = ["EditingFilters"] + Table.RowsRowModelWrapper.WwFilters
         class EditingFilters(Base.Filter): pass
@@ -586,7 +596,9 @@ class EditableTable(Table):
                 return []
 
             def get_active_edit_function(self, path):
-                return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, self.path + ['edit'] + path)
+                return (    self.ww_filter.edit_operations.get(path[0], False)
+                        and self.session.AccessManager(Webwidgets.Constants.EDIT,
+                                                       self.win_id, self.path + ['edit'] + path))
 
             def field_input_edit_group_function(self, path, string_value):
                 if string_value == '': return
@@ -597,11 +609,14 @@ class EditableTable(Table):
                 return []
 
             def draw_edit_group_function(self, config, output_options):
-                return True, self.draw_group_function(['edit_group_function', "new"],
-                                                      "new",
-                                                      "Add new",
-                                                      output_options)
+                return (self.ww_filter.edit_operations['new'],
+                        self.draw_group_function(['edit_group_function', "new"],
+                                                 "new",
+                                                 "Add new",
+                                                 output_options))
 
             def get_active_edit_group_function(self, path):
-                return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, self.path + ['edit_group_function'] + path)
+                return (    self.ww_filter.edit_operations.get(path[0], False)
+                        and self.session.AccessManager(Webwidgets.Constants.EDIT,
+                                                       self.win_id, self.path + ['edit_group_function'] + path))
 
