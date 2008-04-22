@@ -21,7 +21,7 @@
 import Webwidgets
 import Base, ListMod, LocationInputLocations
 
-class RegionInput(ListMod.RowsSingleValueListInput):
+class RegionPartInput(ListMod.RowsSingleValueListInput):
     class WwModel(ListMod.RowsSingleValueListInput.WwModel):
         string_based = True
         region_prefix = []
@@ -55,14 +55,54 @@ class RegionInput(ListMod.RowsSingleValueListInput):
                     instance.ww_filter.value = value
             value = Value()
 
-class CountryInput(RegionInput):
-    class WwModel(RegionInput.WwModel):
+class CountryInput(RegionPartInput):
+    class WwModel(RegionPartInput.WwModel):
         region_prefix = []
 
-class CountyInput(RegionInput):
-    class WwModel(RegionInput.WwModel):
+class CountyInput(RegionPartInput):
+    class WwModel(RegionPartInput.WwModel):
         region_prefix = [""]
 
-class MunicipalityInput(RegionInput):
-    class WwModel(RegionInput.WwModel):
+class MunicipalityInput(RegionPartInput):
+    class WwModel(RegionPartInput.WwModel):
         region_prefix = ["", ""]
+
+class RegionCountryInput(Webwidgets.Html):
+    html = "%(Country)s%(Update)s"
+    __wwml_html_override__ = False
+
+    class Update(Webwidgets.UpdateButton): pass
+    
+    class Country(Webwidgets.Field):
+        class Label(Webwidgets.Html): html = "Country"
+        class Field(CountryInput): field_name = "country"
+
+class RegionCountyInput(RegionCountryInput):
+    html = "%(County)s" + RegionCountryInput.html
+
+    class Country(RegionCountryInput.Country):
+        class Field(RegionCountryInput.Country.Field):
+            def value_changed(self, path, value):
+                self.parent.parent['County']['Field'].ww_filter.region_prefix = [self.value]
+            def draw(self, output_options):
+                self.register_submit_action(self.path, 'change')
+                return RegionCountryInput.Country.Field.draw(self, output_options)
+
+    class County(Webwidgets.Field):
+        class Label(Webwidgets.Html): html = "County"
+        class Field(CountyInput): field_name = "county"
+
+class RegionMunicipalityInput(RegionCountyInput):
+    html = "%(Municipality)s" + RegionCountyInput.html
+
+    class County(RegionCountyInput.County):
+        class Field(RegionCountyInput.County.Field):
+            def value_changed(self, path, value):
+                self.parent.parent['Municipality']['Field'].ww_filter.region_prefix = [self.value]
+            def draw(self, output_options):
+                self.register_submit_action(self.path, 'change')
+                return RegionCountyInput.County.Field.draw(self, output_options)
+
+    class Municipality(Webwidgets.Field):
+        class Label(Webwidgets.Html): html = "Municipality"
+        class Field(CountyInput): field_name = "municipality"

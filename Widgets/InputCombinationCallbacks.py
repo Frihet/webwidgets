@@ -21,22 +21,7 @@
 import Base, ListMod, LocationInput, LocationInputLocations
 
 class AddressInput(object):
-    class Country(object):
-        class Field(object):
-            def value_changed(self, path, value):
-                self.parent.parent['County']['Field'].ww_filter.region_prefix = [self.value]
-            def draw(self, output_options):
-                self.register_submit_action(self.path, 'change')
-                return LocationInput.CountryInput.draw(self, output_options)
-    
-    class County(object):
-        class Field(object):
-            def value_changed(self, path, value):
-                self.parent.parent['Municipality']['Field'].ww_filter.region_prefix = (
-                    self.ww_filter.region_prefix + [self.value])
-            def draw(self, output_options):
-                self.register_submit_action(self.path, 'change')
-                return LocationInput.CountyInput.draw(self, output_options)
+    pass
 
 class ApplicationWindow(object):
     class Body(object):
