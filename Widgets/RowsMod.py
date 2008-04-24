@@ -38,11 +38,11 @@ class RowsSimpleModelFilter(Base.Filter):
 	self.expand_version = 0
         self.old_default_expand = None
 
-    def get_rows(self, all, output_options):
+    def get_rows(self, all = False, output_options = {}, **kw):
         self.ensure()
         if self.non_memory_storage:
             if all:
-                return self.ww_filter.get_rows(all, output_options)
+                return self.ww_filter.get_rows(all = all, output_options = output_options, **kw)
             else:
                 return self.rows
         else:
@@ -143,7 +143,7 @@ class RowsSimpleModelFilter(Base.Filter):
     def reread(self):
         """Reload the list"""
         if self.non_memory_storage:
-            self.rows[:] = self.ww_filter.get_rows(False, {})
+            self.rows[:] = self.ww_filter.get_rows()
         elif self.object.ww_filter.sort != self.old_sort:
             def row_cmp(row1, row2):
                 for col, order in self.object.ww_filter.sort:
@@ -162,13 +162,14 @@ class RowsPrintableFilter(Base.Filter):
     # left = BaseTable
     # right = RowsSimpleModelFilter
     
-    def get_rows(self, output_options):
-        return self.ww_filter.get_rows('printable_version' in output_options, output_options)
+    def get_rows(self, **kw):
+        kw['all'] = 'printable_version' in kw.get('output_options', {})
+        return self.ww_filter.get_rows(**kw)
 
 class RowsRowWrapperFilter(Base.Filter):
-    def get_rows(self, all, output_options):
+    def get_rows(self, **kw):
         return [self.RowsRowModelWrapper(table = self.object, ww_model = row)
-                for row in self.ww_filter.get_rows(all, output_options)]
+                for row in self.ww_filter.get_rows(**kw)]
 
     def get_row_id(self, row):
         return "wrap_" + self.ww_filter.get_row_id(row.ww_model)
@@ -213,7 +214,7 @@ class RowsComposite(Base.CachingComposite):
             self.sort = list(self.sort)
             self.rows = list(self.rows)
 
-        def get_rows(self, all, output_options):
+        def get_rows(self, **kw):
             """Load the list after a repaging/resorting, or for a
             printable version. If you set non_memory_storage to True, you
             _must_ implement this method.

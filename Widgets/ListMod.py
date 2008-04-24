@@ -66,7 +66,7 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
         if not self.ww_filter.multiple:
             none = [self.draw_option(not self.ww_filter.value, "", "&lt;None selected&gt;", output_options)]
         return none + [self.draw_row(row, output_options)
-                       for row in self.ww_filter.get_rows(output_options)]
+                       for row in self.ww_filter.get_rows(output_options = output_options)]
     
     def draw(self, output_options):
         Base.ValueInput.draw(self, output_options)

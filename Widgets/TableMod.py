@@ -160,10 +160,10 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                     setattr(row, "selection_col", SelectionCellInstance)
                 return row
 
-            def get_rows(self, all, output_options):
+            def get_rows(self, output_options = {}, **kw):
                 return [self.mangle_row(row, output_options)
                         for row
-                        in self.ww_filter.get_rows(all, output_options)]
+                        in self.ww_filter.get_rows(output_options = output_options, **kw)]
             
         class TableFunctionColFilter(Base.Filter):
             # left = Table
@@ -176,10 +176,10 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                         setattr(row, name, BaseTableMod.FunctionCellInstance)
                 return row
 
-            def get_rows(self, all, output_options):
+            def get_rows(self, output_options = {}, **kw):
                 return [self.mangle_row(row, output_options)
                         for row
-                        in self.ww_filter.get_rows(all, output_options)]        
+                        in self.ww_filter.get_rows(output_options = output_options, **kw)]        
 
             def get_columns(self, output_options, only_sortable):
                 if (   only_sortable
@@ -234,7 +234,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
     def field_input_selection(self, path, *string_values):
         if len(string_values) == 1 and not string_values[0]:
             string_values = []
-        for row in self.ww_filter.get_rows({}):
+        for row in self.ww_filter.get_rows():
             row_id = self.ww_filter.get_row_id(row)
             if row_id in string_values:
                 if row not in self.ww_filter.selection:
@@ -472,9 +472,9 @@ class ExpandableTable(Table):
             # right = Table
 
             # API used by Table
-            def get_rows(self, all, output_options):
+            def get_rows(self, **kw):
                 res = []
-                for row in self.ww_filter.get_rows(all, output_options):
+                for row in self.ww_filter.get_rows(**kw):
                     row.ww_filter.expand_col = BaseTableMod.ExpandCellInstance
                     res.append(row)
 
@@ -572,9 +572,9 @@ class EditableTable(Table):
         WwFilters = ["TableEditableFilter"] + Table.RowsFilters.WwFilters
     
         class TableEditableFilter(Base.Filter):
-            def get_rows(self, all, output_options):
+            def get_rows(self, **kw):
                 res = []
-                for row in self.ww_filter.get_rows(all, output_options):
+                for row in self.ww_filter.get_rows(**kw):
                     row.edit_function_col = EditFunctionCellInstance
                     res.append(row)
                 return res

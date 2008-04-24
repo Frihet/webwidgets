@@ -116,7 +116,7 @@ class TableRowsToTreeFilter(Base.Filter):
         
     def get_tree(self, output_options):
         total_column_order = self.get_total_column_order(output_options)
-        rows = self.ww_filter.get_rows(output_options)
+        rows = self.ww_filter.get_rows(output_options = output_options)
         tree = {'level': 0,
                 'rows': 0,
                 'children':[]}
