@@ -176,25 +176,43 @@ class Object(object):
         return types.TypeType(name, (cls,) + clss, members)
     derive = classmethod(derive)
 
+    #### fixme ####
+    # name = "Inheriting properties from parent widget"
+    #
+    # description = """It would be usefull to have widgets inherit
+    # (read-only) attributes from their parent widgets. This would be
+    # especially usefull for database sessions and the like, where the
+    # session could be overridden for a part of an application and all
+    # of its sub-parts.
+    #
+    # This has been tested, but was found to be too slow (when an
+    # attribute is not found, it still had to traverse the whole tree
+    # to the root every time), and the code was removed."""
+    #### end ####
+    
     def __getattr__(self, name):
-        """Lookup order: self, self.ww_model, self.parent"""
+        """Lookup order: self, self.ww_model"""
         if self.ww_model is None:
             raise AttributeError(self, name)
         return getattr(self.ww_model, name)
         
     def __hasattr__(self, name):
-        """Lookup order: self.__dict__, self.ww_model"""
-        # FIXME: Search type(self) (didn't bother) and self.parent (too slow!!!) too...
-        return (   name in self.__dict__
-                or (    self.ww_model is not None
-                    and hasattr(self.ww_model, name)))
+        """Lookup order: self, self.ww_model"""
+        model_has_name = (   self.ww_model is not None
+                          and hasattr(self.ww_model, name))
+        self_has_name = (   name in self.__dict__
+                         or hasattr(type(self), name))
+        return (   self_has_name
+                or model_has_name)
 
     def __setattr__(self, name, value):
-        # Note: We never set values on parent, only self and
-        # self.ww_model
-        if (   self.ww_model is None
-            or name in self.__dict__
-            or not hasattr(self.ww_model, name)):
+        """Lookup order: self, self.ww_model"""
+        model_has_name = (   self.ww_model is not None
+                          and hasattr(self.ww_model, name))
+        self_has_name = (   name in self.__dict__
+                         or hasattr(type(self), name))
+        if (   not model_has_name
+            or self_has_name):
             object.__setattr__(self, name, value)
         else:
             setattr(self.ww_model, name, value)
@@ -236,17 +254,24 @@ class Model(Object):
 
 class Filter(Object):
     def __getattr__(self, name):
+        """Lookup order: self, self.ww_filter"""
         return getattr(self.ww_filter, name)
     
     def __hasattr__(self, name):
-        return (   name in self.__dict__
-                or hasattr(type(self), name)
-                or hasattr(self.ww_filter, name))
+        """Lookup order: self, self.ww_filter"""
+        self_has_name = (   name in self.__dict__
+                         or hasattr(type(self), name))
+        ww_filter_has_name = hasattr(self.ww_filter, name)
+        return (   self_has_name
+                or ww_filter_has_name)
 
     def __setattr__(self, name, value):
-        if (   name in self.__dict__
-            or hasattr(type(self), name)
-            or not hasattr(self.ww_filter, name)):
+        """Lookup order: self, self.ww_filter"""
+        self_has_name = (   name in self.__dict__
+                         or hasattr(type(self), name))
+        ww_filter_has_name = hasattr(self.ww_filter, name)
+        if (  self_has_name
+            or not ww_filter_has_name):
             object.__setattr__(self, name, value)
         else:
             setattr(self.ww_filter, name, value)
