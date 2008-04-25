@@ -220,11 +220,7 @@ class Program(WebKit.Page.Page):
                     except StopIteration:
                         return
                     except:
-                        if debug_exceptions: traceback.print_exc()
-                        import WebUtils.HTMLForException
-                        self.widget.system_errors.append(
-                            (sys.exc_info()[1],
-                             WebUtils.HTMLForException.HTMLForException()))
+                        self.widget.append_exception()
                 else:
                     if self.widget.session.debug_receive_notification:
                         print "Notifying %s (ignored)" % self
@@ -345,19 +341,22 @@ class Program(WebKit.Page.Page):
 
             for fieldname, field in sorted_fields:
                 path = Utils.id_to_path(fieldname)
-                # Check an extra time that the widget is
-                # active, just for added paranoia :) The field
-                # should'nt ever be there if it isn't but some
-                # sloppy widget hacker migt have forgotten to
-                # not to add it...
-                if field.get_active(path):
-                    value = fields.get(fieldname, '')
-                    if not isinstance(value, types.ListType):
-                        value = [value]
-                    if field.field_output(path) != value:
-                        if self.debug_field_input:
-                            print "Field input:", path, fieldname, field.field_output(path), value
-                        field.field_input(path, *value)
+                try:
+                    # Check an extra time that the widget is
+                    # active, just for added paranoia :) The field
+                    # should'nt ever be there if it isn't but some
+                    # sloppy widget hacker migt have forgotten to
+                    # not to add it...
+                    if field.get_active(path):
+                        value = fields.get(fieldname, '')
+                        if not isinstance(value, types.ListType):
+                            value = [value]
+                        if field.field_output(path) != value:
+                            if self.debug_field_input:
+                                print "Field input:", path, fieldname, field.field_output(path), value
+                            field.field_input(path, *value)
+                except:
+                    field.append_exception()
 
         def handle_request(self):
             """Main processing method, called by WebWare. This method will

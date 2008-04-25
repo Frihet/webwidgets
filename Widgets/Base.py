@@ -438,6 +438,21 @@ class Widget(Object):
         information on the message passing mechanism."""        
         self.session.notify(self, message, args, kw, path)
 
+    def append_exception(self):
+        """Appends the current exception to the exceptions of this
+        widget. This will be shown to the user next to the widget (or
+        instead of the widget if this was from the draw method
+        crashing).
+
+        Do not ever let exceptions propagate so that they kill of the
+        whole page!
+        """
+        if debug_exceptions: traceback.print_exc()
+        import WebUtils.HTMLForException
+        self.system_errors.append(
+            (sys.exc_info()[1],
+             WebUtils.HTMLForException.HTMLForException()))
+
     def draw_html_attributes(self, path):
         attributes = [(name[5:], getattr(self, name))
                       for name in dir(self)
@@ -820,12 +835,8 @@ class Composite(Widget):
                 try:
                     result = child.draw(output_options)
                 except Exception, e:
-                    if debug_exceptions: traceback.print_exc()
                     result = ''
-                    import WebUtils.HTMLForException
-                    child.system_errors.append(
-                        (sys.exc_info()[1],
-                         WebUtils.HTMLForException.HTMLForException()))
+                    child.append_exception()
             elif isinstance(child, type) and issubclass(child, Widget):
                 raise Exception("The child %(child)s to %(self)s is a class, not an instance" % {
                     'child': Webwidgets.Utils.obj_info(child),
