@@ -95,6 +95,9 @@ class RowsSimpleModelFilter(Base.Filter):
     def get_row_id_from_row_model(self, row_model):
         return self.get_row_id(row_model)
     
+    def get_row_id_to_model_row_id(self, row_id):
+        return self.get_row_id_from_row_model(self.object.ww_filter.get_row_by_id(row_id).ww_model)
+
     def get_row_by_id(self, row_id):
         if self.non_memory_storage:
             return self.ww_filter.get_row_by_id(row_id)
