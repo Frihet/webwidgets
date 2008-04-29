@@ -1,6 +1,6 @@
 #! /bin/env python
-# -*- coding: UTF-8 -*-
-# vim: set fileencoding=UTF-8 :
+# -*- coding: utf-8 -*-
+# vim: set fileencoding=utf-8 :
 
 # Group By Ordering List for the Webwidgets web developement framework
 # A list widget with intuitive grouping and sorting controls
@@ -517,6 +517,21 @@ class ExpandableTable(Table):
                 elif row_id.startswith("parent_"):
                     return self.ww_filter.get_row_by_id(row_id[7:])
                 raise Exception("Invalid row-id %s (should have started with 'child_' or 'parent_')" % row_id)
+
+class ExpansionTable(ExpandableTable):
+    class RowsRowModelWrapper(ExpandableTable.RowsRowModelWrapper):
+        WwFilters = ["ExpansionFilter"] + ExpandableTable.RowsRowModelWrapper.WwFilters
+
+        class ExpansionFilter(Webwidgets.Filter):
+            def __init__(self, *arg, **kw):
+                Webwidgets.Filter.__init__(self, *arg, **kw)
+                if hasattr(self, 'is_expansion'): return
+                self.ww_expansion = {
+                    'is_expansion': True,
+                    'ww_functions': [],
+                    'ww_expanded': self.table.ExpansionViewer(
+                    self.table.session, self.table.win_id,
+                    parent_table = self)}
 
 class EditFunctionCell(BaseTableMod.FunctionCell):
     html_class = ['edit_function_col']
