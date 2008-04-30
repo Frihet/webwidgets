@@ -193,7 +193,7 @@ def mangle_attribute_value(attribute, text, module, using, class_path, bind_cont
         text = None
     return generate_value(type_name, text, {'id': attribute, 'classid': attribute}, module, using, class_path, bind_context + [attribute])
 
-def generate_value_for_node(module, node, using = [], class_path = [], bind_context = []):
+def generate_value_for_node(module, node, using = [], class_path = [], bind_context = [], is_root_node = False):
     if not node.nodeType == node.ELEMENT_NODE:
         raise Exception('Non element node given to generate_value_for_node: %s' % str(node))
     # Yes, ordered dict here, since we mix it with child nodes further
@@ -203,11 +203,11 @@ def generate_value_for_node(module, node, using = [], class_path = [], bind_cont
                                     for (key, value)
                                     in node.attributes.items()])
 
+    if ('id' in attributes) == ('classid' in attributes) and not is_root_node:
+        raise Exception('One of classid and id, and only one, must be set for an object: %s' % str(node))
+
     if 'id' in attributes:
-        if 'classid' not in attributes:
-            attributes['classid'] = attributes['id']
-        else:
-            raise Exception('Both classid and id can not be set for an object')
+        attributes['classid'] = attributes['id']
 
     if 'using' in attributes:
         using = attributes['using'].split(' ') + using
@@ -255,17 +255,18 @@ def generate_widgets_from_file(modulename, filename, file, path = None, bind_con
         setattr(sys.modules[parent], module_parts[-1], module)
     try:
         root_node = xml.dom.minidom.parse(file)
+        dom_node = root_node.getElementsByTagNameNS(
+            'http://freecode.no/xml/namespaces/wwml-1.0', 'wwml')[0]
+        return generate_value_for_node(
+            module,
+            dom_node,
+            ['Webwidgets'],
+            [],
+            bind_context,
+            True)[2]
     except Exception, e:
         e.args = ("Unable to parse file %s: %s" % (filename, e.args[0]),) + e.args[1:]
-        raise e
-    dom_node = root_node.getElementsByTagNameNS(
-        'http://freecode.no/xml/namespaces/wwml-1.0', 'wwml')[0]
-    return generate_value_for_node(
-        module,
-        dom_node,
-        ['Webwidgets'],
-        [],
-        bind_context)[2]
+        raise type(e), e, sys.exc_info()[2]
 
 import imp, ihooks
 
