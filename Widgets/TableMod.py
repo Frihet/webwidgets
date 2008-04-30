@@ -531,7 +531,7 @@ class ExpansionTable(ExpandableTable):
                     'ww_functions': [],
                     'ww_expanded': self.table.ExpansionViewer(
                     self.table.session, self.table.win_id,
-                    parent_table = self)}
+                    parent_row = self.object)}
 
 class EditFunctionCell(BaseTableMod.FunctionCell):
     html_class = ['edit_function_col']
