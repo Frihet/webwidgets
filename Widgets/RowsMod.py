@@ -367,7 +367,7 @@ class RowsComposite(Base.CachingComposite):
     def child_for_row(self, row):
         row_id = self.ww_filter.get_row_id(row)
         if row_id not in self.children:
-            self.children[row_id] = RowsRowWidget(self.session, self.win_id)
+            self.children[row_id] = RowsRowWidget(self.session, self.win_id, parent_row = row)
         return self.children[row_id]
 
     def draw_cell(self, row, column_name, value, output_options):
