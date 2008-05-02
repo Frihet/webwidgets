@@ -1,6 +1,6 @@
 #! /bin/env python
-# -*- coding: UTF-8 -*-
-# vim: set fileencoding=UTF-8 :
+# -*- coding: utf-8 -*-
+# vim: set fileencoding=utf-8 :
 
 # Webwidgets web developement framework
 # Copyright (C) 2006 uAnywhere, Egil Moeller <redhog@redhog.org>
@@ -288,20 +288,22 @@ class Program(WebKit.Page.Page):
             sorted_arguments.sort(lambda (name1, argument1), (name2, argument2):
                                  argument1['widget'].input_order(argument2['widget']))
 
+            changed_arguments = []
             for argumentname, argument in sorted_arguments:
                 path = argument['path']
                 argument = argument['widget']
-                # Check an extra time that the widget is
-                # active, just for added paranoia :) The argument
-                # should'nt ever be there if it isn't but some
-                # sloppy widget hacker migt have forgotten to
-                # not to add it...
+                # Check an extra time that the widget is active, just
+                # for added paranoia :) The argument shouldn't ever be
+                # there if it isn't but some sloppy widget hacker
+                # might have forgotten to not to add it.
                 if argument.get_active(path):
                     value = arguments.get(argumentname, '')
                     if not isinstance(value, types.ListType):
                         value = [value]
                     if argument.field_output(path) != value:
-                        argument.field_input(path, *value)
+                        changed_arguments.append((field, path, value))
+
+            return changed_arguments
 
         def generate_arguments(self, window):
             """Return a tuple of the location and arguments (query
@@ -339,24 +341,22 @@ class Program(WebKit.Page.Page):
             sorted_fields.sort(lambda (name1, field1), (name2, field2):
                               field1.input_order(field2))
 
+            changed_fields = []
             for fieldname, field in sorted_fields:
                 path = Utils.id_to_path(fieldname)
-                try:
-                    # Check an extra time that the widget is
-                    # active, just for added paranoia :) The field
-                    # should'nt ever be there if it isn't but some
-                    # sloppy widget hacker migt have forgotten to
-                    # not to add it...
-                    if field.get_active(path):
-                        value = fields.get(fieldname, '')
-                        if not isinstance(value, types.ListType):
-                            value = [value]
-                        if field.field_output(path) != value:
-                            if self.debug_field_input:
-                                print "Field input:", path, fieldname, field.field_output(path), value
-                            field.field_input(path, *value)
-                except:
-                    field.append_exception()
+
+                # Check an extra time that the widget is active, just
+                # for added paranoia :) The field should'nt ever be
+                # there if it isn't but some sloppy widget hacker migt
+                # have forgotten to not to add it...
+                if field.get_active(path):
+                    value = fields.get(fieldname, '')
+                    if not isinstance(value, types.ListType):
+                        value = [value]
+                    if field.field_output(path) != value:
+                        changed_fields.append((field, path, value))
+
+            return changed_fields
 
         def handle_request(self):
             """Main processing method, called by WebWare. This method will
@@ -434,10 +434,17 @@ class Program(WebKit.Page.Page):
 
             window = session.get_window(output_options['win_id'])
             if window:
-                session.process_arguments(window, output_options['location'], arguments)
+                # Collect changed attributes in order, then run field_input
+                changed = session.process_arguments(window, output_options['location'], arguments)
                 if req.method() == 'POST':
-                    session.process_fields(window,
-                                          decode_fields(normalize_fields(req.fields())))
+                    changed.extend(session.process_fields(window,
+                                                          decode_fields(normalize_fields(req.fields()))))
+
+                for field, path, value in changed:
+                    try:
+                        field.field_input(path, *value)
+                    except:
+                        field.append_exception()
 
                 obj = window
                 fn_name = 'output'
