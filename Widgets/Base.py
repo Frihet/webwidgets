@@ -233,14 +233,19 @@ class Wrapper(Object):
         Object.__init__(self, ww_model = ww_model, **attrs)
 
 class PersistentWrapper(Wrapper):
-    def __new__(cls, ww_model, **attrs):
+    def ww_wrapper_key(cls, ww_model, **attrs):
+        return str(id(ww_model))
+    ww_wrapper_key = classmethod(ww_wrapper_key)
+    
+    def __new__(cls, **attrs):
         if 'wrappers' not in cls.__dict__:
                 cls.wrappers = {}
-        if id(ww_model) not in cls.wrappers:
-            wrapper = cls.wrappers[id(ww_model)] = Wrapper.__new__(cls, ww_model = ww_model, **attrs)
-            wrapper.ww_first_init(ww_model = ww_model, **attrs)
+        wrapper_key = cls.ww_wrapper_key(**attrs)
+        if wrapper_key not in cls.wrappers:
+            wrapper = cls.wrappers[wrapper_key] = Wrapper.__new__(cls, **attrs)
+            wrapper.ww_first_init(**attrs)
         else:
-            wrapper = cls.wrappers[id(ww_model)]
+            wrapper = cls.wrappers[wrapper_key]
         return wrapper
 
     def __init__(self, *arg, **kw):

@@ -251,8 +251,9 @@ class RowsComposite(Base.CachingComposite):
     WwFilters = ["OutputOptionsFilters", "RowsFilters", "SourceFilters"]
 
     class RowsRowModelWrapper(Base.PersistentWrapper):
-        WwFilters = ["RowFilters"]
-        class RowFilters(Base.Filter): pass
+        def ww_wrapper_key(cls, table, ww_model, **attrs):
+            return "%s-%s" % (id(table), id(ww_model))
+        ww_wrapper_key = classmethod(ww_wrapper_key)
 
         def ww_first_init(self, ww_model, *arg, **kw):
             Base.PersistentWrapper.ww_first_init(self, ww_model = ww_model, *arg, **kw)
@@ -263,6 +264,9 @@ class RowsComposite(Base.CachingComposite):
                 self.ww_row_id = ww_model.get('ww_row_id', id(ww_model))
             else:
                 self.ww_row_id = getattr(ww_model, 'ww_row_id', id(ww_model))
+
+        WwFilters = ["RowFilters"]
+        class RowFilters(Base.Filter): pass
 
         def __getattr__(self, name):
             if isinstance(self.ww_model, dict):
