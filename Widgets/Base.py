@@ -285,14 +285,110 @@ class RenameFilter(Filter):
     """This filter renames one or more attributes using a dictionary
     mapping in the name_map attribute."""
     def __getattr__(self, name):
-        return getattr(self.ww_filter, self.ww_filter.name_map.get(name, name))
+        if name != 'name_map':
+            name = self.name_map.get(name, name)
+        return getattr(self.ww_filter, name)
 
     def __setattr__(self, name, value):
-        setattr(self.ww_filter, self.ww_filter.name_map.get(name, name), value)
+        if name != 'name_map':
+            name = self.name_map.get(name, name)
+        setattr(self.ww_filter, name, value)
 
-class RenameWrapper(Wrapper):
-    WwFilters = [RenameFilter]
+    def rename(cls, **name_map):
+        return cls.derive(name_map = name_map)
+    rename = classmethod(rename)
+
+
+class RedirectFilter(Filter):
+    """This filter redirects model lookups and changes to (the
+    ww_filter of) another widget."""
+
+    redirect = []
+    """If redirect is empty everything except the names in
+    dont_redirect is redirected. If non-empty, only the named
+    attributes are redirected."""
+    dont_redirect = ['redirect_path']
     
+    def __getattr__(self, name):
+        if name in self.dont_redirect or self.redirect and name not in self.redirect:
+            parent = self
+        else:
+            parent = self.object + self.redirect_path
+        return getattr(parent.ww_filter, name)
+
+    def __setattr__(self, name, value):
+        if name in self.dont_redirect or self.redirect and name not in self.redirect:
+            parent = self
+        else:
+            parent = self.object + self.redirect_path
+        setattr(parent.ww_filter, name, value)
+
+    def redirect(cls, *relative_path_arg, **rest):
+        """Derive a subclass given a path, a set of levels (upwards)
+        and optionally values for redirect and dont_redirect (see doc.
+        for the class attributes for more info on how they work)."""
+        return cls.derive(redirect_path = Webwidgets.Utils.RelativePath(*relative_path_arg),
+                          **rest)
+
+class RedirectRenameFilter(Filter):
+    """This is the combination of the RedirectFilter and RenameFilter
+    - it first renames attributes and the redirects them to another widget."""
+    
+    WwFilters = ["RenameFilter", "RedirectFilter"]
+    RenameFilter = RenameFilter
+    class RedirectFilter(RedirectFilter):
+        dont_redirect = ["name_map"] + RedirectFilter.dont_redirect
+
+    def redirect(cls, *relative_path_arg, **name_map):
+        """Derive a subclass given a path, a set of levels (upwards)
+        and a name map (name = name_to_rewrite_to)."""
+        return cls.derive(
+            RenameFilter = cls.RenameFilter.derive(name_map = name_map),
+            RedirectFilter = cls.RedirectFilter.derive(redirect_path = Webwidgets.Utils.RelativePath(*relative_path_arg),
+                                                       redirect = name_map.values()))
+    redirect = classmethod(redirect)
+
+class MapValueFilter(Filter):
+    value_maps = {}
+    
+    def __getattr__(self, name):
+        res = getattr(self.ww_filter, name)
+        if name != 'value_maps' and name in self.value_maps and res in self.value_maps[name][1]:
+            res = self.value_maps[name][1][res]
+        return res
+
+    def __setattr__(self, name, value):
+        if name != 'value_maps' and name in self.value_maps and value in self.value_maps[name][0]:
+            value = self.value_maps[name][0][value]
+        setattr(self.ww_filter, name, value)
+
+    def map_values(cls, **value_maps):
+        value_maps = dict([(name, (value_map,
+                                   dict([(map_to, map_from)
+                                         for (map_from, map_to)
+                                         in value_map.iteritems()])))
+                           for (name, value_map)
+                           in value_maps.iteritems()])
+
+                                   
+        return cls.derive(value_maps = value_maps)
+    map_values = classmethod(map_values)
+
+class MangleFilter(Filter):
+    """This is the most generic of the redirection/renaming filters.
+    It allows the redirection/renaming to be done by arbitrary
+    functions provided by the user."""
+    def mangle(cls, **mangle_rules):
+        """Derive a subclass given a set of redirection rules. Every
+        rule is of the form attribute_name = getter of attribute_name
+        = (getter, setter)."""
+        properties = {}
+        for name, rule in mangle_rules.iteritems():
+            if not isinstance(rule, (tuple, list)):
+                rule = (rule,)
+            properties[name] = property(*rule)
+        return cls.derive(**properties)
+    mangle = classmethod(mangle)
 
 class Widget(Object):
     """Widget is the base class for all widgets. It manages class name
@@ -665,7 +761,7 @@ class Widget(Object):
 
     def __setattr__(self, name, value):
         if not hasattr(self, name) or value is not getattr(self, name):
-            Object.__setattr__(self, name, value)    
+            Object.__setattr__(self, name, value)
             self.notify('%s_changed' % name, value)
 
 class Text(Widget):
@@ -680,7 +776,7 @@ class Text(Widget):
     html = ""
 
     def draw(self, output_options):
-        return self._(self.html, output_options)
+        return self._(self.ww_filter.html, output_options)
 
 class BaseChildNodes(object):
     def __init__(self, node):
