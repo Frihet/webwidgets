@@ -34,7 +34,8 @@ USA
   <w:Html id="Body">
 
    <w:CountryInput id="Country" />
-   <w:AddressInput id="Address" />
+   <w:AddressInput id="AddressInput" />
+   <w:Address id="Address" />
 
    <w:Button id="Submit" title="Submit" />
 

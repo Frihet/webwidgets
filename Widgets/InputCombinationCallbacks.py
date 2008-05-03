@@ -21,7 +21,54 @@
 import Base, ListMod, LocationInput, LocationInputLocations
 
 class AddressInput(object):
-    pass
+    class WwModel(object):
+        co = ''
+        street = ''
+        zip = ''
+        city = ''
+        municipality = ''
+        county = ''
+        country = ''
+        
+    class Co(object):
+        class Field(object): WwFilters = [Base.RedirectRenameFilter.redirect([], 2, value ='co')]
+    class Street(object):
+        class Field(object): WwFilters = [Base.RedirectRenameFilter.redirect([], 2, value = 'street')]
+    class Zip(object):
+        class Field(object): WwFilters = [Base.RedirectRenameFilter.redirect([], 2, value = 'zip')]
+    class City(object):
+        class Field(object): WwFilters = [Base.RedirectRenameFilter.redirect([], 2, value = 'city')]
+    class Region(object):
+        WwFilters = LocationInput.MunicipalityInput.WwFilters + [
+            Base.RedirectRenameFilter.redirect([], 1,
+                                               municipality = "municipality",
+                                               county = "county",
+                                               country = "country")]
+
+class Address(object):
+    class WwModel(object):
+        co = 'X'
+        street = 'Y'
+        zip = ''
+        city = ''
+        municipality = ''
+        county = ''
+        country = ''
+        
+    class Co(object):
+        class Field(object): WwFilters = [Base.RedirectRenameFilter.redirect([], 2, html = 'co')]
+    class Street(object):
+        class Field(object): WwFilters = [Base.RedirectRenameFilter.redirect([], 2, html = 'street')]
+    class Zip(object):
+        class Field(object): WwFilters = [Base.RedirectRenameFilter.redirect([], 2, html = 'zip')]
+    class City(object):
+        class Field(object): WwFilters = [Base.RedirectRenameFilter.redirect([], 2, html = 'city')]
+    class Region(object):
+        WwFilters = LocationInput.Municipality.WwFilters + [
+            Base.RedirectRenameFilter.redirect([], 1,
+                                               municipality = "municipality",
+                                               county = "county",
+                                               country = "country")]
 
 class ApplicationWindow(object):
     class Body(object):

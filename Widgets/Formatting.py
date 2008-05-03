@@ -58,11 +58,11 @@ class Html(Base.Text, Base.StaticComposite):
     way to "format" together other widgets with some custom HTML
     around them.
 
-    @cvar html: The "html" attribute should contain HTML code with python format strings like
-    %(name)s embedded. These should correspond to children of the html
-    widget, or if prefixed with '', to attributes. In addition
-    the special name"id" will insert the widget id (path) of the current widget, which is usefull
-    for CSS styling).
+    @cvar html: The 'html' attribute should contain HTML code with
+    python format strings like %(name)s embedded. These should
+    correspond to children of the html widget or to attributes. In
+    addition the special name 'id' will insert the widget id (path) of
+    the current widget, which is usefull for CSS styling).
     """
     
     ww_class_data__no_classes_name = True
@@ -75,13 +75,13 @@ class Html(Base.Text, Base.StaticComposite):
             output_options,
             invisible_as_empty = True,
             include_attributes = True)
-        html = self._(self.html, output_options)
+        html = self._(self.ww_filter.html, output_options)
         if self.top_level is not None:
             html = "<%(top_level)s %(html_attributes)s>" + html + "</%(top_level)s>"
         try:
             return html % children
         except (KeyError, TypeError), e:
-            e.args = (self, self.path) + e.args + (self.html,)
+            e.args = (self, self.path) + e.args + (self.ww_filter.html,)
             raise e
 
 class Div(Html):
