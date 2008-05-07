@@ -46,21 +46,27 @@ class RowsSimpleModelFilter(Base.Filter):
             else:
                 return self.rows
         else:
-            rows = []
+            # Just here to support very simple list-like rows back-ends.
+            rows = self.rows
+            if self.dont_sort_in_place or hasattr(rows, 'sort'):
+                rows = list(rows)
+                rows.sort(self.row_cmp)
+                
+            result_rows = []
             expand_tree = self.get_expand_tree()
             
             if self.default_expand:
-                for row in self.rows:
+                for row in rows:
                     node = expand_tree
                     while (    not node.toggled
                            and self.get_row_col(row, node.col) in node.values):
                         node = node.values[self.get_row_col(row, node.col)]
                     if (   not node.toggled
                         or self.get_row_id(row) in node.rows):
-                        rows.append(row)
+                        result_rows.append(row)
             else:
                 last_row = None
-                for row in self.rows:
+                for row in rows:
                     common = self.row_common_sorted_columns(row, last_row)
                     expanded = True
                     node = expand_tree
@@ -71,14 +77,14 @@ class RowsSimpleModelFilter(Base.Filter):
                             break
                         node = node.values[self.get_row_col(row, node.col)]
                     if expanded:
-                        rows.append(row)
-
+                        result_rows.append(row)
                     last_row = row
+
             if all or self.rows_per_page == 0:
-                return rows
+                return result_rows
             else:
-                return rows[(self.page - 1) * self.rows_per_page:
-                            self.page * self.rows_per_page]
+                return result_rows[(self.page - 1) * self.rows_per_page:
+                                   self.page * self.rows_per_page]
 
     def get_row_col(self, row, col):
         if isinstance(row, dict):
@@ -143,19 +149,22 @@ class RowsSimpleModelFilter(Base.Filter):
             or self.default_expand != self.old_default_expand):
             self.reread()
 
+    def row_cmp(self, row1, row2):
+        for col, order in self.object.ww_filter.sort:
+            diff = cmp(row1[col], row2[col])
+            if diff:
+                if order == 'desc': diff *= -1
+                return diff
+        return 0
+
     def reread(self):
         """Reload the list"""
         if self.non_memory_storage:
             self.rows[:] = self.ww_filter.get_rows()
-        elif self.object.ww_filter.sort != self.old_sort:
-            def row_cmp(row1, row2):
-                for col, order in self.object.ww_filter.sort:
-                    diff = cmp(row1[col], row2[col])
-                    if diff:
-                        if order == 'desc': diff *= -1
-                        return diff
-                return 0
-            self.rows.sort(row_cmp)
+        elif (    not self.dont_sort_in_place
+              and hasattr(self.rows, 'sort')
+              and self.object.ww_filter.sort != self.old_sort):
+            self.rows.sort(self.row_cmp)
         self.old_sort = self.object.ww_filter.sort
         self.old_page = self.page
         self.old_expand = self.expand_version
@@ -210,6 +219,7 @@ class RowsComposite(Base.CachingComposite):
         dont_merge_columns = ()
 
         non_memory_storage = False
+        dont_sort_in_place = False
 
         def __init__(self):
             super(RowsComposite.WwModel, self).__init__()
