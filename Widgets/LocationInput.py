@@ -75,6 +75,7 @@ class CountryInput(Webwidgets.Html):
     __wwml_html_override__ = False
 
     class WwModel(object):
+        active = True
         country = ''
 
     class Update(Webwidgets.UpdateButton): pass
@@ -83,7 +84,7 @@ class CountryInput(Webwidgets.Html):
         class Label(Webwidgets.Html): html = "Country"
         class Field(CountryPartInput):
             field_name = "country"
-            WwFilters = CountryPartInput.WwFilters + [Base.RedirectRenameFilter.redirect([], 2, value ='country')]
+            WwFilters = CountryPartInput.WwFilters + [Base.RedirectRenameFilter.redirect([], 2, active = "active", value ='country')]
 
 class CountyInput(CountryInput):
     html = "%(County)s" + CountryInput.html
@@ -102,7 +103,7 @@ class CountyInput(CountryInput):
         class Field(CountyPartInput):
             field_name = "county"
             WwFilters = CountyPartInput.WwFilters + [
-                Base.RedirectRenameFilter.redirect([], 2, value ='county'),
+                Base.RedirectRenameFilter.redirect([], 2, active = "active", value ='county'),
                 Base.MangleFilter.mangle(
                     region_prefix = lambda self: [self.parent.parent.ww_filter.country])]
 
@@ -123,7 +124,7 @@ class MunicipalityInput(CountyInput):
         class Field(MunicipalityPartInput):
             field_name = "municipality"
             WwFilters = MunicipalityPartInput.WwFilters + [
-                Base.RedirectRenameFilter.redirect([], 2, value ='municipality'),
+                Base.RedirectRenameFilter.redirect([], 2, active = "active", value ='municipality'),
                 Base.MangleFilter.mangle(
                 region_prefix = lambda self: [self.parent.parent.ww_filter.county])]
 

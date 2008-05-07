@@ -20,8 +20,12 @@
 
 import Base, ListMod, LocationInput, LocationInputLocations
 
+def redirect_value_to_address(name):
+    return [Base.RedirectRenameFilter.redirect([], 2, active = "active", value = name)]
+    
 class AddressInput(object):
     class WwModel(object):
+        active = True
         co = ''
         street = ''
         zip = ''
@@ -31,20 +35,24 @@ class AddressInput(object):
         country = ''
         
     class Co(object):
-        class Field(object): WwFilters = [Base.RedirectRenameFilter.redirect([], 2, value ='co')]
+        class Field(object): WwFilters = redirect_value_to_address('co')
     class Street(object):
-        class Field(object): WwFilters = [Base.RedirectRenameFilter.redirect([], 2, value = 'street')]
+        class Field(object): WwFilters = redirect_value_to_address('street')
     class Zip(object):
-        class Field(object): WwFilters = [Base.RedirectRenameFilter.redirect([], 2, value = 'zip')]
+        class Field(object): WwFilters = redirect_value_to_address('zip')
     class City(object):
-        class Field(object): WwFilters = [Base.RedirectRenameFilter.redirect([], 2, value = 'city')]
+        class Field(object): WwFilters = redirect_value_to_address('city')
     class Region(object):
         WwFilters = LocationInput.MunicipalityInput.WwFilters + [
             Base.RedirectRenameFilter.redirect([], 1,
+                                               active = "active",
                                                municipality = "municipality",
                                                county = "county",
                                                country = "country")]
 
+def redirect_html_to_address(name):
+    return [Base.RedirectRenameFilter.redirect([], 2, html = name)]
+    
 class Address(object):
     class WwModel(object):
         co = 'X'
@@ -56,13 +64,13 @@ class Address(object):
         country = ''
         
     class Co(object):
-        class Field(object): WwFilters = [Base.RedirectRenameFilter.redirect([], 2, html = 'co')]
+        class Field(object): WwFilters = redirect_html_to_address('co')
     class Street(object):
-        class Field(object): WwFilters = [Base.RedirectRenameFilter.redirect([], 2, html = 'street')]
+        class Field(object): WwFilters = redirect_html_to_address('street')
     class Zip(object):
-        class Field(object): WwFilters = [Base.RedirectRenameFilter.redirect([], 2, html = 'zip')]
+        class Field(object): WwFilters = redirect_html_to_address('zip')
     class City(object):
-        class Field(object): WwFilters = [Base.RedirectRenameFilter.redirect([], 2, html = 'city')]
+        class Field(object): WwFilters = redirect_html_to_address('city')
     class Region(object):
         WwFilters = LocationInput.Municipality.WwFilters + [
             Base.RedirectRenameFilter.redirect([], 1,
