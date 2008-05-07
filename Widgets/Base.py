@@ -194,7 +194,12 @@ class Object(object):
         """Lookup order: self, self.ww_model"""
         if self.ww_model is None:
             raise AttributeError(self, name)
-        return getattr(self.ww_model, name)
+        try:
+            return getattr(self.ww_model, name)
+        except:
+            e = sys.exc_info()[1]
+            e.args = (self,) + e.args
+            raise type(e), e, sys.exc_info()[2]
         
     def __hasattr__(self, name):
         """Lookup order: self, self.ww_model"""
@@ -299,37 +304,97 @@ class RenameFilter(Filter):
     rename = classmethod(rename)
 
 
+class RetrieveFromFilter(Filter):
+    do_retrieve = []
+    dont_retrieve = ['retrieve_from']
+    retrieve_from = "some_attribute"
+
+    def get_retrieve_object(self, name):
+        obj = self.ww_filter
+        if (    name not in self.dont_retrieve
+            and (not self.do_retrieve
+                 or name in self.do_retrieve)):
+            obj = getattr(obj, self.retrieve_from)
+        return obj
+
+    def __getattr__(self, name):
+        return getattr(self.get_retrieve_object(name), name)
+
+    def __setattr__(self, name, value):
+        setattr(self.get_retrieve_object(name), name, value)
+
+    def retrieve_from(cls, retrieve_from, **arg):
+        return cls.derive(retrieve_from = retrieve_from, **arg)
+    retrieve_from = classmethod(retrieve_from)
+
 class RedirectFilter(Filter):
     """This filter redirects model lookups and changes to (the
     ww_filter of) another widget."""
 
-    redirect = []
-    """If redirect is empty everything except the names in
+    do_redirect = []
+    """If do_redirect is empty everything except the names in
     dont_redirect is redirected. If non-empty, only the named
     attributes are redirected."""
     dont_redirect = ['redirect_path']
-    
+
+    redirect_path = None
+    """The widget path relative to this widget to redirect to."""
+
+    redirect_attribute = None
+    """Name-value pair (tuple) to search for among parent widgets to
+    get the widget to redirect to. If set to a non tuple, search for
+    ('__name__', value)."""
+
+    def get_redirected_widget(self, name):
+        parent = self
+        if (    name not in self.dont_redirect
+            and (not self.do_redirect
+                 or name in self.do_redirect)):
+            parent = self.object
+            if self.redirect_path is not None:
+                parent = parent + self.redirect_path
+            if self.redirect_attribute is not None:
+                name = '__name__'
+                value = self.redirect_attribute
+                if isinstance(value, (tuple, list)):
+                    name, value = value
+                parent = parent.get_widgets_by_attribute(
+                    attribute = name,
+                    direction_down = False
+                    )[value]
+        return parent
+
     def __getattr__(self, name):
-        if name in self.dont_redirect or self.redirect and name not in self.redirect:
-            parent = self
-        else:
-            parent = self.object + self.redirect_path
-        return getattr(parent.ww_filter, name)
+        return getattr(self.get_redirected_widget(name).ww_filter, name)
 
     def __setattr__(self, name, value):
-        if name in self.dont_redirect or self.redirect and name not in self.redirect:
-            parent = self
-        else:
-            parent = self.object + self.redirect_path
-        setattr(parent.ww_filter, name, value)
+        setattr(self.get_redirected_widget(name).ww_filter, name, value)
 
-    def redirect(cls, *relative_path_arg, **rest):
+    def redirect(cls, *redirect_args, **rest):
         """Derive a subclass given a path, a set of levels (upwards)
-        and optionally values for redirect and dont_redirect (see doc.
-        for the class attributes for more info on how they work)."""
-        return cls.derive(redirect_path = Webwidgets.Utils.RelativePath(*relative_path_arg),
-                          **rest)
+        and optionally values for do_redirect, dont_redirect and
+        redirect_attribute (see doc. for the class attributes for more
+        info on how they work)."""
+        relative_path = []
+        if len(redirect_args) > 2:
+            relative_path = redirect_args[:2]
+            rest['redirect_attribute'] = redirect_args[2:]
+        elif (len(redirect_args) == 2
+              and isinstance(redirect_args[0], (list, tuple))
+              and isinstance(redirect_args[1], int)):
+            relative_path = redirect_args
+        elif redirect_args:
+            rest['redirect_attribute'] = redirect_args
 
+        if 'redirect_attribute' in rest and len(rest['redirect_attribute']) == 1:
+            rest['redirect_attribute'] = rest['redirect_attribute'][0]
+
+        if relative_path:
+            rest['redirect_path'] = Webwidgets.Utils.RelativePath(*relative_path)
+
+        return cls.derive(**rest)
+    redirect = classmethod(redirect)
+    
 class RedirectRenameFilter(Filter):
     """This is the combination of the RedirectFilter and RenameFilter
     - it first renames attributes and the redirects them to another widget."""
@@ -339,13 +404,16 @@ class RedirectRenameFilter(Filter):
     class RedirectFilter(RedirectFilter):
         dont_redirect = ["name_map"] + RedirectFilter.dont_redirect
 
-    def redirect(cls, *relative_path_arg, **name_map):
+    def redirect(cls, *redirect_args, **name_map):
         """Derive a subclass given a path, a set of levels (upwards)
-        and a name map (name = name_to_rewrite_to)."""
+        and a name map (name = name_to_rewrite_to). A value to search
+        for among parent widgets (and attribute name) can optionally
+        be supplied. See RenameFilter for more details."""
+
         return cls.derive(
             RenameFilter = cls.RenameFilter.derive(name_map = name_map),
-            RedirectFilter = cls.RedirectFilter.derive(redirect_path = Webwidgets.Utils.RelativePath(*relative_path_arg),
-                                                       redirect = name_map.values()))
+            RedirectFilter = cls.RedirectFilter.redirect(do_redirect = name_map.values(),
+                                                         *redirect_args))
     redirect = classmethod(redirect)
 
 class MapValueFilter(Filter):
@@ -1192,7 +1260,7 @@ class Input(Widget):
         """@return: Whether the widget is allowing input from the user
         or not.
         """
-        return self.active and self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, path)
+        return self.ww_filter.active and self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, path)
 
 class ValueInput(Input):
     """Base class for all input widgets that holds some kind of value
