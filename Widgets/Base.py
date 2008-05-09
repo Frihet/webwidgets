@@ -1,6 +1,6 @@
 #! /bin/env python
-# -*- coding: UTF-8 -*-
-# vim: set fileencoding=UTF-8 :
+# -*- coding: utf-8 -*-
+# vim: set fileencoding=utf-8 :
 
 # Webwidgets web developement framework
 # Copyright (C) 2006 uAnywhere, Egil Moeller <redhog@redhog.org>
@@ -1218,6 +1218,9 @@ class Input(Widget):
     """Displayed by a corresponding L{Label} if set to non-None.
     See that widget for further information."""
 
+    error_messages = {}
+    """Message displayed if validation fails."""
+
     __input_subordinates__ = ()
     """Other input widgets that should handle simultaneous input from
     the user _before_ this widget."""    
@@ -1261,6 +1264,23 @@ class Input(Widget):
         or not.
         """
         return self.ww_filter.active and self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, path)
+
+    def validate(self):
+        """Run all validate_ methods on ourselves stopping on the
+        first returning False setting error to name (validate_name)
+        from error_messages.
+
+        @return: True if all validations returned True, else False.
+        """
+        for method in dir(self):
+            if not method.startswith('validate_'):
+                continue
+
+            if not getattr(self, method)():
+                validate_name = method[len('validate_'):]
+                self.error = self.error_messages.get(validate_name, validate_name)
+                return False
+        return True
 
 class ValueInput(Input):
     """Base class for all input widgets that holds some kind of value
