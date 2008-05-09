@@ -1,5 +1,5 @@
-# -*- coding: UTF-8 -*-
-# vim: set fileencoding=UTF-8 :
+# -*- coding: utf-8 -*-
+# vim: set fileencoding=utf-8 :
 
 # RowsComposite provides a common model and filter engine for
 # row-based widgets (tables, lists, etc)
@@ -216,7 +216,13 @@ class RowsComposite(Base.CachingComposite):
         dependent_columns = {}
         """{column_name: [column_name]}"""
         dont_merge_widgets = True
-        dont_merge_columns = ()
+        
+        merge_columns = ()
+        """List of columns to merge if merge_columns_exclude = False or
+        include if False"""
+        merge_columns_exclude = False
+        """If False, merge columns not in merge_columns, if True merge all
+        but the ones in merge_columns"""
 
         non_memory_storage = False
         dont_sort_in_place = False
@@ -312,7 +318,7 @@ class RowsComposite(Base.CachingComposite):
 
         level = 0
         for column in total_column_order:
-            if not (    column not in self.dont_merge_columns
+            if not (    self.merge_columns_exclude == (column not in self.merge_columns)
                     # This is just because virtual columns might be
                     # added at a higher level than the one where this
                     # is called.

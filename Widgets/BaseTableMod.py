@@ -1,6 +1,6 @@
 #! /bin/env python
-# -*- coding: UTF-8 -*-
-# vim: set fileencoding=UTF-8 :
+# -*- coding: utf-8 -*-
+# vim: set fileencoding=utf-8 :
 
 # Group By Ordering List for the Webwidgets web developement framework
 # A list widget with intuitive grouping and sorting controls
@@ -132,7 +132,7 @@ class TableRowsToTreeFilter(Base.Filter):
             else:
                 for column in total_column_order:
                     col_value = getattr(row.ww_filter, column)
-                    merge = (    column not in self.dont_merge_columns
+                    merge = (    self.merge_columns_exclude == (column not in self.merge_columns)
                              and node['children']
                              and 'value' in node['children'][-1]
                              and (   not self.dont_merge_widgets

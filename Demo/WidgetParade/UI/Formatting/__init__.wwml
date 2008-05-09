@@ -45,7 +45,8 @@
      </w:odict>
     </w:odict>
     <w:dict id="group_functions" new="New" delete="Delete all" />
-    <w:list id="dont_merge_columns"><w:string id="bar">bar</w:string></w:list>
+    <w:list id="merge_columns"><w:string id="bar">bar</w:string></w:list>
+    <w:false id="merge_columns_exclude" />
     <w:list id="rows">
      <w:dict id="row1" foo="47" bar="11" fie="56" x="X" y="Y" z="Z" />
      <w:dict id="row2" foo="47" bar="11" fie="56" x="X" y="Y" z="Z" />
