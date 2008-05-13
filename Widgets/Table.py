@@ -364,10 +364,11 @@ class BaseTable(Base.Composite):
                                                     'column_last_level_%s' % last_level]
             value = self.draw_child(self.path + ["cell_%s_%s" % (row.row, column_name)],
                                     value, output_options, True)
+	
         return '<td rowspan="%(rowspan)s" colspan="%(colspan)s" class="%(class)s">%(content)s</td>' % {
             'rowspan': rowspan,
             'colspan': colspan,
-            'class': ' '.join(html_class),
+            'class': ' '.join(html_class) + " " + Webwidgets.Utils.classes_to_css_classes([cls + '._.column.' + column_name for cls in self.ww_classes]),
             'content': value}
 
     def get_mangled_rows(self, output_options):
@@ -433,6 +434,8 @@ class BaseTable(Base.Composite):
                }
 
     def draw_printable_version(self, output_options):
+        output_options = dict(output_options)
+        output_options['output_classes'] = "printable_version"
         return self.session.windows[self.win_id].draw(output_options,
                                                      body = self.draw(output_options),
                                                      title = self.title)

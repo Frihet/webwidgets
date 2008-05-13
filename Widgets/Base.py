@@ -961,12 +961,24 @@ class HtmlWindow(Window, StaticComposite):
         result['Content-Type'] = 'text/html; charset=%(encoding)s' % {'encoding': self.encoding}
         return result
 
+    class HtmlClass(object):
+        def __get__(self, instance, owner):
+            ww_classes = owner.ww_classes
+            if instance:
+                ww_classes = instance.ww_classes
+            res = Webwidgets.Utils.classes_to_css_classes(ww_classes)
+            if instance and hasattr(instance, 'output_options') and 'output_classes' in instance.output_options:
+                res += ' ' + instance.output_options['output_classes']
+            return res
+    html_class = HtmlClass()
+
     def draw(self, output_options, body = None, title = None):
         Window.draw(self, output_options)
         self.head_content = Webwidgets.Utils.OrderedDict()
 
         self.register_styles(output_options)
 
+        self.output_options = output_options
         result = self.draw_children(
             output_options,
             invisible_as_empty = True,
