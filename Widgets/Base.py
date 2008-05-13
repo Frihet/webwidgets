@@ -358,10 +358,7 @@ class RedirectFilter(Filter):
                 value = self.redirect_attribute
                 if isinstance(value, (tuple, list)):
                     name, value = value
-                parent = parent.get_widgets_by_attribute(
-                    attribute = name,
-                    direction_down = False
-                    )[value]
+                parent = parent.get_ansestor_by_attribute(name, value)
         return parent
 
     def __getattr__(self, name):
@@ -579,6 +576,21 @@ class Widget(Object):
             res = res[name]
         return res
 
+    def get_ansestor_by_attribute(self, *arg):
+        value = arg[-1]
+        name = "__name__"
+        if len(arg) == 2:
+            name = arg[0]
+
+        if hasattr(self, name) and getattr(self, name) == value:
+            return self
+        elif self.parent and hasattr(self.parent, 'get_ansestor_by_attribute'):
+            try:
+                return self.parent.get_ansestor_by_attribute(*arg)
+            except KeyError:
+                pass
+        raise KeyError("No such parent", self, name, value)
+
     def get_widgets_by_attribute(self, attribute = '__name__', direction_down = True, recursive = True):
 	res = {}
 	if not direction_down and self.parent:
@@ -586,6 +598,7 @@ class Widget(Object):
                 res.update(self.parent.get_widgets_by_attribute(attribute, direction_down, recursive))
         if hasattr(self, attribute):
             res[getattr(self, attribute)] = self
+        # FIXME: What is the purpose of this??!?
         elif hasattr(type(self), attribute):
             res[getattr(type(self), attribute)] = self
         return res

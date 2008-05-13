@@ -180,6 +180,14 @@ class WeakValueOrderedDict(OrderedDict):
             except KeyError:
                 pass    
 
+#### fixme ####
+# name = "Generalize RelativePath to some kind of WidgetSelector"
+# description = """Generalize RelativePath to some kind of
+# WidgetSelector set of classes that can select widgets based on
+# several different criterias, esp. doing what
+# get_widgets_by_attribute is doing."""
+#### end ####
+
 class RelativePath(object):
     """RelativePath is a representation of a path that relative one
     point in a tree identifies some other point. It consists of a
