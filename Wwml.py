@@ -1,6 +1,6 @@
 #! /bin/env python
-# -*- coding: UTF-8 -*-
-# vim: set fileencoding=UTF-8 :
+# -*- coding: utf-8 -*-
+# vim: set fileencoding=utf-8 :
 
 # Webwidgets web developement framework
 # Copyright (C) 2007 FreeCode AS, Egil Moeller <egil.moeller@freecode.no>
@@ -38,6 +38,7 @@ import os.path, sys, types, time, datetime
 
 debug_loader = False
 debug_subclass = False
+debug_childmerge = False
 
 def generate_parts_for_node(module, node, using = [], class_path = [], bind_context = [], html_context = []):
     attributes = []
@@ -100,6 +101,46 @@ def generate_parts_for_node(module, node, using = [], class_path = [], bind_cont
                 attributes.extend(child_attributes)
     return attributes, ''.join(texts)
 
+def merge_child_widgets(module, widget, binding, attributes={}, name=None, indent = ''):
+    name = name or '%sMerged' % (widget.__name__, )
+
+    if debug_childmerge:
+        print indent, "MERGING %s as %s with %s IN %s..." % (name, str(widget), str(binding), str(module))
+
+    merged_members = {}
+
+    if binding:
+        for child_name in dir(binding):
+            widget_member = getattr(widget, child_name, None)
+            binding_member = getattr(binding, child_name, None)
+            if ( widget_member is not binding_member
+                 and not child_name.startswith('__')
+                 and child_name not in attributes
+                 and isinstance(widget_member, type)
+                 and issubclass(widget_member, Webwidgets.Widget)
+                 and isinstance(binding_member, type)):
+                merged_members[child_name] = merge_child_widgets(module, widget_member, binding_member, indent = indent + '    ')
+            elif getattr(binding_member, "ww_bind", None) == "require":
+                raise Exception("No child widget for binding %s in widget %s" % (binding_member, widget))
+
+    # Override merged members with attributes from WWML
+    merged_members.update(attributes)
+
+    if binding:
+        base_cls = (binding, widget)
+    else:
+        base_cls = (widget, )
+
+    try:
+        return types.TypeType(name, base_cls, merged_members)
+
+    except TypeError, e:
+        raise TypeError("Unable to instantiate widget in %s: %s(%s): %s" % (
+                module, name,
+                ', '.join([str(cls) for cls in base_cls]),
+                str(e)))
+
+
 def generate_value(type_name, text, attributes, module, using, class_path, bind_context):
     if type_name == 'false': value = False
     elif type_name == 'true': value = True
@@ -133,12 +174,10 @@ def generate_value(type_name, text, attributes, module, using, class_path, bind_
             print "WWML:     using: %s" % ' '.join(using)
         node_value = Utils.load_class(type_name, using, module = module)
         if isinstance(node_value, types.TypeType) and issubclass(node_value, Webwidgets.Widgets.Base.Widget):
-            base_cls = ()
             try:
-                base_cls += (Utils.load_class(callback_name, using, module = module),)
+                binding = Utils.load_class(callback_name, using, module = module)
             except ImportError, e:
-                pass
-            base_cls += (node_value,)
+                binding = None
 
             if 'html' not in attributes and hasattr(node_value, '__wwml_html_override__') and node_value.__wwml_html_override__:
                 attributes['html'] = text
@@ -159,16 +198,12 @@ def generate_value(type_name, text, attributes, module, using, class_path, bind_
             if '__wwml_html_override__' not in attributes:
                 attributes['__wwml_html_override__'] = False
             attributes['__module__'] = module.__name__
-            try:
-                value = types.TypeType(str(attributes['classid']),
-                                       base_cls,
-                                       attributes)
-            except TypeError, e:
-                raise TypeError("Unable to instantiate widget in %s: %s(%s): %s" % (
-                    module,
-                    str(attributes['classid']),
-                    ', '.join([str(cls) for cls in base_cls]),
-                    str(e)))
+
+            # Create class
+            if debug_childmerge:
+                print "MERGE TOP LEVEL", node_value, binding, module
+            value = merge_child_widgets(module, node_value, binding, attributes, str(attributes['classid']))
+
         elif hasattr(node_value, '__iter__'):
             value = Utils.OrderedDict(attributes)
             if 'classid' in value: del value['classid']
