@@ -35,6 +35,7 @@ import Webwidgets.Utils.Threads
 import traceback
 
 debug_exceptions = True
+log_exceptions = True
                         
 class Type(type):
     ww_class_order_nr = Webwidgets.Utils.Threads.Counter()
@@ -629,7 +630,14 @@ class Widget(Object):
         Do not ever let exceptions propagate so that they kill of the
         whole page!
         """
-        if debug_exceptions: traceback.print_exc()
+        if debug_exceptions:
+            import pdb
+            # Uggly hack around a bug in pdb (it apparently depends on
+            # and old sys-API)
+            sys.last_traceback = sys.exc_info()[2]
+            pdb.pm()
+        elif log_exceptions:
+             traceback.print_exc()
         import WebUtils.HTMLForException
         self.system_errors.append(
             (sys.exc_info()[1],
