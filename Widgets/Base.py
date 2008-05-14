@@ -34,7 +34,7 @@ import Webwidgets.Utils.FileHandling
 import Webwidgets.Utils.Threads
 import traceback
 
-debug_exceptions = True
+debug_exceptions = False
 log_exceptions = True
                         
 class Type(type):
