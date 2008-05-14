@@ -26,6 +26,7 @@ class LogIn(object):
     user_info = None
     debug_log_in = False
     debug_errors = False
+    is_login_widget = True
 
     def __init__(self, session, win_id, **attrs):
         Webwidgets.Html.__init__(self, session, win_id, **attrs)
@@ -34,18 +35,19 @@ class LogIn(object):
     class LogIn(object):
         def selected(self, path, value):
             fields = self.get_widgets_by_attribute('field_name')
+            login_widget = self.get_ansestor_by_attribute("is_login_widget", True)
 
-            if self.parent.debug_log_in: print "Log in attempt:", fields['username'].value, fields['password'].value
+            if login_widget.debug_log_in: print "Log in attempt:", fields['username'].value, fields['password'].value
 
             try:
-                self.parent.user_info = self.parent.authenticate(
+                login_widget.user_info = login_widget.authenticate(
                     fields['username'].value,
                     fields['password'].value)
             except Exception, e:
-                if self.parent.debug_errors: traceback.print_exc()
+                if login_widget.debug_errors: traceback.print_exc()
                 fields['username'].error = unicode(e)
             else:
-                if self.parent.debug_log_in: print "User logged in:", self.parent.user_info
+                if login_widget.debug_log_in: print "User logged in:", login_widget.user_info
                 
     def authenticate(self, username, password):
         raise Exception("You must override the authenticate() method of this widget!")
