@@ -36,7 +36,11 @@ import traceback
 
 debug_exceptions = False
 log_exceptions = True
-                        
+
+class NoOldValue(object):
+    """This class is used as a marker to signify that there was no old
+    attribute set when doing setattr"""
+
 class Type(type):
     ww_class_order_nr = Webwidgets.Utils.Threads.Counter()
 
@@ -153,6 +157,16 @@ class Object(object):
         for filter_class in reversed(ww_filter_classes):
             ww_filter = self.get_filter(filter_class)(ww_filter = ww_filter, object = object)
         self.__dict__[name] = ww_filter
+        self.__dict__["object"] = object
+
+    def is_first_filter(self):
+	if not hasattr(self, 'object'):
+            # We haven't set anything up in __init__ yet, so pretend
+            # we're not first (we can't really know yet either way) so
+            # that no notifications are thrown anywhere random...
+            return False
+        return self.object.ww_filter is self
+    is_first_filter = property(is_first_filter)
 
     def print_filter_class_stack(cls, ww_filter_classes = None, indent = ''):
         if ww_filter_classes is None: ww_filter_classes = cls.WwFilters
@@ -211,7 +225,7 @@ class Object(object):
         return (   self_has_name
                 or model_has_name)
 
-    def __setattr__(self, name, value):
+    def _setattr_dispatch(self, name, value):
         """Lookup order: self, self.ww_model"""
         model_has_name = (   self.ww_model is not None
                           and hasattr(self.ww_model, name))
@@ -222,6 +236,24 @@ class Object(object):
             object.__setattr__(self, name, value)
         else:
             setattr(self.ww_model, name, value)
+        
+    def __setattr__(self, name, value):
+        """Lookup order: self, self.ww_model"""
+        old_value = getattr(self, name, NoOldValue )
+
+        self._setattr_dispatch(name, value)
+
+        if value != old_value and self.is_first_filter:
+            self.object.notify('%s_changed' % name, value)
+
+    def notify(self, message, *args, **kw):
+        """See L{notify_kw}."""
+        self.notify_kw(message, args, kw)
+
+    def notify_kw(self, message, args = (), kw = {}, path = None):
+        """To handle notifications for a kind of Object, override this
+        method in the subclass to do something usefull."""
+        pass
 
     def __unicode__(self):
         return object.__repr__(self)
@@ -264,25 +296,28 @@ class Model(Object):
     pass
 
 class Filter(Object):
+    # These getattr/hasattr/setattr are very similar to the ones of
+    # Object, except they work on self.ww_filter instead of on
+    # self.ww_model...
     def __getattr__(self, name):
         """Lookup order: self, self.ww_filter"""
         return getattr(self.ww_filter, name)
     
     def __hasattr__(self, name):
         """Lookup order: self, self.ww_filter"""
+        ww_filter_has_name = hasattr(self.ww_filter, name)
         self_has_name = (   name in self.__dict__
                          or hasattr(type(self), name))
-        ww_filter_has_name = hasattr(self.ww_filter, name)
         return (   self_has_name
                 or ww_filter_has_name)
 
-    def __setattr__(self, name, value):
+    def _setattr_dispatch(self, name, value):
         """Lookup order: self, self.ww_filter"""
+        ww_filter_has_name = hasattr(self.ww_filter, name)
         self_has_name = (   name in self.__dict__
                          or hasattr(type(self), name))
-        ww_filter_has_name = hasattr(self.ww_filter, name)
-        if (  self_has_name
-            or not ww_filter_has_name):
+        if (  not ww_filter_has_name
+            or self_has_name):
             object.__setattr__(self, name, value)
         else:
             setattr(self.ww_filter, name, value)
@@ -610,10 +645,6 @@ class Widget(Object):
             raise Webwidgets.Constants.NotASubwidgetException('%s: Not a subwidget path %s' % (str(self), path,))
         return path[len(widget_path) + 1:]
 
-    def notify(self, message, *args, **kw):
-        """See L{notify_kw}."""
-        self.notify_kw(message, args, kw)
-
     def notify_kw(self, message, args = (), kw = {}, path = None):
         """Enques a message (method name and arguments) for the
         widget. Please see the documentation for
@@ -847,11 +878,6 @@ class Widget(Object):
 
     def __add__(self, other):
         return self.get_widget_by_path(other)
-
-    def __setattr__(self, name, value):
-        if not hasattr(self, name) or value is not getattr(self, name):
-            Object.__setattr__(self, name, value)
-            self.notify('%s_changed' % name, value)
 
 class Text(Widget):
     """This widget is a simple string output widget.

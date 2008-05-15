@@ -22,6 +22,9 @@
 import Webwidgets
 import UI
 
+Webwidgets.Widgets.Base.debug_exceptions = True
+Webwidgets.Widgets.Base.log_exceptions = False
+
 class index(Webwidgets.Program):
     class Session(Webwidgets.Program.Session):
         def new_window(self, win_id):
