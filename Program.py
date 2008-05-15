@@ -145,6 +145,11 @@ class Program(WebKit.Page.Page):
             protocol = "http"
             if req._environ['SERVER_PORT'] != '80':
                 port = ':' + req._environ['SERVER_PORT']
+        
+        # This is due to difference between running with apache+mod_webkit and only webware appserver
+        if ':' in req._environ['HTTP_HOST']:
+            port = ''
+
         return protocol + '://' + req._environ['HTTP_HOST'] + port + adapter
 
     def request_base(self):
