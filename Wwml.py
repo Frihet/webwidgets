@@ -40,14 +40,75 @@ debug_loader = False
 debug_subclass = False
 debug_childmerge = False
 
+xml_namespace_wwml = 'http://freecode.no/xml/namespaces/wwml-1.0'
+xml_namespace_html = 'http://www.w3.org/TR/REC-html40'
+
+def preprocess_node(module, node, using = [], class_path = [], bind_context = [], html_context = []):
+    # The following pre-processing transforms
+    #
+    #     <w:Foo id="Bar">
+    #      <w:Foo.Bar.Fie.Naja id="Bar.Fie.Naja" />
+    #     </w:Foo>
+    #
+    # into
+    #
+    #     <w:Foo id="Bar">
+    #      <w:Foo.Bar id="Bar">
+    #       <w:Foo.Bar.Fie.Naja id="Fie.Naja" />
+    #      </w:Foo.Bar>
+    #     </w:Foo>
+    #
+    # Note that this only happens one step at a time, as the child
+    # nodes (of the Bar node in the example above), whill be mangled
+    # the same way too in a later call to generate_parts_for_node.
+    
+    sub_children = Utils.OrderedDict()
+
+    doc = node.ownerDocument
+    
+    for pos in xrange(len(node.childNodes) - 1, -1, -1):
+        child = node.childNodes[pos]
+        if child.nodeType != doc.ELEMENT_NODE or child.namespaceURI != xml_namespace_wwml: continue
+        id_type = ['classid', 'id'][child.hasAttribute('id')]
+        if not child.hasAttribute(id_type): continue
+        node_id_attr = child.attributes[id_type]
+        node_id = node_id_attr.value
+        if '.' not in node_id: continue
+
+        top, rest = node_id.split('.', 1)
+        if top not in sub_children:
+            sub_children[top] = []
+
+        child.setAttribute(id_type, rest)
+        
+        sub_children[top].append(child)
+        del node.childNodes[pos]
+
+    for child in node.childNodes:
+        if child.nodeType != doc.ELEMENT_NODE or child.namespaceURI != xml_namespace_wwml: continue
+        node_id = child.attributes.get('id', child.attributes.get('classid', None))
+        if node_id is None: continue
+        node_id = node_id.value
+        if node_id in sub_children:
+            child.childNodes.extend(sub_children[node_id])
+            del sub_children[node_id]
+
+    for name, children in sub_children.iteritems():
+        container = doc.createElement(node.tagName + '.' + name)
+        container.namespaceURI = node.namespaceURI
+        container.setAttribute('id', name)
+        container.childNodes.extend(children)
+        node.childNodes.append(container)
+
 def generate_parts_for_node(module, node, using = [], class_path = [], bind_context = [], html_context = []):
     attributes = []
     texts = []
+    preprocess_node(module, node, using, class_path, bind_context, html_context)
     for child in node.childNodes:
         if child.nodeType == node.TEXT_NODE:
             texts.append(child.data)
         elif child.nodeType == node.ELEMENT_NODE:
-            if child.namespaceURI == 'http://freecode.no/xml/namespaces/wwml-1.0':
+            if child.namespaceURI == xml_namespace_wwml:
                 if child.localName == 'variable':
                      texts.append("%(" + child.attributes.get('id').value + ")s")
                 elif child.localName == 'pre':
@@ -66,7 +127,7 @@ def generate_parts_for_node(module, node, using = [], class_path = [], bind_cont
                         #else:
                         #    print "NOT A SUBCLASS:", id
                     attributes.append((classid, value))
-            elif child.namespaceURI == 'http://www.w3.org/TR/REC-html40':
+            elif child.namespaceURI == xml_namespace_html:
                 child_attributes_values = dict(child.attributes.items())
                 child_attributes, child_texts = generate_parts_for_node(
                     module,
@@ -295,7 +356,7 @@ def generate_widgets_from_file(modulename, filename, file, path = None, bind_con
     try:
         root_node = xml.dom.minidom.parse(file)
         dom_node = root_node.getElementsByTagNameNS(
-            'http://freecode.no/xml/namespaces/wwml-1.0', 'wwml')[0]
+            xml_namespace_wwml, 'wwml')[0]
         return generate_value_for_node(
             module,
             dom_node,
