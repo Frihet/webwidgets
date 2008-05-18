@@ -239,12 +239,13 @@ class Object(object):
         
     def __setattr__(self, name, value):
         """Lookup order: self, self.ww_model"""
-        old_value = getattr(self, name, NoOldValue )
+        old_value = getattr(self, name, NoOldValue)
 
-        self._setattr_dispatch(name, value)
+        if value is not old_value:
+            self._setattr_dispatch(name, value)
 
-        if value != old_value and self.is_first_filter:
-            self.object.notify('%s_changed' % name, value)
+            if value != old_value and self.is_first_filter:
+                self.object.notify('%s_changed' % name, value)
 
     def notify(self, message, *args, **kw):
         """See L{notify_kw}."""
@@ -536,7 +537,6 @@ class Widget(Object):
     parent = None
     name = 'anonymous'
 
-
     system_errors = []
 
     def __init__(self, session, win_id, **attrs):
@@ -561,10 +561,16 @@ class Widget(Object):
         @param attrs: Any attributes to set for the widget.
         
         """
-        
-        self.session = session
-        self.win_id = win_id
-        self.system_errors = []
+
+        # We update __dict__ not to have to bother with __setattr__
+        # and notifications.
+        # Set name and parent here as an optimization...
+        self.__dict__.update({
+            'session': session,
+            'win_id': win_id,
+            'system_errors': [],
+            'name': 'anonymous',
+            'parent': None})
         Object.__init__(self, **attrs)
 
     class HtmlId(object):
