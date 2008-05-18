@@ -32,8 +32,8 @@ import types, xml.sax.saxutils, os.path, cgi, re, sys, weakref
 import Webwidgets.Utils, Webwidgets.Utils.Gettext, Webwidgets.Constants
 import Webwidgets.Utils.FileHandling
 import Webwidgets.Utils.Threads
-import traceback
-
+import traceback, WebUtils.HTMLForException, pdb
+        
 debug_exceptions = False
 log_exceptions = True
 
@@ -336,7 +336,9 @@ class RenameFilter(Filter):
         setattr(self.ww_filter, name, value)
 
     def rename(cls, **name_map):
-        return cls.derive(name_map = name_map)
+        return cls.derive(name="RenameFilter(%s)" % (', '.join(['%s=%s' % (orig, new)
+                                                                for (orig, new) in name_map.iteritems()]),),
+                          name_map = name_map)
     rename = classmethod(rename)
 
 
@@ -360,7 +362,10 @@ class RetrieveFromFilter(Filter):
         setattr(self.get_retrieve_object(name), name, value)
 
     def retrieve_from(cls, retrieve_from, **arg):
-        return cls.derive(retrieve_from = retrieve_from, **arg)
+        return cls.derive(name="RetrieveFromFilter(%s, %s)" % (retrieve_from,
+                                                               ', '.join(['%s=%s' % (key, value)
+                                                                          for (key, value) in arg.iteritems()]),),
+                          retrieve_from = retrieve_from, **arg)
     retrieve_from = classmethod(retrieve_from)
 
 class RedirectFilter(Filter):
@@ -425,7 +430,10 @@ class RedirectFilter(Filter):
         if relative_path:
             rest['redirect_path'] = Webwidgets.Utils.RelativePath(*relative_path)
 
-        return cls.derive(**rest)
+        return cls.derive(
+            name="RedirectFilter(%s)" % (', '.join(['%s=%s' % (key, value)
+                                                    for (key, value) in rest.iteritems()]),),
+            **rest)
     redirect = classmethod(redirect)
     
 class RedirectRenameFilter(Filter):
@@ -444,6 +452,9 @@ class RedirectRenameFilter(Filter):
         be supplied. See RenameFilter for more details."""
 
         return cls.derive(
+            name = "RedirectRenameFilter(%s, %s)" % (', '.join([str(item) for item in redirect_args]),
+                                                     ', '.join(['%s=%s' % (key, value)
+                                                                for (key, value) in name_map.iteritems()])),
             RenameFilter = cls.RenameFilter.derive(name_map = name_map),
             RedirectFilter = cls.RedirectFilter.redirect(do_redirect = name_map.values(),
                                                          *redirect_args))
@@ -472,7 +483,8 @@ class MapValueFilter(Filter):
                            in value_maps.iteritems()])
 
                                    
-        return cls.derive(value_maps = value_maps)
+        return cls.derive(name = "MapValueFilter(%s)" % (', '.join(value_maps.keys()),),
+                          value_maps = value_maps)
     map_values = classmethod(map_values)
 
 class MangleFilter(Filter):
@@ -661,15 +673,13 @@ class Widget(Object):
         Do not ever let exceptions propagate so that they kill of the
         whole page!
         """
+        if log_exceptions:
+             traceback.print_exc()
         if debug_exceptions:
-            import pdb
             # Uggly hack around a bug in pdb (it apparently depends on
             # and old sys-API)
             sys.last_traceback = sys.exc_info()[2]
             pdb.pm()
-        elif log_exceptions:
-             traceback.print_exc()
-        import WebUtils.HTMLForException
         self.system_errors.append(
             (sys.exc_info()[1],
              WebUtils.HTMLForException.HTMLForException()))
