@@ -595,6 +595,13 @@ class Widget(Object):
             return instance.draw_html_attributes(instance.path)            
     html_attributes = HtmlAttributes()
 
+    #### fixme ####
+    # name = "Iterative definition of self.path"
+    # type = "optimization"
+    # description = "The path attribute could be set by the parent
+    # widget and be a normal variable instead of a property. This
+    # would probably speed things up a bit."
+    #### end ####
     class Path(object):
         def __get__(self, instance, owner):
             """Returns the path of the widget within the widget tree."""
