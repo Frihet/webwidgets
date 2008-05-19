@@ -1,6 +1,6 @@
 #! /bin/env python
-# -*- coding: UTF-8 -*-
-# vim: set fileencoding=UTF-8 :
+# -*- coding: utf-8 -*-
+# vim: set fileencoding=utf-8 :
 
 # Webwidgets web developement framework
 # Copyright © 2007 FreeCode AS, Claes Nästén <claes.nasten@freecode.no>
@@ -70,15 +70,15 @@ class DateInput(Input.StringInput, Base.DirectoryServer):
     def field_input(self, path, string_value):
         try:
             if string_value == '':
-                self.value = None
+                self.ww_filter.value = None
             else:
-                self.value = datetime.datetime(*(time.strptime(string_value, str(self.format))[0:6]))
+                self.ww_filter.value = datetime.datetime(*(time.strptime(string_value, str(self.format))[0:6]))
         except ValueError:
-            self.value = None
+            self.ww_filter.value = None
             self.error = 'Invalid date format, expected %s got %s' \
                 % (self.format, string_value)
                 
     def field_output(self, path):
-        if self.value is None:
+        if self.ww_filter.value is None:
             return ['']
-        return [self.value.strftime(str(self.format))]
+        return [self.ww_filter.value.strftime(str(self.format))]
