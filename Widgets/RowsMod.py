@@ -218,7 +218,7 @@ class RowsComposite(Base.CachingComposite):
         dont_merge_widgets = True
         
         merge_columns = ()
-        """List of columns to merge if merge_columns_exclude = False or
+        """List of columns to merge if merge_columns_exclude = True or
         include if False"""
         merge_columns_exclude = False
         """If False, merge columns not in merge_columns, if True merge all
@@ -318,7 +318,7 @@ class RowsComposite(Base.CachingComposite):
 
         level = 0
         for column in total_column_order:
-            if not (    self.merge_columns_exclude == (column not in self.merge_columns)
+            if not (    self.merge_columns_exclude == (column in self.merge_columns)
                     # This is just because virtual columns might be
                     # added at a higher level than the one where this
                     # is called.

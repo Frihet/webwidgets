@@ -132,7 +132,7 @@ class TableRowsToTreeFilter(Base.Filter):
             else:
                 for column in total_column_order:
                     col_value = getattr(row.ww_filter, column)
-                    merge = (    self.merge_columns_exclude == (column not in self.merge_columns)
+                    merge = (    self.merge_columns_exclude == (column in self.merge_columns)
                              and node['children']
                              and 'value' in node['children'][-1]
                              and (   not self.dont_merge_widgets
