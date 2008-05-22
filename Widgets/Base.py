@@ -1219,7 +1219,7 @@ class StaticComposite(DictComposite):
         for name in dir(self):
             if name in ('__class__', 'parent', 'window'): continue
             value = getattr(self, name)
-            if isinstance(value, type) and issubclass(value, Widget) and not value.ww_explicit_load:
+            if isinstance(value, type) and issubclass(value, Widget) and not value.__dict__.get('ww_explicit_load', False):
                 child_classes.append((name, value))
                 
         child_classes.sort(lambda x, y: cmp(x[1].ww_class_order_nr, y[1].ww_class_order_nr))
