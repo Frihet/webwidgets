@@ -227,13 +227,14 @@ class TabbedView(SwitchingView, Base.ActionInput):
         return """
                <div %(html_attributes)s>
                 %(tabs)s
-                <div class="page">
+                <div class="%(html_classes_for_page)s">
                  %(page)s
                 </div>
                </div>
                """ % {'html_attributes': self.draw_html_attributes(self.path),
                       'page': super(TabbedView, self).draw(output_options),
                       'tabs': self.draw_tabs(output_options),
+                      'html_classes_for_page': Webwidgets.Utils.classes_to_css_classes(self.ww_classes, ['page'])
                       }
 
 class Hide(Base.StaticComposite):
