@@ -833,6 +833,14 @@ class Widget(Object):
         return self.session.calculate_url(output_options,
                                          arguments)
         
+    def validate(self):
+        """Validate the state of the widget and any child widgets
+        created by previous user input. Returns True or False. Widgets
+        that return False shoudl try to display some kind of error
+        message to the user detailing the reasons for the validation
+        failure."""
+        return True
+    
     def get_languages(self, output_options):
         def parse_languages(languages):
             return tuple([item.split(';')[0]
@@ -1129,6 +1137,14 @@ class Composite(Widget):
     def get_child(self, name):
         """@return: a child widget."""
         raise NotImplemented
+
+    def validate(self):
+        """Validate all child widgets. Returns True only if all of
+        them returns True."""
+        res = True
+        for name, child in self.get_children():
+            res = res and child.validate()
+        return res
 
     def get_widgets_by_attribute(self, attribute = '__name__', direction_down = True, recursive = True):
         fields = Widget.get_widgets_by_attribute(self, attribute, direction_down, recursive)
