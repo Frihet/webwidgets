@@ -180,11 +180,21 @@ class TabbedView(SwitchingView, Base.ActionInput):
 
     def field_input(self, path, string_value):
         if string_value != '':
-            self.page = Webwidgets.Utils.id_to_path(string_value, True)
+            page = Webwidgets.Utils.id_to_path(string_value, True)
+            if self.get_active_page(page):
+                self.page = page
 
     def field_output(self, path):
         return [unicode(Webwidgets.Utils.path_to_id(self.page, True))]
 
+    def get_active_page(self, page):
+        return getattr(self + page, 'active', True) and self.session.AccessManager(
+            Webwidgets.Constants.REARRANGE, self.win_id, self.path + page)
+        
+    def get_active_page_preview(self, page):
+        return getattr(self + page, 'active', True) and self.session.AccessManager(
+            Webwidgets.Constants.REARRANGE, self.win_id, self.path + page)
+        
     def get_active(self, path):
         """@return: Whether the widget is allowing input from the user
         or not.
@@ -198,7 +208,9 @@ class TabbedView(SwitchingView, Base.ActionInput):
         def draw_tabs(pages, path = []):
             tabs = []
             for name, (page, title, children) in pages.iteritems():
-                info = {'disabled': ['', 'disabled="disabled"'][page == self.page or not active],
+                info = {'disabled': ['', 'disabled="disabled"'][   page == self.page
+                                                                or not active
+                                                                or not self.get_active_page_preview(page)],
                         'name': widget_id,
                         'html_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'page'] + page),
                         'page': Webwidgets.Utils.path_to_id(page),
