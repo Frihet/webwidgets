@@ -29,7 +29,7 @@
   <w:Html id="FileList" title="File list">
    <table>
     <tr><th>Type</th><th>Filename</th><th>Dates</th><th>Actions</th></tr>
-    <w:List id="Listing">
+    <w:List classid="Listing">
 
      <w:Html classid="Entry">
       <tr>

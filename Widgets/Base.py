@@ -56,12 +56,12 @@ class Type(type):
         
 
         for key in members.keys():
-            if key.startswith('class_data_'):
-                members['ww_class_data'][key[len('class_data_'):]] = members[key]
+            if key.startswith('ww_class_data__'):
+                members['ww_class_data'][key[len('ww_class_data__'):]] = members[key]
                 del members[key]
 
         members['ww_classes'] = []
-        if not members['ww_class_data'].get('ww_class_data__no_classes_name', False):
+        if not members['ww_class_data'].get('no_classes_name', False):
             members['ww_classes'].append(None) # Our own one is set later on
         for base in bases:
             if hasattr(base, 'ww_classes'):
@@ -81,7 +81,7 @@ class Type(type):
         return set_class_path(type.__new__(cls, name, bases, members))
 
     def ww_update_classes(self):
-        if not self.ww_class_data.get('ww_class_data__no_classes_name', False):
+        if not self.ww_class_data.get('no_classes_name', False):
             self.ww_classes[0] = Webwidgets.Utils.class_full_name(self)
 
 class Object(object):
@@ -92,11 +92,11 @@ class Object(object):
     
     __metaclass__ = Type
 
-    ww_class_data__no_classes_name = False
+    ww_class_data__no_classes_name = True
     """Do not include the name of this particular class in L{ww_classes}
-    for subww_classes of this class (and for this class itself)."""
+    for subclasses of this class (and for this class itself)."""
 
-    ww_classes = ("Webwidgets.Widget",)
+    ww_classes = ("Webwidgets.Object",)
     """Read-only attribute containing a list of the names of all
     inherited ww_classes except ones with L{ww_class_data__no_classes_name} set to
     True. This is mainly usefull for automatic CSS class generation."""
@@ -1207,6 +1207,7 @@ class DictComposite(Composite):
         del self.children[name]
 
 class CachingComposite(DictComposite):
+    ww_class_data__no_classes_name = True
     ChildNodeDict = WeakChildNodeDict
     
 class StaticComposite(DictComposite):
@@ -1450,6 +1451,8 @@ class MultipleActionInput(ActionInput):
         return
 
 class DirectoryServer(Widget):
+    ww_class_data__no_classes_name = True
+
     class BaseDirectory(object):
         def __get__(self, instance, owner):
             filePath = sys.modules[owner.__module__].__file__
