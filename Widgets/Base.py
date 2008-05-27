@@ -737,22 +737,26 @@ class Widget(Object):
             for base in bases:
                 register_class_styles(base)
             if cls.__dict__.get('widget_style', None):
-                self.register_style_link(self.calculate_url({'widget_class': cls.__module__ + '.' + cls.__name__,
-                                                          'aspect': 'style'},
-                                                         {}))
+                self.register_style_link(self.calculate_url({'transaction': output_options['transaction'],
+                                                             'widget_class': cls.__module__ + '.' + cls.__name__,
+                                                             'aspect': 'style'},
+                                                            {}))
             if cls.__dict__.get('widget_script', None):
-                self.register_script_link(self.calculate_url({'widget_class': cls.__module__ + '.' + cls.__name__,
-                                                           'aspect': 'script'},
-                                                          {}))
+                self.register_script_link(self.calculate_url({'transaction': output_options['transaction'],
+                                                              'widget_class': cls.__module__ + '.' + cls.__name__,
+                                                              'aspect': 'script'},
+                                                             {}))
         register_class_styles(cls)
         if self.__dict__.get('widget_style', None):
-            self.register_style_link(self.calculate_url({'widget': Webwidgets.Utils.path_to_id(self.path),
-                                                      'aspect': 'style'},
-                                                     {}))
+            self.register_style_link(self.calculate_url({'transaction': output_options['transaction'],
+                                                         'widget': Webwidgets.Utils.path_to_id(self.path),
+                                                         'aspect': 'style'},
+                                                        {}))
         if self.__dict__.get('widget_script', None):
-            self.register_script_link(self.calculate_url({'widget': Webwidgets.Utils.path_to_id(self.path),
-                                                       'aspect': 'script'},
-                                                      {}))
+            self.register_script_link(self.calculate_url({'transaction': output_options['transaction'],
+                                                          'widget': Webwidgets.Utils.path_to_id(self.path),
+                                                          'aspect': 'script'},
+                                                         {}))
 
     def class_output_style(cls, session, arguments, output_options):
         return cls.widget_style
@@ -823,7 +827,7 @@ class Widget(Object):
     def calculate_url(self, output_options, arguments = None):
         output_options = dict(output_options)
         location, new_arguments = self.session.generate_arguments(
-            self.session.get_window(self.win_id))
+            self.session.get_window(self.win_id, output_options))
         if arguments is None:
             arguments = new_arguments
         if 'win_id' not in output_options:
@@ -855,7 +859,7 @@ class Widget(Object):
             if self.session.languages is not None:
                 return self.session.languages
             try:
-                return parse_languages(self.session.program.request().environ().get('HTTP_ACCEPT_LANGUAGE', 'en'))
+                return parse_languages(output_options['transaction'].request().environ().get('HTTP_ACCEPT_LANGUAGE', 'en'))
             except:
                 return 'en'
 
@@ -1559,8 +1563,8 @@ class HtmlWindow(Window, StaticComposite):
         if title is None: title = self.get_title(self.path)
         result['title'] = '<title>' + title + '</title>'
         result['doctype'] = self.doctype
-        result['ww_untranslated__uri'] = cgi.escape(self.session.program.request()._environ['REQUEST_URI'])
-        result['ww_untranslated__base'] = self.session.program.request_base()
+        result['ww_untranslated__uri'] = cgi.escape(output_options['transaction'].request()._environ['REQUEST_URI'])
+        result['ww_untranslated__base'] = self.session.program.request_base(output_options['transaction'])
 
         for (all1, name1, value1, all2, value2, name2) in self.findallvalues.findall(result['Body']):
             self.register_value('field_value' + '_' + (name1 or name2), (value1 or value2))

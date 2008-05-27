@@ -96,23 +96,32 @@ class Program(WebKit.Page.Page):
 #         traceback.print_stack()
 #         super(Program, self).sleep(transaction)
 
-    def writeHTML(self):
+    def _respond(self, transaction):
         """Main processing method, called by WebWare."""
 
+        try:
+            return self.handle_request(transaction)
+        except:
+            sys.last_traceback = sys.exc_info()[2]
+            pdb.pm()
+            raise
+        
+    def handle_request(self, transaction):
         type(self).request_nr += 1
 
-        session = self.session()
-        servlet = self.request().servletURI()
+        session = transaction.session()
+        request = transaction.request()
+        servlet = request.servletURI()
         if not session.hasValue(servlet):
             session[servlet] = self.Session(type(self))
         session[servlet].program = self
-        fn = session[servlet].handle_request
+        fn = lambda: session[servlet].handle_request(transaction)
 
         if self.profile:
             non_profiled_fn = fn
             def profile_fn():
                 profiler = hotshot.Profile("webwidgets.profile.request.%s" % type(self).request_nr)
-                profiler.addinfo('url', self.request_base() + self.request().extraURLPath() + '?' + self.request().queryString())
+                profiler.addinfo('url', self.request_base(transaction) + request.extraURLPath() + '?' + request.queryString())
                 try:
                     return profiler.runcall(non_profiled_fn)
                 finally:
@@ -127,11 +136,11 @@ class Program(WebKit.Page.Page):
 
         return fn()
 
-    def webware_base(self):
+    def webware_base(self, transaction):
         """@return: A URL to where the Webware installation is serving
         documents from."""
 
-        req = self.request()
+        req = transaction.request()
 
         # FIXME: Work-around empty adapter name
         adapter = req.adapterName()
@@ -152,9 +161,9 @@ class Program(WebKit.Page.Page):
 
         return protocol + '://' + req._environ['HTTP_HOST'] + port + adapter
 
-    def request_base(self):
+    def request_base(self, transaction):
         """@return: A URL to this Webwidgets application."""
-        return self.webware_base() + self.request().servletURI()
+        return self.webware_base(transaction) + transaction.request().servletURI()
 
     class Session(object):
         """The application programmer should subclass this class and
@@ -247,27 +256,32 @@ class Program(WebKit.Page.Page):
             def __str__(self):
                 return str(unicode(self))
 
-        def get_window(self, win_id):
+        def get_window(self, win_id, output_options):
             """Retrieves a window by its ID; either an existing window
             is returned, or a window created for the requested id."""
             if win_id in self.windows:
                 return self.windows[win_id]
             else:
-                try:
-                    window = self.new_window(win_id)
-                    if window is not None:
-                        self.windows[win_id] = window
-                        # Redraw the window once, so that all input fields
-                        # have generated their window.fields and
-                        # window.arguments entries so that we can do
-                        # proper input handling directly and don't
-                        # have to wait for the next reload. This is
-                        # especially important for arguments as they can
-                        # be bookmarked.
-                        window.draw({})
-                    return window
-                except Constants.OutputGiven:
-                    return None
+                window = self.new_window(win_id)
+                if window is not None:
+                    self.windows[win_id] = window
+                    # Redraw the window once, so that all input fields
+                    # have generated their window.fields and
+                    # window.arguments entries so that we can do
+                    # proper input handling directly and don't
+                    # have to wait for the next reload. This is
+                    # especially important for arguments as they can
+                    # be bookmarked.
+                    #### fixme ####
+                    # name = """Transaction should probably be
+                    # some kind of dummy object, not out current
+                    # real one..."""
+                    #### end ####
+                    try:
+                        window.draw({'transaction': output_options['transaction']})
+                    except Constants.OutputGiven:
+                        return None
+                return window
 
         def process_arguments(self, window, location, arguments):
             """Process arguments (query parameters) and location and
@@ -363,15 +377,15 @@ class Program(WebKit.Page.Page):
 
             return changed_fields
 
-        def handle_request(self):
+        def handle_request(self, transaction):
             """Main processing method, called by WebWare. This method will
             notify widgets of changed input values, process any pending
             notifications and then redraw all widgets (unless output has
             already been set by a notification, e.g. with
             L{redirect}, in which case that output is sent to the
             client instaed)."""
-            req = self.program.request()
-            response = self.program.response()
+            req = transaction.request()
+            response = transaction.response()
 
             self.output = None
 
@@ -391,6 +405,7 @@ class Program(WebKit.Page.Page):
                 base_options['widget'] = location[0][1:]
                 location = location[1:]
             base_options['location'] = location
+            base_options['transaction'] = transaction
 
             arguments = decode_fields(normalize_fields(cgi.parse_qs(req.queryString())))
             arguments, output_options = filter_arguments(arguments)
@@ -407,37 +422,37 @@ class Program(WebKit.Page.Page):
             output_fn = getattr(obj, fn_name)
 
             try:
-                self.output = output_fn(self, arguments, output_options)
-            except Constants.OutputGiven:
-                pass
+                output = output_fn(self, arguments, output_options)
+            except Constants.OutputGiven, e:
+                output = e.output
 
-            if self.output is None:
-                self.output = {'Status': '404 No such window',
+            if output is None:
+                output = {'Status': '404 No such window',
                                'Content-Type': 'text/plain',
                                Constants.OUTPUT: '404 No such window'}
 
-            if 'Status' not in self.output:
-                self.output['Status'] = '200 OK'
+            if 'Status' not in output:
+                output['Status'] = '200 OK'
 
-            for key, value in self.output.iteritems():
+            for key, value in output.iteritems():
                 if key not in (Constants.OUTPUT, Constants.FINAL_OUTPUT):
                     response.setHeader(key.encode('utf-8'), value.encode('utf-8'))
             content = None
-            if Constants.OUTPUT in self.output:
-                content = self.output[Constants.OUTPUT]
-            if Constants.FINAL_OUTPUT in self.output:
-                content = self.output[Constants.FINAL_OUTPUT]
+            if Constants.OUTPUT in output:
+                content = output[Constants.OUTPUT]
+            if Constants.FINAL_OUTPUT in output:
+                content = output[Constants.FINAL_OUTPUT]
             if isinstance(content, types.StringType):
-                self.program.write(content)
+                response.write(content)
             elif content is not None:
                 for item in content:
-                    self.program.write(item)
+                    response.write(item)
 
         def class_output(cls, session, arguments, output_options):
-            req = session.program.request()
-            response = session.program.response()
+            req = output_options['transaction'].request()
+            response = output_options['transaction'].response()
 
-            window = session.get_window(output_options['win_id'])
+            window = session.get_window(output_options['win_id'], output_options)
             if window:
                 # Collect changed attributes in order, then run field_input
                 changed = session.process_arguments(window, output_options['location'], arguments)
@@ -498,7 +513,7 @@ class Program(WebKit.Page.Page):
             self.Notification(*arg, **kw).process()
 
         def calculate_url(self, output_options, arguments):
-            path = [self.program.request_base()]
+            path = [self.program.request_base(output_options['transaction'])]
 
             if (   (    'widget_class' in output_options
                     and output_options['widget_class'] != Constants.DEFAULT_WIDGET_CLASS)
@@ -525,7 +540,7 @@ class Program(WebKit.Page.Page):
                 for value_part in value:
                     url_arg_list.append((key, value_part))
             for key, value in output_options.iteritems():
-                if key not in ('widget_class', 'win_id', 'widget', 'location', 'internal'):
+                if key not in ('transaction', 'widget_class', 'win_id', 'widget', 'location', 'internal'):
                     if not isinstance(value, list): value = [value]
                     for value_part in value:
                         url_arg_list.append(('_' + key, value_part))
@@ -537,12 +552,11 @@ class Program(WebKit.Page.Page):
             return '/'.join(path) + args
 
         def redirect(self, output_options, arguments):
-            self.output = {'Status': '303 See Other',
-                           'Location': self.calculate_url(output_options,
-                                                         arguments)}
-            raise Constants.OutputGiven
+            raise Constants.OutputGiven({'Status': '303 See Other',
+                                         'Location': self.calculate_url(output_options,
+                                                                        arguments)})
 
         def new_window(self, win_id):
             """You should override this to return a Window instance in
             your own application."""
-            raise Constants.OutputGiven
+            raise Constants.OutputGiven()
