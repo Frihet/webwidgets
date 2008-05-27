@@ -71,16 +71,10 @@ menu_bar_menu.setOnClickHandler(onButtonClick);
                       'tabs': '\n'.join(draw_tabs(self.draw_page_titles(output_options)))}
  
     def draw(self, output_options):
-        self.register_style_link(self.calculate_url({'widget_class': 'Webwidgets.MainMenu',
-                                                  'location': ['css/dhtmlXMenu.css']},
-                                                 {}))
-        self.register_script_link(self.calculate_url({'widget_class': 'Webwidgets.MainMenu',
-                                                   'location': ['js', 'dhtmlXProtobar.js']},
-                                                  {}))
-        self.register_script_link(self.calculate_url({'widget_class': 'Webwidgets.MainMenu',
-                                                   'location': ['js', 'dhtmlXMenuBar.js']},
-                                                  {}))
-        self.register_script_link(self.calculate_url({'widget_class': 'Webwidgets.MainMenu',
-                                                   'location': ['js', 'dhtmlXCommon.js']},
-                                                  {}))
+        def calculate_url(location):
+            return self.calculate_url_to_directory_server('Webwidgets.MainMenu', location, output_options)
+        self.register_style_link(calculate_url(['css', 'dhtmlXMenu.css']))
+        self.register_script_link(calculate_url(['js', 'dhtmlXProtobar.js']))
+        self.register_script_link(calculate_url(['js', 'dhtmlXMenuBar.js']))
+        self.register_script_link(calculate_url(['js', 'dhtmlXCommon.js']))
         return Composite.TabbedView.draw(self, output_options)

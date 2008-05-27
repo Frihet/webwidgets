@@ -40,6 +40,11 @@
   <w:Municipality id="Region" />
  </w:Fieldgroup>
 
+ <w:Div id="DialogContainer">
+  <w:List id="Dialogs" />
+  <w:Html id="Body" />
+ </w:Div>
+
  <w:HtmlWindow
   id="ApplicationWindow"
   title="Application window">
