@@ -730,33 +730,29 @@ class Widget(Object):
         return ''
 
     def register_styles(self, output_options):
-        cls = type(self)
+        def calculate_url(**args):
+            args['transaction'] = output_options['transaction']
+            return self.calculate_url(args, {})
+        def calculate_class_url(cls, aspect):
+            return calculate_url(widget_class = cls.__module__ + '.' + cls.__name__,
+                                 aspect = aspect)
+        def calculate_widget_url(slef, aspect):
+            return calculate_url(widget = Webwidgets.Utils.path_to_id(self.path),
+                                 aspect = aspect)
         def register_class_styles(cls):
             bases = list(cls.__bases__)
             bases.reverse()
             for base in bases:
                 register_class_styles(base)
             if cls.__dict__.get('widget_style', None):
-                self.register_style_link(self.calculate_url({'transaction': output_options['transaction'],
-                                                             'widget_class': cls.__module__ + '.' + cls.__name__,
-                                                             'aspect': 'style'},
-                                                            {}))
+                self.register_style_link(calculate_class_url(cls, 'style'))
             if cls.__dict__.get('widget_script', None):
-                self.register_script_link(self.calculate_url({'transaction': output_options['transaction'],
-                                                              'widget_class': cls.__module__ + '.' + cls.__name__,
-                                                              'aspect': 'script'},
-                                                             {}))
-        register_class_styles(cls)
+                self.register_script_link(calculate_class_url(cls, 'script'))
+        register_class_styles(type(self))
         if self.__dict__.get('widget_style', None):
-            self.register_style_link(self.calculate_url({'transaction': output_options['transaction'],
-                                                         'widget': Webwidgets.Utils.path_to_id(self.path),
-                                                         'aspect': 'style'},
-                                                        {}))
+            self.register_style_link(calculate_widget_url(self, 'style'))
         if self.__dict__.get('widget_script', None):
-            self.register_script_link(self.calculate_url({'transaction': output_options['transaction'],
-                                                          'widget': Webwidgets.Utils.path_to_id(self.path),
-                                                          'aspect': 'script'},
-                                                         {}))
+            self.register_script_link(calculate_widget_url(self, 'script'))
 
     def class_output_style(cls, session, arguments, output_options):
         return cls.widget_style
@@ -1480,6 +1476,11 @@ class DirectoryServer(Widget):
             file.close()
     class_output = classmethod(class_output)
 
+    def calculate_url_to_directory_server(self, widget_class, location, output_options):
+        return self.calculate_url({'transaction': output_options['transaction'],
+                                   'widget_class': widget_class,
+                                   'location': location},
+                                  {})
 
 class Window(Widget):
     """Window is the main widget and should allways be the top-level
