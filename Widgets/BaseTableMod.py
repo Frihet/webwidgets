@@ -298,7 +298,8 @@ class BaseTable(RowsMod.RowsComposite, Base.DirectoryServer):
         return res
 
     def draw(self, output_options):
-        self.register_style_link(self.calculate_url({'widget_class': 'Webwidgets.BaseTable',
+        self.register_style_link(self.calculate_url({'transaction': output_options['transaction'],
+                                                     'widget_class': 'Webwidgets.BaseTable',
                                                      'location': ['Table.css']},
                                                     {}))
         reverse_dependent_columns = self.reverse_dependency(self.dependent_columns)
