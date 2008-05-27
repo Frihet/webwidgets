@@ -35,22 +35,17 @@ class DateInput(Input.StringInput, Base.DirectoryServer):
         """
         super(DateInput, self).draw(output_options)
 
-        self.register_style_link(self.calculate_url({'transaction': output_options['transaction'],
-                                                     'widget_class': 'Webwidgets.DateInput',
-                                                     'location': ['calendar-blue.css']},
-                                                    {}))
-        self.register_script_link(self.calculate_url({'transaction': output_options['transaction'],
-                                                      'widget_class': 'Webwidgets.DateInput',
-                                                      'location': ['calendar.js']},
-                                                     {}),
-                                  self.calculate_url({'transaction': output_options['transaction'],
-                                                      'widget_class': 'Webwidgets.DateInput',
-                                                      'location': ['lang', 'calendar-en.js']},
-                                                     {}),
-                                  self.calculate_url({'transaction': output_options['transaction'],
-                                                      'widget_class': 'Webwidgets.DateInput',
-                                                      'location': ['calendar-setup.js']},
-                                                     {}))
+        def calculate_url(location):
+            return self.calculate_url_to_directory_server(
+                'Webwidgets.DateInput',
+                location,
+                output_options)
+        
+        self.register_style_link(calculate_url(['calendar-blue.css']))
+        self.register_script_link(
+            calculate_url(['calendar.js']),
+            calculate_url(['lang', 'calendar-en.js']),
+            calculate_url(['calendar-setup.js']))
 
         return '''<input %(html_attributes)s name="%(name)s" value="%(value)s" autocomplete="off" %(disabled)s />
        <script type="text/javascript">
