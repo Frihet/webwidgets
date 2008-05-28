@@ -262,7 +262,7 @@ class Media(Base.Widget):
     
     def draw_inline_text__css(self, output_options):
         if self.get_option('merge'):
-            self.register_style_link(self.calculate_output_url(output_options))
+            Base.HtmlWindow.register_style_link(self, self.calculate_output_url(output_options))
             return self.draw_inline_default(output_options)
         else:
             return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>""" % {
@@ -276,7 +276,7 @@ class Media(Base.Widget):
 
     def draw_inline_application__x_javascript(self, output_options):
         if self.get_option('merge'):
-            self.register_script_link(self.calculate_output_url(output_options))
+            Base.HtmlWindow.register_script_link(self, self.calculate_output_url(output_options))
             return self.draw_inline_default(output_options)
         else:
             return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>""" % {

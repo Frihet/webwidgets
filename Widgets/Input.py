@@ -196,7 +196,7 @@ class UpdateButton(Base.SingleActionInput):
                 'id': Webwidgets.Utils.path_to_id(self.path),
                 'title': self._("Update", output_options),
                 'disabled': ['', 'disabled="disabled"'][not self.get_active(self.path)]}
-        self.register_script('update_button: %(id)s' % info,
+        Base.HtmlWindow.register_script(self, 'update_button: %(id)s' % info,
                             """
                             webwidgets_add_event_handler(window, 'load',
                              'webwidgets_update_button: %(id)s',

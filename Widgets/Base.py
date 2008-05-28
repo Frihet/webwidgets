@@ -773,29 +773,6 @@ class Widget(Object):
             return self.title
         return Webwidgets.Utils.path_to_id(path)
 
-    # The following register-methods are just backwards-compatible
-    # wrappers for the classmethods on HtmlWindow.
-    def register_head_content(self, content_name, content):
-        HtmlWindow.register_head_content(self, content, content_name)
-
-    def register_script_link(self, *uris):
-        HtmlWindow.register_script_link(self, *uris)
-        
-    def register_style_link(self, *uris):
-        HtmlWindow.register_style_link(self, *uris)
-
-    def register_script(self, name, script):
-        HtmlWindow.register_script(self, name, script)
-
-    def register_style(self, name, style):
-        HtmlWindow.register_style(self, name, style)
-        
-    def register_submit_action(self, path, event):
-        HtmlWindow.register_submit_action(self, path, event)
-
-    def register_value(self, name, value):
-        HtmlWindow.register_value(self, name, value)
-
     def calculate_url(self, output_options, arguments = None):
         output_options = dict(output_options)
         location, new_arguments = self.session.generate_arguments(

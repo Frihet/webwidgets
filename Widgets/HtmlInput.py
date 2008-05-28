@@ -33,11 +33,11 @@ class HtmlInput(Input.StringInput, Base.DirectoryServer):
         """
         Draw input widget.
         """
-        self.register_script_link(self.calculate_url({'widget_class': 'Webwidgets.HtmlInput',
+        Base.HtmlWindow.register_script_link(self, self.calculate_url({'widget_class': 'Webwidgets.HtmlInput',
                                                    'location': ['fckeditor.js']},
                                                   {}))
         widget_id = Webwidgets.Utils.path_to_id(self.path)
-        self.register_script('fckeditor: ' + widget_id,
+        Base.HtmlWindow.register_script(self, 'fckeditor: ' + widget_id,
                             """
 webwidgets_add_event_handler(
  window,

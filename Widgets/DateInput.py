@@ -41,8 +41,8 @@ class DateInput(Input.StringInput, Base.DirectoryServer):
                 location,
                 output_options)
         
-        self.register_style_link(calculate_url(['calendar-blue.css']))
-        self.register_script_link(
+        Base.HtmlWindow.register_style_link(self, calculate_url(['calendar-blue.css']))
+        Base.HtmlWindow.register_script_link(self, 
             calculate_url(['calendar.js']),
             calculate_url(['lang', 'calendar-en.js']),
             calculate_url(['calendar-setup.js']))

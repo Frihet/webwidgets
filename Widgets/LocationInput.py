@@ -95,7 +95,7 @@ class CountyInput(CountryInput):
     class Country(CountryInput.Country):
         class Field(CountryInput.Country.Field):
             def draw(self, output_options):
-                self.register_submit_action(self.path, 'change')
+                Base.HtmlWindow.register_submit_action(self, self.path, 'change')
                 return CountryInput.Country.Field.draw(self, output_options)
 
     class County(Webwidgets.Field):
@@ -116,7 +116,7 @@ class MunicipalityInput(CountyInput):
     class County(CountyInput.County):
         class Field(CountyInput.County.Field):
             def draw(self, output_options):
-                self.register_submit_action(self.path, 'change')
+                Base.HtmlWindow.register_submit_action(self, self.path, 'change')
                 return CountyInput.County.Field.draw(self, output_options)
 
     class Municipality(Webwidgets.Field):
