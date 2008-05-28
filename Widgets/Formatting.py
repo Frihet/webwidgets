@@ -46,6 +46,13 @@ class List(Base.StaticComposite):
         return pre + sep.join([attributes['frame'] % Webwidgets.Utils.subclass_dict(attributes, {'child': child})
                                for name, child in children.iteritems()]) + post
 
+class ReplacedList(List):
+    def draw(self, output_options):
+        Base.HtmlWindow.register_replaced_content(
+            self,
+            List.draw(self, output_options))
+        return ''
+
 class BulletList(List):
     pre = "<ul %(html_attributes)s>"
     sep = "\n"

@@ -745,14 +745,14 @@ class Widget(Object):
             for base in bases:
                 register_class_styles(base)
             if cls.__dict__.get('widget_style', None):
-                self.register_style_link(calculate_class_url(cls, 'style'))
+                HtmlWindow.register_style_link(self, calculate_class_url(cls, 'style'))
             if cls.__dict__.get('widget_script', None):
-                self.register_script_link(calculate_class_url(cls, 'script'))
+                HtmlWindow.register_script_link(self, calculate_class_url(cls, 'script'))
         register_class_styles(type(self))
         if self.__dict__.get('widget_style', None):
-            self.register_style_link(calculate_widget_url(self, 'style'))
+            HtmlWindow.register_style_link(self, calculate_widget_url(self, 'style'))
         if self.__dict__.get('widget_script', None):
-            self.register_script_link(calculate_widget_url(self, 'script'))
+            HtmlWindow.register_script_link(self, calculate_widget_url(self, 'script'))
 
     def class_output_style(cls, session, arguments, output_options):
         return cls.widget_style
@@ -773,52 +773,28 @@ class Widget(Object):
             return self.title
         return Webwidgets.Utils.path_to_id(path)
 
-    def register_head_content(self, content_name, content):        
-        self.session.windows[self.win_id].head_content[content_name] = content
+    # The following register-methods are just backwards-compatible
+    # wrappers for the classmethods on HtmlWindow.
+    def register_head_content(self, content_name, content):
+        HtmlWindow.register_head_content(self, content, content_name)
 
     def register_script_link(self, *uris):
-        content_name = 'script: ' + ' '.join(uris)
-        self.register_head_content(
-            content_name,
-            '\n'.join(["<script src='%s' type='text/javascript' ></script>" % (cgi.escape(uri),)
-                       for uri in uris]))
+        HtmlWindow.register_script_link(self, *uris)
         
     def register_style_link(self, *uris):
-        content_name = 'style: ' + ' '.join(uris)
-        self.register_head_content(
-            content_name,
-            '\n'.join(["<link href='%s' rel='stylesheet' type='text/css' />" % (cgi.escape(uri),)
-                       for uri in uris]))
+        HtmlWindow.register_style_link(self, *uris)
 
     def register_script(self, name, script):
-        self.register_head_content(
-            name,
-            "<script language='javascript' type='text/javascript'>%s</script>" % (script,))
+        HtmlWindow.register_script(self, name, script)
 
     def register_style(self, name, style):
-        self.register_head_content(
-            name,
-            "<style type='text/css'>%s</style>" % (style,))
-
+        HtmlWindow.register_style(self, name, style)
+        
     def register_submit_action(self, path, event):
-        info = {'id': Webwidgets.Utils.path_to_id(path),
-                'event': event}
-        self.register_script('submit_action: %(id)s: %(event)s' % info,
-                            """
-                            webwidgets_add_event_handler_once_loaded(
-                             '%(id)s',
-                             '%(event)s',
-                             'webwidgets_submit_action',
-                             function () {
-                              webwidgets_submit_button_iefix();
-                              document.getElementById('root-_-body-form').submit();
-                             });
-                            """ % info)
+        HtmlWindow.register_submit_action(self, path, event)
 
     def register_value(self, name, value):
-        self.register_head_content('value: ' + name,
-                                 """<script language="javascript" type='text/javascript'>webwidgets_values['%(name)s'] = '%(value)s';</script>""" % {'name': name,
-                                                                                                                              'value': value})
+        HtmlWindow.register_value(self, name, value)
 
     def calculate_url(self, output_options, arguments = None):
         output_options = dict(output_options)
@@ -1551,6 +1527,7 @@ class HtmlWindow(Window, StaticComposite):
     def draw(self, output_options, body = None, title = None):
         Window.draw(self, output_options)
         self.head_content = Webwidgets.Utils.OrderedDict()
+        self.replaced_content = Webwidgets.Utils.OrderedDict()
 
         self.register_styles(output_options)
 
@@ -1568,9 +1545,10 @@ class HtmlWindow(Window, StaticComposite):
         result['ww_untranslated__base'] = self.session.program.request_base(output_options['transaction'])
 
         for (all1, name1, value1, all2, value2, name2) in self.findallvalues.findall(result['Body']):
-            self.register_value('field_value' + '_' + (name1 or name2), (value1 or value2))
+            HtmlWindow.register_value(self, 'field_value' + '_' + (name1 or name2), (value1 or value2))
 
         result['ww_untranslated__head_content'] = '\n'.join(self.head_content.values())
+        result['ww_untranslated__replaced_content'] = '\n'.join(self.replaced_content.values())
         
         return ("""
 %(doctype)s
@@ -1583,7 +1561,75 @@ class HtmlWindow(Window, StaticComposite):
  </head>
  <body %(ww_untranslated__html_attributes)s>
   <form name="%(ww_untranslated__html_id)s" method='post' enctype='multipart/form-data' action='%(ww_untranslated__uri)s' id="%(ww_untranslated__html_id)s-_-body-form">
+   %(ww_untranslated__replaced_content)s
    %(Body)s
   </form>
  </body>
 </html>""" % result).encode(self.encoding)
+
+    def register_head_content(cls, widget, content, content_name):
+        content_name = content_name or Webwidgets.Utils.path_to_id(widget.path)
+        widget.session.windows[widget.win_id].head_content[content_name] = content
+    register_head_content = classmethod(register_head_content)
+   
+    def register_replaced_content(cls, widget, content, content_name = None):
+        content_name = content_name or Webwidgets.Utils.path_to_id(widget.path)
+        widget.session.windows[widget.win_id].replaced_content[content_name] = content
+    register_replaced_content = classmethod(register_replaced_content)
+
+    def register_script_link(cls, widget, *uris):
+        cls.register_head_content(
+            widget,
+            '\n'.join(["<script src='%s' type='text/javascript' ></script>" % (cgi.escape(uri),)
+                       for uri in uris]),
+            'script: ' + ' '.join(uris))
+    register_script_link = classmethod(register_script_link)
+        
+    def register_style_link(cls, widget, *uris):
+        cls.register_head_content(
+            widget,
+            '\n'.join(["<link href='%s' rel='stylesheet' type='text/css' />" % (cgi.escape(uri),)
+                       for uri in uris]),
+            'style: ' + ' '.join(uris))
+    register_style_link = classmethod(register_style_link)
+    
+    def register_script(cls, widget, name, script):
+        cls.register_head_content(
+            widget,
+            "<script language='javascript' type='text/javascript'>%s</script>" % (script,),
+            name)
+    register_script = classmethod(register_script)
+        
+    def register_style(cls, widget, name, style):
+        cls.register_head_content(
+            widget,
+            "<style type='text/css'>%s</style>" % (style,),
+            name)
+    register_style = classmethod(register_style)
+
+    def register_submit_action(cls, widget, path, event):
+        info = {'id': Webwidgets.Utils.path_to_id(path),
+                'event': event}
+        cls.register_script(
+            widget,
+            'submit_action: %(id)s: %(event)s' % info,
+            """
+            webwidgets_add_event_handler_once_loaded(
+             '%(id)s',
+             '%(event)s',
+             'webwidgets_submit_action',
+             function () {
+              webwidgets_submit_button_iefix();
+              document.getElementById('root-_-body-form').submit();
+             });
+            """ % info)
+    register_submit_action = classmethod(register_submit_action)
+
+    def register_value(cls, widget, name, value):
+        cls.register_head_content(
+            widget,
+            """<script language="javascript" type='text/javascript'>webwidgets_values['%(name)s'] = '%(value)s';</script>""" % {
+                'name': name,
+                'value': value},
+            'value: ' + name)
+    register_value = classmethod(register_value)
