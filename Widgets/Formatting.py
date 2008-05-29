@@ -160,6 +160,9 @@ class Media(Base.Widget):
                         'include_label':False},
              'image/png':{'inline':True},
              'image/jpeg':{'inline':True},
+             'image/pjpeg':{'inline':True},
+             'image/jpg':{'inline':True},
+             'image/pjpg':{'inline':True},
              'image/gif':{'inline':True},
              'text/css':{'inline':True, 'merge':False, 'invisible':False},
              'text/html':{'inline':True, 'merge':False, 'invisible':False}}
@@ -251,6 +254,9 @@ class Media(Base.Widget):
     
     draw_inline_image__png = draw_inline_image
     draw_inline_image__jpeg = draw_inline_image
+    draw_inline_image__pjpeg = draw_inline_image
+    draw_inline_image__jpg = draw_inline_image
+    draw_inline_image__pjpg = draw_inline_image
     draw_inline_image__gif = draw_inline_image
     
     def draw_inline_text__css(self, output_options):
