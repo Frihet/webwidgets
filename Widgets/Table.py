@@ -622,8 +622,9 @@ class Table(BaseTable, Base.ActionInput):
 """ % info)
 
     def draw_printable_link(self, config, output_options):
-        location = self.calculate_url({'widget': Webwidgets.Utils.path_to_id(self.path),
-                                      'printable_version': 'yes'})
+        location = self.calculate_url({'transaction': output_options['transaction'],
+                                       'widget': Webwidgets.Utils.path_to_id(self.path),
+                                       'printable_version': 'yes'})
         return (True, """<a class="printable" href="%(location)s">%(caption)s</a>""" % {
             'caption': self._(config['title'], output_options),
             'location': cgi.escape(location),

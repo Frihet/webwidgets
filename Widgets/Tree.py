@@ -278,7 +278,8 @@ class Tree(Base.ActionInput, Base.DirectoryServer):
         def get_picture(**params):
             #return '/junk/Tree.scripts/' + self.pict_pattern % params
             return self.calculate_url(
-                {'widget_class': 'Webwidgets.Tree',
+                {'transaction': output_options['transaction'],
+                 'widget_class': 'Webwidgets.Tree',
                  'location': [self.pict_pattern % params]},
                 {})
         

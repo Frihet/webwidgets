@@ -33,9 +33,10 @@ class HtmlInput(Input.StringInput, Base.DirectoryServer):
         """
         Draw input widget.
         """
-        self.register_script_link(self.calculate_url({'widget_class': 'Webwidgets.HtmlInput',
-                                                   'location': ['fckeditor.js']},
-                                                  {}))
+        self.register_script_link(self.calculate_url({'transaction': output_options['transaction'],
+                                                      'widget_class': 'Webwidgets.HtmlInput',
+                                                      'location': ['fckeditor.js']},
+                                                     {}))
         widget_id = Webwidgets.Utils.path_to_id(self.path)
         self.register_script('fckeditor: ' + widget_id,
                             """
@@ -50,5 +51,6 @@ webwidgets_add_event_handler(
    oFCKeditor.ReplaceTextarea() ;
   });
   """ % {'widget_id': widget_id,
-         'widget_url': self.calculate_url({'widget_class': 'Webwidgets.HtmlInput'}, {})})
+         'widget_url': self.calculate_url({'transaction': output_options['transaction'],
+                                           'widget_class': 'Webwidgets.HtmlInput'}, {})})
         return super(HtmlInput, self).draw(output_options)

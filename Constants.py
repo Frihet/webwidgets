@@ -34,7 +34,14 @@ DEFAULT_WIDGET = 'root'
 class OUTPUT(Singleton): pass
 class FINAL_OUTPUT(OUTPUT): pass
 
-class OutputGiven(Exception): pass        
+class OutputGiven(Exception):
+    """This exception can be thrown anywhere from within get_window(),
+    class_output(), output() or draw() (of any widget), and will
+    immediately abort the current page and replace it with whatever
+    content is supplied to the init function of this exception (same
+    format as what can be returned by output())."""
+    def __init__(self, output = None):
+        self.output = output
 
 class NotASubwidgetException(Exception): pass
 
