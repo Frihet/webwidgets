@@ -426,11 +426,9 @@ class FieldStorageInput(Base.ValueInput):
     original_value = value = None
 
     def field_input(self, path, string_value):
-        if self.value is None:
+        if self.value is None or hasattr(self.value, "fileId"):
             self.value = cgi.FieldStorage()
             self.value.filename = '%s file' % (self.mime_type,)
-        if hasattr(self.value, 'original'):
-            del self.value.original
         self.value.type = self.mime_type
         if self.value.file is None:
             self.value.file = self.value.make_file()

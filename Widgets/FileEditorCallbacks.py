@@ -117,6 +117,7 @@ class FileEditor(Webwidgets.Html, Webwidgets.ValueInput):
         class Action(object):
             def clicked(self, path):
                 value = self.parent['File'].value
+                self.parent['File'].value = None
                 editors = self.parent.parent['Editors']
                 if value is not None:
                     editor = mime_type_to_method(value.type)
