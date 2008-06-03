@@ -157,6 +157,10 @@ class SwitchingView(Tabset):
     old_page = None
     page = None
 
+    def __init__(self, session, win_id, *attrs):
+        super(SwitchingView, self).__init__(session, win_id, *attrs)
+        self.old_page = self.page
+
     def page_changed(self, path, page):
         """Notification that the user has changed page."""
         if path != self.path: return
