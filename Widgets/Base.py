@@ -637,17 +637,34 @@ class Widget(Object):
             res = res[name]
         return res
 
-    def get_ansestor_by_attribute(self, *arg):
-        value = arg[-1]
-        name = "__name__"
-        if len(arg) == 2:
-            name = arg[0]
+    def get_ansestor_by_attribute(self, *arg, **kw):
+        """get_ansestor_by_attribute(value)
+               name = "__name__"
+           get_ansestor_by_attribute(name, value)
 
-        if hasattr(self, name) and getattr(self, name) == value:
+           Keyword forms:
+           get_ansestor_by_attribute(name=name, value=value)
+           get_ansestor_by_attribute(value = value)
+               name = "__name__"
+           get_ansestor_by_attribute(name = name)
+               value = any value
+        """
+
+        if 'name' not in kw:
+            kw['name'] = "__name__"
+
+        if arg:
+            kw['value'] = arg[-1]
+            if len(arg) == 2:
+                kw['name'] = arg[0]
+
+        if (    hasattr(self, kw['name'])
+            and (   'value' not in kw
+                 or getattr(self, kw['name']) == kw['value'])):
             return self
         elif self.parent and hasattr(self.parent, 'get_ansestor_by_attribute'):
             try:
-                return self.parent.get_ansestor_by_attribute(*arg)
+                return self.parent.get_ansestor_by_attribute(**kw)
             except KeyError:
                 pass
         raise KeyError("No such parent", self, name, value)
