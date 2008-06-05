@@ -667,7 +667,7 @@ class Widget(Object):
                 return self.parent.get_ansestor_by_attribute(**kw)
             except KeyError:
                 pass
-        raise KeyError("No such parent", self, name, value)
+        raise KeyError("No such parent", self, kw)
 
     def get_widgets_by_attribute(self, attribute = '__name__', direction_down = True, recursive = True):
 	res = {}

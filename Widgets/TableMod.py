@@ -619,7 +619,7 @@ class EditableTable(Table):
             def field_input_edit_group_function(self, path, string_value):
                 if string_value == '': return
                 if path[0] == "new":
-                    self.pre_rows.append(self.DBModel(ww_is_new = True))
+                    self.pre_rows.append(self.object.ww_filter.create_new_row())
 
             def field_output_edit_group_function(self, path):
                 return []
