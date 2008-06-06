@@ -194,8 +194,6 @@ class RowsRowWrapperFilter(Base.Filter):
             ww_model = self.ww_filter.get_row_by_id(row_id[5:]))
     
 
-class RowsRowWidget(Base.CachingComposite): pass
-
 class RowsComposite(Base.CachingComposite):
     class WwModel(Base.Model):
         rows = []
@@ -251,7 +249,9 @@ class RowsComposite(Base.CachingComposite):
             non_memory_storage to True, you _must_ implement this method.
             """
             raise NotImplementedError("get_pages")
-    
+
+    class RowsRowWidget(Base.CachingComposite): pass
+
     class SourceFilters(Base.Filter):
         WwFilters = ["RowsSimpleModelFilter"]
         class RowsSimpleModelFilter(RowsSimpleModelFilter): pass
@@ -387,7 +387,7 @@ class RowsComposite(Base.CachingComposite):
     def child_for_row(self, row):
         row_id = self.ww_filter.get_row_id(row)
         if row_id not in self.children:
-            self.children[row_id] = RowsRowWidget(self.session, self.win_id, parent_row = row)
+            self.children[row_id] = self.RowsRowWidget(self.session, self.win_id, parent_row = row)
         return self.children[row_id]
 
     def draw_cell(self, row, column_name, value, output_options):
