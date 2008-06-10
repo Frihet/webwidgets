@@ -1,6 +1,6 @@
 #! /bin/env python
-# -*- coding: UTF-8 -*-
-# vim: set fileencoding=UTF-8 :
+# -*- coding: utf-8 -*-
+# vim: set fileencoding=utf-8 :
 
 # Webwidgets web developement framework
 # Copyright (C) 2006 uAnywhere, Egil Moeller <redhog@redhog.org>
@@ -107,9 +107,18 @@ class StaticDialog(InfoFrame):
 
         buttons = Buttons()
 
-class Dialog(StaticDialog):
+class Dialog(StaticDialog, Base.DirectoryServer):
     remove_on_close = False
-    
+
+    def draw(self, output_options):
+        Base.HtmlWindow.register_script_link(
+            self, 
+            self.calculate_url_to_directory_server(
+                'Webwidgets.Dialog',
+                ['Dialog','dialog_iefix.js'],
+                output_options))
+        return StaticDialog.draw(self, output_options)
+
     def close(self):
         if self.remove_on_close:
             del self.parent[self.name]
@@ -119,6 +128,7 @@ class Dialog(StaticDialog):
     def selected(self, path, value):
         if path != self.path: return
         self.close()
+
 
 class Tabset(Base.StaticComposite):
     def get_pages(self, path = []):
