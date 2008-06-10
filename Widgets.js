@@ -71,5 +71,6 @@ function webwidgets_iefix_load() {
    buttons[i].onclick = webwidgets_submit_button_iefix;
 }
 
-if (window.navigator.userAgent.indexOf ( "MSIE " ) > 0)
+if (window.navigator.userAgent.indexOf ( "MSIE " ) > 0){
  webwidgets_add_event_handler(window, 'load', 'webwidgets_iefix', webwidgets_iefix_load);
+}
