@@ -808,7 +808,30 @@ class Widget(Object):
         created by previous user input. Returns True or False. Widgets
         that return False shoudl try to display some kind of error
         message to the user detailing the reasons for the validation
-        failure."""
+        failure.
+
+        Run all validate_ methods on ourselves stopping on the
+        first returning False setting error to name (validate_name)
+        from error_messages.
+
+        @return: True if all validations returned True, else False.
+        """
+        validated = False
+        for method in dir(self):
+            if not method.startswith('validate_'):
+                continue
+            validated = True
+
+            if not getattr(self, method)():
+                validate_name = method[len('validate_'):]
+                self.error = self.error_messages.get(validate_name, validate_name)
+                return False
+
+        # Clear error message if validation routine was run
+        # successful, do not clear if there is no validation
+        if validated:
+            self.error = None
+
         return True
     
     def get_languages(self, output_options):
@@ -1111,7 +1134,7 @@ class Composite(Widget):
     def validate(self):
         """Validate all child widgets. Returns True only if all of
         them returns True."""
-        res = True
+        res = Widget.validate(self)
         for name, child in self.get_children():
             if hasattr(child, "validate"):
                 res = res and child.validate()
@@ -1322,23 +1345,6 @@ class Input(Widget):
         or not.
         """
         return self.ww_filter.active and self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, path)
-
-    def validate(self):
-        """Run all validate_ methods on ourselves stopping on the
-        first returning False setting error to name (validate_name)
-        from error_messages.
-
-        @return: True if all validations returned True, else False.
-        """
-        for method in dir(self):
-            if not method.startswith('validate_'):
-                continue
-
-            if not getattr(self, method)():
-                validate_name = method[len('validate_'):]
-                self.error = self.error_messages.get(validate_name, validate_name)
-                return False
-        return True
 
 class ValueInput(Input):
     """Base class for all input widgets that holds some kind of value
