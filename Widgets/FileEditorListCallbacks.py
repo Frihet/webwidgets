@@ -35,6 +35,12 @@ class Value(object):
             setattr(instance.file_editor.value, self.attribute, value)
 
 class FileEditorList(object):
+    #### fixme ####
+    # name = "FileEditorList does not use WwFilters"
+    # description = """If we had used WwFilters, value could have been
+    # redirected and further filtered. As it is now, you have to do
+    # some kind of load/save cycle around this widget."""
+    #### end ####
     def __init__(self, session, win_id, **attrs):
         self.__dict__['rows'] = []
         Webwidgets.Table.__init__(self, session, win_id, **attrs)
@@ -80,12 +86,13 @@ class FileEditorList(object):
             self.add_row()
             self.rows[-1]['file'].expanded = True
 
-    def function(self, path, function, row):
+    def function(self, path, function, row_id):
         if path != self.path: return
         if function == 'delete':
-            del self.rows[row]
+            self.rows.remove(self.get_row_by_id(row_id).ww_model)
         if function == 'edit':
-            self.rows[row]['file'].expanded = not self.rows[row]['file'].expanded
+            row = self.ww_filter.get_row_by_id(row_id)
+            row.file.expanded = not row.file.expanded
 
     class FileListValue(object):
         def __get__(self, instance, owner):
