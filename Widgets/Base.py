@@ -539,6 +539,10 @@ class Widget(Object):
 
     system_errors = []
 
+    error = None
+    """Displayed by a corresponding L{Label} if set to non-None.
+    See that widget for further information."""
+
     def __init__(self, session, win_id, **attrs):
         """Creates a new widget
         
@@ -810,9 +814,11 @@ class Widget(Object):
         message to the user detailing the reasons for the validation
         failure.
 
-        Run all validate_ methods on ourselves stopping on the
-        first returning False setting error to name (validate_name)
-        from error_messages.
+        Run all validate_ methods on ourselves stopping on the first
+        returning False, setting self.error to the value of the member
+        variable with the same suffix and the prefix invalid_, if such
+        a variable exists. If it does not, self.error is set to the
+        name of the method without the validate_ prefix.
 
         @return: True if all validations returned True, else False.
         """
@@ -824,7 +830,7 @@ class Widget(Object):
 
             if not getattr(self, method)():
                 validate_name = method[len('validate_'):]
-                self.error = self.error_messages.get(validate_name, validate_name)
+                self.error = getattr(self, 'invalid_' + validate_name, validate_name)
                 return False
 
         # Clear error message if validation routine was run
@@ -1294,13 +1300,6 @@ class Input(Widget):
     everything else. This is very intentional, as this is intended to
     be used to provide readable (and bookmarkable) URLs!
     """
-
-    error = None
-    """Displayed by a corresponding L{Label} if set to non-None.
-    See that widget for further information."""
-
-    error_messages = {}
-    """Message displayed if validation fails."""
 
     __input_subordinates__ = ()
     """Other input widgets that should handle simultaneous input from
