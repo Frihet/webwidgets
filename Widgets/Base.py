@@ -1136,8 +1136,8 @@ class Composite(Widget):
         them returns True."""
         res = Widget.validate(self)
         for name, child in self.get_children():
-            if hasattr(child, "validate"):
-                res = res and child.validate()
+            if hasattr(child, "validate"):                
+                res = child.validate() and res
         return res
 
     def get_widgets_by_attribute(self, attribute = '__name__', direction_down = True, recursive = True):
