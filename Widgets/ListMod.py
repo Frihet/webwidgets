@@ -23,7 +23,9 @@ import Base, RowsMod
 
 class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
     """Scrollable list of selectable items. The list can optionally
-    allow the user to select multiple items."""
+    allow the user to select multiple items. The currently selected
+    item(s) are stored in a list, regardless of if multiple items can
+    be shoosen or not."""
     
     original_value = []
 
@@ -33,6 +35,8 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
         value = []
 
         column_separator = ' '
+        """If multiple columns are to be displayed (see L{column}),
+        separate their contents within each row with this string."""
         
         multiple = True
         """Allow the user to select multiple items."""
@@ -43,6 +47,8 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
     WwFilters = RowsMod.RowsComposite.WwFilters + ["ValueFilters"]
 
     class ValueFilters(Base.Filter):
+        """This filter groups all filters that mangles the L{value} of
+        the widget, that is, the item selection."""
         WwFilters = []
 
     def draw_option(self, selected, value, description, output_options):
@@ -93,6 +99,10 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
         return [self.ww_filter.get_row_id_from_row_model(row) for row in self.ww_filter.value]
 
 class RowsSingleValueListInput(RowsListInput):
+    """Scrollable list of selectable items. Only one item can be
+    selected at a time."""
+
+    
     class WwModel(RowsListInput.WwModel):
         value = None
 
@@ -100,6 +110,9 @@ class RowsSingleValueListInput(RowsListInput):
         WwFilters = ["SingleValueFilter"] + RowsListInput.ValueFilters.WwFilters
 
         class SingleValueFilter(Base.Filter):
+            """This filter makes L{value} contain either the currently
+            selected list item (row), or C{None} if none is currently
+            selected."""
             multiple = False
 
             class Value(object):

@@ -65,6 +65,9 @@ def sort_to_order_by(sort, quote = "`"):
     return    
     
 class SelectionCell(BaseTableMod.SpecialCell):
+    """Draws a checkbox that lets the user add/remove the current row
+    from a list of selected rows."""
+    
     html_class = ['functions']
 
     def draw_selectbox(self, table, value, path, html_class, active, checked, output_options):
@@ -155,6 +158,9 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                      "TableFunctionColFilter"] + BaseTableMod.BaseTable.RowsFilters.WwFilters + ["TableSortFilter"]
 
         class SelectionColFilter(Base.Filter):
+            """This filter adds a C{selection_col} column with
+            selection checkboxes that the user can use to add/remove
+            the current row from the L{selection} list."""
             def mangle_row(self, row, output_options):
                 if 'printable_version' not in output_options:
                     setattr(row, "selection_col", SelectionCellInstance)
@@ -166,6 +172,9 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                         in self.ww_filter.get_rows(output_options = output_options, **kw)]
             
         class TableFunctionColFilter(Base.Filter):
+            """This filter adds columns with function buttons
+            according to L{functions} that can be used to let the user
+            perform operations on individual rows."""
             # left = Table
             # right = Table
             def mangle_row(self, row, output_options):
@@ -194,6 +203,10 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                     return self.ww_filter.get_columns(output_options, only_sortable)
 
         class TableSortFilter(Base.Filter):
+            """This filter prepends L{pre_sort} and appends
+            L{post_sort} to any sorting selected by the user,
+            effectively overriding his/her choice for certain columns,
+            and providing a default sorting order."""
             class Sort(object):
                 def __get__(self, instance, owner):
                     if instance is None: instance = owner
@@ -465,12 +478,19 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
 """ % info
 
 class ExpandableTable(Table):
+    """This widget allows rows to contain a "subtree row" in
+    L{ww_expansion} that is inserted below the row if
+    L{ww_is_expanded} is set on the row. It also adds an expand button
+    that allows the user to set/reset L{ww_is_expanded}.
+    """
+    
     class RowsFilters(Table.RowsFilters):
         WwFilters = ["TableExpandableFilter"] + Table.RowsFilters.WwFilters
 
         class TableExpandableFilter(Base.Filter):
-            # left = ExpandableTable
-            # right = Table
+            """This filter provides the functionality of L{ExpandableTable}."""
+            
+            # left = ExpandableTable right = Table
 
             # API used by Table
             def get_rows(self, **kw):
@@ -520,6 +540,16 @@ class ExpandableTable(Table):
                 raise Exception("Invalid row-id %s (should have started with 'child_' or 'parent_')" % row_id)
 
 class ExpansionTable(ExpandableTable):
+    """This widget allows any row to be "expanded" by inserting an
+    extra row containing an instance of the L{ExpansionViewer} widget
+    after the row if L{ww_is_expanded} is set on the row. It also adds
+    an expand button that allows the user to set/reset
+    L{ww_is_expanded}."""
+
+    class ExpansionViewer(Base.Widget):
+        """Override this member variable with any widget to display
+        beneath the rows of the table as expansion."""
+    
     class RowsRowModelWrapper(ExpandableTable.RowsRowModelWrapper):
         WwFilters = ["ExpansionFilter"] + ExpandableTable.RowsRowModelWrapper.WwFilters
 
@@ -535,6 +565,9 @@ class ExpansionTable(ExpandableTable):
                     parent_row = self.object)}
 
 class EditFunctionCell(BaseTableMod.FunctionCell):
+    """Draws a set of editing buttons for a row. The set of buttons
+    drawn depends on if L{is_editing} returns C{True} for the row."""
+    
     html_class = ['edit_function_col']
 
     input_path = ['edit']
@@ -570,6 +603,15 @@ class EditFunctionCell(BaseTableMod.FunctionCell):
 EditFunctionCellInstance = EditFunctionCell()
 
 class EditableTable(Table):
+    """This widget is a base class for tables that provides in-place
+    editing of individual rows. The semantics provided are
+
+    new-save
+    edit-save
+    edit-revert
+    delete = edit-delete == new-delete == new-revert
+    """
+    
     class WwModel(Table.WwModel):
         edit_operations = {'edit': True,
                            'revert': True,
@@ -582,12 +624,17 @@ class EditableTable(Table):
 
     class RowsRowModelWrapper(Table.RowsRowModelWrapper):
         WwFilters = ["EditingFilters"] + Table.RowsRowModelWrapper.WwFilters
-        class EditingFilters(Base.Filter): pass
+        class EditingFilters(Base.Filter):
+            """This filter groups filters managing input fields for
+            the row."""
+        
 
     class RowsFilters(Table.RowsFilters):
         WwFilters = ["TableEditableFilter"] + Table.RowsFilters.WwFilters
     
         class TableEditableFilter(Base.Filter):
+            """This filter provides a column called
+            L{edit_function_col} with the editing buttons."""
             def get_rows(self, **kw):
                 res = []
                 for row in self.ww_filter.get_rows(**kw):

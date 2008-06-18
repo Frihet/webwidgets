@@ -23,22 +23,26 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-A webwidgets application consists of a subclass of
-L{Webwidgets.Program.Program}, in a file named as the subclass, in a
-Webware context, and an interface defined using subww_classes of the
-various widgets from L{Webwidgets.Widgets}.
 
-Example application (in test.py):
+About
+=====
 
- >>> import Webwidgets
- ...
- >>> class MyWindow(Webwidgets.Window):
- ...    #some widgets goes here
- ... 
- >>> class test(Webwidgets.Program):
- ...    class Session(Webwidgets.Program.Session):
- ...        def new_window(self, win_id):
- ...            return MyWindow(self, win_id)
+    A webwidgets application consists of a subclass of
+    L{Webwidgets.Program.Program}, in a file named as the subclass, in
+    a Webware context, and an interface defined using subww_classes of
+    the various widgets from L{Webwidgets.Widgets}.
+
+    Example application (in test.py):
+
+     >>> import Webwidgets
+     ...
+     >>> class MyWindow(Webwidgets.Window):
+     ...    #some widgets goes here
+     ... 
+     >>> class test(Webwidgets.Program):
+     ...    class Session(Webwidgets.Program.Session):
+     ...        def new_window(self, win_id):
+     ...            return MyWindow(self, win_id)
 
 """
 

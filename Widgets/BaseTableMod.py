@@ -47,6 +47,9 @@ class SpecialCell(object):
         return ''
 
 class FunctionCell(SpecialCell):
+    """Draws a function button that when clicked operates on the
+    current row in some fashion."""
+    
     html_class = ['functions']
 
     def draw_function(self, table, row_id, value, path, html_class, title, active, output_options):
@@ -88,6 +91,9 @@ class FunctionCell(SpecialCell):
 FunctionCellInstance = FunctionCell()
 
 class ExpandCell(FunctionCell):
+    """Draws an expansion/collapse button that lets the user show/hide
+    a subtree under the current row."""
+    
     html_class = ['expand_col']
 
     input_path = ['expand']
@@ -157,6 +163,10 @@ class BaseTable(RowsMod.RowsComposite, Base.DirectoryServer):
     """
 
     class TreeFilters(Base.Filter):
+        """This filter groups filters that mangle the virtual tree of
+        rows (that has merged cells, according to the current sorting
+        order)."""
+        
         WwFilters = ["TableRowsToTreeFilter"]
         class TableRowsToTreeFilter(TableRowsToTreeFilter): pass
 

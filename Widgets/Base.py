@@ -130,11 +130,11 @@ class Object(object):
 
     def __init__(self, **attrs):
         """Creates a new object
-            raise AttributeError(self, name)
+        raise AttributeError(self, name)
 
         @param ww_filter: The next filter when building a filter
-                       tree/chain. None for the root node, next filter
-                       in chain otherwise.
+            tree/chain. None for the root node, next
+            filter in chain otherwise.
         @param attrs: Any attributes to set for the object.
         """
         if 'ww_model' in attrs and attrs['ww_model'] is None:
@@ -323,7 +323,12 @@ class Filter(Object):
         else:
             setattr(self.ww_filter, name, value)
 
-class RenameFilter(Filter):
+class StandardFilter(Filter):
+    """This class only groups all L{Filter} subclasses that provides
+    generic, reusable functionality (as opposed to widget-specific
+    filters)."""
+
+class RenameFilter(StandardFilter):
     """This filter renames one or more attributes using a dictionary
     mapping in the name_map attribute."""
     def __getattr__(self, name):
@@ -343,7 +348,7 @@ class RenameFilter(Filter):
     rename = classmethod(rename)
 
 
-class RetrieveFromFilter(Filter):
+class RetrieveFromFilter(StandardFilter):
     do_retrieve = []
     dont_retrieve = ['retrieve_from']
     retrieve_from = "some_attribute"
@@ -369,7 +374,7 @@ class RetrieveFromFilter(Filter):
                           retrieve_from = retrieve_from, **arg)
     retrieve_from = classmethod(retrieve_from)
 
-class RedirectFilter(Filter):
+class RedirectFilter(StandardFilter):
     """This filter redirects model lookups and changes to (the
     ww_filter of) another widget."""
 
@@ -437,7 +442,7 @@ class RedirectFilter(Filter):
             **rest)
     redirect = classmethod(redirect)
     
-class RedirectRenameFilter(Filter):
+class RedirectRenameFilter(StandardFilter):
     """This is the combination of the RedirectFilter and RenameFilter
     - it first renames attributes and the redirects them to another widget."""
     
@@ -461,8 +466,12 @@ class RedirectRenameFilter(Filter):
                                                          *redirect_args))
     redirect = classmethod(redirect)
 
-class MapValueFilter(Filter):
+class MapValueFilter(StandardFilter):
+    """Allows variable values to be mapped arbitrarily to other values."""
     value_maps = {}
+    """Dictionary with member variable names as keys, and two
+    dictionaries (one for each direction) for value mappings as
+    values."""
     
     def __getattr__(self, name):
         res = getattr(self.ww_filter, name)
@@ -488,7 +497,7 @@ class MapValueFilter(Filter):
                           value_maps = value_maps)
     map_values = classmethod(map_values)
 
-class MangleFilter(Filter):
+class MangleFilter(StandardFilter):
     """This is the most generic of the redirection/renaming filters.
     It allows the redirection/renaming to be done by arbitrary
     functions provided by the user."""
@@ -642,16 +651,22 @@ class Widget(Object):
         return res
 
     def get_ansestor_by_attribute(self, *arg, **kw):
-        """get_ansestor_by_attribute(value)
-               name = "__name__"
-           get_ansestor_by_attribute(name, value)
+        """
+        Searches for a ansestor widget with a certain member
+        variable, optionally set to a certain value.
 
-           Keyword forms:
-           get_ansestor_by_attribute(name=name, value=value)
-           get_ansestor_by_attribute(value = value)
-               name = "__name__"
-           get_ansestor_by_attribute(name = name)
-               value = any value
+        C{get_ansestor_by_attribute(value)}
+        C{get_ansestor_by_attribute(name, value)}
+        C{get_ansestor_by_attribute(name=SOMENAME, value=SOMEVALUE)}
+        C{get_ansestor_by_attribute(value=SOMEVALUE)}
+
+        @param name: The member variable name to search for. Defaults
+        to C{"__name__"}.
+
+        @param value: If set, only search for widgets that has the
+        variable set to this value.
+
+        @return: An ansestor widget to the current widget.
         """
 
         if 'name' not in kw:
@@ -1207,6 +1222,9 @@ class DictComposite(Composite):
         del self.children[name]
 
 class CachingComposite(DictComposite):
+    """Only keeps week references to the children - if any child is
+    not referenced by some other part of the code, it is silently
+    removed."""
     ww_class_data__no_classes_name = True
     ChildNodeDict = WeakChildNodeDict
     
@@ -1427,6 +1445,9 @@ class MultipleActionInput(ActionInput):
         return
 
 class DirectoryServer(Widget):
+    """Mix-in class that adds a L{class_output} that serves files from
+    a directory named the same as the current python module, but with
+    the C{.py} replaces by C{.scripts}."""
     ww_class_data__no_classes_name = True
 
     class BaseDirectory(object):
@@ -1453,6 +1474,15 @@ class DirectoryServer(Widget):
     class_output = classmethod(class_output)
 
     def calculate_url_to_directory_server(self, widget_class, location, output_options):
+        """Calculates a URL to a file in the directory served by this class.
+
+        @param widget_class: The python path to this widget class.
+
+        @param location: A python list of path components of the path
+        relative to the .scripts-directory to the file to serve. E.g.
+        C{['css-files', 'main.css']}.
+        """
+        
         return self.calculate_url({'transaction': output_options['transaction'],
                                    'widget_class': widget_class,
                                    'location': location},

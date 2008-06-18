@@ -19,6 +19,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+"""xgettext-ish program for python that uses introspection and thus works
+on code loaded from non .py-files, e.g. wwml-files."""
+
 import Webwidgets, types, datetime, sys, os, os.path
 
 class Dummy(object):

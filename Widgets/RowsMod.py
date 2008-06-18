@@ -23,6 +23,13 @@ import Webwidgets.Constants, Webwidgets.Utils, re, math, cgi, types, itertools
 import Base
 
 class RowsSimpleModelFilter(Base.Filter):
+    """This filter adds support for memmory mapped L{RowsComposite} -
+    that is for when L{RowsComposite.non_memory_storage} is set to
+    C{False} and for row caching when set to C{True}. It also provides
+    a base implementation of the row/tree collapse algorithm for rows
+    with merged cells (in L{get_rows}).
+    """
+
     # left = RowsPrintableFilter
     # right = BaseTable.WwModel
 
@@ -39,6 +46,11 @@ class RowsSimpleModelFilter(Base.Filter):
         self.old_default_expand = None
 
     def get_rows(self, all = False, output_options = {}, **kw):
+        """This method implements row sorting and the row/tree
+        collapse algorithm for rows with merged cells. This method
+        should/could be used as a basis when implementing the same
+        functionality in some other way - e.g. as a compiler of
+        sorting lists to SQL queries."""
         self.ensure()
         if self.non_memory_storage:
             if all:
@@ -171,6 +183,8 @@ class RowsSimpleModelFilter(Base.Filter):
         self.old_default_expand = self.default_expand
 
 class RowsPrintableFilter(Base.Filter):
+    """This filter handles the 'printable_version' output option -
+    when set, I{all} rows are returned, not just the current page."""
     # left = BaseTable
     # right = RowsSimpleModelFilter
     
@@ -179,6 +193,11 @@ class RowsPrintableFilter(Base.Filter):
         return self.ww_filter.get_rows(**kw)
 
 class RowsRowWrapperFilter(Base.Filter):
+    """This filter wraps all rows in L{RowsRowModelWrapper}. This adds
+       a filtering chain on individual rows; to override cells in a
+       row (columns) you can add L{WwFilters} to the
+       L{RowsRowModelWrapper} class."""
+    
     def get_rows(self, **kw):
         return [self.RowsRowModelWrapper(table = self.object, ww_model = row)
                 for row in self.ww_filter.get_rows(**kw)]
@@ -195,6 +214,31 @@ class RowsRowWrapperFilter(Base.Filter):
     
 
 class RowsComposite(Base.CachingComposite):
+    """
+    RowsComposite is the base class for widgets that provide some
+    kind of list or table of other widgets that can be sorted,
+    collapsed and filtered in various ways.
+
+    Notable/special features:
+
+        - The list can be divided into pages, shown one at a time.
+
+        - The list can be sorted on any number of columns, in any order.
+
+        - Consecutive rows have their cells merged if they share values in
+          the first sorted columns (prefix).
+
+        - Rows that have merged cells can be collapsed.
+
+        - The above essentially creats a collapsible tree of the rows,
+          where the cells, put in the current sorting order, are elements
+          in the path to the row.
+
+        - The set of rows as well as the content of individual rows can be
+          filtered using L{WwFilters}.
+
+    """
+
     class WwModel(Base.Model):
         rows = []
         sort = []
@@ -223,7 +267,23 @@ class RowsComposite(Base.CachingComposite):
         but the ones in merge_columns"""
 
         non_memory_storage = False
+
+        """This base class along with the standard L{WwFilters} it
+        provides supports two basic back-ends, selected by this
+        variable:
+
+        If set to C{True}, the subclass using this base class I{must}
+        implement L{get_rows}, L{get_row_by_id}, etc.
+
+        If set to C{False}, the subclass using this base class I{must}
+        provide a rows member variable containing the rows to display.
+        """
+
         dont_sort_in_place = False
+        """Don't modify the L{rows} member variable when resorting the
+        list.
+
+        Only applies if L{non_memory_storage} is set to C{False}."""
 
         def __init__(self):
             super(RowsComposite.WwModel, self).__init__()
@@ -233,40 +293,67 @@ class RowsComposite(Base.CachingComposite):
 
         def get_rows(self, **kw):
             """Load the list after a repaging/resorting, or for a
-            printable version. If you set non_memory_storage to True, you
-            _must_ implement this method.
+            printable version. If you set L{non_memory_storage} to
+            C{True}, you I{must} implement this method.
             """
             raise NotImplementedError("get_rows")
 
         def get_row_by_id(self, row_id):
+            """Load one row given its internal id returned by a
+            previous call to L{get_row_id}. If you set
+            L{non_memory_storage} to C{True}, you I{must} implement
+            this method.
+            """
             raise NotImplementedError("get_row_by_id")
 
         def get_row_id(self, row):
+            """Return the internal id for a row to be used in a later
+            call to L{get_row_by_id}. The returned value must be a
+            string and unique for this row. If you set
+            L{non_memory_storage} to C{True}, you I{must} implement
+            this method.
+            """
             raise NotImplementedError("get_row_id")
 
         def get_pages(self):
-            """Returns the total number of pages. If you set
-            non_memory_storage to True, you _must_ implement this method.
+            """Return the total number of pages. If you set
+            L{non_memory_storage} to C{True}, you I{must} implement
+            this method.
             """
             raise NotImplementedError("get_pages")
 
     class RowsRowWidget(Base.CachingComposite): pass
 
     class SourceFilters(Base.Filter):
+        """This filter groups all filters that provides rows from some
+        kind of back-end - e.g. a database query, a redirect from
+        another table etc.""" 
+        
         WwFilters = ["RowsSimpleModelFilter"]
         class RowsSimpleModelFilter(RowsSimpleModelFilter): pass
 
     class RowsFilters(Base.Filter):
+        """This filter groups all filters that mangle rows in some way
+        - wrapping them, adding extra rows, hiding rows etc."""
+        
         WwFilters = ["RowsRowWrapperFilter"]
         class RowsRowWrapperFilter(RowsRowWrapperFilter): pass
 
     class OutputOptionsFilters(Base.Filter):
+        """This filter groups all filters that generate options for
+        L{get_rows} based on L{output_options}."""
+        
         WwFilters = ["RowsPrintableFilter"]
         class RowsPrintableFilter(RowsPrintableFilter): pass
 
     WwFilters = ["OutputOptionsFilters", "RowsFilters", "SourceFilters"]
 
     class RowsRowModelWrapper(Base.PersistentWrapper):
+        """This class is a wrapper that all rows are wrapped in by
+        L{RowsRowWrapperFilter}. This adds a filtering chain on
+        individual rows; to override cells in a row (columns) you can
+        add L{WwFilters} to this class."""
+        
         def ww_wrapper_key(cls, table, ww_model, **attrs):
             return "%s-%s" % (id(table), id(ww_model))
         ww_wrapper_key = classmethod(ww_wrapper_key)
@@ -282,7 +369,9 @@ class RowsComposite(Base.CachingComposite):
                 self.ww_row_id = getattr(ww_model, 'ww_row_id', id(ww_model))
 
         WwFilters = ["RowFilters"]
-        class RowFilters(Base.Filter): pass
+        class RowFilters(Base.Filter):
+            """This filter groups are ordinary filters for cells in
+            the row."""
 
         def __getattr__(self, name):
             if isinstance(self.ww_model, dict):
@@ -293,6 +382,9 @@ class RowsComposite(Base.CachingComposite):
                 return getattr(self.ww_model, name)
 
     class ExpandTreeNode(object):
+        """L{get_expand_tree} returns a tree of instances of this
+        class representing the currently expanded/collapsed rows."""
+        
         def __init__(self, col, values = None, toggled = False, rows = None):
             self.col = col
             self.values = values or {}
