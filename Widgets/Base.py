@@ -743,17 +743,30 @@ class Widget(Object):
                          if value])
 
     def draw_attributes(self, output_options):
+        def get_value_for_key(key):
+            def get_value():
+                value = getattr(self, key)
+                if isinstance(value, (type, types.MethodType)):
+                    raise KeyError
+                return unicode(value)
+            return get_value        
+        def get_translated_value_for_key(key):
+            def get_value():
+                value = getattr(self, key)
+                if isinstance(value, (type, types.MethodType)):
+                    raise KeyError
+                try:
+                    return self._(value, output_options)
+                except:
+                    return unicode(value)
+            return get_value
+
         res = Webwidgets.Utils.OrderedDict()
         for key in dir(self):
             #if key.startswith('_'): continue
-            value = getattr(self, key)
-            if isinstance(value, (type, types.MethodType)): continue
-	    res[key] = res['ww_untranslated__' + key] = unicode(value)
-            try:
-                res[key] = self._(value, output_options)
-            except:
-                pass
-        return res
+            res['ww_untranslated__' + key] = get_value_for_key(key)
+            res[key] = get_translated_value_for_key(key)
+        return Webwidgets.Utils.LazyDict(res)
 
     def draw(self, output_options):
         """Renders the widget to HTML. Path is where the full path to
@@ -1130,16 +1143,22 @@ class Composite(Widget):
                  children.
         """
         
-        res = Webwidgets.Utils.OrderedDict()
-
         if include_attributes:
-            res.update(self.draw_attributes(output_options))
+            res = self.draw_attributes(output_options)
+        else:
+            res = Webwidgets.Utils.LazyDict(Webwidgets.Utils.OrderedDict())
 
+        def get_value_for_name_and_child(name, child):
+            def get_value():
+                res = self.draw_child(self.path + [name], child, output_options, invisible_as_empty)
+                if res is None:
+                    raise KeyError
+                return res
+            return get_value
+        
         for name, child in self.get_children():
-            child = self.draw_child(self.path + [name], child, output_options, invisible_as_empty)
-            if child is not None:
-                res[name] = child
-
+            res[name] = get_value_for_name_and_child(name, child)
+        
         return res
 
     def get_children(self):

@@ -131,7 +131,7 @@ class OrderedDict(dict):
             del res[k]
         
     def popitem(self):
-        for key in sekf.order:
+        for key in self.order:
             value = self.pop(key)
             return (key, value)
         raise KeyError
@@ -179,6 +179,90 @@ class WeakValueOrderedDict(OrderedDict):
                 yield (key, self[key])
             except KeyError:
                 pass    
+
+class LazyDict(dict):
+    def __init__(self, dict_of_functions):
+        self.dict_of_functions = dict_of_functions
+
+    def __contains__(self, item):
+        return item in self.dict_of_functions
+
+    def __iter__(self):
+        return self.dict_of_functions.__iter__()
+
+    def __delitem__(self, key):
+        del self.dict_of_functions[key]
+        
+    def __setitem__(self, key, value):
+        self.dict_of_functions[key] = value
+
+    def __getitem__(self, key):
+        res = self.dict_of_functions[key]
+        if isinstance(res, types.FunctionType):
+            res = self.dict_of_functions[key] = res()
+        return res
+        
+    def __repr__(self):
+        return '{%s}' % ', '.join(["%s:%s" % (repr(name), repr(value))
+                                   for (name, value) in self.iteritems()])
+
+    def __str__(self):
+        return repr(self)
+        
+    def clear(self):
+        self.dict_of_functions.clear()
+
+    def items(self):
+        return list(self.iteritems())
+
+    def iteritems(self):
+        for key in self.iterkeys():
+            try:
+                yield (key, self[key])
+            except KeyError:
+                pass
+
+    def iterkeys(self):
+        return self.dict_of_functions.iterkeys()
+
+    def itervalues(self):
+        return itertools.imap(lambda (name, value): value, self.iteritems())
+
+    def keys(self):
+        return self.dict_of_functions.keys()
+
+    def pop(self, k, *arg):
+        try:
+            return self[k]
+        finally:
+            del res[k]
+        
+    def popitem(self):
+        for key in self.order:
+            value = self.pop(key)
+            return (key, value)
+        raise KeyError
+            
+    def setdefault(self, k, d = None):
+        if k not in self:
+            self[k] = d
+        return self[k]
+
+    def update(self, other):
+        if hasattr(other, 'dict_of_functions'):
+            self.dict_of_functions.update(other.dict_of_functions)
+        else:
+            if hasattr(other, 'iteritems'):
+                other = other.iteritems()
+            for (name, value) in other:
+                self[name] = value
+
+    def values(self):
+        return list(self.itervalues())
+    
+    def sort(self, *arg, **kw):
+        self.dict_of_functions.sort(*arg, **kw)
+
 
 #### fixme ####
 # name = "Generalize RelativePath to some kind of WidgetSelector"
