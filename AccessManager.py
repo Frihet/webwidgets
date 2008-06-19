@@ -34,10 +34,41 @@ class AccessManager(object):
             print "AccessManager: %s: %s: %s:%s" % (result, op, win_id, '.'.join(path))
 
     def __call__(self, op, win_id, path):
+        """Check if an operation is allowed to perform on a widget.
+
+        @param op: Operation to perform
+        @param win_id: Window id
+        @param path: Widget path within the window
+        """
+        
         self.debug_print(op, win_id, path, True)
         return True
 
 class ListAccessManager(AccessManager):
+    """ListAccessManager controlls access to widgets according to an
+    access control list.
+
+    The list is traversed from head to tail comparing the widget path
+    to the path pattern for each item until a match is found. The
+    result (true or false) from the matching item is returned, or
+    False if no item was found matching.
+    
+    Each list item is a tuple of C{(rule_result, rule_scope,
+    rule_path)}.
+
+        - C{rule_result} is the value to return if the item matches,
+          either C{True} or C{False}.
+
+        - C{rule_scope} determines how to match the path -
+          L{Constants.ONE} for exact comparation or
+          L{Constants.SUBTREE} for subtree matching.
+
+        - C{rule_path} is the path to match, expressed as a list of
+          strings/unicode strings. The first item is the operation to
+          perform, the window id the second, and the rest of the path
+          is the widget path.
+    """
+    
     debug_lists = False
     
     def debug_print_path(self, operation_path, result):
@@ -68,4 +99,7 @@ class ListAccessManager(AccessManager):
         return result
 
     def get_access_list(self):
+        """Returns the access control list. This version fetches it
+        using L{self.session.get_access_list} Override this in a
+        subclass to fetch/construct the list from somewhere else."""
         return self.session.get_access_list()
