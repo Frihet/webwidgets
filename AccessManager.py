@@ -19,7 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import Utils, Constants
+import Utils, Constants, csv
 
 class AccessManager(object):
     """This class can be overridden to control access to
@@ -103,3 +103,27 @@ class ListAccessManager(AccessManager):
         using L{self.session.get_access_list} Override this in a
         subclass to fetch/construct the list from somewhere else."""
         return self.session.get_access_list()
+
+    def load_access_list_from_file(cls, file):
+        for line in csv.reader(file):
+            if not line or line[0].startswith('#'): continue
+            (result, scope, op, win, path) = line
+            yield ({"allow": True,
+                    "deny": False}[result.strip()],
+                   {"sub": Constants.SUBTREE,
+                    "one": Constants.ONE}[scope.strip()],
+                   ({"view": Constants.VIEW,
+                     "rarr": Constants.REARRANGE,
+                     "edit": Constants.EDIT}[op.strip()],
+                    (win.strip() == "def" and Constants.DEFAULT_WINDOW) or win.strip()
+                    ) + tuple(Utils.id_to_path(path.strip())))
+    load_access_list_from_file = classmethod(load_access_list_from_file)
+
+    def load_access_list_from_file_name(cls, name):
+        file = open(name)
+        try:
+            for line in cls.load_access_list_from_file(file):
+                yield line
+        finally:
+            file.close()
+    load_access_list_from_file_name = classmethod(load_access_list_from_file_name)
