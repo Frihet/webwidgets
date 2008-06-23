@@ -244,7 +244,13 @@ class Object(object):
         if value is not old_value:
             self._setattr_dispatch(name, value)
 
-            if value != old_value and self.is_first_filter:
+            # Don't compare Objects, e.g. widgets - might not allways
+            # work, and it's sort of meaningless anyway in this
+            # context.
+            if (    self.is_first_filter
+                and (   isinstance(value, Object)
+                     or isinstance(old_value, Object)
+                     or value != old_value)):
                 self.object.notify('%s_changed' % name, value)
 
     def notify(self, message, *args, **kw):
