@@ -1127,6 +1127,7 @@ class Composite(Widget):
             result = [None, ''][invisible_as_empty]
 
         if result is not None and getattr(child, 'system_errors', []):
+            HtmlWindow.register_header(self, "Status", "500 Application exception cought")
             system_error_format = self._(self.system_error_format, output_options)
             system_errors_format = self._(self.system_errors_format, output_options)
             errors = [system_error_format % {'exception': cgi.escape(Webwidgets.Utils.convert_to_str_any_way_possible(error[0])),
@@ -1581,6 +1582,7 @@ class HtmlWindow(Window, StaticComposite):
 
     def draw(self, output_options, body = None, title = None):
         Window.draw(self, output_options)
+        self.headers = {}
         self.head_content = Webwidgets.Utils.OrderedDict()
         self.replaced_content = Webwidgets.Utils.OrderedDict()
 
@@ -1591,6 +1593,8 @@ class HtmlWindow(Window, StaticComposite):
             invisible_as_empty = True,
             include_attributes = True)
 
+        result.update(self.headers)
+        
         if body is not None:
             result['Body'] = body
         if title is None: title = self.get_title(self.path)
@@ -1604,7 +1608,7 @@ class HtmlWindow(Window, StaticComposite):
 
         result['ww_untranslated__head_content'] = '\n'.join(self.head_content.values())
         result['ww_untranslated__replaced_content'] = '\n'.join(self.replaced_content.values())
-        
+
         return ("""
 %(doctype)s
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -1621,6 +1625,10 @@ class HtmlWindow(Window, StaticComposite):
   </form>
  </body>
 </html>""" % result).encode(self.encoding)
+
+    def register_header(cls, widget, name, value):
+        widget.session.windows[widget.win_id].headers[name] = value
+    register_header = classmethod(register_header)
 
     def register_head_content(cls, widget, content, content_name):
         content_name = content_name or Webwidgets.Utils.path_to_id(widget.path)

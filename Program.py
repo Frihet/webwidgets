@@ -428,8 +428,8 @@ class Program(WebKit.Page.Page):
 
             if output is None:
                 output = {'Status': '404 No such window',
-                               'Content-Type': 'text/plain',
-                               Constants.OUTPUT: '404 No such window'}
+                          'Content-Type': 'text/plain',
+                          Constants.OUTPUT: '404 No such window'}
 
             if 'Status' not in output:
                 output['Status'] = '200 OK'
