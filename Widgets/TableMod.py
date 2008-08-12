@@ -528,15 +528,19 @@ class ExpandableTable(Table):
                     return "child_" + self.ww_filter.get_row_id(row.ww_is_expansion_parent)
                 return "parent_" + self.ww_filter.get_row_id(row)
 
-            def get_row_by_id(self, row_id):
-                if row_id.startswith("child_"):
-                    parent = self.ww_filter.get_row_by_id(row_id[6:])
-                    return self.RowsRowModelWrapper(
-                        table = self.object,
-                        ww_is_expansion_parent = parent,
-                        ww_model = parent.ww_filter.ww_expansion)
-                elif row_id.startswith("parent_"):
-                    return self.ww_filter.get_row_by_id(row_id[7:])
+            def get_row_by_id(self, row_id, **kwargs):
+                if '_' in row_id:
+                    prefix, row_id = row_id.split('_', 1)
+
+                    if prefix == "child" or kwargs.get("get_child", False):
+                        parent = self.ww_filter.get_row_by_id(row_id, **kwargs)
+                        return self.RowsRowModelWrapper(
+                            table = self.object,
+                            ww_is_expansion_parent = parent,
+                            ww_model = parent.ww_filter.ww_expansion)
+                    elif prefix == "parent":
+                        return self.ww_filter.get_row_by_id(row_id, **kwargs)
+                    
                 raise Exception("Invalid row-id %s (should have started with 'child_' or 'parent_')" % row_id)
 
 class ExpansionTable(ExpandableTable):
@@ -563,6 +567,14 @@ class ExpansionTable(ExpandableTable):
                     'ww_expanded': self.table.ExpansionViewer(
                     self.table.session, self.table.win_id,
                     parent_row = self.object)}
+
+    def get_expansion_widget(self, row_id):
+        table = self.ww_filter
+        child = table.get_row_by_id(row_id,
+                                    get_child = True)
+        child_widget = table.child_for_row(child)
+        child_widget['ww_expanded'] = child.ww_expanded
+        return child_widget['ww_expanded']
 
 class EditFunctionCell(BaseTableMod.FunctionCell):
     """Draws a set of editing buttons for a row. The set of buttons

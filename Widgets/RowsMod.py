@@ -116,9 +116,9 @@ class RowsSimpleModelFilter(Base.Filter):
     def get_row_id_to_model_row_id(self, row_id):
         return self.get_row_id_from_row_model(self.object.ww_filter.get_row_by_id(row_id).ww_model)
 
-    def get_row_by_id(self, row_id):
+    def get_row_by_id(self, row_id, **kwargs):
         if self.non_memory_storage:
-            return self.ww_filter.get_row_by_id(row_id)
+            return self.ww_filter.get_row_by_id(row_id, **kwargs)
         else:
             for row in self.rows:
                 if self.get_row_id(row) == row_id:
@@ -205,12 +205,12 @@ class RowsRowWrapperFilter(Base.Filter):
     def get_row_id(self, row):
         return "wrap_" + self.ww_filter.get_row_id(row.ww_model)
 
-    def get_row_by_id(self, row_id):
+    def get_row_by_id(self, row_id, **kwargs):
         if not row_id.startswith("wrap_"):
             raise Exception("Invalid row-id %s (should have started with 'wrap_')" % row_id)
         return self.RowsRowModelWrapper(
             table = self.object,
-            ww_model = self.ww_filter.get_row_by_id(row_id[5:]))
+            ww_model = self.ww_filter.get_row_by_id(row_id[5:], **kwargs))
     
 
 class RowsComposite(Base.CachingComposite):
@@ -298,7 +298,7 @@ class RowsComposite(Base.CachingComposite):
             """
             raise NotImplementedError("get_rows")
 
-        def get_row_by_id(self, row_id):
+        def get_row_by_id(self, row_id, **kwargs):
             """Load one row given its internal id returned by a
             previous call to L{get_row_id}. If you set
             L{non_memory_storage} to C{True}, you I{must} implement
