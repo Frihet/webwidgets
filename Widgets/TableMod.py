@@ -123,10 +123,14 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
 
     class WwModel(BaseTableMod.BaseTable.WwModel):
         argument_name = None
-        functions = {} # {'column_name': {'function_name': 'title'}}
-        group_functions = {} # {'function_name': 'title'}
-        disabled_functions = [] # ['function_name']
+        functions = {}
+        """{'column_name': {'function_name': 'title'}}"""
+        group_functions = {}
+        """{'function_name': 'title'}"""
+        disabled_functions = []
+        """['function_name']"""
         disabled_columns = []
+        """["column_name"]"""
         column_groups = {}
         """[column_group_name -> columnt_group_title]"""
 
@@ -142,12 +146,14 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                        'top':
                        Webwidgets.Utils.OrderedDict([  #('title_bar', {'level': 2}),
                                                      ])}
+        """{"position": {"button_bar_name": {"level": value, "option_name": value}}}"""
         button_bars_level_force_min = 0
-        # A button bar is drawn if it is active, or its level is >=
-        # button_bars_level_force_min or there are other button bars with
-        # level < that button bars' level that are to be drawn.
+        """A button bar is drawn if it is active, or its level is >=
+        button_bars_level_force_min or there are other button bars with
+        level < that button bars level that are to be drawn."""
 
         selection = []
+        """Currently selected rows if a column named "selection_col" is added"""
 
         def __init__(self):
             super(Table.WwModel, self).__init__()

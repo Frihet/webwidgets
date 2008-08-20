@@ -71,7 +71,7 @@ class FunctionCell(SpecialCell):
                        'value': value}
                        
     def draw_table_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
-        enabled_functions = getattr(row, 'ww_functions', True)
+        enabled_functions = getattr(row.ww_filter, 'ww_functions', True)
         row_id = table.ww_filter.get_row_id(row)
         rendered_functions = []
         for function, title in table.functions[column_name].iteritems():
