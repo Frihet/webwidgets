@@ -141,6 +141,7 @@ class Object(object):
             del attrs['ww_model']
         if 'ww_model' not in attrs and self.WwModel is not None:
             attrs['ww_model'] = self.WwModel()
+        # FIXME: Does not attribute on ww_model as it should
         self.__dict__.update(attrs)
         self.setup_filter()
 
@@ -361,22 +362,29 @@ class RetrieveFromFilter(StandardFilter):
 
     def get_retrieve_object(self, name):
         obj = self.ww_filter
+        
         if (    name not in self.dont_retrieve
             and (not self.do_retrieve
                  or name in self.do_retrieve)):
+
             obj = getattr(obj, self.retrieve_from)
         return obj
 
     def __getattr__(self, name):
-        return getattr(self.get_retrieve_object(name), name)
+        obj = self.get_retrieve_object(name)
+        if obj is None and self.propagate_none:
+            return None
+        else:
+            return getattr(obj, name)
 
     def __setattr__(self, name, value):
         setattr(self.get_retrieve_object(name), name, value)
 
-    def retrieve_from(cls, retrieve_from, **arg):
+    def retrieve_from(cls, retrieve_from, propagate_none=False, **arg):
         return cls.derive(name="RetrieveFromFilter(%s, %s)" % (retrieve_from,
                                                                ', '.join(['%s=%s' % (key, value)
                                                                           for (key, value) in arg.iteritems()]),),
+                          propagate_none = propagate_none,
                           retrieve_from = retrieve_from, **arg)
     retrieve_from = classmethod(retrieve_from)
 
