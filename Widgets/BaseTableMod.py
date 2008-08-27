@@ -259,8 +259,7 @@ class BaseTable(RowsMod.RowsComposite, Base.DirectoryServer):
                 '%s,%s' % (row_id, column_name),
                 expanded, True, output_options)
 
-        html_class += [Webwidgets.Utils.classes_to_css_classes(
-            [cls + '._.column.' + column_name for cls in self.ww_classes])]
+        html_class += [Webwidgets.Utils.classes_to_css_classes(self.ww_classes, ['column', column_name])]
         
         return '<td rowspan="%(rowspan)s" colspan="%(colspan)s" class="%(class)s">%(expand_button)s%(content)s</td>' % {
             'rowspan': rowspan,
