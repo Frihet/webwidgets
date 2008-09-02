@@ -176,13 +176,14 @@ class Object(object):
                                                   for filter in ww_filter_classes]))
     print_filter_class_stack = classmethod(print_filter_class_stack)
 
-    def print_filter_instance_stack(self, name = 'ww_filter'):
+    def print_filter_instance_stack(self, name = 'ww_filter', attrs = []):
         ww_filter = getattr(self, name)
         ww_filters = []
         while ww_filter is not self and ww_filter is not self.ww_model:
             ww_filters.append(ww_filter)
             ww_filter = ww_filter.ww_filter
-        return '\n'.join(["%s.%s @ %s" % (type(ww_filter).__module__, type(ww_filter).__name__, id(ww_filter)) 
+        return '\n'.join(["%s.%s @ %s %s" % (type(ww_filter).__module__, type(ww_filter).__name__, id(ww_filter),
+                                             ', '.join([str(getattr(ww_filter, attr, None)) for attr in attrs]))
                           for ww_filter in ww_filters]) + '\n'
 
     def derive(cls, *clss, **members):
@@ -378,7 +379,11 @@ class RetrieveFromFilter(StandardFilter):
             return getattr(obj, name)
 
     def __setattr__(self, name, value):
-        setattr(self.get_retrieve_object(name), name, value)
+        obj = self.get_retrieve_object(name)
+        if obj is None and value is None and self.propagate_none:
+            return
+        else:
+            setattr(obj, name, value)
 
     def retrieve_from(cls, retrieve_from, propagate_none=False, **arg):
         return cls.derive(name="RetrieveFromFilter(%s, %s)" % (retrieve_from,
