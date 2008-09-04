@@ -331,6 +331,12 @@ class Filter(Object):
         else:
             setattr(self.ww_filter, name, value)
 
+    def __getitem__(self, index):
+        filter = self
+        for i in xrange(0, index):
+            filter = filter.ww_filter
+        return filter
+
 class StandardFilter(Filter):
     """This class only groups all L{Filter} subclasses that provides
     generic, reusable functionality (as opposed to widget-specific
