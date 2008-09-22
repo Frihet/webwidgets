@@ -98,6 +98,9 @@ class OrderedDict(dict):
             self.order.append(key)
         dict.__setitem__(self, key, value)
 
+    def __add__(self, other):
+        return type(self)(itertools.chain(self.iteritems(), other.iteritems()))
+
     def __repr__(self):
         return '{%s}' % ', '.join(["%s:%s" % (repr(name), repr(value))
                                    for (name, value) in self.iteritems()])

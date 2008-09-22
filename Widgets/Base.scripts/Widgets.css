@@ -53,16 +53,31 @@ input.error,
 .system-error {
  border: 1px solid #ff0000;
 }
-.system-error > .traceback {
- display: none;
+.system-errors {
+ border: 3px solid red;
+ padding: 5px;
+ margin: 5px;
 }
-.system-error:hover > .traceback {
- display: block;
+.system-errors > .header {
+ border: 1px solid red;
+ padding: 5px;
+
+ font-size: 16pt;
+ font-family: serif;
+ color: red;
+}
+.system-error > .content {
  border: 1px solid #ff0000;
  margin: 2pt;
  padding: 2pt;
 }
-
+.click-expand > .content,
+.hover-expand > .content {
+ display: none;
+}
+.hover-expand:hover > .content {
+ display: block;
+}
 
 /* Widget styling */
 .Webwidgets-Widgets-Composite-TabbedView {

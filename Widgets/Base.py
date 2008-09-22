@@ -1099,7 +1099,7 @@ class Composite(Widget):
     children and the visibility attribute of children."""
     ww_class_data__no_classes_name = True
 
-    system_error_format = """<div class="system-error hover-expand">
+    system_error_format = """<div class="system-error click-expand">
                               <div class="header">%(exception)s</div>
                               <div class="content">
                                %(traceback)s
@@ -1107,9 +1107,22 @@ class Composite(Widget):
                              </div>"""
 
     system_errors_format = """<div class="system-errors click-expand">
-                               <div class="header">Error</div>
+                               <div class="header">Sorry, this part of the application has problems (click here for more information)</div>
                                <div class="content">
-                                This widget caused errors:
+                                <p>This part of the application has
+                                crashed. You can try to log out and
+                                log in again to remedy the problem. In
+                                any case, please contact the system
+                                administrator about this issue and
+                                tell him/her the steps you took that
+                                lead up to this issue and he/she will
+                                try to fix the problem as fast as
+                                possible.</p>
+
+                                <p>A more technical, detailed
+                                description of the error follows
+                                (click on the items to expand):</p>
+
                                 %(tracebacks)s
                                </div>
                               </div>"""
@@ -1559,17 +1572,7 @@ class Window(Widget):
         return ''
 
 
-file = open(os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                         'Widgets.css'))
-generic_style = file.read()
-file.close()
-
-file = open(os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                         'Widgets.js'))
-generic_script = file.read()
-file.close()
-
-class HtmlWindow(Window, StaticComposite):
+class HtmlWindow(Window, StaticComposite, DirectoryServer):
     """HtmlWindow is the main widget for any normal application window
     displaying HTML. It has two children - head and body aswell as
     attributes for title, encoding and doctype"""
@@ -1580,15 +1583,6 @@ class HtmlWindow(Window, StaticComposite):
     Body = Text.derive(html = 'Page not available')
     encoding = 'UTF-8'
     doctype = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
-
-    widget_style = {Webwidgets.Constants.FINAL_OUTPUT: generic_style,
-                   'Content-type': 'text/css',
-                   'Cache-Control': 'public; max-age=3600',
-                   }
-    widget_script = {Webwidgets.Constants.FINAL_OUTPUT: generic_script,
-                   'Content-type': 'application/x-javascript',
-                   'Cache-Control': 'public; max-age=3600',
-                   }
 
     findallvalues = re.compile(
         r"""(id=["']([^"'<>]*)["'][^<>]*value=["']([^"'<>]*)["'])|(value=["']([^"'<>]*)["'][^<>]*id=["']([^"'<>]*)["'])""",
@@ -1605,7 +1599,17 @@ class HtmlWindow(Window, StaticComposite):
         self.head_content = Webwidgets.Utils.OrderedDict()
         self.replaced_content = Webwidgets.Utils.OrderedDict()
 
-        self.register_styles(output_options)
+        HtmlWindow.register_style_link(
+            self,
+            self.calculate_url_to_directory_server('Webwidgets.HtmlWindow',
+                                                   ['Widgets.css'],
+                                                   output_options))
+        HtmlWindow.register_script_link(
+            self,
+            self.calculate_url_to_directory_server('Webwidgets.HtmlWindow',
+                                                   ['Widgets.js'],
+                                                   output_options))
+        #self.register_styles(output_options)
 
         result = self.draw_children(
             output_options,
