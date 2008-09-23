@@ -66,6 +66,9 @@ input.error,
  font-family: serif;
  color: red;
 }
+.system-errors > .header > .sub-header {
+ font-size: 10pt;
+}
 .system-error > .content {
  border: 1px solid #ff0000;
  margin: 2pt;

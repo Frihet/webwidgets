@@ -1107,7 +1107,14 @@ class Composite(Widget):
                              </div>"""
 
     system_errors_format = """<div class="system-errors click-expand">
-                               <div class="header">Sorry, this part of the application has problems (click here for more information)</div>
+
+                               <div class="header">Sorry, an error
+                               occured.<br />
+                               You can try to log out and
+                               back in again to solve this.
+                               <div class="sub-header">Read more...</div>
+                               </div>
+
                                <div class="content">
                                 <p>This part of the application has
                                 crashed. You can try to log out and
