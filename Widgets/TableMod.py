@@ -26,7 +26,7 @@ the user to sort the rows and simultaneously group the rows according
 to their content and the sorting."""
 
 import Webwidgets.Constants, Webwidgets.Utils, re, math, cgi, types, itertools
-import Base, BaseTableMod
+import Base, BaseTableMod, Composite
 
 column_allowed_name_re = re.compile("^[a-z_]*$")
 
@@ -671,7 +671,12 @@ class EditableTable(Table):
                 elif function == "save":
                     row.ww_filter.save()
                 elif function == "delete":
-                    row.ww_filter.delete()
+                    class Confirm(Composite.DeleteConfirmationDialog):
+                        def selected(self, path, value):
+                            if value == '1':
+                                self.row.ww_filter.delete()
+                            Composite.DeleteConfirmationDialog.selected(self, path, value)
+                    Composite.DialogContainer.add_dialog_to_nearest(self, Confirm(self.session, self.win_id, row=row))
                     
             def field_output_edit_function(self, path):
                 return []

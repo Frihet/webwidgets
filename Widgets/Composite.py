@@ -107,7 +107,7 @@ class StaticDialog(InfoFrame):
 
         buttons = Buttons()
 
-class Dialog(StaticDialog, Base.DirectoryServer):
+class AbstractDialog(StaticDialog, Base.DirectoryServer):
     remove_on_close = False
 
     def draw(self, output_options):
@@ -129,6 +129,42 @@ class Dialog(StaticDialog, Base.DirectoryServer):
         if path != self.path: return
         self.close()
 
+class Dialog(AbstractDialog):
+    pass
+
+class InfoDialog(AbstractDialog):
+    pass
+
+class ConfirmationDialog(InfoDialog):
+    class Head(Formatting.Html):
+        html = """Really perform action?"""
+    class Body(Formatting.Html):
+        html = """Do you really want to perform this action?"""
+
+class DeleteConfirmationDialog(ConfirmationDialog):
+    class Head(Formatting.Html):
+        html = """Really delete this item?"""
+    class Body(Formatting.Html):
+        html = """Do you really want to delete this item?"""
+
+class DialogContainer(Formatting.Div):
+    is_dialog_container = True
+
+    __wwml_html_override__ = False
+    html = "%(Dialogs)s%(Body)s"
+    class Dialogs(Formatting.ReplacedList): pass
+    class Body(Formatting.Html): pass
+
+    def add_dialog(self, dialog, name = None):
+        if name is None: name = str(len(self['Dialogs'].children))
+        self['Dialogs'][name] = dialog
+        dialog.remove_on_close = True
+
+    def add_dialog_to_nearest(cls, widget, dialog, name = None):
+        widget.get_ansestor_by_attribute(
+            "is_dialog_container", True
+            ).add_dialog(dialog, name)
+    add_dialog_to_nearest = classmethod(add_dialog_to_nearest)
 
 class Tabset(Base.StaticComposite):
     def get_pages(self, path = []):

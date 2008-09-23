@@ -78,20 +78,6 @@ class Address(object):
                                                county = "county",
                                                country = "country")]
 
-class DialogContainer(object):
-    is_dialog_container = True
-
-    def add_dialog(self, dialog, name = None):
-        if name is None: name = str(len(self['Dialogs'].children))
-        self['Dialogs'][name] = dialog
-        dialog.remove_on_close = True
-
-    def add_dialog_to_nearest(cls, widget, dialog, name = None):
-        widget.get_ansestor_by_attribute(
-            "is_dialog_container", True
-            ).add_dialog(dialog, name)
-    add_dialog_to_nearest = classmethod(add_dialog_to_nearest)
-
 class ApplicationWindow(object):
     is_dialog_container = True
 
