@@ -1,6 +1,6 @@
 #! /bin/env python
-# -*- coding: UTF-8 -*-
-# vim: set fileencoding=UTF-8 :
+# -*- coding: utf-8 -*-
+# vim: set fileencoding=utf-8 :
 
 # Webwidgets web developement framework
 # Copyright (C) 2006 uAnywhere, Egil Moeller <redhog@redhog.org>
@@ -331,7 +331,7 @@ class Label(Base.StaticComposite):
         if 'Label' in res:
             res['label'] = res['Label']
         else:
-            res['label'] = target.get_title()
+            res['label'] = target.get_title(target.path)
         if getattr(target, 'error', None) is not None:
             error_arg = (target._(target.error, output_options),)
             if res['label'] == '':
