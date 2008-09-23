@@ -389,6 +389,13 @@ select {
  right: 0;
 }
 
+.Webwidgets-Widgets-Composite-InfoDialog {
+ left: 37%;
+ width: 25%;
+ top: 37%;
+ height: 25%;
+}
+
 .Webwidgets-Widgets-CssFileEditor-CssFileEditor {
  display: table;
 }
