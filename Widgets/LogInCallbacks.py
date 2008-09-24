@@ -85,8 +85,8 @@ Please log in and change your password as soon as possible.
              
              def selected(self, path, value):
                  if path != self.path: return
-                 if not self.validate(): return
                  if value == "recover":
+                     if not self.validate(): return
                      fields = self.get_widgets_by_attribute('field_name')
                      username = fields['recover_username'].value
                      email = fields['recover_email'].value
