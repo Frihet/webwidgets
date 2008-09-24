@@ -23,7 +23,7 @@
 """Output formatting widgets.
 """
 
-import types, StringIO, cgi
+import types, StringIO, cgi, sys, os
 import Webwidgets.Utils, Webwidgets.Constants
 import Base, GridLayoutModel
 
@@ -137,6 +137,12 @@ class Message(Html):
 class Media(Base.Widget):
     """Media (file) viewing widget"""
     content = None
+    "Object with file (file object), type (mimetype) and filename attributes, i.e. cgi.FieldStorage"
+    _content = None
+    "Cache for path based content."
+    inline_only = False
+    "If True, do not link to media object only render inline version. Default False."
+
     class Base(object): pass
     base = Base()
     base.type = 'text/html'
@@ -171,8 +177,31 @@ class Media(Base.Widget):
              'text/css':{'inline':True, 'merge':False, 'invisible':False},
              'text/html':{'inline':True, 'merge':False, 'invisible':False}}
 
+    def get_content(self):
+        # FIXME: This needs to be cleaned up with regards to resource usage.
+
+        if isinstance(self.content, (str, unicode)):
+            if not self._content or self._content.path != self.content:
+                module_path = sys.modules[self.__module__].__file__
+                scripts_path = os.path.splitext(module_path)[0] + '.scripts'
+
+                class Content(object):
+                    path = self.content
+                    file = open(os.path.join(scripts_path, path))
+                    filename = os.path.basename(self.content)
+                    type = Webwidgets.Utils.FileHandling.extension_to_mime_type.get(
+                        os.path.splitext(filename)[1][1:], 'application/octet-stream')
+
+                self._content = Content()
+            return self._content
+
+        else:
+            return self.content
+
+
     def get_option(self, option):
-        mime_type = getattr(self.content, 'type', 'default')
+        r_content = self.get_content()
+        mime_type = getattr(r_content, 'type', 'default')
         if mime_type in self.types and option in self.types[mime_type]:
             return self.types[mime_type][option]
         return self.types['default'][option]
@@ -185,7 +214,8 @@ class Media(Base.Widget):
         return '%s = "%s"' % (html_name, value)
 
     def get_renderer(self, renderer):
-        mime_type = getattr(self.content, 'type', None)
+        r_content = self.get_content()
+        mime_type = getattr(r_content, 'type', None)
         res_name = renderer + '_default'
         if mime_type is not None:
             name = renderer + "_" + mime_type.replace("/", "__").replace("-", "_")
@@ -200,12 +230,13 @@ class Media(Base.Widget):
 
     def output(self, output_options):
         content = ''
+        r_content = self.get_content()
         mime_type = 'text/plain'
         if output_options['part'] == 'content':
-            if self.content is not None:
-                self.content.file.seek(0)
-                content = self.content.file.read()
-                mime_type = self.content.type
+            if r_content is not None:
+                r_content.file.seek(0)
+                content = r_content.file.read()
+                mime_type = r_content.type
         elif output_options['part'] == 'base':
             if self.base is not None:
                 self.base.file.seek(0)
@@ -227,8 +258,11 @@ class Media(Base.Widget):
         if self.get_option('invisible'):
             return ''
 
-        if self.content is None:
+        if self.get_content() is None:
             return self.get_option('empty')
+
+        if self.inline_only:
+            return inline
 
         title = ''
         if not is_default and self.get_option('include_label'):
@@ -242,7 +276,8 @@ class Media(Base.Widget):
             }
 
     def draw_inline_default(self, output_options):
-        return getattr(self.content, 'filename', self.get_option('empty'))
+        r_content = self.get_content()
+        return getattr(r_content, 'filename', self.get_option('empty'))
 
     def base_include_default(self, output_options):
         return {'content': cgi.escape(self.calculate_output_url(output_options))}

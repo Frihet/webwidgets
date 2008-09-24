@@ -225,7 +225,10 @@ class SwitchingView(Tabset):
 class TabbedView(SwitchingView, Base.ActionInput):
     """Provides a set of overlapping 'pages' with tabs, each tab
     holding some other widget, through wich a user can browse using
-    the tabs."""
+    the tabs.
+
+    It is possible to embed a widget in the menu itself by setting the
+    attribute draw_inline=True on the child widget."""
     argument_name = None
 
     def field_input(self, path, string_value):
@@ -266,7 +269,14 @@ class TabbedView(SwitchingView, Base.ActionInput):
                         'page': Webwidgets.Utils.path_to_id(page),
                         'caption': title}
                 if children is None:
-                    tabs.append("""
+                    page_widget = self + page
+
+                    if getattr(page_widget, 'draw_inline', False):
+                        html = self.draw_child(page_widget.path, page_widget, output_options)
+                        if html is not None:
+                            tabs.append("<li>%s</li>" % (html, ))
+                    else:
+                        tabs.append("""
                                  <li><button
                                       type="submit"
                                       %(disabled)s

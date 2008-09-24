@@ -1,6 +1,6 @@
 #! /bin/env python
-# -*- coding: UTF-8 -*-
-# vim: set fileencoding=UTF-8 :
+# -*- coding: utf-8 -*-
+# vim: set fileencoding=utf-8 :
 
 # Webwidgets web developement framework
 # Copyright (C) 2006 uAnywhere, Egil Moeller <redhog@redhog.org>
@@ -211,9 +211,23 @@ class UpdateButton(Base.SingleActionInput):
 
 class ButtonArray(Base.MultipleActionInput):
     """Button array widget - throws a "selected" notification when any one of the buttons is clicked"""
-    
+
+    pre = ''
+    """HTML rendered before button array."""
+    sep = ''
+    """HTML rendered inbetween buttons."""
+    post = ''
+    """HTML rendered after button array."""
     buttons = {'Cancel': '0', 'Ok': '1'}
-    "Mapping from button title to value"
+    "Mapping from button title to value."
+    disabled_buttons = []
+    "List of buttons that are disabled."
+
+    def get_active_button(self, button):
+        if button in self.disabled_buttons:
+            return False
+        else:
+            return self.get_active(self.path + ['_', 'button', button])
 
     def draw(self, output_options):
         super(ButtonArray, self).draw(output_options)
@@ -223,15 +237,17 @@ class ButtonArray(Base.MultipleActionInput):
                        %(disabled)s
                        name="%(name)s"
                        id="%(name)s-_-%(value)s"
-                       value="%(value)s">%(title)s</button>""" %
+                       value="%(value)s"
+                       >%(title)s</button>""" %
                    {'name': input_id,
                     'title': self._(title, output_options),
                     'value': value,
-                    'disabled': ['', 'disabled="disabled"'][not self.get_active(self.path + ['_', 'button', value])]}
-                   for title, value in self.buttons.iteritems()]
-        return """<div %(html_attributes)s>%(buttons)s</div>""" % {
+                    'disabled': ['', 'disabled="disabled"'][not self.get_active_button(value)]}
+                   for title, value in self.ww_filter.buttons.iteritems()]
+        return """<div %(html_attributes)s>%(pre)s%(buttons)s%(post)s</div>""" % {
             'html_attributes': self.draw_html_attributes(self.path),
-            'buttons': ''.join(buttons)}
+            'buttons': self._(self.sep, output_options).join(buttons),
+            'pre': self._(self.pre, output_options), 'post': self._(self.post, output_options)}
 
 class RadioButtonGroup(Base.ValueInput):
     """Group of radio buttons must be joined together. This is
