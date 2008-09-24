@@ -27,7 +27,7 @@
   using="Webwidgets"
   bind="LogInCallbacks.LogIn"
   >
-  <w:Dialog
+  <w:StaticDialog
    id="LogIn"
    Head=":Text:Please log in:"
    >
@@ -42,8 +42,51 @@
      </w:Field>
     </w:Fieldgroup>
    </w:Html>
-   <w:dict id="buttons" login="login" />
-  </w:Dialog>
+   <w:odict id="buttons">
+    <w:string id="I've forgotten my username or password">forgotten</w:string>
+    <w:string id="Login">login</w:string>
+   </w:odict>
+
+   <w:Dialog id="Forgotten" Head=":Html:Recover username or password">
+    <w:Html id="Body">
+     Please enter your username or registered e-mail address. An email
+     with your account information will be sent to your e-mail address.
+     <w:Fieldgroup id="IdentitiesGroup">
+      <w:Field id="Username" Label=":Text:Username">
+       <w:StringInput id="Field" field_name="recover_username" />
+      </w:Field>
+      <w:Field id="EMail" Label=":Text:E-Mail">
+       <w:StringInput id="Field" field_name="recover_email" />
+      </w:Field>
+     </w:Fieldgroup>
+    </w:Html>
+    <w:odict id="buttons">
+     <w:string id="Cancel">cancel</w:string>
+     <w:string id="Recover account information">recover</w:string>
+    </w:odict>
+    
+    <w:InfoDialog id="RecoveryComplete"
+     Head=":Html:Recovery complete">
+     <w:Html id="Body">
+      An e-mail has been sent to you with your account information.
+      Please allow a few minutes for the e-mail to arrive in your
+      inbox.
+     </w:Html>
+     <w:dict id="buttons" Ok="ok" />
+    </w:InfoDialog>
+
+    <w:InfoDialog id="RecoveryFailed"
+     Head=":Html:Recovery failed">
+     <w:Html id="Body">
+      The username or e-mail address you provided was not found in our
+      system. Please contact the system administrator to resolve this
+      matter.
+     </w:Html>
+     <w:dict id="buttons" Ok="ok" />
+    </w:InfoDialog>
+   </w:Dialog>
+
+  </w:StaticDialog>
   <w:variable id="Application" />
  </w:Html>
 

@@ -53,7 +53,11 @@ input.error,
 .system-error {
  border: 1px solid #ff0000;
 }
+.system-errors * {
+ z-index: 10;
+}
 .system-errors {
+ z-index: 10;
  border: 3px solid red;
  padding: 5px;
  margin: 5px;
@@ -360,16 +364,21 @@ select {
  height: 30px;
 }
 
+.Webwidgets-Widgets-LogIn-LogIn-LogIn,
 .Webwidgets-Widgets-Composite-AbstractDialog {
  position: absolute;
  left: 20%;
  width: 60%;
  top: 20%;
  height: 60%;
- z-index: 1;
  margin: 0;
 }
 
+.Webwidgets-Widgets-Composite-AbstractDialog {
+ z-index: 1;
+}
+
+.Webwidgets-Widgets-LogIn-LogIn-LogIn-_-head,
 .Webwidgets-Widgets-Composite-AbstractDialog-_-head {
  position: absolute;
  top: 0;
@@ -378,6 +387,7 @@ select {
  right: 0;
 }
 
+.Webwidgets-Widgets-LogIn-LogIn-LogIn-_-body,
 .Webwidgets-Widgets-Composite-AbstractDialog-_-body {
  position: absolute;
  top: 30px;
@@ -386,6 +396,7 @@ select {
  right: 0;
 }
 
+.Webwidgets-Widgets-LogIn-LogIn-LogIn-_-foot,
 .Webwidgets-Widgets-Composite-AbstractDialog-_-foot {
  position: absolute;
  height: 30px;
