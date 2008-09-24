@@ -162,6 +162,8 @@ class BaseTable(RowsMod.RowsComposite, Base.DirectoryServer):
     in the table.
     """
 
+    empty_table_message = """There is no data in this table / no entries matched your search."""
+
     class TreeFilters(Base.Filter):
         """This filter groups filters that mangle the virtual tree of
         rows (that has merged cells, according to the current sorting
@@ -274,13 +276,17 @@ class BaseTable(RowsMod.RowsComposite, Base.DirectoryServer):
 
         # Why we need this test here: rows_to_tree would create an empty
         # top-node for an empty set of rows, which draw_tree would
-        # render into a single row...
+        # render into a single row with empty cells...
         if rows:
             rendered_rows = self.draw_tree(tree,
                                            rows,
                                            output_options)
         else:
-            rendered_rows = []
+            rendered_rows = [{'cells': ["<td colspan='%(colspan)s' class='empty_table_message'>%(message)s</td>" % {
+                                            'colspan': len(visible_columns),
+                                            'message': self._(self.empty_table_message, output_options)
+                                            }],
+                              'row': {}}]
         return rendered_rows
 
     def append_classes(self, rendered_rows, output_options):

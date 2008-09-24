@@ -125,6 +125,11 @@ input.error,
  padding: 2px;
 }
 
+.Webwidgets-Widgets-TableMod-Table .empty_table_message {
+ padding: 6px;
+ text-align: center;
+}
+
 .Webwidgets-Widgets-TableMod-Table table {
  width: 100%;
  border: solid 1px black;
