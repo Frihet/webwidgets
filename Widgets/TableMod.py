@@ -595,9 +595,11 @@ class EditFunctionCell(BaseTableMod.FunctionCell):
                             'revert': 'Revert',
                             'delete': 'Delete'}
 
-    def draw_edit_function(self, table, row_id, is_editing, output_options):
+    def draw_edit_function(self, table, row_id, is_editing, is_new, output_options):
         if is_editing:
-            functions = ('save', 'revert', 'delete')
+            functions = ['save', 'revert']
+            if not is_new:
+                functions.append('delete')
         else:
             functions = ('edit', 'delete')
             
@@ -615,7 +617,7 @@ class EditFunctionCell(BaseTableMod.FunctionCell):
     def draw_table_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
         row_id = table.ww_filter.get_row_id(row)
         return self.draw_edit_function(table, row_id,
-                                       row.ww_filter.is_editing(),
+                                       row.ww_filter.is_editing(), row.ww_filter.is_new(),
                                        output_options)
 
 EditFunctionCellInstance = EditFunctionCell()
