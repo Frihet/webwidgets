@@ -43,8 +43,8 @@
     </w:Fieldgroup>
    </w:Html>
    <w:odict id="buttons">
-    <w:string id="I've forgotten my username or password">forgotten</w:string>
     <w:string id="Login">login</w:string>
+    <w:string id="I can not access my account">forgotten</w:string>
    </w:odict>
 
    <w:Dialog id="Forgotten" Head=":Html:Recover username or password">
