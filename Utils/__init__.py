@@ -1,6 +1,6 @@
 #! /bin/env python
-# -*- coding: UTF-8 -*-
-# vim: set fileencoding=UTF-8 :
+# -*- coding: utf-8 -*-
+# vim: set fileencoding=utf-8 :
 
 # Webwidgets web developement framework
 # Copyright (C) 2006 uAnywhere, Egil Moeller <redhog@redhog.org>
@@ -24,7 +24,7 @@
 Webwidgets and in implementing new widgets and other objects.
 """
 
-import itertools, types, weakref
+import itertools, types, weakref, sys, os.path
 
 debug_class_loading = False
 
@@ -501,3 +501,12 @@ def class_full_name(cls):
         cls_name.append(cls.ww_class_path)
     cls_name.append(cls.__name__)
     return '.'.join(cls_name)
+
+def module_file_path(module, extension='.scripts'):
+    module_path = sys.modules[module].__file__
+    if os.path.splitext(os.path.basename(module_path))[0] == '__init__':
+        scripts_path = os.path.dirname(module_path) + extension
+    else:
+        scripts_path = os.path.splitext(module_path)[0] + extension
+
+    return scripts_path

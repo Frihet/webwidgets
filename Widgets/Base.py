@@ -1517,8 +1517,7 @@ class DirectoryServer(Widget):
 
     class BaseDirectory(object):
         def __get__(self, instance, owner):
-            filePath = sys.modules[owner.__module__].__file__
-            return os.path.splitext(filePath)[0] + '.scripts'
+            return Webwidgets.Utils.module_file_path(owner.__module__)
     base_directory = BaseDirectory()
     
     def class_output(cls, session, arguments, output_options):

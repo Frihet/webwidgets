@@ -182,12 +182,9 @@ class Media(Base.Widget):
 
         if isinstance(self.content, (str, unicode)):
             if not self._content or self._content.path != self.content:
-                module_path = sys.modules[self.__module__].__file__
-                scripts_path = os.path.splitext(module_path)[0] + '.scripts'
-
                 class Content(object):
                     path = self.content
-                    file = open(os.path.join(scripts_path, path))
+                    file = open(os.path.join(Webwidgets.Utils.module_file_path(self.__module__), path))
                     filename = os.path.basename(self.content)
                     type = Webwidgets.Utils.FileHandling.extension_to_mime_type.get(
                         os.path.splitext(filename)[1][1:], 'application/octet-stream')
