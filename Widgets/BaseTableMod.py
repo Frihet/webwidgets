@@ -62,6 +62,7 @@ class FunctionCell(SpecialCell):
                    class="%(html_class)s"
                    %(disabled)s
                    name="%(html_id)s"
+                   title="%(title)s"
                    value="%(value)s">%(title)s</button>""" % {
                        'html_id': input_id,
                        'html_class': html_class,
