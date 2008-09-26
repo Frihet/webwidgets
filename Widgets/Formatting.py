@@ -333,6 +333,29 @@ class Media(Base.Widget):
     draw_inline_text__html = draw_inline_text
     draw_inline_text__xml = draw_inline_text
 
+class ImageButton(Base.SingleActionInput, Media):
+    """ImageButton, combination of SingleActionInput and Media with
+    inline_only set. Used to get clickable images."""
+
+    inline_only = True
+    
+    def get_renderer(self, renderer):
+        return self.draw_inline_image_button
+
+    def draw(self, output_options):
+        Base.SingleActionInput.draw(self, output_options)
+        return Media.draw(self, output_options)
+
+    def draw_inline_image_button(self, output_options):
+        return """<input %(html_attributes)s type="image" %(disabled)s name="%(name)s" value="1" src="%(src)s" %(width)s %(height)s />""" % {
+            'src': cgi.escape(self.calculate_output_url(output_options)),
+            'name': Webwidgets.Utils.path_to_id(self.path),
+            'width': self.get_html_option('width'),
+            'height': self.get_html_option('height'),
+            'disabled': ['', 'disabled="disabled"'][not self.get_active(self.path)],
+            'html_attributes': self.draw_html_attributes(self.path)
+            }
+
 class DownloadLink(Media):
     types = {'default': Webwidgets.Utils.subclass_dict(Media.types['default'],
                                                       {'inline':False})}
