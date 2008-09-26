@@ -123,6 +123,7 @@ class PasswordInput(Base.ValueInput):
     """Like StringInput, but hides the user input"""
     def draw(self, output_options):
         super(PasswordInput, self).draw(output_options)
+
         return '<input %(html_attributes)s type="password" name="%(name)s" value="%(value)s" %(disabled)s />' % {
             'html_attributes': self.draw_html_attributes(self.path),
             'name': Webwidgets.Utils.path_to_id(self.path),
@@ -142,6 +143,10 @@ class NewPasswordInput(Formatting.Html, Base.ValueInput):
      %(input2)s
     </span>
     """
+
+    msg_password_no_match = "Passwords don't match!"
+    """Message displayed when passwords entered do not match."""
+
     def __init__(self, session, win_id, **attrs):
         Formatting.Html.__init__(
             self, session, win_id,
@@ -151,14 +156,14 @@ class NewPasswordInput(Formatting.Html, Base.ValueInput):
 
     class Input(PasswordInput):
         ww_explicit_load = True
+        html_autocomplete = "off"
         
         def value_changed(self, path, value):
             if self.parent['input1'].value == self.parent['input2'].value:
-                #print "Passwords matches", self.parent['input1'].value, self.parent['input2'].value
                 self.parent.value = value
             else:
                 self.parent.value = None
-                self.parent.error = "Passwords don't match!"
+                self.parent.error = self._(msg_password_no_match)
             return True
 
         def get_active(self, path):

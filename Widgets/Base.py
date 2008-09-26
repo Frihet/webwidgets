@@ -759,6 +759,10 @@ class Widget(Object):
              WebUtils.HTMLForException.HTMLForException()))
 
     def draw_html_attributes(self, path):
+        """Renders list of all attributes set on self starting with
+        html_ not being html_attributes. Setting autocomplete="off" on
+        a Widget could be done by doing widget.html_autocomplete="off"."""
+
         attributes = [(name[5:], getattr(self, name))
                       for name in dir(self)
                       if name.startswith('html_') and name != 'html_attributes']
