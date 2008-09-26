@@ -510,3 +510,7 @@ def module_file_path(module, extension='.scripts'):
         scripts_path = os.path.splitext(module_path)[0] + extension
 
     return scripts_path
+
+def log_exception(exc):
+    # FIXME: Implement logging of exceptions
+    pass

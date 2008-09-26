@@ -75,12 +75,22 @@
      <w:dict id="buttons" Ok="ok" />
     </w:InfoDialog>
 
-    <w:InfoDialog id="RecoveryFailed"
+    <w:InfoDialog id="RecoveryNotFound"
      Head=":Html:Recovery failed">
      <w:Html id="Body">
       The username or e-mail address you provided was not found in our
       system. Please contact the system administrator to resolve this
       matter.
+     </w:Html>
+     <w:dict id="buttons" Ok="ok" />
+    </w:InfoDialog>
+
+    <w:InfoDialog id="RecoveryFailed"
+     Head=":Html:Recovery failed">
+     <w:Html id="Body">
+      The system failed to reset your password or send out an
+      notification email. Please contact the system administrator to
+      resolve this matter.
      </w:Html>
      <w:dict id="buttons" Ok="ok" />
     </w:InfoDialog>

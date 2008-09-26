@@ -19,7 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import Webwidgets, Webwidgets.Utils.Mail, traceback
+import Webwidgets, Webwidgets.Utils, Webwidgets.Utils.Mail, traceback
 
 class LogIn(object):
     global_session = True
@@ -95,26 +95,35 @@ Please log in and change your password as soon as possible.\r
                      elif not email:
                          email = self.login_widget.get_email_from_username(username)
 
-                     if not (username and email):
-                         result_dialog = self.RecoveryFailed
-                     else:
-                         result_dialog = self.RecoveryComplete
+                     result_dialog = self.RecoveryFailed
+                     if username and email:
                          new_password = self.login_widget.reset_password_for_user(username)
-
-                         mailer = Webwidgets.Utils.Mail.Mailer(
-                             host=self.login_widget.mail_host, user=self.login_widget.mail_username,
-                             password=self.login_widget.mail_password)
-                         mail = mailer.construct_mail(self.login_widget.recovery_email_template,
-                                                      {'from_email': self.login_widget.from_email,
-                                                       'to_email': email,
-                                                       'username': username,
-                                                       'new_password': new_password})
-                         mailer.send(self.login_widget.from_email, email, mail)
+                         if new_password:
+                             try:
+                                 self._send_reset_mail(username, new_password, email)
+                                 result_dialog = self.RecoveryComplete
+                             except Exception, exc:
+                                 Webwidgets.Utils.log_exception(exc)
+                     else:
+                         result_dialog = self.RecoveryNotFound
 
                      Webwidgets.DialogContainer.add_dialog_to_nearest(
                          self,
                          result_dialog(self.session, self.win_id))
                  Webwidgets.Dialog.selected(self, path, value)
+
+             def _send_reset_mail(self, username, password, email):
+                 """Send reset mail to user with new password."""
+                 mailer = Webwidgets.Utils.Mail.Mailer(
+                     host=self.login_widget.mail_host, user=self.login_widget.mail_username,
+                     password=self.login_widget.mail_password)
+                 mail = mailer.construct_mail(self.login_widget.recovery_email_template,
+                                              {'from_email': self.login_widget.from_email,
+                                               'to_email': email,
+                                               'username': username,
+                                               'new_password': password})
+                 mailer.send(self.login_widget.from_email, email, mail)
+
 
     def authenticate(self, username, password):
         raise NotImplementedError("You must override the authenticate() method of this widget!")

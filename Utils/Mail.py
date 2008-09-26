@@ -47,7 +47,9 @@ class Mailer(object):
             setattr(self, 'smtp_%s' % (key, ), value)
 
     def send(self, mail_from, mail_to, body):
-        """Send single mail."""
+        """Send single mail. Raises socket.error on connection
+        issues. Raises smtplib.SMTPAuthenticationError if
+        authentication fails."""
         smtp = self._init_connection()
 
         smtp.sendmail(mail_from, mail_to, body)
@@ -70,7 +72,7 @@ class Mailer(object):
             smtp.starttls()
 
         if self.smtp_user and self.smtp_password:
-            smtp.authenticate(self.smtp_user, self.smtp_password)
+            smtp.login(self.smtp_user, self.smtp_password)
 
         return smtp
 
