@@ -121,6 +121,11 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
     be done by e.g a database back-end.
     """
 
+    first_title = u'First page'
+    previous_title = u'Previous page'
+    next_title = u'Next page'
+    last_title = u'Last page'
+
     class WwModel(BaseTableMod.BaseTable.WwModel):
         argument_name = None
         functions = {}
@@ -327,19 +332,23 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                 'last': pages,
                 'back_active': ['', 'disabled="disabled"'][not back_active],
                 'forward_active': ['', 'disabled="disabled"'][not forward_active],
+                'first_title': self._(self.first_title, output_options),
+                'previous_title': self._(self.previous_title, output_options),
+                'next_title': self._(self.next_title, output_options),
+                'last_title': self._(self.last_title, output_options)
                 }
             
         return (back_active or forward_active, """
 <span class="left">
- <button type="submit" %(back_active)s id="%(html_id)s-_-first" name="%(html_id)s" value="%(first)s">&lt;&lt;</button>
- <button type="submit" %(back_active)s id="%(html_id)s-_-previous" name="%(html_id)s" value="%(previous)s">&lt;</button>
+ <button type="submit" %(back_active)s id="%(html_id)s-_-first" name="%(html_id)s" value="%(first)s" title="%(first_title)s>&lt;&lt;</button>
+ <button type="submit" %(back_active)s id="%(html_id)s-_-previous" name="%(html_id)s" value="%(previous)s" title="%(previous_title)s">&lt;</button>
 </span>
 <span class="center">
  %(page)s/%(pages)s
 </span>
 <span class="right">
- <button type="submit" %(forward_active)s id="%(html_id)s-_-next" name="%(html_id)s" value="%(next)s">&gt;</button>
- <button type="submit" %(forward_active)s id="%(html_id)s-_-last" name="%(html_id)s" value="%(last)s">&gt;&gt;</button>
+ <button type="submit" %(forward_active)s id="%(html_id)s-_-next" name="%(html_id)s" value="%(next)s title="%(next_title)s">&gt;</button>
+ <button type="submit" %(forward_active)s id="%(html_id)s-_-last" name="%(html_id)s" value="%(last)s" title="%(last_title)s">&gt;&gt;</button>
 </span>
 """ % info)
 
@@ -363,6 +372,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                    class="%(html_class)s"
                    %(disabled)s
                    name="%(html_id)s"
+                   title="%(title)s"
                    value="selected">%(title)s</button>""" % {
                    'html_id': Webwidgets.Utils.path_to_id(path),
                    'html_class': html_class,
@@ -429,7 +439,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
             else:
                 headings.append("""
 <th id="%(html_id)s-_-head-%(column)s" class="column %(column)s %(ww_classes)s">
- <button type="submit" id="%(html_id)s-_-sort-%(column)s" %(disabled)s name="%(html_id)s-_-sort" value="%(sort)s">%(caption)s</button>
+ <button type="submit" id="%(html_id)s-_-sort-%(column)s" %(disabled)s name="%(html_id)s-_-sort" value="%(sort)s title="%(caption)s">%(caption)s</button>
 </th>
 """ % info)
 

@@ -282,6 +282,7 @@ class TabbedView(SwitchingView, Base.ActionInput):
                                       %(disabled)s
                                       id="%(html_id)s"
                                       name="%(name)s"
+                                      title="%(caption)s"
                                       value="%(page)s">%(caption)s</button></li>
                                 """ % info)
                 else:

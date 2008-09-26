@@ -238,6 +238,7 @@ class ButtonArray(Base.MultipleActionInput):
                        name="%(name)s"
                        id="%(name)s-_-%(value)s"
                        value="%(value)s"
+                       title="%(title)s"
                        >%(title)s</button>""" %
                    {'name': input_id,
                     'title': self._(title, output_options),
