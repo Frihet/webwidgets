@@ -19,7 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import Webwidgets, smtplib, traceback
+import Webwidgets, Webwidgets.Utils.Mail, traceback
 
 class LogIn(object):
     global_session = True
@@ -28,18 +28,17 @@ class LogIn(object):
     debug_errors = False
     is_login_widget = True
     
-    recovery_email_template = """
-From: %(from_email)s
-To: %(to_email)s
-Subject: Recovered account information
-
-You have requested to recover your account information. Your password
-has been reset.
-
-Your username: %(username)s
-Your new password: %(new_password)s
-
-Please log in and change your password as soon as possible.
+    recovery_email_template = """From: %(from_email)s\r
+To: %(to_email)s\r
+Subject: Recovered account information\r
+\r
+You have requested to recover your account information. Your password\r
+has been reset.\r
+\r
+Your username: %(username)s\r
+Your new password: %(new_password)s\r
+\r
+Please log in and change your password as soon as possible.\r
 """
     from_email = 'no-reply@localhost'
 
@@ -102,20 +101,15 @@ Please log in and change your password as soon as possible.
                          result_dialog = self.RecoveryComplete
                          new_password = self.login_widget.reset_password_for_user(username)
 
-                         smtp = smtplib.SMTP()
-                         smtp.connect(self.login_widget.mail_host)
-                         if self.login_widget.mail_username and self.login_widget.mail_password:
-                             smtp.login(self.login_widget.mail_username, self.login_widget.mail_password)
-
-                         email_content = self.login_widget.recovery_email_template % {
-                             'from_email': self.login_widget.from_email,
-                             'to_email': email,
-                             'username': username,
-                             'new_password': new_password}
-                         smtp.sendmail(
-                             self.login_widget.from_email, email,
-                             email_content)
-                         smtp.quit()
+                         mailer = Webwidgets.Utils.Mail.Mailer(
+                             host=self.login_widget.mail_host, user=self.login_widget.mail_username,
+                             password=self.login_widget.mail_password)
+                         mail = mailer.construct_mail(self.login_widget.recovery_email_template,
+                                                      {'from_email': self.login_widget.from_email,
+                                                       'to_email': email,
+                                                       'username': username,
+                                                       'new_password': new_password})
+                         mailer.send(self.login_widget.from_email, email, mail)
 
                      Webwidgets.DialogContainer.add_dialog_to_nearest(
                          self,
