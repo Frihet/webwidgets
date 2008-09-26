@@ -125,6 +125,12 @@ input.error,
  margin: 0;
 }
 
+.Webwidgets-Widgets-BaseTableMod-BaseTable > table > tbody > tr > td > .Webwidgets-Widgets-Formatting-Label,
+.Webwidgets-Widgets-BaseTableMod-BaseTable > table > tbody > tr > td > .Webwidgets-Widgets-Formatting-Label > div {
+ display: inline;
+ padding: 0px;
+}
+
 .Webwidgets-Widgets-TableMod-Table {
  padding: 2px;
 }
