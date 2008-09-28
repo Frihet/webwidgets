@@ -536,15 +536,15 @@ def set_log_exception_path(path):
         globals()['LOG_EXCEPTION_PATH'] = path
 
 def log_exception(exc):
-    """Log exception to file and return exception ID. On failure or if
-    LOG_EXCEPTION_PATH is empty/None return None."""
+    """Log exception to file and return exception (exception, ID). On
+    failure or if LOG_EXCEPTION_PATH is empty/None return (exception, None)."""
 
     if not LOG_EXCEPTION_PATH:
         return None
 
     try:
-        # FIXME: Format exception removing ourself from the stack and
-        # render a string
+        # FIXME: Format exception removing ourself and caller from the
+        # stack and render a string
         exc_string = str(exc)
         exc_id, exc_fo = _log_exception_new()
         if exc_id and exc_fo:
@@ -555,7 +555,7 @@ def log_exception(exc):
     except:
         exc_id = None
 
-    return exc_id
+    return (exc, exc_id)
 
 def _log_exception_new():
     """Create a new exception file with ID id and return (id, fo)

@@ -328,9 +328,15 @@ class RowsComposite(Base.CachingComposite):
         """This filter groups all filters that provides rows from some
         kind of back-end - e.g. a database query, a redirect from
         another table etc.""" 
-        
+
         WwFilters = ["RowsSimpleModelFilter"]
         class RowsSimpleModelFilter(RowsSimpleModelFilter): pass
+
+    class SourceErrorFilter(Base.Filter):
+        """This filter is before the SourceFilter and is there to be
+        able to catch errors in the data fetching SourceFilters."""
+
+        WwFilters = []
 
     class RowsFilters(Base.Filter):
         """This filter groups all filters that mangle rows in some way
@@ -346,7 +352,7 @@ class RowsComposite(Base.CachingComposite):
         WwFilters = ["RowsPrintableFilter"]
         class RowsPrintableFilter(RowsPrintableFilter): pass
 
-    WwFilters = ["OutputOptionsFilters", "RowsFilters", "SourceFilters"]
+    WwFilters = ["OutputOptionsFilters", "RowsFilters", "SourceErrorFilter", "SourceFilters"]
 
     class RowsRowModelWrapper(Base.PersistentWrapper):
         """This class is a wrapper that all rows are wrapped in by
