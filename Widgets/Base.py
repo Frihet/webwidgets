@@ -35,6 +35,7 @@ import Webwidgets.Utils.Threads
 import traceback, WebUtils.HTMLForException, pdb
         
 debug_exceptions = False
+print_exceptions = False
 log_exceptions = True
 
 class NoOldValue(object):
@@ -577,6 +578,9 @@ class Widget(Object):
     """Displayed by a corresponding L{Label} if set to non-None.
     See that widget for further information."""
 
+    log_id_msg = u"""<div class="log-id">Log id for this exception is: %(log_id)s</div>"""
+    """Error message displayed on widget error."""
+
     def __init__(self, session, win_id, **attrs):
         """Creates a new widget
         
@@ -738,7 +742,7 @@ class Widget(Object):
         information on the message passing mechanism."""        
         self.session.notify(self, message, args, kw, path)
 
-    def append_exception(self):
+    def append_exception(self, message=u''):
         """Appends the current exception to the exceptions of this
         widget. This will be shown to the user next to the widget (or
         instead of the widget if this was from the draw method
@@ -747,16 +751,26 @@ class Widget(Object):
         Do not ever let exceptions propagate so that they kill of the
         whole page!
         """
-        if log_exceptions:
-             traceback.print_exc()
+        if print_exceptions:
+            traceback.print_exc()
+        log_id_msg = ''
+        if Webwidgets.Utils.is_log_exceptions():
+            log_id = Webwidgets.Utils.log_exception()
+            if log_id:
+                log_id_msg = self._(self.log_id_msg, {}) % {'log_id': log_id}
+
         if debug_exceptions:
             # Uggly hack around a bug in pdb (it apparently depends on
             # and old sys-API)
             sys.last_traceback = sys.exc_info()[2]
             pdb.pm()
+
+        if message:
+            message = "<div class='log-message'>%s</div>" % (message, )
+
         self.system_errors.append(
             (sys.exc_info()[1],
-             WebUtils.HTMLForException.HTMLForException()))
+             log_id_msg + message + WebUtils.HTMLForException.HTMLForException()))
 
     def draw_html_attributes(self, path):
         """Renders list of all attributes set on self starting with

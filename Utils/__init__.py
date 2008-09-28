@@ -24,7 +24,7 @@
 Webwidgets and in implementing new widgets and other objects.
 """
 
-import itertools, types, weakref, sys, os, os.path
+import itertools, types, weakref, sys, os, os.path, traceback, syslog
 
 debug_class_loading = False
 
@@ -517,6 +517,9 @@ function. If this is None exceptions are not logged."""
 LOG_EXCEPTION_MAX_LOG=65534
 """Max number of logged exception files."""
 
+def is_log_exceptions():
+    return not not LOG_EXCEPTION_PATH
+
 def get_log_exception_path():
     """Return path exception directory."""
     return LOG_EXCEPTION_PATH
@@ -535,7 +538,7 @@ def set_log_exception_path(path):
 
         globals()['LOG_EXCEPTION_PATH'] = path
 
-def log_exception(exc):
+def log_exception():
     """Log exception to file and return exception (exception, ID). On
     failure or if LOG_EXCEPTION_PATH is empty/None return (exception, None)."""
 
@@ -543,19 +546,21 @@ def log_exception(exc):
         return None
 
     try:
-        # FIXME: Format exception removing ourself and caller from the
-        # stack and render a string
-        exc_string = str(exc)
-        exc_id, exc_fo = _log_exception_new()
-        if exc_id and exc_fo:
-            try:
+        exc_string = traceback.format_exc()
+
+        try:
+            exc_id, exc_fo = _log_exception_new()
+            if exc_id and exc_fo:
                 exc_fo.write(exc_string)
-            finally:
+
+                syslog.syslog('%s exception logged with id %s' % (str(sys.exc_info()[1]), exc_id))
+        finally:
+            if exc_fo:
                 exc_fo.close()
     except:
         exc_id = None
 
-    return (exc, exc_id)
+    return exc_id
 
 def _log_exception_new():
     """Create a new exception file with ID id and return (id, fo)

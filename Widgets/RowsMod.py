@@ -336,7 +336,25 @@ class RowsComposite(Base.CachingComposite):
         """This filter is before the SourceFilter and is there to be
         able to catch errors in the data fetching SourceFilters."""
 
-        WwFilters = []
+        WwFilters = ['CatchErrorFilter']
+
+        class CatchErrorFilter(Webwidgets.Filter):
+            sort_error_msg = u'Unable to sort with specified order, resetting sort order'
+            """Message displayed when get_rows fails, assume it is a sorting issue"""
+
+            def get_rows(self, **kwargs):
+                """Get rows from database, resetting sort order if
+                something goes wrong."""
+                try:
+                    result = self.ww_filter.get_rows(**kwargs)
+                except Exception, exc:
+                    # Reset sort order, try again
+                    self.ww_filter.sort = getattr(self.ww_filter, 'default_sort', [])
+                    result = self.ww_filter.get_rows(**kwargs)
+                    self.object.append_exception(self.sort_error_msg)
+
+                return result
+
 
     class RowsFilters(Base.Filter):
         """This filter groups all filters that mangle rows in some way
