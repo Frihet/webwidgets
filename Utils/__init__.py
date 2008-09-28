@@ -24,7 +24,7 @@
 Webwidgets and in implementing new widgets and other objects.
 """
 
-import itertools, types, weakref, sys, os.path
+import itertools, types, weakref, sys, os, os.path
 
 debug_class_loading = False
 
@@ -511,6 +511,66 @@ def module_file_path(module, extension='.scripts'):
 
     return scripts_path
 
+LOG_EXCEPTION_PATH=None
+"""Path to directory where exceptions are logged with log_exception
+function. If this is None exceptions are not logged."""
+LOG_EXCEPTION_MAX_LOG=65534
+"""Max number of logged exception files."""
+
+def get_log_exception_path():
+    """Return path exception directory."""
+    return LOG_EXCEPTION_PATH
+
+def set_log_exception_path(path):
+    """Set path to exception directory creating it if it does not
+    exist."""
+    globals()['LOG_EXCEPTION_PATH'] = None
+
+    if path:
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        if not os.path.isdir(path):
+            raise ValueError('%s path is not a directory' % (path, ))
+
+        globals()['LOG_EXCEPTION_PATH'] = path
+
 def log_exception(exc):
-    # FIXME: Implement logging of exceptions
-    pass
+    """Log exception to file and return exception ID. On failure or if
+    LOG_EXCEPTION_PATH is empty/None return None."""
+
+    if not LOG_EXCEPTION_PATH:
+        return None
+
+    try:
+        # FIXME: Format exception removing ourself from the stack and
+        # render a string
+        exc_string = str(exc)
+        exc_id, exc_fo = _log_exception_new()
+        if exc_id and exc_fo:
+            try:
+                exc_fo.write(exc_string)
+            finally:
+                exc_fo.close()
+    except:
+        exc_id = None
+
+    return exc_id
+
+def _log_exception_new():
+    """Create a new exception file with ID id and return (id, fo)
+    tuple where fo is an open file object."""
+    exc_id = exc_fo = None
+
+    if LOG_EXCEPTION_PATH:
+        # FIXME: Make something like mkstemp here to make this safe
+
+        i = 0
+        while not exc_fo and i < LOG_EXCEPTION_MAX_LOG:
+            path = os.path.join(LOG_EXCEPTION_PATH, '%05d.info' % (i, ))
+            if not os.path.exists(path):
+                exc_fo = open(path, 'w')
+                exc_id = '%05d' % (i, )
+            i += 1
+
+    return (exc_id, exc_fo)
