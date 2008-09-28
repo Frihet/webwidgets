@@ -421,15 +421,25 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
 
         # Column headings
         for column, definition in visible_columns.iteritems():
-            sort_active = self.get_active(sort_path + [column])
+            # Disable column due to sorting or it being active, not
+            # using default value in filter here due to filter
+            # ordering issues.
+            if not getattr(self.ww_filter, 'column_is_sortable', lambda x: True)(column):
+                disabled = 'disabled="nonsortable"'
+            elif self.get_active(sort_path + [column]):
+                disabled = ''
+            else:
+                disabled = 'disabled="disabled"'
+
             info = {'input_id': input_id,
                     'html_id': widget_id,
                     'column': column,
-                    'disabled': ['disabled="disabled"', ''][sort_active],
+                    'disabled': disabled,
                     'caption': self._(definition["title"], output_options),
                     'ww_classes': sort_to_classes(self.ww_filter.sort, reverse_dependent_columns.get(column, column)),
                     'sort': sort_to_string(set_sort(self.ww_filter.user_sort, reverse_dependent_columns.get(column, column)))
                     }
+
             if 'printable_version' in output_options:
                 headings.append("""
 <th id="%(html_id)s-_-head-%(column)s" class="column %(column)s %(ww_classes)s">
