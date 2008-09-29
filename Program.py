@@ -31,7 +31,7 @@ import cgi, urllib, types, os, sys
 import Utils, Widgets, AccessManager, Constants
 import hotshot, pdb, traceback
 
-debug_exceptions = True
+debug_exceptions = False
 
 def decode_field(value):
     if isinstance(value, types.StringType):
