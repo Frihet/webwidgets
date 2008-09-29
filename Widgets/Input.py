@@ -482,6 +482,8 @@ class FieldStorageInput(Base.ValueInput):
 
 class NotificationError(Base.SingleActionInput):
     error = Exception("Example error")
+    ww_bind_callback = "dont-require"
+    
 
     def field_input(self, path, string_value):
         self.notify('raise_error')

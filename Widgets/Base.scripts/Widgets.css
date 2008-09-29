@@ -61,6 +61,7 @@ input.error,
  border: 3px solid red;
  padding: 5px;
  margin: 5px;
+ background: white;
 }
 .system-errors > .header {
  border: 1px solid red;

@@ -35,10 +35,10 @@
     <w:Message id="Message" />
     <w:Fieldgroup id="CredentialsGroup">
      <w:Field id="Username" Label=":Text:Username">
-      <w:StringInput id="Field" field_name="username" />
+      <w:StringInput id="Field" field_name="username" bind="dont-require" />
      </w:Field>
      <w:Field id="Password" Label=":Text:Password">
-      <w:PasswordInput id="Field" field_name="password" />
+      <w:PasswordInput id="Field" field_name="password" bind="dont-require" />
      </w:Field>
     </w:Fieldgroup>
    </w:Html>
@@ -53,10 +53,10 @@
      with your account information will be sent to your e-mail address.
      <w:Fieldgroup id="IdentitiesGroup">
       <w:Field id="Username" Label=":Text:Username">
-       <w:StringInput id="Field" field_name="recover_username" />
+       <w:StringInput id="Field" field_name="recover_username" bind="dont-require" />
       </w:Field>
       <w:Field id="EMail" Label=":Text:E-Mail">
-       <w:StringInput id="Field" field_name="recover_email" />
+       <w:StringInput id="Field" field_name="recover_email" bind="dont-require" />
       </w:Field>
      </w:Fieldgroup>
     </w:Html>

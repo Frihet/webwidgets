@@ -181,7 +181,7 @@ def merge_child_widgets(module, widget, binding, attributes={}, name=None, inden
                  and issubclass(widget_member, Webwidgets.Widget)
                  and isinstance(binding_member, type)):
                 merged_members[child_name] = merge_child_widgets(module, widget_member, binding_member, indent = indent + '    ')
-            elif getattr(binding_member, "ww_bind", None) == "require":
+            elif getattr(binding_member, "ww_bind_widget", None) == "require":
                 raise Exception("No child widget for binding %s in widget %s" % (binding_member, widget))
 
     # Override merged members with attributes from WWML
@@ -202,7 +202,26 @@ def merge_child_widgets(module, widget, binding, attributes={}, name=None, inden
                 str(e)))
 
 
+wwml_bind_status_names = ['require',
+                          'forbid',
+                          'dont-require',
+                          'fallback']
+
 def generate_value(type_name, text, attributes, module, using, class_path, bind_context):
+    """Binding:
+
+    Source:   Wwml         Widget class        Callback class       Result: Bind is
+    Variable: bind         ww_bind_callback    ww_bind_widget
+              require                                               required
+              forbid                                                forbidden
+              dont-require                     dont-require         allowed
+              dont-require                     require              required
+              fallback     forbid                                   forbidden
+              fallback     require                                  required
+              fallback     dont-require        dont-require         allowed
+              fallback     dont-require        require              required
+    """
+
     if type_name == 'false': value = False
     elif type_name == 'true': value = True
     elif type_name == 'none': value = None
@@ -223,58 +242,83 @@ def generate_value(type_name, text, attributes, module, using, class_path, bind_
     elif type_name == 'list':
         value = [value for name, value in attributes.iteritems()
                  if name not in ('classid', 'id')]
-    elif type_name == 'wwml':
-        value = module
-        for k, v in attributes.iteritems():
-            setattr(value, k, v)
-        attributes['classid'] = 'wwml'
     else:
         callback_name = '.'.join(bind_context)
         if debug_subclass:
-            print "WWML: class %s(%s, %s): pass" % (attributes['classid'], callback_name, type_name)
-            print "WWML:     using: %s" % ' '.join(using)
-        node_value = Utils.load_class(type_name, using, module = module)
-        if isinstance(node_value, types.TypeType) and issubclass(node_value, Webwidgets.Widgets.Base.Widget):
-            try:
-                binding = Utils.load_class(callback_name, using, module = module)
-            except ImportError, e:
-                binding = None
+            if type_name != 'wwml':
+                print "WWML: class %s(%s, %s): pass" % (attributes['classid'], callback_name, type_name)
+                print "WWML:     using: %s" % ' '.join(using)
 
-            if 'html' not in attributes and hasattr(node_value, '__wwml_html_override__') and node_value.__wwml_html_override__:
-                attributes['html'] = text
+        wwml_bind_status = attributes.get('bind', 'fallback')
 
-            if ':pre' in attributes or ':post' in attributes:
-                if 'html' not in attributes:
-                    attributes['html'] = getattr(node_value, 'html', '')
+        node_value = None
+        if type_name != 'wwml':
+            node_value = Utils.load_class(type_name, using, module = module)
+        widget_bind_status = getattr(node_value, 'ww_bind_callback', "dont-require")
 
-                if ':pre' in attributes:
-                    attributes['html'] = attributes[':pre'] + attributes['html']
-                    del attributes[':pre']
-                if ':post' in attributes:
-                    attributes['html'] = attributes['html'] + attributes[':post']
-                    del attributes[':post']
-                    
-            if 'id' not in attributes:
-                attributes['ww_explicit_load'] = True
-            if '__wwml_html_override__' not in attributes:
-                attributes['__wwml_html_override__'] = False
-            attributes['__module__'] = module.__name__
+        bind_status = widget_bind_status
+        if wwml_bind_status != "fallback":
+            bind_status = wwml_bind_status
+        
+        binding = None
+        try:
+            binding = Utils.load_class(callback_name, using, module = module)
+        except ImportError, e:
+            if bind_status == "require":
+                print "widget_bind_status", widget_bind_status
+                print "wwml_bind_status", wwml_bind_status
+                raise
 
-            # Create class
-            if debug_childmerge:
-                print "MERGE TOP LEVEL", node_value, binding, module
-            value = merge_child_widgets(module, node_value, binding, attributes, str(attributes['classid']))
+        callback_bind_status = getattr(binding, 'ww_bind_widget', "fallback")
+        if callback_bind_status != "fallback":
+            bind_status = callback_bind_status
 
-        elif hasattr(node_value, '__iter__'):
-            value = Utils.OrderedDict(attributes)
-            if 'classid' in value: del value['classid']
-            if 'id' in value: del value['id']
-            if hasattr(node_value, 'iteritems'):
-                value = Utils.subclass_dict(node_value, value)
-            else:
-                value = Utils.subclass_list(node_value, value.values())
+        if bind_status == "forbid":
+            raise Exception("Binding forbidden but present anyway for %s" % (type_name,))
+
+        if type_name == 'wwml':
+            value = module
+            for k, v in attributes.iteritems():
+                setattr(value, k, v)
+            attributes['classid'] = 'wwml'
         else:
-            value = node_value
+            if isinstance(node_value, types.TypeType) and issubclass(node_value, Webwidgets.Widgets.Base.Widget):
+                if 'html' not in attributes and hasattr(node_value, '__wwml_html_override__') and node_value.__wwml_html_override__:
+                    attributes['html'] = text
+
+                if ':pre' in attributes or ':post' in attributes:
+                    if 'html' not in attributes:
+                        attributes['html'] = getattr(node_value, 'html', '')
+
+                    if ':pre' in attributes:
+                        attributes['html'] = attributes[':pre'] + attributes['html']
+                        del attributes[':pre']
+                    if ':post' in attributes:
+                        attributes['html'] = attributes['html'] + attributes[':post']
+                        del attributes[':post']
+
+                if 'id' not in attributes:
+                    attributes['ww_explicit_load'] = True
+                if '__wwml_html_override__' not in attributes:
+                    attributes['__wwml_html_override__'] = False
+                attributes['ww_bind_callback'] = 'dont-require'
+                attributes['__module__'] = module.__name__
+
+                # Create class
+                if debug_childmerge:
+                    print "MERGE TOP LEVEL", node_value, binding, module
+                value = merge_child_widgets(module, node_value, binding, attributes, str(attributes['classid']))
+
+            elif hasattr(node_value, '__iter__'):
+                value = Utils.OrderedDict(attributes)
+                if 'classid' in value: del value['classid']
+                if 'id' in value: del value['id']
+                if hasattr(node_value, 'iteritems'):
+                    value = Utils.subclass_dict(node_value, value)
+                else:
+                    value = Utils.subclass_list(node_value, value.values())
+            else:
+                value = node_value
 
     return value
 
@@ -308,19 +352,13 @@ def generate_value_for_node(module, node, using = [], class_path = [], bind_cont
     if 'using' in attributes:
         using = attributes['using'].split(' ') + using
 
-    # If bind="require" we ignore it, for all purposes except the
-    # forced loading below.
-    if 'bind' in attributes and attributes['bind'] != 'require':
+    # If bind is the name of a class or module, set that as
+    # bind-context, otherwize append the name of the widget to the
+    # bind context of the parent widget.
+    if attributes.get('bind', 'fallback') not in wwml_bind_status_names:
         bind_context = attributes['bind'].split('.')
     else:
         bind_context = bind_context + [attributes.get('classid', '__unknown__')]
-
-    if 'bind' in attributes:
-        # Just check that it exists and barf otherwize - we'll load it
-        # again later when we actually need it or a part of it (at
-        # this point, it does not matter if the name points to a class
-        # or just to a module).
-        Utils.load_class('.'.join(bind_context), using, module = module)
 
     class_path = class_path + [attributes.get('classid', '__unknown__')]
 
@@ -330,12 +368,12 @@ def generate_value_for_node(module, node, using = [], class_path = [], bind_cont
     return (attributes.get('id', None),
             attributes.get('classid', None),
             generate_value(node.localName,
-                          text,
-                          attributes,
-                          module,
-                          using,
-                          class_path,
-                          bind_context))
+                           text,
+                           attributes,
+                           module,
+                           using,
+                           class_path,
+                           bind_context))
 
 
 def generate_widgets_from_file(modulename, filename, file, path = None, bind_context = ''):

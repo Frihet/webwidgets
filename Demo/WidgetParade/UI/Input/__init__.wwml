@@ -35,7 +35,7 @@
    <w:FileEditor id="FilEditorTest" />
 
    <h1>TextFileEditor</h1>
-   <w:TextFileEditor id="TextFilEditorTest" />
+   <w:TextFileEditor id="TextFilEditorTest" bind="dont-require" />
 
    <h1>FileEditorList</h1>
    <w:FileEditorList id="FilEditorListTest" />
@@ -43,18 +43,18 @@
   </w:Html>
 
   <w:Html id="Radio" title="Radio buttons">
-   <w:RadioButtonGroup id="Drink" />
-   <w:RadioButtonGroup id="Food" />
+   <w:RadioButtonGroup id="Drink" bind="dont-require" />
+   <w:RadioButtonGroup id="Food" bind="dont-require" />
 
    <w:Html id="Hot">
     <h1>Hot stuff</h1>
-    <w:Field id="Tea" Label=":Html:Tea"><w:RadioInput id="Field" group=":path:3/Drink" /></w:Field>
-    <w:Field id="Ratatouille" Label=":Html:Ratatouille"><w:RadioInput id="Field" group=":path:3/Food" /></w:Field>
+    <w:Field id="Tea" Label=":Html:Tea"><w:RadioInput id="Field" group=":path:3/Drink" bind="dont-require" /></w:Field>
+    <w:Field id="Ratatouille" Label=":Html:Ratatouille"><w:RadioInput id="Field" group=":path:3/Food" bind="dont-require" /></w:Field>
    </w:Html>
    <w:Html id="Cold">
     <h1>Cold stuff</h1>
-    <w:Field id="Coce" Label=":Html:Coce"><w:RadioInput id="Field" group=":path:3/Drink" /></w:Field>
-    <w:Field id="Icecream" Label=":Html:Icecream"><w:RadioInput id="Field" group=":path:3/Food" /></w:Field>
+    <w:Field id="Coce" Label=":Html:Coce"><w:RadioInput id="Field" group=":path:3/Drink" bind="dont-require" /></w:Field>
+    <w:Field id="Icecream" Label=":Html:Icecream"><w:RadioInput id="Field" group=":path:3/Food" bind="dont-require" /></w:Field>
    </w:Html>
 
   </w:Html>
@@ -62,7 +62,7 @@
 
   <w:Fieldgroup id="Data" title="Data input">
    <w:Field id="LongText" Label=":Html:A longer text">
-    <w:StringInput id="Field" cols=":integer:20" rows=":integer:10">
+    <w:StringInput id="Field" cols=":integer:20" rows=":integer:10" bind="dont-require" >
      <w:string id="value">
 Hej allla barn,
 nu är det branprogram!
@@ -74,7 +74,7 @@ Titta här skall ni få se vad farbror frej tar fram!
     <w:Html id="Field" error=":none" />
    </w:Field>
    <w:Field id='NewPwd' Label=':Text:New password'>
-    <w:NewPasswordInput id="Field" value="foo" />
+    <w:NewPasswordInput id="Field" value="foo" bind="dont-require" />
    </w:Field>
    <w:Field id="UpdatePwd" Label=":Html:Update passwords">
     <w:Html id="Field" error=":none">
@@ -83,7 +83,7 @@ Titta här skall ni få se vad farbror frej tar fram!
     </w:Html>
    </w:Field>
    <w:Field id="SomeDate" Label=":Html:Some date">
-    <w:DateInput id="Field" value=":time:1998-01-01 22:33:34" />
+    <w:DateInput id="Field" value=":time:1998-01-01 22:33:34" bind="dont-require" />
    </w:Field>
    <w:Field id="Address" Label=":Html:Some address">
     <w:AddressInput id="Field" error=":none" />

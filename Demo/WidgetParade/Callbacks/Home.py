@@ -29,3 +29,6 @@ class Home(object):
                                          "../../../Docs/Logo.png"))
         content.file.seek(0)
 
+
+#     class SubclassWithNoWidget(object):
+#         ww_bind_widget = "require"

@@ -25,7 +25,7 @@
 
  <w:Html id="CssFileEditor" top_level="div">
   <div><w:TextFileEditor id="input" mime_type="text/css" /></div>
-  <div><w:Button id="update" title="Update" /></div>
+  <div><w:Button id="update" title="Update" bind="dont-require" /></div>
   <div><w:Media id="preview" /></div>
  </w:Html>
 </w:wwml>

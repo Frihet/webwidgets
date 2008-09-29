@@ -27,7 +27,7 @@
  <w:Tabset id="Config" title="Configuration">
   <w:Html id="language" title="Language">
    <div>Current language(s): <w:Widget id="language" /></div>
-   <div><w:LanguageSelector id="sel" /><w:UpdateButton id="update" /></div>
+   <div><w:LanguageSelector id="sel" /><w:UpdateButton id="update" bind="dont-require" /></div>
   </w:Html>
  </w:Tabset>
 </w:wwml>

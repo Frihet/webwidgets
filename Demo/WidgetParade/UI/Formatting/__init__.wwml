@@ -27,7 +27,7 @@
  >
  <w:Tabset id="Formatting" title="Output">
   <w:Html id="table" title="Tables">
-   <w:Table id="ListTest" argument_name='test' rows_per_page=":integer:20">
+   <w:Table id="ListTest" argument_name='test' rows_per_page=":integer:20" bind="dont-require">
     <w:odict id="columns">
      <w:string id="foo">Fooish foo</w:string>
      <w:string id="functs"></w:string>
@@ -73,14 +73,14 @@
      <w:dict id="row7" foo="48" bar="11" fie="52" x="X" y="Y" z="Z" />
      <w:dict id="row8" foo="Bertil" bar="Bengtsson" fie="57" x="X" y="Y" z="Z" />
      <w:dict id="row9" x="X" y="Y" z="Z">
-      <w:StringInput id="foo" value="Anders" />
-      <w:StringInput id="bar" value="And" />
-      <w:StringInput id="fie" value="Mumum xxx" />
+      <w:StringInput id="foo" value="Anders" bind="dont-require" />
+      <w:StringInput id="bar" value="And" bind="dont-require" />
+      <w:StringInput id="fie" value="Mumum xxx"  bind="dont-require"/>
      </w:dict>
      <w:dict id="row10" x="X" y="Y" z="Z">
-      <w:StringInput id="foo" value="Cesar" />
-      <w:StringInput id="bar" value="And" />
-      <w:StringInput id="fie" value="Mumum xxx" />
+      <w:StringInput id="foo" value="Cesar" bind="dont-require" />
+      <w:StringInput id="bar" value="And" bind="dont-require" />
+      <w:StringInput id="fie" value="Mumum xxx" bind="dont-require" />
      </w:dict>
     </w:list>
    </w:Table>

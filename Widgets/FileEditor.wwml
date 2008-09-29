@@ -52,7 +52,7 @@
 
   <w:Html id="Upload" top_level="div">
    <w:Label id="FileLabel" target="1/File" Label=":Text:Upload file: " />
-   <w:FileInput id="File">
+   <w:FileInput id="File" bind="dont-require">
     <w:Html id="Preview" />
     <w:Html id="Clear" />
    </w:FileInput>

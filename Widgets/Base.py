@@ -987,7 +987,7 @@ class Text(Widget):
     """
 
     __wwml_html_override__ = True
-    """Let Wwml-defined subww_classes override the html attribute"""
+    """Let Wwml-defined subclasses override the html attribute"""
 
     html = ""
 
@@ -1409,6 +1409,9 @@ class Input(Widget):
     __input_dominants__ = ()
     """Other input widgets that should handle simultaneous input from
     the user _after_ this widget."""    
+
+    ww_bind_callback = "require"
+    
 
     class HtmlClass(Widget.HtmlClass):
         def __get__(self, instance, owner):
