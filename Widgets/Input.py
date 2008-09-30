@@ -112,6 +112,22 @@ class FloatInput(AbstractNumberInput):
     error_string = "Numbers must only contain the digits 0-9, period '.' and the exp. separator 'e'"
     str_to_num = staticmethod(Webwidgets.Utils.Locale.atof)
 
+class AbstractPercentageInput(FloatInput):
+    def num_to_str(self, locale_spec, num):
+        return FloatInput.num_to_str(locale_spec, num / self.unit_value)
+    def str_to_num(self, locale_spec, str):
+        return FloatInput.str_to_num(locale_spec, str) * self.unit_value
+    def draw(self, output_options):
+        return FloatInput.draw(self, output_options) + self.postfix
+
+class PercentageInput(AbstractPercentageInput):
+    unit_value = 0.01
+    postfix = '%'
+    
+class PromilleInput(AbstractPercentageInput):
+    unit_value = 0.001
+    postfix = u'‰'
+
 class PasswordInput(Base.ValueInput):
     """Like StringInput, but hides the user input"""
     def draw(self, output_options):

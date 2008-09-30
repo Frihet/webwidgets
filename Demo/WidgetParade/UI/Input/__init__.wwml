@@ -76,6 +76,9 @@ Titta här skall ni få se vad farbror frej tar fram!
    <w:Field id="IntInput" Label=":Html:Integer input">
     <w:IntegerInput id="Field" bind="dont-require" />
    </w:Field>
+   <w:Field id="PercentageInput" Label=":Html:Percentage input">
+    <w:PercentageInput id="Field" bind="dont-require" />
+   </w:Field>
    <w:Field id="LastPwd" Label=":Html:Last password">
     <w:Html id="Field" error=":none" />
    </w:Field>
