@@ -70,6 +70,12 @@ Titta här skall ni få se vad farbror frej tar fram!
      </w:string>
     </w:StringInput>
    </w:Field>
+   <w:Field id="FloatInput" Label=":Html:Float input">
+    <w:FloatInput id="Field" bind="dont-require" />
+   </w:Field>
+   <w:Field id="IntInput" Label=":Html:Integer input">
+    <w:IntegerInput id="Field" bind="dont-require" />
+   </w:Field>
    <w:Field id="LastPwd" Label=":Html:Last password">
     <w:Html id="Field" error=":none" />
    </w:Field>
