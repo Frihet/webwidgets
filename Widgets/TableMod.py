@@ -449,7 +449,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
             else:
                 headings.append("""
 <th id="%(html_id)s-_-head-%(column)s" class="column %(column)s %(ww_classes)s">
- <button type="submit" id="%(html_id)s-_-sort-%(column)s" %(disabled)s name="%(html_id)s-_-sort" value="%(sort)s title="%(caption)s">%(caption)s</button>
+ <button type="submit" id="%(html_id)s-_-sort-%(column)s" %(disabled)s name="%(html_id)s-_-sort" value="%(sort)s" title="%(caption)s">%(caption)s</button>
 </th>
 """ % info)
 
