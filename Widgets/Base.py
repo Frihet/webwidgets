@@ -927,7 +927,7 @@ class Widget(Object):
             try:
                 return parse_languages(output_options['transaction'].request().environ().get('HTTP_ACCEPT_LANGUAGE', 'en'))
             except:
-                return 'en'
+                return ('en',)
 
         return ()
 

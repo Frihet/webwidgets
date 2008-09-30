@@ -25,7 +25,7 @@
 """
 
 import types, cgi
-import Webwidgets.Utils, Webwidgets.Constants
+import Webwidgets.Utils, Webwidgets.Utils.Locale, Webwidgets.Constants
 import Base, Formatting
 
 class ArgumentInput(Base.ValueInput):
@@ -79,45 +79,38 @@ class StringInput(Base.ValueInput):
         else:
             return '<input %(html_attributes)s %(size)s type="text" name="%(name)s" value="%(value)s" %(disabled)s />' % info
 
-class IntegerInput(StringInput):
-    error_string = "Integers must only contain the digits 0-9"
-    original_value = None
-    class WwModel(Base.ValueInput.WwModel):
-        value = None
-    def field_input(self, path, string_value):
-        try:
-            if string_value == '':
-                self.value = None
-            else:
-                self.value = int(string_value)
-        except ValueError, e:
-            self.value = None
-            self.error = self.error_string
-                
-    def field_output(self, path):
-        if self.value is None:
-            return ['']
-        return [str(self.value)]
+class AbstractNumberInput(StringInput):
+    num_to_str = staticmethod(Webwidgets.Utils.Locale.str)
 
-class FloatInput(StringInput):
-    error_string = "Numbers must only contain the digits 0-9, period '.' and the exp. separator 'e'"
     original_value = None
     class WwModel(Base.ValueInput.WwModel):
         value = None
     def field_input(self, path, string_value):
-        try:
-            if string_value == '':
-                self.ww_filter.value = None
-            else:
-                self.ww_filter.value = float(string_value)
-        except ValueError, e:
+        if string_value == '':
             self.ww_filter.value = None
-            self.ww_filter.error = self.error_string
-                
+        else:
+            language = self.get_languages({})[0]
+            try:
+                self.ww_filter.value = self.str_to_num({"LC_NUMERIC": language},
+                                                       string_value)
+            except ValueError, e:
+                self.ww_filter.value = None
+                self.ww_filter.error = self.error_string
+
     def field_output(self, path):
         if self.ww_filter.value is None:
             return ['']
-        return [str(self.ww_filter.value)]
+        language = self.get_languages({})[0]
+        return [self.num_to_str({"LC_NUMERIC": language},
+                                self.ww_filter.value)]
+
+class IntegerInput(AbstractNumberInput):
+    error_string = "Integers must only contain the digits 0-9"
+    str_to_num = staticmethod(Webwidgets.Utils.Locale.atoi)
+
+class FloatInput(AbstractNumberInput):
+    error_string = "Numbers must only contain the digits 0-9, period '.' and the exp. separator 'e'"
+    str_to_num = staticmethod(Webwidgets.Utils.Locale.atof)
 
 class PasswordInput(Base.ValueInput):
     """Like StringInput, but hides the user input"""
