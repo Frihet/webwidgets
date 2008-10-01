@@ -630,7 +630,7 @@ class EditFunctionCell(BaseTableMod.FunctionCell):
                                       ['edit_function', function],
                                       function,
                                       self.edit_function_titles[function],
-                                      table.get_active(table.path + ['_', 'edit_function', function]),
+                                      table.get_active(table.path + ['_', 'edit_function', function, row_id]),
                                       output_options)
         return res
     
@@ -704,7 +704,12 @@ class EditableTable(Table):
                 return []
 
             def get_active_edit_function(self, path):
-                return (    self.ww_filter.edit_operations.get(path[0], False)
+                row_active = True
+                if len(path) > 1:
+                    row = self.object.ww_filter.get_row_by_id(path[1])
+                    row_active = not hasattr(row.ww_filter, "ww_edit_operations") or row.ww_filter.ww_edit_operations.get(path[0], False)                    
+                return (    row_active
+                        and self.ww_filter.edit_operations.get(path[0], False)
                         and self.session.AccessManager(Webwidgets.Constants.EDIT,
                                                        self.win_id, self.path + ['edit'] + path))
 
