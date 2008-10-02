@@ -48,7 +48,8 @@ Please log in and change your password as soon as possible.\r
 
     def __init__(self, session, win_id, **attrs):
         Webwidgets.Html.__init__(self, session, win_id, **attrs)
-        self.user_info_changed(self.path, self.user_info)
+        self['Application'] = Webwidgets.Html(self.session, self.win_id)
+        self['LogIn'].visible = True
   
     class LogIn(object):
         def selected(self, path, value):
@@ -60,10 +61,11 @@ Please log in and change your password as soon as possible.\r
                 if login_widget.debug_log_in: print "Log in attempt:", fields['username'].value, fields['password'].value
 
                 try:
-                    login_widget.user_info = login_widget.authenticate(
+                    login_widget.ww_filter.authenticate(
                         fields['username'].value,
                         fields['password'].value)
                 except Exception, e:
+                    raise
                     if login_widget.debug_errors: traceback.print_exc()
                     fields['username'].error = unicode(e)
                 else:
@@ -91,13 +93,13 @@ Please log in and change your password as soon as possible.\r
                      email = fields['recover_email'].value
                      
                      if not username:
-                         username = self.login_widget.get_username_from_email(email)
+                         username = self.login_widget.ww_filter.get_username_from_email(email)
                      elif not email:
-                         email = self.login_widget.get_email_from_username(username)
+                         email = self.login_widget.ww_filter.get_email_from_username(username)
 
                      result_dialog = self.RecoveryFailed
                      if username and email:
-                         new_password = self.login_widget.reset_password_for_user(username)
+                         new_password = self.login_widget.ww_filter.reset_password_for_user(username)
                          if new_password:
                              try:
                                  self._send_reset_mail(username, new_password, email)
@@ -115,15 +117,38 @@ Please log in and change your password as soon as possible.\r
              def _send_reset_mail(self, username, password, email):
                  """Send reset mail to user with new password."""
                  mailer = Webwidgets.Utils.Mail.Mailer(
-                     host=self.login_widget.mail_host, user=self.login_widget.mail_username,
-                     password=self.login_widget.mail_password)
-                 mail = mailer.construct_mail(self.login_widget.recovery_email_template,
-                                              {'from_email': self.login_widget.from_email,
+                     host=self.login_widget.ww_filter.mail_host, user=self.login_widget.ww_filter.mail_username,
+                     password=self.login_widget.ww_filter.mail_password)
+                 mail = mailer.construct_mail(self.login_widget.ww_filter.recovery_email_template,
+                                              {'from_email': self.login_widget.ww_filter.from_email,
                                                'to_email': email,
                                                'username': username,
                                                'new_password': password})
-                 mailer.send(self.login_widget.from_email, email, mail)
+                 mailer.send(self.login_widget.ww_filter.from_email, email, mail)
 
+    WwFilters = ["UserInfoFilters", "SessionFilters", "AuthenticationFilters"]
+
+    class UserInfoFilters(Webwidgets.Filter):
+        def authenticate(self, username, password):
+            self.object.user_info = self.ww_filter.authenticate(username, password)
+            if self.object.user_info:
+                if self.global_session:
+                    self.session.log_in = self
+                self.object['Application'] = self.Application(self.session, self.win_id)
+                self.object['LogIn'].visible = False
+            return self.object.user_info
+
+        def log_out(self):
+            if self.global_session:
+                del self.session.log_in
+            self.object['Application'] = Webwidgets.Html(self.session, self.win_id)
+            self.object['LogIn'].visible = True
+
+    class SessionFilters(Webwidgets.Filter):
+        pass
+
+    class AuthenticationFilters(Webwidgets.Filter):
+        pass
 
     def authenticate(self, username, password):
         raise NotImplementedError("You must override the authenticate() method of this widget!")
@@ -138,14 +163,8 @@ Please log in and change your password as soon as possible.\r
         raise NotImplementedError("You must override the reset_password_for_user() method of this widget!")
 
     def user_info_changed(self, path, value):
-        if self.global_session:
-            self.session.log_in = self
         if self.user_info is None:
-            self['Application'] = Webwidgets.Html(self.session, self.win_id)
-            self['LogIn'].visible = True
-        else:
-            self['Application'] = self.Application(self.session, self.win_id)
-            self['LogIn'].visible = False
+            self.ww_filter.log_out()
 
 class LogOut(object):
     debug = True
