@@ -340,14 +340,14 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
             
         return (back_active or forward_active, """
 <span class="left">
- <button type="submit" %(back_active)s id="%(html_id)s-_-first" name="%(html_id)s" value="%(first)s" title="%(first_title)s>&lt;&lt;</button>
+ <button type="submit" %(back_active)s id="%(html_id)s-_-first" name="%(html_id)s" value="%(first)s" title="%(first_title)s">&lt;&lt;</button>
  <button type="submit" %(back_active)s id="%(html_id)s-_-previous" name="%(html_id)s" value="%(previous)s" title="%(previous_title)s">&lt;</button>
 </span>
 <span class="center">
  %(page)s/%(pages)s
 </span>
 <span class="right">
- <button type="submit" %(forward_active)s id="%(html_id)s-_-next" name="%(html_id)s" value="%(next)s title="%(next_title)s">&gt;</button>
+ <button type="submit" %(forward_active)s id="%(html_id)s-_-next" name="%(html_id)s" value="%(next)s" title="%(next_title)s">&gt;</button>
  <button type="submit" %(forward_active)s id="%(html_id)s-_-last" name="%(html_id)s" value="%(last)s" title="%(last_title)s">&gt;&gt;</button>
 </span>
 """ % info)
