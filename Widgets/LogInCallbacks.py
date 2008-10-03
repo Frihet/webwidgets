@@ -27,6 +27,9 @@ class LogIn(object):
     debug_log_in = False
     debug_errors = False
     is_login_widget = True
+
+    class AuthenticationFailure(Exception):
+        pass
     
     recovery_email_template = """From: %(from_email)s\r
 To: %(to_email)s\r
@@ -64,9 +67,7 @@ Please log in and change your password as soon as possible.\r
                     login_widget.ww_filter.authenticate(
                         fields['username'].value,
                         fields['password'].value)
-                except Exception, e:
-                    raise
-                    if login_widget.debug_errors: traceback.print_exc()
+                except Webwidgets.LogIn.AuthenticationFailure, e:
                     fields['username'].error = unicode(e)
                 else:
                     if login_widget.debug_log_in: print "User logged in:", login_widget.user_info
