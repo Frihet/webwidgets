@@ -163,6 +163,14 @@ class BaseTable(RowsMod.RowsComposite, Base.DirectoryServer):
     in the table.
     """
 
+    class WwModel(RowsMod.RowsComposite.WwModel):
+        allow_collapse_columns = ()
+        """List of columns that the user can collapse/expand if allow_collapse_columns_exclude = False or
+        not if True"""
+        allow_collapse_columns_exclude = True
+        """If False, allow collapse/expand for columns in allow_collapse_columns, if True allow for all
+        but the ones in allow_collapse_columns"""        
+
     empty_table_message = """There is no data in this table / no entries matched your search."""
 
     class TreeFilters(Base.Filter):
@@ -254,7 +262,9 @@ class BaseTable(RowsMod.RowsComposite, Base.DirectoryServer):
 
         expand_button = ""
         expanded = self.ww_filter.is_expanded_node(row, node_level)
-        if rowspan > 1 or (not expanded and not single):
+        if (   (not expanded and not single)
+            or (    rowspan > 1
+                and self.ww_filter.allow_collapse_columns_exclude == (column_name not in self.ww_filter.allow_collapse_columns))):            
             row_id = self.ww_filter.get_row_id(row)
             expand_button = ExpandCellInstance.draw_expand(
                 self,
