@@ -85,6 +85,11 @@ class Type(type):
         if not self.ww_class_data.get('no_classes_name', False):
             self.ww_classes[0] = Webwidgets.Utils.class_full_name(self)
 
+class Required(object):
+    """Required value, if set on a class the member must be set or
+    overridden in a subclass or instance."""
+    pass
+
 class Object(object):
     """Object is a more elaborate version of object, providing a few
     extra utility methods, some extra"magic" class attributes -
@@ -144,6 +149,10 @@ class Object(object):
             attrs['ww_model'] = self.WwModel()
         # FIXME: Does not attribute on ww_model as it should
         self.__dict__.update(attrs)
+        for name in dir(self):
+            if getattr(self, name, None) is Required:
+                raise AttributeError('Required attribute %s missing' % (name, ))
+
         self.setup_filter()
 
     def get_filter(cls, filter_class):
