@@ -141,6 +141,12 @@ class ConfirmationDialog(InfoDialog):
     class Body(Formatting.Html):
         html = """Do you really want to perform this action?"""
 
+class DisableConfirmationDialog(ConfirmationDialog):
+    class Head(Formatting.Html):
+        html = """Really disable this item?"""
+    class Body(Formatting.Html):
+        html = """Do you really want to disable this item?"""
+
 class DeleteConfirmationDialog(ConfirmationDialog):
     class Head(Formatting.Html):
         html = """Really delete this item?"""
