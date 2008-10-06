@@ -1471,6 +1471,18 @@ class ValueInput(Input):
         multiple = False
         """Handle multiple values"""
 
+    @classmethod
+    def reset_all_inputs(cls, widget):
+        if hasattr(widget, "reset"):
+            try:
+                widget.reset()
+            except:
+                widget.append_exception()
+
+        if hasattr(widget, "get_children"):
+            for name, child in widget.get_children():
+                cls.reset_all_inputs(child)
+
     def reset(self):
         self.ww_filter.value = self.ww_filter.original_value
 

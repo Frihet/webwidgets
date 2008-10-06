@@ -85,6 +85,7 @@ class AbstractNumberInput(StringInput):
     original_value = None
     class WwModel(Base.ValueInput.WwModel):
         value = None
+        original_value = None
     def field_input(self, path, string_value):
         if string_value == '':
             self.ww_filter.value = None
@@ -113,6 +114,7 @@ class FloatInput(AbstractNumberInput):
     str_to_num = staticmethod(Webwidgets.Utils.Locale.atof)
 
 class AbstractPercentageInput(FloatInput):
+    #FIXME: Handle None properly in AbstractPercentageInput
     def num_to_str(self, locale_spec, num):
         return FloatInput.num_to_str(locale_spec, num / self.unit_value)
     def str_to_num(self, locale_spec, str):

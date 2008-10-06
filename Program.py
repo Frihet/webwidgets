@@ -372,7 +372,15 @@ class Program(WebKit.Page.Page):
                     value = fields.get(fieldname, '')
                     if not isinstance(value, types.ListType):
                         value = [value]
-                    if field.field_output(path) != value:
+                    try:
+                        old_value = field.field_output(path)
+                    except:
+                        # If old value crashes, make sure we update
+                        # the value no matter what, it might, just
+                        # might, fix the problem :)
+                        old_value = None
+                        field.append_exception()
+                    if old_value != value:
                         changed_fields.append((field, path, value))
 
             return changed_fields

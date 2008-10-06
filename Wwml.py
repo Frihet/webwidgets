@@ -273,8 +273,8 @@ def generate_value(type_name, text, attributes, module, using, class_path, bind_
         if callback_bind_status != "fallback":
             bind_status = callback_bind_status
 
-        if bind_status == "forbid":
-            raise Exception("Binding forbidden but present anyway for %s" % (type_name,))
+        if binding is not None and bind_status == "forbid":
+            raise Exception("Binding forbidden but present anyway for %s: %s" % (type_name, binding))
 
         if type_name == 'wwml':
             value = module
