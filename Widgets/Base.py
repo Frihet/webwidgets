@@ -149,11 +149,16 @@ class Object(object):
             attrs['ww_model'] = self.WwModel()
         # FIXME: Does not attribute on ww_model as it should
         self.__dict__.update(attrs)
-        for name in dir(self):
-            if getattr(self, name, None) is Required:
-                raise AttributeError('Required attribute %s missing' % (name, ))
-
         self.setup_filter()
+
+        for name in dir(self):
+            try:
+                attr = getattr(self, name, None)
+            except:
+                attr = None
+
+            if attr is Required:
+                raise AttributeError('Required attribute %s missing' % (name, ))
 
     def get_filter(cls, filter_class):
         if isinstance(filter_class, (str, unicode)):
