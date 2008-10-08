@@ -777,6 +777,9 @@ class Widget(Object):
             # Uggly hack around a bug in pdb (it apparently depends on
             # and old sys-API)
             sys.last_traceback = sys.exc_info()[2]
+
+            print "######################### The application has crashed ##########################"
+            print "Exception: %s" % (sys.exc_info()[1],)
             pdb.pm()
 
         if message:
