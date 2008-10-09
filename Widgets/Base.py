@@ -1523,7 +1523,7 @@ class MixedInput(Input):
     __input_subordinates__ = (ValueInput,)
 
     def field_output(self, path):
-        return []
+        return ['']
 
 class ActionInput(MixedInput):
     """Base class for all input widgets that only fires some

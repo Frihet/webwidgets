@@ -268,7 +268,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                     self.ww_filter.selection.remove(row.ww_model)
         
     def field_output_expand(self, path):
-        return []
+        return ['']
     def field_output(self, path):
         sub_widget = self.path_to_subwidget_path(path)
         return getattr(self.ww_filter, 'field_output_' + sub_widget[0])(sub_widget[1:])
@@ -277,9 +277,9 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
     def field_output_page(self, path):
         return [unicode(self.page)]
     def field_output_function(self, path):
-        return []
+        return ['']
     def field_output_group_function(self, path):
-        return []
+        return ['']
     def field_output_selection(self, path):
         return [self.ww_filter.get_row_id_from_row_model(row)
                 for row in self.ww_filter.selection]
@@ -544,7 +544,7 @@ class ExpandableTable(Table):
                 row.ww_filter.ww_is_expanded = not getattr(row.ww_filter, 'ww_is_expanded', False)
 
             def field_output_expand(self, path):
-                return []
+                return ['']
 
             def get_active_expand(self, path):
                 return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['expand'] + path)
@@ -701,7 +701,7 @@ class EditableTable(Table):
                     Composite.DialogContainer.add_dialog_to_nearest(self, Confirm(self.session, self.win_id, row=row))
                     
             def field_output_edit_function(self, path):
-                return []
+                return ['']
 
             def get_active_edit_function(self, path):
                 row_active = True
@@ -719,7 +719,7 @@ class EditableTable(Table):
                     self.pre_rows.append(self.object.ww_filter.create_new_row())
 
             def field_output_edit_group_function(self, path):
-                return []
+                return ['']
 
             def draw_edit_group_function(self, config, output_options):
                 return (self.ww_filter.edit_operations['new'],

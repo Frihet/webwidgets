@@ -244,7 +244,7 @@ class TabbedView(SwitchingView, Base.ActionInput):
                 self.page = page
 
     def field_output(self, path):
-        return [unicode(Webwidgets.Utils.path_to_id(self.page, True))]
+        return ['']
 
     def get_active_page(self, page):
         return getattr(self + page, 'active', True) and self.session.AccessManager(
