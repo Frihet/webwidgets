@@ -484,6 +484,24 @@ class Program(WebKit.Page.Page):
                     fn_name += '_' + output_options['aspect']
                 output_fn = getattr(obj, fn_name)
 
+                if not changed and output_fn is window.output:
+                    #### fixme ####
+                    # name = """changed will nearly allways be true due
+                    # to buttons"""
+                    # description = """If you clicked a button and
+                    # then you do a reload, you'd have the same POST
+                    # (non-empty-string) variable, but your
+                    # field_output would still output an empty
+                    # string."""
+                    #### end ####
+                    
+                    # Don't fire reload events except for reloads of
+                    # the page itself. Caching policies might result
+                    # in other items being reloaded now and then w/o
+                    # user interaction...
+                    window.notify("reload")
+
+
                 res = output_fn(*args)
                 if (not res
                     or (    'Location' not in res
