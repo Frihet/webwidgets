@@ -767,11 +767,9 @@ class Widget(Object):
         """
         if print_exceptions:
             traceback.print_exc()
-        log_id_msg = ''
+        log_id = None
         if Webwidgets.Utils.is_log_exceptions():
             log_id = Webwidgets.Utils.log_exception()
-            if log_id:
-                log_id_msg = self._(self.log_id_msg, {}) % {'log_id': log_id}
 
         if debug_exceptions:
             # Uggly hack around a bug in pdb (it apparently depends on
@@ -782,12 +780,11 @@ class Widget(Object):
             print "Exception: %s" % (sys.exc_info()[1],)
             pdb.pm()
 
-        if message:
-            message = "<div class='log-message'>%s</div>" % (message, )
-
         self.system_errors.append(
-            (sys.exc_info()[1],
-             log_id_msg + message + WebUtils.HTMLForException.HTMLForException()))
+            {'exception': sys.exc_info()[1],
+             'log_id': log_id,
+             'message': message,
+             'traceback': WebUtils.HTMLForException.HTMLForException()})
 
     def draw_html_attributes(self, path):
         """Renders list of all attributes set on self starting with
@@ -1137,38 +1134,54 @@ class Composite(Widget):
     system_error_format = """<div class="system-error click-expand">
                               <div class="header">%(exception)s</div>
                               <div class="content">
+                               %(log_id)s
+                               <div class='log-message'>%(message)s</div>
                                %(traceback)s
                               </div>
                              </div>"""
 
-    system_errors_format = """<div class="system-errors click-expand">
+    system_error_log_id_format = """<div>More information on this item can be found in the log-file with issue ID <span class="log-id">%(log_id)s</span>.</div>"""
 
-                               <div class="header">Sorry, an error
-                               occured.<br />
-                               You can try to log out and
-                               back in again to solve this.
-                               <div class="sub-header">Read more...</div>
+    system_errors_log_ids_format = """<div>Please mention the following issue ID when reporting this: <span class="log-ids">%(log_ids)s</span></div>"""
+
+    system_errors_format = """<div class="system-errors js-dialog">
+
+                               <div class="head">Sorry, an error occured.</div>
+                               <div class="body">
+
+                                <div>Sorry, an unexpected error
+                                occured. You can try to log out and
+                                back in again to solve this.</div>
+
+                                %(log_ids)s
+
+				<div class="content">
+				 <p>This part of the application has
+				 crashed. You can try to log out and
+				 log in again to remedy the problem,
+				 or just continue using other parts of
+				 the application. In any case, please
+				 contact the system administrator
+				 about this issue and tell him/her the
+				 steps you took that lead up to this
+				 issue and he/she will try to fix the
+				 problem as fast as possible.</p>
+
+				 <p>A more technical, detailed
+				 description of the error follows
+				 (click on the items to expand):</p>
+
+				 %(tracebacks)s
+				</div>
+                               </div>
+                               
+                               <div class="foot">
+                                <span class="expand">Read more...</span>
+                                <span class="collapse">Hide details</span>
+                                <span class="hide">Hide</span>
                                </div>
 
-                               <div class="content">
-                                <p>This part of the application has
-                                crashed. You can try to log out and
-                                log in again to remedy the problem. In
-                                any case, please contact the system
-                                administrator about this issue and
-                                tell him/her the steps you took that
-                                lead up to this issue and he/she will
-                                try to fix the problem as fast as
-                                possible.</p>
-
-                                <p>A more technical, detailed
-                                description of the error follows
-                                (click on the items to expand):</p>
-
-                                %(tracebacks)s
-                               </div>
                               </div>"""
-
 
     def __init__(self, session, win_id, **attrs):
         super(Composite, self).__init__(
@@ -1203,11 +1216,23 @@ class Composite(Widget):
         if result is not None and getattr(child, 'system_errors', []):
             HtmlWindow.register_header(self, "Status", "500 Application exception cought")
             system_error_format = self._(self.system_error_format, output_options)
+            system_error_log_id_format = self._(self.system_error_log_id_format, output_options)
+            system_errors_log_ids_format = self._(self.system_errors_log_ids_format, output_options)
             system_errors_format = self._(self.system_errors_format, output_options)
-            errors = [system_error_format % {'exception': cgi.escape(Webwidgets.Utils.convert_to_str_any_way_possible(error[0])),
-                                             'traceback': Webwidgets.Utils.convert_to_str_any_way_possible(error[1])}
+            errors = [system_error_format % {'exception': cgi.escape(Webwidgets.Utils.convert_to_str_any_way_possible(error['exception'])),
+                                             'log_id': error['log_id'] and system_error_log_id_format % {'log_id': error['log_id']} or '',
+                                             'message': error['message'],
+                                             'traceback': Webwidgets.Utils.convert_to_str_any_way_possible(error['traceback'])}
                       for error in child.system_errors]
-            result = system_errors_format % {'tracebacks': '\n'.join(errors)} + result
+            log_ids = [error['log_id'] for error in child.system_errors
+                       if error['log_id'] is not None]
+            log_ids_str = ''
+            if log_ids:
+                log_ids_str = system_errors_log_ids_format % {'log_ids': '.'.join(log_ids)}
+            
+            result = system_errors_format % {
+                'log_ids': log_ids_str,
+                'tracebacks': '\n'.join(errors)} + result
             del child.system_errors[:]
 
         if 'internal' in output_options and 'draw_wrapper' in output_options['internal']:
@@ -1659,6 +1684,11 @@ class HtmlWindow(Window, StaticComposite, DirectoryServer):
             self,
             self.calculate_url_to_directory_server('Webwidgets.HtmlWindow',
                                                    ['Widgets.css'],
+                                                   output_options))
+        HtmlWindow.register_script_link(
+            self,
+            self.calculate_url_to_directory_server('Webwidgets.HtmlWindow',
+                                                   ['prototype.js'],
                                                    output_options))
         HtmlWindow.register_script_link(
             self,

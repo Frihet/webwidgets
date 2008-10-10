@@ -75,23 +75,62 @@ if (window.navigator.userAgent.indexOf ( "MSIE " ) > 0){
  webwidgets_add_event_handler(window, 'load', 'webwidgets_iefix', webwidgets_iefix_load);
 }
 
+
+function selectParent(element, selector) {
+ while (element.parentNode) {
+  if (element.match(selector))
+   return element;
+  element = element.parentNode;
+ }
+}
+
 function webwidgets_click_expand(event) {
- divs = event.target.parentNode.childNodes;
- for (i = 0; i < divs.length; i++)
-  if (divs[i].className && divs[i].className.match('content'))
-   if (divs[i].style.display == "block")
-    divs[i].style.display = "none";
-   else
-    divs[i].style.display = "block";
+ clickExpand = selectParent(event.target, '.click-expand');
+ content = clickExpand.select('.content')[0];
+
+ if (content.style.display == "block")
+  content.style.display = "none";
+ else
+  content.style.display = "block";
+
  event.cancelBubble = true;
  if (event.stopPropagation) event.stopPropagation();
 }
 
 function webwidgets_click_expand_load() {
- divs = document.getElementsByTagName('div');
- for (i = 0; i < divs.length; i++)
-  if (divs[i].className.match('click-expand'))
-   divs[i].onclick = webwidgets_click_expand;
+ click_expands = $$('.click-expand');
+ for (i = 0; i < click_expands.length; i++)
+  click_expands[i].onclick = webwidgets_click_expand;
 }
 
 webwidgets_add_event_handler(window, 'load', 'webwidgets_click_expand', webwidgets_click_expand_load);
+
+
+function webwidgets_js_dialog(event) {
+ clickExpand = selectParent(event.target, '.js-dialog');
+
+ if ($(event.target).match('.expand')) {
+  clickExpand.select('.foot > .expand')[0].style.display = "none";
+  clickExpand.select('.foot > .collapse')[0].style.display = "inline";
+  clickExpand.select('.body .content')[0].style.display = "block";
+
+ } else if ($(event.target).match('.collapse')) {
+  clickExpand.select('.foot > .expand')[0].style.display = "inline";
+  clickExpand.select('.foot > .collapse')[0].style.display = "none";
+  clickExpand.select('.body .content')[0].style.display = "none";
+
+ } else if ($(event.target).match('.hide')) {
+  clickExpand.style.display = "none";
+ }
+
+ event.cancelBubble = true;
+ if (event.stopPropagation) event.stopPropagation();
+}
+
+function webwidgets_js_dialog_load() {
+ js_dialogs = $$('.js-dialog');
+ for (i = 0; i < js_dialogs.length; i++)
+  js_dialogs[i].onclick = webwidgets_js_dialog;
+}
+
+webwidgets_add_event_handler(window, 'load', 'webwidgets_js_dialog', webwidgets_js_dialog_load);

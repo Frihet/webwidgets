@@ -63,7 +63,7 @@ input.error,
  margin: 5px;
  background: white;
 }
-.system-errors > .header {
+.system-errors > .head {
  border: 1px solid red;
  padding: 5px;
 
@@ -71,16 +71,26 @@ input.error,
  font-family: serif;
  color: red;
 }
-.system-errors > .header > .sub-header {
- font-size: 10pt;
+.js-dialog > .foot {
+ padding-top: 5px;
 }
+.js-dialog > .foot > * {
+ font-size: 10pt;
+ border: 1px solid black;
+ padding: 2px;
+}
+.js-dialog > .foot > .collapse {
+ display: none;
+}
+
 .system-error > .content {
  border: 1px solid #ff0000;
  margin: 2pt;
  padding: 2pt;
 }
 .click-expand > .content,
-.hover-expand > .content {
+.hover-expand > .content,
+.js-dialog > .body > .content {
  display: none;
 }
 .hover-expand:hover > .content {

@@ -511,7 +511,7 @@ def module_file_path(module, extension='.scripts'):
 
     return scripts_path
 
-LOG_EXCEPTION_PATH=None
+LOG_EXCEPTION_PATH="/tmp" #None
 """Path to directory where exceptions are logged with log_exception
 function. If this is None exceptions are not logged."""
 LOG_EXCEPTION_MAX_LOG=65534
