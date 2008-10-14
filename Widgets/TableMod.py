@@ -72,8 +72,7 @@ class SelectionCell(BaseTableMod.SpecialCell):
 
     def draw_selectbox(self, table, value, path, html_class, active, checked, output_options):
         input_id = Webwidgets.Utils.path_to_id(table.path + ['_'] + path)
-        if active:
-            table.session.windows[table.win_id].fields[input_id] = table
+        table.register_input(table.path + ['_'] + path)
         return """<input
                    type="checkbox"
                    id="%(html_id)s"
@@ -150,6 +149,9 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                                                      ('group_functions', {'level': 1})]),
                        'top':
                        Webwidgets.Utils.OrderedDict([  #('title_bar', {'level': 2}),
+                                                     ]),
+                       'titlebar':
+                       Webwidgets.Utils.OrderedDict([('order_functions', {'level': 1})
                                                      ])}
         """{"position": {"button_bar_name": {"level": value, "option_name": value}}}"""
         button_bars_level_force_min = 0
@@ -237,6 +239,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
             sub_widget = self.path_to_subwidget_path(path)
         except Webwidgets.Constants.NotASubwidgetException:
             return
+
         getattr(self.ww_filter, 'field_input_' + sub_widget[0])(sub_widget[1:], *string_values)
 
     def field_input_expand(self, path, string_value):
@@ -249,6 +252,9 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
     def field_input_page(self, path, string_value):
         if string_value == '': return
         self.page = int(string_value)
+    def field_input_reset_order(self, path, string_value):
+        # Reset sort order, try again
+        self.ww_filter.sort = getattr(self.ww_filter, 'default_sort', [])
     def field_input_function(self, path, string_value):
         if string_value == '': return
         self.notify('function', path[0], string_value)
@@ -276,6 +282,8 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         return [sort_to_string(self.ww_filter.user_sort)]
     def field_output_page(self, path):
         return [unicode(self.page)]
+    def field_output_reset_order(self, path):
+        return ['']
     def field_output_function(self, path):
         return ['']
     def field_output_group_function(self, path):
@@ -296,6 +304,8 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['sort'] + path)
     def get_active_page(self, path):
         return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['page'] + path)
+    def get_active_reset_order(self, path):
+        return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['sort'] + path)
     def get_active_function(self, path):
         if path[0] in self.disabled_functions: return False
         return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, self.path + ['function'] + path)
@@ -319,8 +329,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         pages = self.ww_filter.get_pages(output_options)
         page_id = Webwidgets.Utils.path_to_id(self.path + ['_', 'page'])
         page_active = self.get_active(self.path + ['_', 'page'])
-        if page_active:
-            self.session.windows[self.win_id].fields[page_id] = self
+        self.register_input(self.path + ['_', 'page'])
         back_active = page_active and self.page > 1
         forward_active = page_active and self.page < pages
         info = {'html_id': page_id,
@@ -360,6 +369,22 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
             'caption': self._(config['title'], output_options),
             'location': cgi.escape(location),
             })
+
+
+    reset_title = u'Reset order'
+    """Title for reset order button."""
+    def draw_order_functions(self, config, output_options):
+        reset_order_id = Webwidgets.Utils.path_to_id(self.path + ['_', 'reset_order'])
+        info = {'html_id': reset_order_id,
+                'reset': 'reset_order',
+                'reset_title': self._(self.reset_title, output_options)}
+
+        self.register_input(self.path + ['_', 'reset_order'])
+        return (True, """
+<span class="right">
+  <button type="submit" id="%(html_id)s" name="%(html_id)s" value="%(reset)s" title="%(reset_title)s">%(reset_title)s</button>
+</span>
+""" % info)
 
     def draw_group_function(self, path, html_class, title, output_options):
         path = self.path + ['_'] + path
@@ -414,10 +439,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         input_id = Webwidgets.Utils.path_to_id(sort_path)
         widget_id = Webwidgets.Utils.path_to_id(self.path)
 
-        if self.argument_name:
-            self.session.windows[self.win_id].arguments[self.argument_name + '_sort'] = {
-                'widget':self, 'path': sort_path}
-        self.session.windows[self.win_id].fields[input_id] = self
+        self.register_input(sort_path, self.argument_name and self.argument_name + '_sort' or None)
 
         # Column headings
         for column, definition in visible_columns.iteritems():
@@ -441,17 +463,18 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                     }
 
             if 'printable_version' in output_options:
-                headings.append("""
-<th id="%(html_id)s-_-head-%(column)s" class="column %(column)s %(ww_classes)s">
- <span id="%(html_id)s-_-sort-%(column)s">%(caption)s</span>
-</th>
-""" % info)
+                headings.append(["""<th id="%(html_id)s-_-head-%(column)s" class="column %(column)s %(ww_classes)s">""" % info,
+                                 """<span id="%(html_id)s-_-sort-%(column)s">%(caption)s</span>""" % info,
+                                 """</th>""" % info])
             else:
-                headings.append("""
-<th id="%(html_id)s-_-head-%(column)s" class="column %(column)s %(ww_classes)s">
- <button type="submit" id="%(html_id)s-_-sort-%(column)s" %(disabled)s name="%(html_id)s-_-sort" value="%(sort)s" title="%(caption)s">%(caption)s</button>
-</th>
-""" % info)
+                headings.append(["""<th id="%(html_id)s-_-head-%(column)s" class="column %(column)s %(ww_classes)s">""" % info,
+                                 """<button type="submit" id="%(html_id)s-_-sort-%(column)s" %(disabled)s name="%(html_id)s-_-sort" value="%(sort)s" title="%(caption)s">%(caption)s</button>""" % info,
+                                 """</th>""" % info])
+
+        if len(headings):
+            headings[-1][1] = headings[-1][1] + self.draw_buttons('titlebar', output_options)
+
+        headings = [''.join(heading) for heading in headings]
 
         # Group headings
         group_headings = []
