@@ -60,7 +60,7 @@ class GenericRegionPart(Base.Object):
             def __set__(self, instance, value):
                 if instance.string_based and value is not None:
                     if instance.store_symbol:
-                        value = value.symbol
+                        value = value.symbols[-1]
                     else:
                         value = value.title
                 instance.ww_filter.value = value
