@@ -1,0 +1,54 @@
+1 Aachen
+2 Aachen
+3 Bielefeld
+4 Bochum
+5 Bonn
+6 Borken
+7 Bottrop
+8 Coesfeld
+9 Köln
+10 Dortmund
+11 Duisburg
+12 Düren
+13 Düsseldorf
+14 Ennepe-Ruhr
+15 Essen
+16 Euskirchen
+17 Gelsenkirchen
+18 Gütersloh
+19 Hagen
+20 Hamm
+21 Heinsberg
+22 Herford
+23 Herne
+24 Hochsauerlandkreis
+25 Höxter
+26 Kleve
+27 Krefeld
+28 Leverkusen
+29 Lippe
+30 Märkischer Kreis
+31 Mettmann
+32 Minden-Lübbecke
+33 Mönchengladbach
+34 Mülheim
+35 Münster
+36 Oberbergischer Kreis
+37 Oberhausen
+38 Olpe
+39 Paderborn
+40 Recklinghausen
+41 Remscheid
+42 Rhein-Erft-Kreis
+43 Rheinisch-Bergischer Kreis
+44 Rhein-Kreis Neuss
+45 Rhein-Sieg
+46 Siegen-Wittgenstein
+47 Soest
+48 Solingen
+49 Steinfurt
+50 Unna
+51 Viersen
+52 Warendorf
+53 Wesel
+54 Wuppertal

@@ -1,0 +1,12 @@
+0821 Högsby
+0834 Torsås
+0840 Mörbylånga
+0860 Hultsfred
+0861 Mönsterås
+0862 Emmaboda
+0880 Kalmar
+0881 Nybro
+0882 Oskarshamn
+0883 Västervik
+0884 Vimmerby
+0885 Borgholm

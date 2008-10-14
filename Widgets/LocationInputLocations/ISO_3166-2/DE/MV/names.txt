@@ -1,0 +1,18 @@
+1 Bad Doberan
+2 Demmin
+3 Greifswald
+4 Güstrow
+5 Ludwigslust
+6 Mecklenburg-Strelitz
+7 Müritz
+8 Neubrandenburg
+9 Nordvorpommern
+10 Nordwestmecklenburg
+11 Ostvorpommern
+12 Parchim
+13 Rostock
+14 Rügen
+15 Schwerin
+16 Stralsund
+17 Uecker-Randow
+18 Wismar

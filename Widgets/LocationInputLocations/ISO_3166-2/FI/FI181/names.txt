@@ -1,0 +1,24 @@
+1 Helsinki / Helsingfors
+2 Vantaa / Vanda
+3 Espoo / Esbo
+4 Kauniainen / Grankulla
+5 Hyvinkää / Hyvinge
+6 Järvenpää / Träskända
+7 Kerava / Kervo
+8 Kirkkonummi / Kyrkslätt
+9 Mäntsälä
+10 Nurmijärvi
+11 Pornainen / Borgnäs
+12 Siuntio / Sjundeå
+13 Tuusula / Tusby
+14 Karjalohja / Karislojo
+15 Karkkila / Högfors
+16 Lohja / Lojo
+17 Nummi-Pusula
+18 Sammatti
+19 Vihti / Vichtis
+20 Ekenäs / Tammisaari
+21 Hanko / Hangö
+22 Ingå / Inkoo
+23 Karis / Karjaa
+24 Pohja / Pojo

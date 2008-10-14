@@ -1,0 +1,9 @@
+1 Hyrynsalmi
+2 Kuhmo
+3 Puolanka
+4 Suomussalmi
+5 Kajaani
+6 Paltamo
+7 Ristijärvi
+8 Sotkamo
+9 Vaala

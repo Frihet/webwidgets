@@ -1,0 +1,10 @@
+1 Askola
+2 Myrskylä / Mörskom
+3 Pukkila / Buckila
+4 Porvoo / Borgå
+5 Sipoo / Sibbo
+6 Lapinjärvi / Lappträsk
+7 Liljendal
+8 Loviisa / Lovisa
+9 Pernå / Pernaja
+10 Ruotsinpyhtää / Strömfors

@@ -1,0 +1,23 @@
+1 Altenburger Land
+2 Eichsfeld
+3 Eisenach
+4 Erfurt
+5 Gera
+6 Gotha
+7 Greiz
+8 Hildburghausen
+9 Ilm
+10 Jena
+11 Kyffhäuser
+12 Nordhausen
+13 Saale-Holzland
+14 Saale-Orla
+15 Saalfeld-Rudolstadt
+16 Schmalkalden-Meiningen
+17 Sömmerda
+18 Sonneberg
+19 Suhl
+20 Unstrut-Hainich
+21 Wartburg
+22 Weimar
+23 Weimarer Land

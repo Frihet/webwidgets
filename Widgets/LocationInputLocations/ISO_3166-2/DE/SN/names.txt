@@ -1,0 +1,44 @@
+1 Sachsen-Anhalt
+2 Altmarkkreis Salzwedel
+3 Anhalt-Bitterfeld
+4 Börde
+5 Burgenland
+6 Dessau-Roßlau
+7 Halle (Saale)
+8 Harz
+9 Jerichower Land
+10 Magdeburg
+11 Mansfeld-Südharz
+12 Saalekreis
+13 Salzlandkreis
+14 Stendal
+15 Wittenberg
+16 Annaberg
+17 Aue-Schwarzenberg
+18 Bautzen
+19 Chemnitz
+20 Chemnitzer Land
+21 Delitzsch
+22 Döbeln
+23 Dresden
+24 Freiberg
+25 Görlitz
+26 Hoyerswerda
+27 Kamenz
+28 Leipzig
+29 Leipziger Land
+30 Löbau-Zittau
+31 Meißen
+32 Mittlerer Erzgebirgskreis
+33 Mittweida
+34 Muldentalkreis
+35 Niederschlesischer Oberlausitzkreis
+36 Plauen
+37 Riesa-Großenhain
+38 Sächsische Schweiz
+39 Stollberg
+40 Torgau-Oschatz
+41 Vogt
+42 Weißeritz
+43 Zwickau
+44 Zwickauer Land

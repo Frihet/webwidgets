@@ -1,0 +1,20 @@
+FI131 Southern Savonia
+FI132 Northern Savonia
+FI133 North Karelia
+FI134 Kainuu
+FI181 Uusimaa
+FI182 Eastern Uusimaa
+FI183 Finland Proper
+FI184 Tavastia Proper
+FI185 Päijänne Tavastia
+FI186 Kymenlaakso
+FI187 South Karelia
+FI191 Satakunta
+FI192 Pirkanmaa
+FI193 Central Finland
+FI194 Southern Ostrobothnia
+FI195 Ostrobothnia
+FI1A1 Central Ostrobothnia
+FI1A2 Northern Ostrobothnia
+FI1A3 Lapland
+FI200 Åland

@@ -1,0 +1,41 @@
+1 AB¶Alba Iulia
+2 Aiud
+3 Blaj
+4 Sebeş
+5 BC¶Bacău
+6 Oneşti
+7 Moineşti
+8 BH¶Oradea
+9 Beiuş
+10 Marghita
+11 Salonta
+12 BN¶Bistriţa
+13 BT¶Botoşani
+14 Dorohoi
+15 BV¶Braşov
+16 Făgăraş
+17 Codlea
+18 Săcele
+19 BR¶Brăila
+20 BZ¶Buzău
+21 Râmnicu Sărat
+22 DB¶Târgovişte
+23 Moreni
+24 DJ¶Craiova
+25 Băileşti
+26 Calafat
+27 HD¶Deva
+28 Hunedoara
+29 Brad
+30 Lupeni
+31 Orăştie
+32 Petroşani
+33 Vulcan
+34 MM¶Baia Mare
+35 Sighetu Marmaţiei
+36 SB¶Sibiu
+37 Mediaş
+38 VS¶Vaslui
+39 Bârlad
+40 Huşi
+41 Bucureşti¶

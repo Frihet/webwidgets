@@ -1,0 +1,14 @@
+0701 Horten
+0702 Holmestrand
+0704 Tønsberg
+0706 Sandefjord
+0709 Larvik
+0711 Svelvik
+0713 Sande
+0714 Hof
+0716 Re
+0719 Andebu
+0720 Stokke
+0722 Nøtterøy
+0723 Tjøme
+0728 Lardal

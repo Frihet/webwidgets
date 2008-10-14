@@ -1,0 +1,11 @@
+1 Aalborg
+2 Brønderslev
+3 Frederikshavn
+4 Hjørring
+5 Jammerbugt
+6 Læsø
+7 Mariagerfjord
+8 Morsø
+9 Rebild
+10 Thisted
+11 Vesthimmerland

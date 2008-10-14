@@ -1,0 +1,17 @@
+1 Faxe
+2 Greve
+3 Guldborgsund
+4 Holbæk
+5 Kalundborg
+6 Køge
+7 Lejre
+8 Lolland
+9 Næstved
+10 Odsherred
+11 Ringsted
+12 Roskilde
+13 Slagelse
+14 Solrød
+15 Sorø
+16 Stevns
+17 Vordingborg

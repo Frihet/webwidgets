@@ -1,0 +1,47 @@
+1 Ammerland
+2 Aurich
+3 Braunschweig
+4 Celle
+5 Cloppenburg
+6 Cuxhaven
+7 Delmenhorst
+8 Diepholz
+9 Emden
+10 Emsland
+11 Friesland
+12 Gifhorn
+13 Goslar
+14 Göttingen
+15 Grafschaft Bentheim
+16 Hameln-Pyrmont
+17 Hannover
+18 Hannover
+19 Harburg
+20 Helmstedt
+21 Hildesheim
+22 Holzminden
+23 Leer
+24 Lüchow-Dannenberg
+25 Lüneburg
+26 Nienburg (Weser)
+27 Northeim
+28 Oldenburg
+29 Oldenburg
+30 Osnabrück
+31 Osnabrück
+32 Osterholz
+33 Osterode am Harz
+34 Peine
+35 Rotenburg (Wümme)
+36 Salzgitter
+37 Schaumburg
+38 Soltau-Fallingbostel
+39 Stade
+40 Uelzen
+41 Vechta
+42 Verden
+43 Wesermarsch
+44 Wilhelmshaven
+45 Wittmund
+46 Wolfenbüttel
+47 Wolfsburg

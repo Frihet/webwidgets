@@ -21,21 +21,26 @@
 import os.path
 
 class GeographicRegion(object):
-    file_pattern = "ISO_3166-2:%(symbol)s.txt"
+    file_pattern = "ISO_3166-2/%(symbols)s/names.txt"
+    file_sep = os.path.sep
     
-    def __init__(self, symbol, title):
-        self.symbol = symbol
+    def __init__(self, symbols, title):
+        self.symbols = symbols
         self.title = title
-        self.parts, self.part_dict = self.load_list(os.path.join(os.path.dirname(__file__), 
-                                                                 self.file_pattern % {'symbol': symbol}))
+        self.parts, self.part_dict = self.load_list(
+            symbols,
+            os.path.join(os.path.dirname(__file__), 
+                         self.file_pattern % {'symbols': self.file_sep.join(symbols)}))
 
-    def load_list(cls, file_name):
+    def load_list(cls, symbols, file_name):
+        def entry_to_region(symbol, title):
+            return GeographicRegion(symbols + [symbol], title)
         if not os.access(file_name, os.F_OK): return [], {}
         file = open(file_name)
         try:
-            result = [GeographicRegion(*entry[:-1].decode('utf-8').split(" ", 1))
+            result = [entry_to_region(*entry[:-1].decode('utf-8').split(" ", 1))
                       for entry in file]
-            result_dict = dict([(r.symbol, r) for r in result])
+            result_dict = dict([(r.symbols[-1], r) for r in result])
             return result, result_dict
         finally:
             file.close()
@@ -49,4 +54,4 @@ class GeographicRegion(object):
 class GeographicRegionWorld(GeographicRegion):
     file_pattern = "ISO_3166-1_alpha-2.txt"
 
-world = GeographicRegionWorld("", "World")
+world = GeographicRegionWorld([], "World")

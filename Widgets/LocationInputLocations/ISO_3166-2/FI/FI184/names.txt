@@ -1,0 +1,16 @@
+1 Forssa
+2 Hattula
+3 Hauho
+4 Hausjärvi
+5 Humppila
+6 Hämeenlinna
+7 Janakkala
+8 Jokioinen
+9 Kalvola
+10 Lammi
+11 Loppi
+12 Renko
+13 Riihimäki
+14 Tammela
+15 Tuulos
+16 Ypäjä

@@ -1,0 +1,21 @@
+0602 Drammen
+0604 Kongsberg
+0605 Ringerike
+0612 Hole
+0615 Flå
+0616 Nes
+0617 Gol
+0618 Hemsedal
+0619 Ål
+0620 Hol
+0621 Sigdal
+0622 Krødsherad
+0623 Modum
+0624 	Øvre Eiker Hokksund
+0625 	Nedre Eiker Mjøndalen
+0626 Lier
+0627 Røyken
+0628 Hurum
+0631 Flesberg
+0632 Rollag
+0633 	Nore og Uvdal Rødberg

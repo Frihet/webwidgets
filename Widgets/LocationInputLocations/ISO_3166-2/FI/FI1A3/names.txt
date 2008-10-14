@@ -1,0 +1,22 @@
+1 Enontekiö
+2 Inari
+3 Kemi
+4 Kemijärvi
+5 Keminmaa
+6 Kittilä
+7 Kolari
+8 Muonio
+9 Pelkosenniemi
+10 Pello
+11 Posio
+12 Ranua
+13 Rovaniemen mlk
+14 Rovaniemi
+15 Salla
+16 Savukoski
+17 Simo
+18 Sodankylä
+19 Tervola
+20 Tornio
+21 Utsjoki
+22 Ylitornio

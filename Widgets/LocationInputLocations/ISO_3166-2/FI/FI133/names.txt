@@ -1,0 +1,16 @@
+1 Eno
+2 Ilomantsi
+3 Joensuu
+4 Juuka
+5 Kesälahti
+6 Kitee
+7 Kontiolahti
+8 Lieksa
+9 Liperi
+10 Nurmes
+11 Outokumpu
+12 Polvijärvi
+13 Pyhäselkä
+14 Rääkkylä
+15 Tohmajärvi
+16 Valtimo

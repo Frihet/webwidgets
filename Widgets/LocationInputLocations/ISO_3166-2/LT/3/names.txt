@@ -1,0 +1,7 @@
+1 Klaipėda 
+2 Klaipėda 
+3 Kretinga 
+4 Neringa
+5 Palanga 
+6 Skuodas 
+7 Šilutė 

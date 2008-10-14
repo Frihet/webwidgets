@@ -1,0 +1,12 @@
+1 Imatra
+2 Joutseno
+3 Lappeenranta
+4 Lemi
+5 Luumäki
+6 Parikkala
+7 Rautjärvi
+8 Ruokolahti
+9 Savitaipale
+10 Suomenniemi
+11 Taipalsaari
+12 Ylämaa

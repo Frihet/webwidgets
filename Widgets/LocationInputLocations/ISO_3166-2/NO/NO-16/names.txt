@@ -1,0 +1,25 @@
+1601 Trondheim
+1612 Hemne
+1613 Snillfjord
+1617 Hitra
+1620 Frøya
+1621 Ørland
+1622 Agdenes
+1624 Rissa
+1627 Bjugn
+1630 Åfjord
+1632 Roan
+1633 Osen
+1634 Oppdal
+1635 Rennebu
+1636 Meldal
+1638 Orkdal
+1640 Røros
+1644 Holtålen
+1648 	Midtre Gauldal Støren
+1653 Melhus
+1657 Skaun
+1662 Klæbu
+1663 Malvik
+1664 Selbu
+1665 Tydal

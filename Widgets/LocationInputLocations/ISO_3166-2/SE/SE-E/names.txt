@@ -1,0 +1,13 @@
+0509 Ödeshög
+0512 Ydre
+0513 Kinda
+0560 Boxholm
+0561 Åtvidaberg
+0562 Finspång
+0563 Valdemarsvik
+0580 Linköping
+0581 Norrköping
+0582 Söderköping
+0583 Motala
+0584 Vadstena
+0586 Mjölby

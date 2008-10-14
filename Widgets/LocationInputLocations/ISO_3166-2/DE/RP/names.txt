@@ -1,0 +1,36 @@
+1 Ahrweiler
+2 Altenkirchen (Westerwald)
+3 Alzey-Worms
+4 Bad Dürkheim
+5 Bad Kreuznach
+6 Bernkastel-Wittlich
+7 Birkenfeld
+8 Bitburg-Prüm
+9 Cochem-Zell
+10 Daun
+11 Donnersbergkreis
+12 Frankenthal
+13 Germersheim
+14 Kaiserslautern
+15 Kaiserslautern
+16 Koblenz
+17 Kusel
+18 Landau
+19 Ludwigshafen
+20 Mainz
+21 Mainz-Bingen
+22 Mayen-Koblenz
+23 Neustadt
+24 Neuwied
+25 Pirmasens
+26 Rhein-Hunsrück
+27 Rhein-Lahn
+28 Rhein-Pfalz-Kreis
+29 Speyer
+30 Südliche Weinstraße
+31 Südwestpfalz
+32 Trier
+33 Trier-Saarburg
+34 Westerwald
+35 Worms
+36 Zweibrücken

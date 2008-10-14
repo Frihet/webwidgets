@@ -1,0 +1,15 @@
+1 Dithmarschen
+2 Flensburg
+3 Herzogtum Lauenburg
+4 Kiel
+5 Lübeck
+6 Neumünster
+7 Nordfriesland
+8 Ostholstein
+9 Pinneberg
+10 Plön
+11 Rendsburg-Eckernförde
+12 Schleswig-Flensburg
+13 Segeberg
+14 Steinburg
+15 Stormarn

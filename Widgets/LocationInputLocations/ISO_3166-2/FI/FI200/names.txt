@@ -1,0 +1,16 @@
+1 Brändö
+2 Eckerö
+3 Finström
+4 Föglö
+5 Geta
+6 Hammarland
+7 Jomala
+8 Kumlinge
+9 Kökar
+10 Lemland
+11 Lumparland
+12 Mariehamn
+13 Saltvik
+14 Sottunga
+15 Sund
+16 Vård

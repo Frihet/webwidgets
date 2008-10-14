@@ -1,0 +1,16 @@
+DŚ Dolnośląskie
+KP Kujawsko-pomorskie
+LB Lubelskie
+LS Lubuskie
+ŁD Łódzkie
+MP Małopolskie
+MZ Mazowieckie
+OP Opolskie,
+PK Podkarpackie
+PL Podlaskie
+PM Pomorskie
+ŚL Śląskie,
+ŚK Świętokrzyskie
+WM Warmińsko-mazurskie
+WP Wielkopolskie
+ZP Zachodniopomorskie

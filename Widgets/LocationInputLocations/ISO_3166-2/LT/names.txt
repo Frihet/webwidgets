@@ -1,0 +1,10 @@
+1 Alytus
+2 Kaunas
+3 Klaipėda
+4 Marijampolė
+5 Panevėžys
+6 Šiauliai
+7 Tauragė
+8 Telšiai
+9 Utena
+10 Vilnius

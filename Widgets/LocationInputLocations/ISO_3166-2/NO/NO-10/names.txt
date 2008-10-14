@@ -1,0 +1,15 @@
+1001 Kristiansand
+1002 Mandal
+1003 Farsund
+1004 Flekkefjord
+1014 Vennesla
+1017 Songdalen
+1018 Søgne
+1021 Marnardal
+1026 Åseral
+1027 Audnedal
+1029 Lindesnes
+1032 Lyngdal
+1034 Hægebostad
+1037 Kvinesdal
+1046 Sirdal

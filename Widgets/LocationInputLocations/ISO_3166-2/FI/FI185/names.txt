@@ -1,0 +1,12 @@
+1 Artjärvi
+2 Asikkala
+3 Hollola
+4 Hämeenkoski
+5 Kärkölä
+6 Lahti
+7 Nastola
+8 Orimattila
+9 Padasjoki
+10 Hartola
+11 Heinola
+12 Sysmä

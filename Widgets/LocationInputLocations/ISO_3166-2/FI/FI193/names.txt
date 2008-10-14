@@ -1,0 +1,27 @@
+1 Hankasalmi
+2 Joutsa
+3 Jyväskylä
+4 Jyväskylän maalaiskunta
+5 Jämsä
+6 Jämsänkoski
+7 Kannonkoski
+8 Karstula
+9 Keuruu
+10 Kinnula
+11 Kivijärvi
+12 Konnevesi
+13 Korpilahti
+14 Kuhmoinen
+15 Kyyjärvi
+16 Laukaa
+17 Luhanka
+18 Multia
+19 Muurame
+20 Petäjävesi
+21 Pihtipudas
+22 Pylkönmäki
+23 Saarijärvi
+24 Toivakka
+25 Uurainen
+26 Viitasaari
+27 Äänekoski

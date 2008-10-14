@@ -1,0 +1,18 @@
+1 Barnim
+2 Brandenburg
+3 Cottbus
+4 Dahme-Spreewald
+5 Elbe-Elster
+6 Frankfurt (Oder)
+7 Havelland
+8 Märkisch-Oderland
+9 Oberhavel
+10 Oberspreewald-Lausitz
+11 Oder-Spree
+12 Ostprignitz-Ruppin
+13 Potsdam
+14 Potsdam-Mittelmark
+15 Prignitz
+16 Spree-Neiße
+17 Teltow-Fläming
+18 Uckermark

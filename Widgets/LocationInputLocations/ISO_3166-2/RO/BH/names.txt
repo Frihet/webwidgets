@@ -1,0 +1,4 @@
+1 Oradea
+2 Beiuş
+3 Marghita
+4 Salonta

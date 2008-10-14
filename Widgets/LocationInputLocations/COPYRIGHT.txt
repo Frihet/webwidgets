@@ -1,0 +1,5 @@
+This data is taken from Wikipedia.org. It is most likely not
+copyrightable as it is just a mere collection of facts (city names).
+In case they are, wikipedia content is licensed under the terms of the
+GNU Free Documentation License;
+http://en.wikipedia.org/wiki/Wikipedia:Text_of_the_GNU_Free_Documentation_License

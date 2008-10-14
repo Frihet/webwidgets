@@ -1,0 +1,12 @@
+1 Halsua
+2 Himanka
+3 Kannus
+4 Kaustinen
+5 Kokkola
+6 Kälviä
+7 Lestijärvi
+8 Lohtaja
+9 Perho
+10 Toholampi
+11 Ullava
+12 Veteli

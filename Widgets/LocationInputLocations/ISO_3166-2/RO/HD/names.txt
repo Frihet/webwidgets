@@ -1,0 +1,7 @@
+1 Deva
+2 Hunedoara
+3 Brad
+4 Lupeni
+5 Orăştie
+6 Petroşani
+7 Vulcan

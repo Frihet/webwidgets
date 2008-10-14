@@ -1,0 +1,26 @@
+0114 Upplands Väsby
+0115 Vallentuna
+0117 Österåker
+0120 Värmdö
+0123 Järfälla
+0125 Ekerö
+0126 Huddinge
+0127 Botkyrka
+0128 Salem
+0136 Haninge
+0138 Tyresö
+0139 Upplands-Bro
+0140 Nykvarn
+0160 Täby
+0162 Danderyd
+0163 Sollentuna
+0180 Stockholm
+0181 Södertälje
+0182 Nacka
+0183 Sundbyberg
+0184 Solna
+0186 Lidingö
+0187 Vaxholm
+0188 Norrtälje
+0191 Sigtuna
+0192 Nynäshamn

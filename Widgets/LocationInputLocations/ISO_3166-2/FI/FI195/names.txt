@@ -1,0 +1,17 @@
+1 Isokyrö
+2 Jakobstad
+3 Kaskinen
+4 Korsholm
+5 Korsnäs
+6 Kristinestad
+7 Kronoby
+8 Laihia
+9 Larsmo
+10 Malax
+11 Nykarleby
+12 Närpes
+13 Oravais
+14 Pedersöre
+15 Vaasa
+16 Vähäkyrö
+17 Vörå-Maxmo

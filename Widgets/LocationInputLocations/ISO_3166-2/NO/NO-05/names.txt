@@ -1,0 +1,26 @@
+0501 Lillehammer
+0502 Gjøvik
+0511 Dovre
+0512 Lesja
+0513 Skjåk
+0514 Lom
+0515 Vågå
+0516 Nord-Fron
+0517 Sel
+0519 Sør-Fron
+0520 Ringebu
+0521 Øyer
+0522 Gausdal
+0528 	Østre Toten Lena
+0529 	Vestre Toten Raufoss
+0532 Jevnaker
+0533 Lunner
+0534 Gran
+0536 	Søndre Land Hov
+0538 	Nordre Land Dokka
+0540 Sør-Aurdal
+0541 Etnedal
+0542 Nord-Aurdal
+0543 	Vestre Slidre Slidre
+0544 	Øystre Slidre Heggenes
+0545 Vang

@@ -1,0 +1,18 @@
+1 Hirvensalmi
+2 Kangasniemi
+3 Mikkeli / St. Michel
+4 Mäntyharju
+5 Pertunmaa
+6 Ristiina
+7 Joroinen / Jorois
+8 Juva
+9 Puumala
+10 Rantasalmi
+11 Sulkava
+12 Enonkoski
+13 Heinävesi
+14 Kerimäki
+15 Punkaharju
+16 Savonlinna / Nyslott
+17 Savonranta
+18 Pieksämäki

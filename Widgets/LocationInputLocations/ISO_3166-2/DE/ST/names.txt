@@ -1,0 +1,14 @@
+1 Altmarkkreis Salzwedel
+2 Anhalt-Bitterfeld
+3 Börde
+4 Burgenland
+5 Dessau-Roßlau
+6 Halle (Saale)
+7 Harz
+8 Jerichower Land
+9 Magdeburg
+10 Mansfeld-Südharz
+11 Saalekreis
+12 Salzlandkreis
+13 Stendal
+14 Wittenberg

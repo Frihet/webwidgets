@@ -1,0 +1,5 @@
+1 Kalvarija
+2 Kazlų Rūda
+3 Marijampolė
+4 Šakiai 
+5 Vilkaviškis 
