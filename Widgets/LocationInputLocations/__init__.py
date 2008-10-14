@@ -1,5 +1,5 @@
-# -*- coding: UTF-8 -*-
-# vim: set fileencoding=UTF-8 :
+# -*- coding: utf-8 -*-
+# vim: set fileencoding=utf-8 :
 
 # Provides a list-selector widget
 # Copyright (C) 2008 FreeCode AS, Egil Moeller <egil.moller@freecode.no>
@@ -27,7 +27,7 @@ class GeographicRegion(object):
     def __init__(self, symbols, title):
         self.symbols = symbols
         self.title = title
-        self.parts, self.part_dict = self.load_list(
+        self.parts, self.sym_dict, self.name_dict = self.load_list(
             symbols,
             os.path.join(os.path.dirname(__file__), 
                          self.file_pattern % {'symbols': self.file_sep.join(symbols)}))
@@ -35,13 +35,14 @@ class GeographicRegion(object):
     def load_list(cls, symbols, file_name):
         def entry_to_region(symbol, title):
             return GeographicRegion(symbols + [symbol], title)
-        if not os.access(file_name, os.F_OK): return [], {}
+        if not os.access(file_name, os.F_OK): return [], {}, {}
         file = open(file_name)
         try:
             result = [entry_to_region(*entry[:-1].decode('utf-8').split(" ", 1))
                       for entry in file]
-            result_dict = dict([(r.symbols[-1], r) for r in result])
-            return result, result_dict
+            sym_dict = dict([(r.symbols[-1], r) for r in result])
+            name_dict = dict([(r.title, r) for r in result])
+            return result, sym_dict, name_dict
         finally:
             file.close()
     load_list = classmethod(load_list)

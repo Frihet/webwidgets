@@ -1,5 +1,5 @@
-# -*- coding: UTF-8 -*-
-# vim: set fileencoding=UTF-8 :
+# -*- coding: utf-8 -*-
+# vim: set fileencoding=utf-8 :
 
 # Provides a list-selector widget
 # Copyright (C) 2008 FreeCode AS, Egil Moeller <egil.moller@freecode.no>
@@ -24,13 +24,21 @@ import Base, Formatting, ListMod, LocationInputLocations
 class GenericRegionPart(Base.Object):
     class WwModel(Base.Object):
         string_based = True
+        store_symbol = True
         region_prefix = []
 
-    def get_region(self):
+    def get_region_from_sym(self):
         region = LocationInputLocations.world
         for prefix in self.ww_filter.region_prefix:
-            if prefix not in region.part_dict: return None
-            region = region.part_dict[prefix]
+            if prefix not in region.sym_dict: return None
+            region = region.sym_dict[prefix]
+        return region
+
+    def get_region_from_name(self):
+        region = LocationInputLocations.world
+        for prefix in self.ww_filter.region_prefix:
+            if prefix not in region.name_dict: return None
+            region = region.name_dict[prefix]
         return region
     
     WwFilters = ['RegionNameFilter']
@@ -40,13 +48,21 @@ class GenericRegionPart(Base.Object):
             def __get__(self, instance, owner):
                 if instance is None: return None
                 value = instance.ww_filter.value
+
                 if instance.string_based and value is not None:
-                    region = instance.get_region()
-                    value = region and region.part_dict.get(value, None)
+                    if instance.store_symbol:
+                        region = instance.get_region_from_sym()
+                        value = region and region.sym_dict.get(value, None)
+                    else:
+                        region = instance.get_region_from_name()
+                        value = region and region.name_dict.get(value, None)
                 return value
             def __set__(self, instance, value):
                 if instance.string_based and value is not None:
-                    value = value.symbol
+                    if instance.store_symbol:
+                        value = value.symbol
+                    else:
+                        value = value.title
                 instance.ww_filter.value = value
         value = Value()
 
@@ -55,7 +71,10 @@ class RegionPartInput(GenericRegionPart, ListMod.RowsSingleValueListInput):
     WwFilters = ListMod.RowsSingleValueListInput.WwFilters + GenericRegionPart.WwFilters
     
     def get_rows(self):
-        return getattr(self.get_region(), "parts", [])
+        if self.ww_model.store_symbol:
+            return getattr(self.get_region_from_sym(), "parts", [])
+        else:
+            return getattr(self.get_region_from_name(), "parts", [])
     rows = property(get_rows)
 
 class CountryPartInput(RegionPartInput):
