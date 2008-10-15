@@ -35,6 +35,8 @@ class Mailer(object):
     "If set, use this username when authenticating to the host."
     smtp_password = None
     "If set, use this password when authenticating to the host."
+    encoding_priority = ('ascii', 'iso-8859-1', 'utf-8')
+    "List of encoding, earlier elements have higher priority."""
 
     def __init__(self, **kwargs):
         """Initialize Mailer, supported kwargs are smtp_KEYs defined
@@ -60,7 +62,42 @@ class Mailer(object):
         """Create mail body that can be sent with the mail
         method. template is a string with standard %(value)s format
         parameters and args is a dict with the values"""
-        return template % args
+        template_enc = template
+        args_enc = None
+
+        if isinstance(template, unicode):
+            for encoding in self.encoding_priority:
+                try:
+                    template_enc = template.encode(encoding)
+                    args_enc = self._encode_arguments(encoding, args)
+                except UnicodeEncodeError:
+                    template_enc = None
+
+                if template_enc is not None and args_enc is not None:
+                    break
+
+            # If encoding failed, force encoding with last encoding in the list.
+            if template_enc is None:
+                template_enc = template.encode(self.encoding_priority[-1], 'replace')
+
+        # If encoding failed or default encoding is use, use last in
+        # priority and replace errors to be safe.
+        if args_enc is None:
+            args_enc = self._encode_arguments(self.encoding_priority[-1], args, 'replace')
+
+        return template_enc % args_enc
+
+    def _encode_arguments(self, encoding, args, errors='strict'):
+        try:
+            args_encoded = {}
+            for key, value in args.iteritems():
+                if isinstance(value, unicode):
+                    value = value.encode(encoding, errors)
+                args_encoded[key] = value
+        except UnicodeEncodeError:
+            args_encoded = None
+
+        return args_encoded
 
     def _init_connection(self):
         """Connect to host, authenticate and return smtp
