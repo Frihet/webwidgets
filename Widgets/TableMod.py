@@ -144,7 +144,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         
         button_bars = {'bottom-left':
                        Webwidgets.Utils.OrderedDict([('paging_buttons_prev',  {'level': 1}),
-                                                     ('paging_buttons_page_of_pages',  {'level': 1, 'verbose': 1}),
+                                                     ('paging_buttons_rows_of_rows',  {'level': 1, 'verbose': 1}),
                                                      ('paging_buttons_next',  {'level': 1}),
                                                      ]),
                        'bottom-right':
@@ -377,6 +377,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
             self.session.windows[self.win_id].arguments[self.argument_name + '_page'] = {
                 'widget':self, 'path': self.path + ['_', 'page']}
 
+        rows = self.ww_filter.get_number_of_rows(output_options)
         pages = self.ww_filter.get_pages(output_options)
         page_id = Webwidgets.Utils.path_to_id(self.path + ['_', 'page'])
         page_active = self.get_active(self.path + ['_', 'page'])
@@ -389,9 +390,9 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                  'previous': self.page - 1,
                  'page': self.page,
                  'pages': pages,
-                 'rows': pages * self.rows_per_page, #FIXME: This is utterly wrong :P
-                 'page_start': self.page * self.rows_per_page,
-                 'page_end': (self.page + 1) * self.rows_per_page,
+                 'rows': rows,
+                 'page_start': (self.page - 1) * self.ww_filter.rows_per_page,
+                 'page_end': min(self.page * self.ww_filter.rows_per_page, rows),
                  'next': self.page + 1,
                  'last': pages,
                  'back_active': ['', 'disabled="disabled"'][not back_active],

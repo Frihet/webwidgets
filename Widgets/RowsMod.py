@@ -126,10 +126,13 @@ class RowsSimpleModelFilter(Base.Filter):
             raise KeyError(self, row_id)
 
     def get_pages(self, output_options):
+        return int(math.ceil(float(self.get_number_of_rows(output_options)) / self.rows_per_page))
+
+    def get_number_of_rows(self, output_options):
         if self.non_memory_storage:
-            return self.ww_filter.get_pages()
+            return self.ww_filter.get_number_of_rows(output_options)
         else:
-            return int(math.ceil(float(len(self.rows)) / self.rows_per_page))
+            return len(self.rows)
 
     def get_columns(self, output_options, only_sortable = False):
         res = Webwidgets.Utils.OrderedDict()
