@@ -461,9 +461,10 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         button_bars_level_min = self.button_bars_level_force_min
         button_bars = Webwidgets.Utils.OrderedDict()
         for name, config in configs.iteritems():
-            button_bars[name] = getattr(self.ww_filter, 'draw_' + name)(config, output_options)
-            if button_bars[name][0]:
-                button_bars_level_min = min(config['level'], button_bars_level_min)
+            if hasattr(self.ww_filter, 'draw_' + name):
+                button_bars[name] = getattr(self.ww_filter, 'draw_' + name)(config, output_options)
+                if button_bars[name][0]:
+                    button_bars_level_min = min(config['level'], button_bars_level_min)
 
         button_bars_html = ''.join([html
                                     for name, (active, html) in button_bars.iteritems()
