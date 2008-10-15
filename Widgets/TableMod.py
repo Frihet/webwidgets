@@ -142,22 +142,24 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         sort = []
         post_sort = []
         
-        button_bars = {'bottom-left':
+        button_bars = {'top-left':
                        Webwidgets.Utils.OrderedDict([('paging_buttons_prev',  {'level': 1}),
                                                      ('paging_buttons_rows_of_rows',  {'level': 1, 'verbose': 1}),
                                                      ('paging_buttons_next',  {'level': 1}),
                                                      ]),
-                       'bottom-right':
+                       'top-right':
                        Webwidgets.Utils.OrderedDict([('group_functions', {'level': 1}),
                                                      ('printable_link',  {'level': 2,
                                                                           'title': 'Printable version'}),
+                                                     ('order_functions', {'level': 1})
                                                      ]),
 #                        'bottom-center':
 #                        Webwidgets.Utils.OrderedDict([('title_bar', {'level': 2}),
 #                                                      ]),
-                       'titlebar':
-                       Webwidgets.Utils.OrderedDict([('order_functions', {'level': 1})
-                                                     ])}
+#                        'titlebar':
+#                        Webwidgets.Utils.OrderedDict([('order_functions', {'level': 1})
+#                                                      ])
+                       }
         
         """{"position": {"button_bar_name": {"level": value, "option_name": value}}}"""
         button_bars_level_force_min = 0
@@ -422,11 +424,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                 'reset_title': self._(self.reset_title, output_options)}
 
         self.register_input(self.path + ['_', 'reset_order'])
-        return (True, """
-<span class="right">
-  <button type="submit" id="%(html_id)s" name="%(html_id)s" value="%(reset)s" title="%(reset_title)s">%(reset_title)s</button>
-</span>
-""" % info)
+        return (True, """<button type="submit" id="%(html_id)s" name="%(html_id)s" value="%(reset)s" title="%(reset_title)s">%(reset_title)s</button>""" % info)
 
     def draw_group_function(self, path, html_class, title, output_options):
         path = self.path + ['_'] + path
@@ -505,11 +503,11 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
 
             if 'printable_version' in output_options:
                 headings.append(["""<th id="%(html_id)s-_-head-%(column)s" class="column %(column)s %(ww_classes)s">""" % info,
-                                 """<span id="%(html_id)s-_-sort-%(column)s">%(caption)s</span>""" % info,
+                                 """<span id="%(html_id)s-_-sort-%(column)s" class="column-heading">%(caption)s</span>""" % info,
                                  """</th>""" % info])
             else:
                 headings.append(["""<th id="%(html_id)s-_-head-%(column)s" class="column %(column)s %(ww_classes)s">""" % info,
-                                 """<button type="submit" id="%(html_id)s-_-sort-%(column)s" %(disabled)s name="%(html_id)s-_-sort" value="%(sort)s" title="%(caption)s">%(caption)s</button>""" % info,
+                                 """<button type="submit" id="%(html_id)s-_-sort-%(column)s" class="column-heading" %(disabled)s name="%(html_id)s-_-sort" value="%(sort)s" title="%(caption)s">%(caption)s</button>""" % info,
                                  """</th>""" % info])
 
         if len(headings):
@@ -530,7 +528,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                         group_row_headings.append([col_group, 1])
                 else:
                     group_row_headings.append([None, 1])
-            group_headings.append(["<th colspan='%(colspan)s'>%(title)s</th>" % {
+            group_headings.append(["""<th colspan='%(colspan)s' class="column-group"><span class="column-heading">%(title)s</span></th>""" % {
                                     'colspan': colspan,
                                     'title': group_row_def.get(group, '')
                                    }
