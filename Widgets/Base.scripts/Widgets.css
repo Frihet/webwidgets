@@ -158,6 +158,44 @@ input.error,
  border-spacing: 0px;
 }
 
+.Webwidgets-Widgets-TableMod-Table .buttons-group {
+ display: table;
+ width: 100%;
+}
+
+.Webwidgets-Widgets-TableMod-Table .buttons-top-left,
+.Webwidgets-Widgets-TableMod-Table .buttons-top-center,
+.Webwidgets-Widgets-TableMod-Table .buttons-top-right,
+.Webwidgets-Widgets-TableMod-Table .buttons-bottom-left,
+.Webwidgets-Widgets-TableMod-Table .buttons-bottom-center,
+.Webwidgets-Widgets-TableMod-Table .buttons-bottom-right {
+ display: table-cell;
+ white-space: nowrap;
+}
+
+.Webwidgets-Widgets-TableMod-Table .buttons-top-left,
+.Webwidgets-Widgets-TableMod-Table .buttons-top-right,
+.Webwidgets-Widgets-TableMod-Table .buttons-bottom-left,
+.Webwidgets-Widgets-TableMod-Table .buttons-bottom-right {
+ width: 0;
+}
+
+.Webwidgets-Widgets-TableMod-Table .buttons-top-left,
+.Webwidgets-Widgets-TableMod-Table .buttons-bottom-left {
+ text-align: left;
+}
+
+.Webwidgets-Widgets-TableMod-Table .buttons-top-right,
+.Webwidgets-Widgets-TableMod-Table .buttons-bottom-right {
+ text-align: right;
+}
+
+.Webwidgets-Widgets-TableMod-Table .buttons-top-center,
+.Webwidgets-Widgets-TableMod-Table .buttons-bottom-center {
+ width: 100%;
+ text-align: center;
+}
+
 .Webwidgets-Widgets-TableMod-Table .buttons {
  padding-top: 2px;
  padding-bottom: 2px;

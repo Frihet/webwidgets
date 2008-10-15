@@ -142,17 +142,23 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         sort = []
         post_sort = []
         
-        button_bars = {'bottom':
-                       Webwidgets.Utils.OrderedDict([('paging_buttons',  {'level': 0}),
+        button_bars = {'bottom-left':
+                       Webwidgets.Utils.OrderedDict([('paging_buttons_prev',  {'level': 1}),
+                                                     ('paging_buttons_page_of_pages',  {'level': 1, 'verbose': 1}),
+                                                     ('paging_buttons_next',  {'level': 1}),
+                                                     ]),
+                       'bottom-right':
+                       Webwidgets.Utils.OrderedDict([('group_functions', {'level': 1}),
                                                      ('printable_link',  {'level': 2,
                                                                           'title': 'Printable version'}),
-                                                     ('group_functions', {'level': 1})]),
-                       'top':
-                       Webwidgets.Utils.OrderedDict([  #('title_bar', {'level': 2}),
                                                      ]),
+#                        'bottom-center':
+#                        Webwidgets.Utils.OrderedDict([('title_bar', {'level': 2}),
+#                                                      ]),
                        'titlebar':
                        Webwidgets.Utils.OrderedDict([('order_functions', {'level': 1})
                                                      ])}
+        
         """{"position": {"button_bar_name": {"level": value, "option_name": value}}}"""
         button_bars_level_force_min = 0
         """A button bar is drawn if it is active, or its level is >=
@@ -320,8 +326,53 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         if title is None:
             return (False, '')
         return (True, "<h1>%s</h1>" % (title,))
+
+    def draw_paging_buttons_by_format(self, formats, config, info, output_options):
+        fmt = formats[min(len(formats)-1,
+                          config.get('verbose', 0))]
+        return self._(fmt, output_options) % info
+
     
-    def draw_paging_buttons(self, config, output_options):
+    paging_buttons_first_format = (
+        """<button type="submit" %(back_active)s id="%(html_id)s-_-first" name="%(html_id)s" value="%(first)s" title="First page">&lt;&lt;</button>""",
+        """<button type="submit" %(back_active)s id="%(html_id)s-_-first" name="%(html_id)s" value="%(first)s" title="First page">First page</button>""")
+    paging_buttons_prev_format = (
+        """<button type="submit" %(back_active)s id="%(html_id)s-_-previous" name="%(html_id)s" value="%(previous)s" title="Previous page">&lt;</button>""",
+        """<button type="submit" %(back_active)s id="%(html_id)s-_-previous" name="%(html_id)s" value="%(previous)s" title="Previous page">Previous page</button>""")
+    def draw_paging_buttons_prev(self, config, output_options):
+        active, info = self.draw_paging_buttons_info(config, output_options)
+        return (active, """<span class="back">%(first)s%(previous)s</span>""" % {
+            'first': self.draw_paging_buttons_by_format(self.paging_buttons_first_format, config, info, output_options),
+            'previous':self.draw_paging_buttons_by_format(self.paging_buttons_prev_format, config, info, output_options)})
+
+    paging_buttons_page_of_pages_format = ("""<span class="page_of_pages">%(page)s/%(pages)s</span>""",
+                                           """<span class="page_of_pages">Page %(page)s of %(pages)s</span>""",
+                                           """<span class="page_of_pages">Showing page %(page)s out of a total of %(pages)s</span>""")
+    def draw_paging_buttons_page_of_pages(self, config, output_options):
+        active, info = self.draw_paging_buttons_info(config, output_options)
+        return (active, self.draw_paging_buttons_by_format(self.paging_buttons_page_of_pages_format, config, info, output_options))
+
+    paging_buttons_rows_of_rows_format = ("""<span class="rows_of_rows">%(page_start)s-%(page_end)s/%(rows)s</span>""",
+                                          """<span class="rows_of_rows">Items %(page_start)s to %(page_end)s of %(rows)s</span>""",
+                                          """<span class="rows_of_rows">Showing items %(page_start)s to %(page_end)s out of a total of %(rows)s</span>""")
+    def draw_paging_buttons_rows_of_rows(self, config, output_options):
+        active, info = self.draw_paging_buttons_info(config, output_options)
+        return (active, self.draw_paging_buttons_by_format(self.paging_buttons_rows_of_rows_format, config, info, output_options))
+
+    paging_buttons_next_format = (
+        """<button type="submit" %(forward_active)s id="%(html_id)s-_-next" name="%(html_id)s" value="%(next)s" title="Next page">&gt;</button>""",
+        """<button type="submit" %(forward_active)s id="%(html_id)s-_-next" name="%(html_id)s" value="%(next)s" title="Next page">Next page</button>""")
+    paging_buttons_last_format = (
+        """<button type="submit" %(forward_active)s id="%(html_id)s-_-last" name="%(html_id)s" value="%(last)s" title="Last page">&gt;&gt;</button>""",
+        """<button type="submit" %(forward_active)s id="%(html_id)s-_-last" name="%(html_id)s" value="%(last)s" title="Last page">Last page</button>""")
+
+    def draw_paging_buttons_next(self, config, output_options):
+        active, info = self.draw_paging_buttons_info(config, output_options)
+        return (active, """<span class="forward">%(next)s%(last)s</span>""" % {
+            'next': self.draw_paging_buttons_by_format(self.paging_buttons_next_format, config, info, output_options),
+            'last':self.draw_paging_buttons_by_format(self.paging_buttons_last_format, config, info, output_options)})
+
+    def draw_paging_buttons_info(self, config, output_options):
         if self.argument_name:
             self.session.windows[self.win_id].arguments[self.argument_name + '_page'] = {
                 'widget':self, 'path': self.path + ['_', 'page']}
@@ -332,34 +383,24 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         self.register_input(self.path + ['_', 'page'])
         back_active = page_active and self.page > 1
         forward_active = page_active and self.page < pages
-        info = {'html_id': page_id,
-                'first': 1,
-                'previous': self.page - 1,
-                'page': self.page,
-                'pages': pages,
-                'next': self.page + 1,
-                'last': pages,
-                'back_active': ['', 'disabled="disabled"'][not back_active],
-                'forward_active': ['', 'disabled="disabled"'][not forward_active],
-                'first_title': self._(self.first_title, output_options),
-                'previous_title': self._(self.previous_title, output_options),
-                'next_title': self._(self.next_title, output_options),
-                'last_title': self._(self.last_title, output_options)
-                }
-            
-        return (back_active or forward_active, """
-<span class="left">
- <button type="submit" %(back_active)s id="%(html_id)s-_-first" name="%(html_id)s" value="%(first)s" title="%(first_title)s">&lt;&lt;</button>
- <button type="submit" %(back_active)s id="%(html_id)s-_-previous" name="%(html_id)s" value="%(previous)s" title="%(previous_title)s">&lt;</button>
-</span>
-<span class="center">
- %(page)s/%(pages)s
-</span>
-<span class="right">
- <button type="submit" %(forward_active)s id="%(html_id)s-_-next" name="%(html_id)s" value="%(next)s" title="%(next_title)s">&gt;</button>
- <button type="submit" %(forward_active)s id="%(html_id)s-_-last" name="%(html_id)s" value="%(last)s" title="%(last_title)s">&gt;&gt;</button>
-</span>
-""" % info)
+        return (back_active or forward_active,
+                {'html_id': page_id,
+                 'first': 1,
+                 'previous': self.page - 1,
+                 'page': self.page,
+                 'pages': pages,
+                 'rows': pages * self.rows_per_page, #FIXME: This is utterly wrong :P
+                 'page_start': self.page * self.rows_per_page,
+                 'page_end': (self.page + 1) * self.rows_per_page,
+                 'next': self.page + 1,
+                 'last': pages,
+                 'back_active': ['', 'disabled="disabled"'][not back_active],
+                 'forward_active': ['', 'disabled="disabled"'][not forward_active],
+                 'first_title': self._(self.first_title, output_options),
+                 'previous_title': self._(self.previous_title, output_options),
+                 'next_title': self._(self.next_title, output_options),
+                 'last_title': self._(self.last_title, output_options)
+                 })
 
     def draw_printable_link(self, config, output_options):
         location = self.calculate_url({'transaction': output_options['transaction'],
@@ -421,17 +462,16 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         button_bars_level_min = self.button_bars_level_force_min
         button_bars = Webwidgets.Utils.OrderedDict()
         for name, config in configs.iteritems():
-            if hasattr(self.ww_filter, 'draw_' + name):
-                button_bars[name] = getattr(self.ww_filter, 'draw_' + name)(config, output_options)
-                if button_bars[name][0]:
-                     button_bars_level_min = min(config['level'], button_bars_level_min)
+            button_bars[name] = getattr(self.ww_filter, 'draw_' + name)(config, output_options)
+            if button_bars[name][0]:
+                button_bars_level_min = min(config['level'], button_bars_level_min)
 
         button_bars_html = ''.join([html
                                     for name, (active, html) in button_bars.iteritems()
                                     if configs[name]['level'] >= button_bars_level_min])
         if not button_bars_html:
             return ''
-        return "<div class='buttons'>%s</div>" % (button_bars_html,)
+        return "<div class='buttons buttons-%s'>%s</div>" % (position, button_bars_html,)
 
     def draw_headings(self, visible_columns, reverse_dependent_columns, output_options):
         sort_path = self.path + ['_', 'sort']
@@ -515,14 +555,19 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
     def mangle_output(self, table, output_options):
         info = {'html_attributes': self.draw_html_attributes(self.path),
                 'table': table,
-                'buttons_top': self.draw_buttons('top', output_options),
-                'buttons_bottom': self.draw_buttons('bottom', output_options)
+                'buttons_top_left': self.draw_buttons('top-left', output_options),
+                'buttons_top_center': self.draw_buttons('top-center', output_options),
+                'buttons_top_right': self.draw_buttons('top-right', output_options),
+                'buttons_bottom_left': self.draw_buttons('bottom-left', output_options),
+                'buttons_bottom_center': self.draw_buttons('bottom-center', output_options),
+                'buttons_bottom_right': self.draw_buttons('bottom-right', output_options),
                 }
         return """
 <div %(html_attributes)s>
- %(buttons_top)s
+ <div class="buttons-group buttons-top">%(buttons_top_left)s%(buttons_top_center)s%(buttons_top_right)s</div>
  %(table)s
- %(buttons_bottom)s
+ <div class="buttons-group buttons-bottom">%(buttons_bottom_left)s%(buttons_bottom_center)s%(buttons_bottom_right)s</div>
+ <div class="table-end" />
 </div>
 """ % info
 

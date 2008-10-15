@@ -194,7 +194,7 @@ class Button(Base.SingleActionInput):
 
     def draw(self, output_options):
         super(Button, self).draw(output_options)
-        return '<input %(html_attributes)s type="submit" %(disabled)s name="%(name)s" value="%(title)s" />' % {
+        return '<input %(html_attributes)s type="submit" %(disabled)s name="%(name)s" value="%(title)s" title="%(title)s" />' % {
             'html_attributes': self.draw_html_attributes(self.path),
             'name': Webwidgets.Utils.path_to_id(self.path),
             'title': self._(self.title, output_options),

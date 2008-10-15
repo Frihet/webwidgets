@@ -28,7 +28,7 @@ Webwidgets.Program.Session.debug_send_notification = False
 class MyWindow(object):
     class Body(object):
         class Autoexpand(object):
-            default_expand = False
+#            default_expand = False
             def __init__(self, session, win_id, **attrs):
                 Webwidgets.Table.__init__(self, session, win_id, **attrs)
                 self.pre_sort = [('country', 'asc'),
@@ -42,3 +42,8 @@ class MyWindow(object):
                         for technology in ('modem', 'DSL1', 'DSL2', 'cable'):
                             for price in ('100-200', '200-300', '300-400', '400-'):
                                 self.rows.append({'country':country, 'provider':provider, 'technology':technology, 'price':price})
+
+        class DebugNow(object):
+            def clicked(self, path):
+                import pdb
+                pdb.set_trace()
