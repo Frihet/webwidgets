@@ -4,7 +4,7 @@
 
 # Group By Ordering List for the Webwidgets web developement framework
 # A list widget with intuitive grouping and sorting controls
-# 
+#
 # Copyright (C) 2007 FreeCode AS, Egil Moeller <egil.moller@freecode.no>
 
 # This program is free software; you can redistribute it and/or modify
@@ -62,12 +62,12 @@ def sort_to_order_by(sort, quote = "`"):
         order.append(quote + key + quote + ' ' + ['desc', 'asc'][dir == 'asc'])
     if order:
         return 'order by ' + ', '.join(order)
-    return    
-    
+    return
+
 class SelectionCell(BaseTableMod.SpecialCell):
     """Draws a checkbox that lets the user add/remove the current row
     from a list of selected rows."""
-    
+
     html_class = ['functions']
 
     def draw_selectbox(self, table, value, path, html_class, active, checked, output_options):
@@ -141,7 +141,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         pre_sort = []
         sort = []
         post_sort = []
-        
+
         button_bars = {'top-left':
                        Webwidgets.Utils.OrderedDict([('paging_buttons_prev',  {'level': 1}),
                                                      ('paging_buttons_rows_of_rows',  {'level': 1, 'verbose': 1}),
@@ -160,7 +160,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
 #                        Webwidgets.Utils.OrderedDict([('order_functions', {'level': 1})
 #                                                      ])
                        }
-        
+
         """{"position": {"button_bar_name": {"level": value, "option_name": value}}}"""
         button_bars_level_force_min = 0
         """A button bar is drawn if it is active, or its level is >=
@@ -173,7 +173,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         def __init__(self):
             super(Table.WwModel, self).__init__()
             self.selection = list(self.selection)
-            
+
     class RowsFilters(BaseTableMod.BaseTable.RowsFilters):
         WwFilters = ["SelectionColFilter",
                      "TableFunctionColFilter"] + BaseTableMod.BaseTable.RowsFilters.WwFilters + ["TableSortFilter"]
@@ -191,7 +191,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                 return [self.mangle_row(row, output_options)
                         for row
                         in self.ww_filter.get_rows(output_options = output_options, **kw)]
-            
+
         class TableFunctionColFilter(Base.Filter):
             """This filter adds columns with function buttons
             according to L{functions} that can be used to let the user
@@ -209,7 +209,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
             def get_rows(self, output_options = {}, **kw):
                 return [self.mangle_row(row, output_options)
                         for row
-                        in self.ww_filter.get_rows(output_options = output_options, **kw)]        
+                        in self.ww_filter.get_rows(output_options = output_options, **kw)]
 
             def get_columns(self, output_options, only_sortable):
                 if (   only_sortable
@@ -280,7 +280,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
             else:
                 if row in self.ww_filter.selection:
                     self.ww_filter.selection.remove(row.ww_model)
-        
+
     def field_output_expand(self, path):
         return ['']
     def field_output(self, path):
@@ -334,7 +334,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                           config.get('verbose', 0))]
         return self._(fmt, output_options) % info
 
-    
+
     paging_buttons_first_format = (
         """<button type="submit" %(back_active)s id="%(html_id)s-_-first" name="%(html_id)s" value="%(first)s" title="First page">&lt;&lt;</button>""",
         """<button type="submit" %(back_active)s id="%(html_id)s-_-first" name="%(html_id)s" value="%(first)s" title="First page">First page</button>""")
@@ -521,7 +521,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         for group_row_name, group_row_def in self.column_groups.iteritems():
             group_row_headings = []
             for col_name, col_def in visible_columns.iteritems():
-	        if group_row_name in col_def:
+                if group_row_name in col_def:
                     col_group = col_def[group_row_name]
                     if group_row_headings and group_row_headings[-1][0] == col_group:
                         group_row_headings[-1][1] += 1
@@ -567,7 +567,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
  <div class="buttons-group buttons-top">%(buttons_top_left)s%(buttons_top_center)s%(buttons_top_right)s</div>
  %(table)s
  <div class="buttons-group buttons-bottom">%(buttons_bottom_left)s%(buttons_bottom_center)s%(buttons_bottom_right)s</div>
- <div class="table-end" />
+ <div class="table-end"></div>
 </div>
 """ % info
 
@@ -577,13 +577,13 @@ class ExpandableTable(Table):
     L{ww_is_expanded} is set on the row. It also adds an expand button
     that allows the user to set/reset L{ww_is_expanded}.
     """
-    
+
     class RowsFilters(Table.RowsFilters):
         WwFilters = ["TableExpandableFilter"] + Table.RowsFilters.WwFilters
 
         class TableExpandableFilter(Base.Filter):
             """This filter provides the functionality of L{ExpandableTable}."""
-            
+
             # left = ExpandableTable right = Table
 
             # API used by Table
@@ -634,7 +634,7 @@ class ExpandableTable(Table):
                             ww_model = parent.ww_filter.ww_expansion)
                     elif prefix == "parent":
                         return self.ww_filter.get_row_by_id(row_id, **kwargs)
-                    
+
                 raise Exception("Invalid row-id %s (should have started with 'child_' or 'parent_')" % row_id)
 
 class ExpansionTable(ExpandableTable):
@@ -647,7 +647,7 @@ class ExpansionTable(ExpandableTable):
     class ExpansionViewer(Base.Widget):
         """Override this member variable with any widget to display
         beneath the rows of the table as expansion."""
-    
+
     class RowsRowModelWrapper(ExpandableTable.RowsRowModelWrapper):
         WwFilters = ["ExpansionFilter"] + ExpandableTable.RowsRowModelWrapper.WwFilters
 
@@ -673,7 +673,7 @@ class ExpansionTable(ExpandableTable):
 class EditFunctionCell(BaseTableMod.FunctionCell):
     """Draws a set of editing buttons for a row. The set of buttons
     drawn depends on if L{is_editing} returns C{True} for the row."""
-    
+
     html_class = ['edit_function_col']
 
     input_path = ['edit']
@@ -690,7 +690,7 @@ class EditFunctionCell(BaseTableMod.FunctionCell):
                 functions.append('delete')
         else:
             functions = ('edit', 'delete')
-            
+
         res = ''
         for function in functions:
             res += self.draw_function(table,
@@ -701,7 +701,7 @@ class EditFunctionCell(BaseTableMod.FunctionCell):
                                       table.get_active(table.path + ['_', 'edit_function', function, row_id]),
                                       output_options)
         return res
-    
+
     def draw_table_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
         row_id = table.ww_filter.get_row_id(row)
         return self.draw_edit_function(table, row_id,
@@ -719,14 +719,14 @@ class EditableTable(Table):
     edit-revert
     delete = edit-delete == new-delete == new-revert
     """
-    
+
     class WwModel(Table.WwModel):
         edit_operations = {'edit': True,
                            'revert': True,
                            'save': True,
                            'delete': True,
                            'new': True}
-        
+
         edit_columns = {'ww_default': True}
         edit_new_columns = {'ww_default': True}
 
@@ -735,11 +735,11 @@ class EditableTable(Table):
         class EditingFilters(Base.Filter):
             """This filter groups filters managing input fields for
             the row."""
-        
+
 
     class RowsFilters(Table.RowsFilters):
         WwFilters = ["TableEditableFilter"] + Table.RowsFilters.WwFilters
-    
+
         class TableEditableFilter(Base.Filter):
             """This filter provides a column called
             L{edit_function_col} with the editing buttons."""
@@ -753,7 +753,7 @@ class EditableTable(Table):
             def field_input_edit_function(self, path, string_value):
                 if string_value == '': return
                 row = self.object.ww_filter.get_row_by_id(string_value)
-                function = path[0]	
+                function = path[0]
                 if function == "edit":
                     row.ww_filter.edit()
                 elif function == "revert":
@@ -767,7 +767,7 @@ class EditableTable(Table):
                                 self.row.ww_filter.delete()
                             Composite.DeleteConfirmationDialog.selected(self, path, value)
                     Composite.DialogContainer.add_dialog_to_nearest(self, Confirm(self.session, self.win_id, row=row))
-                    
+
             def field_output_edit_function(self, path):
                 return ['']
 
@@ -775,7 +775,7 @@ class EditableTable(Table):
                 row_active = True
                 if len(path) > 1:
                     row = self.object.ww_filter.get_row_by_id(path[1])
-                    row_active = not hasattr(row.ww_filter, "ww_edit_operations") or row.ww_filter.ww_edit_operations.get(path[0], False)                    
+                    row_active = not hasattr(row.ww_filter, "ww_edit_operations") or row.ww_filter.ww_edit_operations.get(path[0], False)
                 return (    row_active
                         and self.ww_filter.edit_operations.get(path[0], False)
                         and self.session.AccessManager(Webwidgets.Constants.EDIT,
