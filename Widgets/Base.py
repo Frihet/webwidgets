@@ -33,7 +33,7 @@ import Webwidgets.Utils, Webwidgets.Utils.Gettext, Webwidgets.Constants
 import Webwidgets.Utils.FileHandling
 import Webwidgets.Utils.Threads
 import traceback, WebUtils.HTMLForException, pdb
-        
+
 debug_exceptions = False
 print_exceptions = False
 log_exceptions = True
@@ -54,7 +54,7 @@ class Type(type):
         if 'ww_class_data' not in members:
             members['ww_class_data'] = {}
         members['ww_class_data'] = {}
-        
+
 
         for key in members.keys():
             if key.startswith('ww_class_data__'):
@@ -95,7 +95,7 @@ class Object(object):
     extra utility methods, some extra"magic" class attributes -
     L{ww_classes}, L{ww_class_order_nr} and L{ww_class_path} and
     model/model-filter handling."""
-    
+
     __metaclass__ = Type
 
     ww_class_data__no_classes_name = True
@@ -123,7 +123,7 @@ class Object(object):
     ww_model = None
     """If non-None, any attribute not found on this object will be
     searched for on this object."""
-    
+
     WwModel = None
     """If non-None and the model attribute is None, this class will be
     instantiated and the instance placed in the model attribute."""
@@ -176,7 +176,7 @@ class Object(object):
         self.__dict__["object"] = object
 
     def is_first_filter(self):
-	if not hasattr(self, 'object'):
+        if not hasattr(self, 'object'):
             # We haven't set anything up in __init__ yet, so pretend
             # we're not first (we can't really know yet either way) so
             # that no notifications are thrown anywhere random...
@@ -221,7 +221,7 @@ class Object(object):
     # attribute is not found, it still had to traverse the whole tree
     # to the root every time), and the code was removed."""
     #### end ####
-    
+
     def __getattr__(self, name):
         """Lookup order: self, self.ww_model"""
         if self.ww_model is None:
@@ -232,7 +232,7 @@ class Object(object):
             e = sys.exc_info()[1]
             e.args = (self,) + e.args
             raise type(e), e, sys.exc_info()[2]
-        
+
     def __hasattr__(self, name):
         """Lookup order: self, self.ww_model"""
         model_has_name = (   self.ww_model is not None
@@ -253,7 +253,7 @@ class Object(object):
             object.__setattr__(self, name, value)
         else:
             setattr(self.ww_model, name, value)
-        
+
     def __setattr__(self, name, value):
         """Lookup order: self, self.ww_model"""
         old_value = getattr(self, name, NoOldValue)
@@ -281,7 +281,7 @@ class Object(object):
 
     def __unicode__(self):
         return object.__repr__(self)
-        
+
     def __str__(self):
         return str(unicode(self))
 
@@ -298,7 +298,7 @@ class PersistentWrapper(Wrapper):
     def ww_wrapper_key(cls, ww_model, **attrs):
         return str(id(ww_model))
     ww_wrapper_key = classmethod(ww_wrapper_key)
-    
+
     def __new__(cls, **attrs):
         if 'wrappers' not in cls.__dict__:
                 cls.wrappers = {}
@@ -312,7 +312,7 @@ class PersistentWrapper(Wrapper):
 
     def __init__(self, *arg, **kw):
         self.__dict__.update(kw)
-    
+
     def ww_first_init(self, *arg, **kw):
         Wrapper.__init__(self, *arg, **kw)
 
@@ -326,7 +326,7 @@ class Filter(Object):
     def __getattr__(self, name):
         """Lookup order: self, self.ww_filter"""
         return getattr(self.ww_filter, name)
-    
+
     def __hasattr__(self, name):
         """Lookup order: self, self.ww_filter"""
         ww_filter_has_name = hasattr(self.ww_filter, name)
@@ -384,7 +384,7 @@ class RetrieveFromFilter(StandardFilter):
 
     def get_retrieve_object(self, name):
         obj = self.ww_filter
-        
+
         if (    name not in self.dont_retrieve
             and (not self.do_retrieve
                  or name in self.do_retrieve)):
@@ -481,11 +481,11 @@ class RedirectFilter(StandardFilter):
                                                     for (key, value) in rest.iteritems()]),),
             **rest)
     redirect = classmethod(redirect)
-    
+
 class RedirectRenameFilter(StandardFilter):
     """This is the combination of the RedirectFilter and RenameFilter
     - it first renames attributes and the redirects them to another widget."""
-    
+
     WwFilters = ["RenameFilter", "RedirectFilter"]
     RenameFilter = RenameFilter
     class RedirectFilter(RedirectFilter):
@@ -512,7 +512,7 @@ class MapValueFilter(StandardFilter):
     """Dictionary with member variable names as keys, and two
     dictionaries (one for each direction) for value mappings as
     values."""
-    
+
     def __getattr__(self, name):
         res = getattr(self.ww_filter, name)
         if name != 'value_maps' and name in self.value_maps and res in self.value_maps[name][1]:
@@ -532,7 +532,7 @@ class MapValueFilter(StandardFilter):
                            for (name, value_map)
                            in value_maps.iteritems()])
 
-                                   
+
         return cls.derive(name = "MapValueFilter(%s)" % (', '.join(value_maps.keys()),),
                           value_maps = value_maps)
     map_values = classmethod(map_values)
@@ -565,7 +565,7 @@ class Widget(Object):
     See L{Webwidgets.Program.Program.Session.notify} for an
     explanation of notifications.
     """
-    
+
     ww_explicit_load = False
     """Controls wether the widget class is automatically instantiated
     when the parent widget is instantiated."""
@@ -597,7 +597,7 @@ class Widget(Object):
 
     def __init__(self, session, win_id, **attrs):
         """Creates a new widget
-        
+
         @param session: L{Webwidgets.Program.Session} instance. Must be
                        same as for any parent widget.
 
@@ -615,7 +615,7 @@ class Widget(Object):
                      ('MyContext/MyPage', 'popup')
 
         @param attrs: Any attributes to set for the widget.
-        
+
         """
 
         # We update __dict__ not to have to bother with __setattr__
@@ -648,7 +648,7 @@ class Widget(Object):
         def __get__(self, instance, owner):
             if instance is None or instance.parent is None:
                 return None
-            return instance.draw_html_attributes(instance.path)            
+            return instance.draw_html_attributes(instance.path)
     html_attributes = HtmlAttributes()
 
     #### fixme ####
@@ -680,7 +680,7 @@ class Widget(Object):
                 return None
             return instance.session.windows.get(instance.win_id, None)
     window = Window()
-    
+
     def get_visible(self, path):
         return self.visible and self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, path)
 
@@ -732,8 +732,8 @@ class Widget(Object):
         raise KeyError("No such parent", self, kw)
 
     def get_widgets_by_attribute(self, attribute = '__name__', direction_down = True, recursive = True):
-	res = {}
-	if not direction_down and self.parent:
+        res = {}
+        if not direction_down and self.parent:
             if hasattr(self.parent, 'get_widgets_by_attribute'):
                 res.update(self.parent.get_widgets_by_attribute(attribute, direction_down, recursive))
         if hasattr(self, attribute):
@@ -753,7 +753,7 @@ class Widget(Object):
         """Enques a message (method name and arguments) for the
         widget. Please see the documentation for
         L{Webwidgets.Program.Program.Session.notify} for more
-        information on the message passing mechanism."""        
+        information on the message passing mechanism."""
         self.session.notify(self, message, args, kw, path)
 
     def append_exception(self, message=u''):
@@ -806,7 +806,7 @@ class Widget(Object):
                 if isinstance(value, (type, types.MethodType)):
                     raise KeyError
                 return unicode(value)
-            return get_value        
+            return get_value
         def get_translated_value_for_key(key):
             def get_value():
                 value = getattr(self, key)
@@ -891,7 +891,7 @@ class Widget(Object):
             output_options['location'] = location
         return self.session.calculate_url(output_options,
                                          arguments)
-        
+
     def validate(self):
         """Validate the state of the widget and any child widgets
         created by previous user input. Returns True or False. Widgets
@@ -924,12 +924,12 @@ class Widget(Object):
             self.error = None
 
         return True
-    
+
     def get_languages(self, output_options):
         def parse_languages(languages):
             return tuple([item.split(';')[0]
                           for item in languages.split(',')])
-        
+
         if 'languages' in output_options:
             return parse_languages(output_options['languages'])
         if self.window is not None:
@@ -981,7 +981,7 @@ class Widget(Object):
         except TypeError, e:
             e.args = (self, str(message)) + e.args
             raise e
-        
+
     def __unicode__(self):
         class_path = type(self).__module__
         if getattr(type(self), 'ww_class_path', ''):
@@ -1022,7 +1022,7 @@ class BaseChildNodes(object):
             if isinstance(value, Widget):
                 if self.node is value:
                     raise Exception("Object's parent set to itself!", value)
-                
+
                 value.parent = self.node
                 value.name = name
 
@@ -1083,7 +1083,7 @@ class ChildNodeList(BaseChildNodes, list):
         """
         BaseChildNodes.__init__(self, node)
         self.extend(*arg, **kw)
-    
+
     def iteritems(self):
         for index, value in enumerate(self):
             yield (str(index), value)
@@ -1121,7 +1121,7 @@ class ChildNodeList(BaseChildNodes, list):
     def reverse(self, *arg, **kw):
         super(ChildNodeList, self).reverse(*arg, **kw)
         self.ensure()
-    
+
     def sort(self, *arg, **kw):
         super(ChildNodeList, self).sort(*arg, **kw)
         self.ensure()
@@ -1155,26 +1155,26 @@ class Composite(Widget):
 
                                 %(log_ids)s
 
-				<div class="content">
-				 <p>This part of the application has
-				 crashed. You can try to log out and
-				 log in again to remedy the problem,
-				 or just continue using other parts of
-				 the application. In any case, please
-				 contact the system administrator
-				 about this issue and tell him/her the
-				 steps you took that lead up to this
-				 issue and he/she will try to fix the
-				 problem as fast as possible.</p>
+                                <div class="content">
+                                 <p>This part of the application has
+                                 crashed. You can try to log out and
+                                 log in again to remedy the problem,
+                                 or just continue using other parts of
+                                 the application. In any case, please
+                                 contact the system administrator
+                                 about this issue and tell him/her the
+                                 steps you took that lead up to this
+                                 issue and he/she will try to fix the
+                                 problem as fast as possible.</p>
 
-				 <p>A more technical, detailed
-				 description of the error follows
-				 (click on the items to expand):</p>
+                                 <p>A more technical, detailed
+                                 description of the error follows
+                                 (click on the items to expand):</p>
 
-				 %(tracebacks)s
-				</div>
+                                 %(tracebacks)s
+                                </div>
                                </div>
-                               
+
                                <div class="foot">
                                 <span class="expand">Read more...</span>
                                 <span class="collapse">Hide details</span>
@@ -1229,7 +1229,7 @@ class Composite(Widget):
             log_ids_str = ''
             if log_ids:
                 log_ids_str = system_errors_log_ids_format % {'log_ids': '.'.join(log_ids)}
-            
+
             result = system_errors_format % {
                 'log_ids': log_ids_str,
                 'tracebacks': '\n'.join(errors)} + result
@@ -1248,7 +1248,7 @@ class Composite(Widget):
         @return: dictionary of child_names and HTML for the respective
                  children.
         """
-        
+
         if include_attributes:
             res = self.draw_attributes(output_options)
         else:
@@ -1261,10 +1261,10 @@ class Composite(Widget):
                     raise KeyError
                 return res
             return get_value
-        
+
         for name, child in self.get_children():
             res[name] = get_value_for_name_and_child(name, child)
-        
+
         return res
 
     def get_children(self):
@@ -1282,7 +1282,7 @@ class Composite(Widget):
         them returns True."""
         res = Widget.validate(self)
         for name, child in self.get_children():
-            if hasattr(child, "validate"):                
+            if hasattr(child, "validate"):
                 res = child.validate() and res
         return res
 
@@ -1300,7 +1300,7 @@ class Composite(Widget):
             return self.get_child(name)
         except KeyError:
             return default
-        
+
     def __getitem__(self, name):
         """@return: a child widget."""
         return self.get_child(name)
@@ -1311,7 +1311,7 @@ class Composite(Widget):
             return True
         except:
             return False
-        
+
     def __iter__(self):
         return self.get_children()
 
@@ -1319,7 +1319,7 @@ class DictComposite(Composite):
     ww_class_data__no_classes_name = True
 
     ChildNodeDict = ChildNodeDict
-    
+
     def __init__(self, session, win_id, **attrs):
         super(DictComposite, self).__init__(
             session, win_id, **attrs)
@@ -1352,7 +1352,7 @@ class CachingComposite(DictComposite):
     removed."""
     ww_class_data__no_classes_name = True
     ChildNodeDict = WeakChildNodeDict
-    
+
 class StaticComposite(DictComposite):
     """Base class for all composite widgets, handling child class
     instantiation, drawing of children and the visibility attribute of
@@ -1366,7 +1366,7 @@ class StaticComposite(DictComposite):
     """
 
     ww_class_data__no_classes_name = True
-    
+
     def __init__(self, session, win_id, **attrs):
         super(StaticComposite, self).__init__(
             session, win_id, **attrs)
@@ -1374,16 +1374,16 @@ class StaticComposite(DictComposite):
         # Class members have no intrinsic order, so we sort them on
         # their order of creation, which if created through the Python
         # class statement, is the same as their textual order :)
-        
+
         child_classes = []
         for name in dir(self):
             if name in ('__class__', 'parent', 'window'): continue
             value = getattr(self, name)
             if isinstance(value, type) and issubclass(value, Widget) and not value.__dict__.get('ww_explicit_load', False):
                 child_classes.append((name, value))
-                
+
         child_classes.sort(lambda x, y: cmp(x[1].ww_class_order_nr, y[1].ww_class_order_nr))
-        
+
         for (name, value) in child_classes:
             self.children[name] = value(session, win_id)
 
@@ -1391,7 +1391,7 @@ class Input(Widget):
     """Base class for all input widgets, providing input field registration"""
     class __metaclass__(Widget.__metaclass__):
         debug_input_order = False
-        
+
         def __new__(cls, name, bases, members):
             subordinates = set()
             dominants = set()
@@ -1421,7 +1421,7 @@ class Input(Widget):
                 print "    Subordinates:", ', '.join([sub.__name__ for sub in subordinates])
                 print "    Dominants:", ', '.join([sub.__name__ for sub in dominants])
                 print "    Level:", members['_input_level']
-            
+
             return Widget.__metaclass__.__new__(cls, name, bases, members)
 
     def input_order(cls, other):
@@ -1443,17 +1443,20 @@ class Input(Widget):
     everything else. This is very intentional, as this is intended to
     be used to provide readable (and bookmarkable) URLs!
     """
+    ignore_input_this_request = False
+    """If true, input for this field is suppressed for one/current
+    request. This member is reset after each request."""
 
     __input_subordinates__ = ()
     """Other input widgets that should handle simultaneous input from
-    the user _before_ this widget."""    
+    the user _before_ this widget."""
 
     __input_dominants__ = ()
     """Other input widgets that should handle simultaneous input from
-    the user _after_ this widget."""    
+    the user _after_ this widget."""
 
     ww_bind_callback = "require"
-    
+
 
     class HtmlClass(Widget.HtmlClass):
         def __get__(self, instance, owner):
@@ -1477,10 +1480,10 @@ class Input(Widget):
 
     def field_input(self, path, *string_values):
         raise NotImplementedError(self, "field_input")
-    
+
     def field_output(self, path):
         raise NotImplementedError(self, "field_output")
-    
+
     def draw(self, output_options):
         self.register_input(self.path, self.argument_name)
         return ''
@@ -1594,7 +1597,7 @@ class DirectoryServer(Widget):
         def __get__(self, instance, owner):
             return Webwidgets.Utils.module_file_path(owner.__module__)
     base_directory = BaseDirectory()
-    
+
     def class_output(cls, session, arguments, output_options):
         path = output_options['location']
         for item in path:
@@ -1621,7 +1624,7 @@ class DirectoryServer(Widget):
         relative to the .scripts-directory to the file to serve. E.g.
         C{['css-files', 'main.css']}.
         """
-        
+
         return self.calculate_url({'transaction': output_options['transaction'],
                                    'widget_class': widget_class,
                                    'location': location},
@@ -1637,7 +1640,7 @@ class Window(Widget):
 
     root = True
     path = []
-    
+
     def __init__(self, session, win_id, **attrs):
         super(Window, self).__init__(session, win_id, **attrs)
         self.fields = {}
@@ -1703,7 +1706,7 @@ class HtmlWindow(Window, StaticComposite, DirectoryServer):
             include_attributes = True)
 
         result.update(self.headers)
-        
+
         if body is not None:
             result['Body'] = body
         if title is None: title = self.get_title(self.path)
@@ -1743,7 +1746,7 @@ class HtmlWindow(Window, StaticComposite, DirectoryServer):
         content_name = content_name or Webwidgets.Utils.path_to_id(widget.path)
         widget.session.windows[widget.win_id].head_content[content_name] = content
     register_head_content = classmethod(register_head_content)
-   
+
     def register_replaced_content(cls, widget, content, content_name = None):
         content_name = content_name or Webwidgets.Utils.path_to_id(widget.path)
         widget.session.windows[widget.win_id].replaced_content[content_name] = content
@@ -1756,7 +1759,7 @@ class HtmlWindow(Window, StaticComposite, DirectoryServer):
                        for uri in uris]),
             'script: ' + ' '.join(uris))
     register_script_link = classmethod(register_script_link)
-        
+
     def register_style_link(cls, widget, *uris):
         cls.register_head_content(
             widget,
@@ -1764,14 +1767,14 @@ class HtmlWindow(Window, StaticComposite, DirectoryServer):
                        for uri in uris]),
             'style: ' + ' '.join(uris))
     register_style_link = classmethod(register_style_link)
-    
+
     def register_script(cls, widget, name, script):
         cls.register_head_content(
             widget,
             "<script language='javascript' type='text/javascript'>%s</script>" % (script,),
             name)
     register_script = classmethod(register_script)
-        
+
     def register_style(cls, widget, name, style):
         cls.register_head_content(
             widget,

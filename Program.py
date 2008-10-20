@@ -105,7 +105,7 @@ class Program(WebKit.Page.Page):
             sys.last_traceback = sys.exc_info()[2]
             pdb.pm()
             raise
-        
+
     def handle_request(self, transaction):
         type(self).request_nr += 1
 
@@ -154,7 +154,7 @@ class Program(WebKit.Page.Page):
             protocol = "http"
             if req._environ['SERVER_PORT'] != '80':
                 port = ':' + req._environ['SERVER_PORT']
-        
+
         # This is due to difference between running with apache+mod_webkit and only webware appserver
         if ':' in req._environ['HTTP_HOST']:
             port = ''
@@ -239,7 +239,7 @@ class Program(WebKit.Page.Page):
                     if self.widget.session.debug_receive_notification:
                         print "Notifying %s (ignored)" % self
                 if self.widget.session.debug_receive_notification:
-                    print "Notifying parent %s" % self.widget.parent                    
+                    print "Notifying parent %s" % self.widget.parent
                 try:
                     parent = self.parent()
                 except StopIteration:
@@ -470,9 +470,13 @@ class Program(WebKit.Page.Page):
 
                 for field, path, value in changed:
                     try:
-                        field.field_input(path, *value)
+                        if not field.ignore_input_this_request:
+                            field.field_input(path, *value)
                     except:
                         field.append_exception()
+
+                for field in window.fields.itervalues():
+                    field.ignore_input_this_request = False
 
                 obj = window
                 fn_name = 'output'
@@ -494,7 +498,7 @@ class Program(WebKit.Page.Page):
                     # field_output would still output an empty
                     # string."""
                     #### end ####
-                    
+
                     # Don't fire reload events except for reloads of
                     # the page itself. Caching policies might result
                     # in other items being reloaded now and then w/o
