@@ -145,7 +145,8 @@ class MunicipalityInput(CountyInput):
             WwFilters = MunicipalityPartInput.WwFilters + [
                 Base.RedirectRenameFilter.redirect([], 2, active = "active", value ='municipality'),
                 Base.MangleFilter.mangle(
-                region_prefix = lambda self: [self.parent.parent.ww_filter.county])]
+                region_prefix = lambda self: [self.parent.parent.ww_filter.country,
+                                              self.parent.parent.ww_filter.county])]
 
 class RegionPart(GenericRegionPart, Formatting.Html):
     class WwModel(GenericRegionPart.WwModel): pass
