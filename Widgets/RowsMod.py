@@ -166,7 +166,13 @@ class RowsSimpleModelFilter(Base.Filter):
 
     def row_cmp(self, row1, row2):
         for col, order in self.object.ww_filter.sort:
-            diff = cmp(row1[col], row2[col])
+            if hasattr(row1, '__getitem__'):
+                diff = cmp(row1[col], row2[col])
+            elif hasattr(row1, 'title'):
+                diff = cmp(row1.title, row2.title)
+            else:
+                diff = cmp(str(row1), str(row2))
+                
             if diff:
                 if order == 'desc': diff *= -1
                 return diff
