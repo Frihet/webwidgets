@@ -155,14 +155,17 @@ class RowsSimpleModelFilter(Base.Filter):
                 self.expand[row_id]['expanded_cols'].remove(col)
 	self.expand_version += 1
 
+    def needs_refresh(self):
+        return (   self.object.ww_filter.sort != self.old_sort
+                or self.page != self.old_page
+                or self.expand_version != self.old_expand
+                or self.default_expand != self.old_default_expand)
+
     # Internal
     def ensure(self):
         """Reload the list after a repaging/resorting"""
-        if (   self.object.ww_filter.sort != self.old_sort
-            or self.page != self.old_page
-            or self.expand_version != self.old_expand
-            or self.default_expand != self.old_default_expand):
-            self.reread()
+        if self.needs_refresh():
+            self.object.ww_filter.reread()
 
     def row_cmp(self, row1, row2):
         for col, order in self.object.ww_filter.sort:

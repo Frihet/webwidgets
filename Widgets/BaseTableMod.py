@@ -171,6 +171,20 @@ class BaseTable(RowsMod.RowsComposite, Base.DirectoryServer):
         """If False, allow collapse/expand for columns in allow_collapse_columns, if True allow for all
         but the ones in allow_collapse_columns"""        
 
+        cache_html_output = False
+        """If set, HTML output is cached as long as
+        self.ww_filter.needs_refresh() returns False. This is a BAD
+        idea if your table contains other widgets..."""
+        html_output_cache = None
+
+    class SourceFilters(RowsMod.RowsComposite.SourceFilters):
+
+        WwFilters = ["HtmlCacheFilter"] + RowsMod.RowsComposite.SourceFilters.WwFilters
+        class HtmlCacheFilter(Base.Filter):
+            def reread(self):
+                self.html_output_cache = None
+                self.ww_filter.reread()
+
     empty_table_message = """There is no data in this table / no entries matched your search."""
 
     class TreeFilters(Base.Filter):
@@ -324,11 +338,7 @@ class BaseTable(RowsMod.RowsComposite, Base.DirectoryServer):
                 res[dependent_column] = main
         return res
 
-    def draw(self, output_options):
-        Base.HtmlWindow.register_style_link(self, self.calculate_url({'transaction': output_options['transaction'],
-                                                     'widget_class': 'Webwidgets.BaseTable',
-                                                     'location': ['Table.css']},
-                                                    {}))
+    def draw_uncached(self, output_options):
         reverse_dependent_columns = self.reverse_dependency(self.dependent_columns)
         visible_columns = self.visible_columns(output_options)
 
@@ -339,6 +349,30 @@ class BaseTable(RowsMod.RowsComposite, Base.DirectoryServer):
                     visible_columns, reverse_dependent_columns, output_options),
                 output_options),
             output_options)
+
+    def draw_cached(self, output_options):
+        return self.ww_filter.html_output_cache
+
+    def draw(self, output_options):
+        Base.HtmlWindow.register_style_link(self, self.calculate_url({'transaction': output_options['transaction'],
+                                                     'widget_class': 'Webwidgets.BaseTable',
+                                                     'location': ['Table.css']},
+                                                    {}))
+        
+        if self.ww_filter.cache_html_output:            
+            print "TABLE CACHED"
+            # Reset the cache if it needs refresh (this will reread
+            # the rows in that case too, but it would be done later
+            # anyway, so we're just hastening it :)
+            self.ww_filter.ensure()
+            if self.ww_filter.html_output_cache is None:
+                print "TABLE CACHE REFRESH"
+                self.ww_filter.html_output_cache = self.draw_uncached(output_options)
+                return self.ww_filter.html_output_cache
+            else:
+                return self.draw_cached(output_options)
+        else:
+            return self.draw_uncached(output_options)
 
     def output(self, output_options):
         return {Webwidgets.Constants.OUTPUT: self.draw_printable_version(output_options),

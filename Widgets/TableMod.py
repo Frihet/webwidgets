@@ -26,7 +26,7 @@ the user to sort the rows and simultaneously group the rows according
 to their content and the sorting."""
 
 import Webwidgets.Constants, Webwidgets.Utils, re, math, cgi, types, itertools
-import Base, BaseTableMod, Composite
+import Base, BaseTableMod, Composite, RowsMod
 
 column_allowed_name_re = re.compile("^[a-z_]*$")
 
@@ -170,9 +170,12 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         selection = []
         """Currently selected rows if a column named "selection_col" is added"""
 
+        html_output_field_cache = []
+
         def __init__(self):
             super(Table.WwModel, self).__init__()
             self.selection = list(self.selection)
+            self.html_output_field_cache = []
 
     class RowsFilters(BaseTableMod.BaseTable.RowsFilters):
         WwFilters = ["SelectionColFilter",
@@ -570,6 +573,20 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
  <div class="table-end"></div>
 </div>
 """ % info
+
+    def register_input(self, *arg, **kw):
+        Base.MixedInput.register_input(self, *arg, **kw)
+        if self.ww_filter.cache_html_output:
+            self.ww_filter.html_output_field_cache.append((arg, kw))
+
+    def draw_uncached(self, output_options):
+        self.ww_filter.html_output_field_cache = []
+        return BaseTableMod.BaseTable.draw_uncached(self, output_options)
+
+    def draw_cached(self, output_options):
+        for (arg, kw) in self.ww_filter.html_output_field_cache:
+            Base.MixedInput.register_input(self, *arg, **kw)
+        return BaseTableMod.BaseTable.draw_cached(self, output_options)
 
 class ExpandableTable(Table):
     """This widget allows rows to contain a "subtree row" in
