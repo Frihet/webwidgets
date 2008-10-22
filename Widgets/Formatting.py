@@ -241,7 +241,8 @@ class Media(Base.Widget):
                            ).encode('utf-8')
                 mime_type = self.base.type
         return {Webwidgets.Constants.OUTPUT: content,
-                'Content-type': mime_type}
+                'Content-type': mime_type,
+                'Cache-Control': 'public; max-age=3600'}
 
     def draw(self, output_options):
         if self.get_option('inline'):
