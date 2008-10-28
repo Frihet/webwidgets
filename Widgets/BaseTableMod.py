@@ -55,7 +55,7 @@ class FunctionCell(SpecialCell):
     def draw_function(self, table, row_id, value, path, html_class, title, active, output_options):
         input_id = Webwidgets.Utils.path_to_id(table.path + ['_'] + path)
         if active:
-            table.session.windows[table.win_id].fields[input_id] = table
+            table.register_input(table.path + ['_'] + path)
         return """<button
                    type="submit"
                    id="%(html_id)s-%(row)s"
