@@ -40,6 +40,7 @@ class GeographicRegion(object):
         try:
             result = [entry_to_region(*entry[:-1].decode('utf-8').split(" ", 1))
                       for entry in file]
+            result.sort(lambda l, r: cmp(l.title, r.title))
             sym_dict = dict([(r.symbols[-1], r) for r in result])
             name_dict = dict([(r.title, r) for r in result])
             return result, sym_dict, name_dict
