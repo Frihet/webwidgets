@@ -156,10 +156,16 @@ class Program(WebKit.Page.Page):
                 port = ':' + req._environ['SERVER_PORT']
 
         # This is due to difference between running with apache+mod_webkit and only webware appserver
-        if ':' in req._environ['HTTP_HOST']:
+        if 'HTTP_HOST' in req._environ:
+            host = req._environ['HTTP_HOST']
+        else:
+            import socket
+            host = socket.getfqdn()
+        
+        if ':' in host:
             port = ''
 
-        return protocol + '://' + req._environ['HTTP_HOST'] + port + adapter
+        return protocol + '://' + host + port + adapter
 
     def request_base(self, transaction):
         """@return: A URL to this Webwidgets application."""
