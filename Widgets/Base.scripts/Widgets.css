@@ -417,7 +417,7 @@ select {
 
 .Webwidgets-Widgets-Composite-InfoFrame-_-body {
  padding: 10px;
- overflow: auto;
+ overflow-y: auto;
 }
 
 .Webwidgets-Widgets-Composite-InfoFrame-_-foot {
