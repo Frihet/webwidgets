@@ -44,22 +44,30 @@ webwidgets_add_event_handler(window, 'load', 'webwidgets_delayed', webwidgets_de
 
 
 function webwidgets_submit_button_iefix() {
- if (window.navigator.userAgent.indexOf ( "MSIE " ) <= 0)
-  return;
- buttons = document.getElementsByTagName('button');
- for (i = buttons.length - 1; i >= 0; i--)
-  if (buttons[i] != event.srcElement)
-   buttons[i].parentNode.removeChild(buttons[i]);
- buttons = document.getElementsByTagName('input');
- for (i = buttons.length - 1; i >= 0; i--)
-  if (buttons[i].type == "submit")
-   if (buttons[i] != event.srcElement)
-    buttons[i].parentNode.removeChild(buttons[i]);
- if (   event.srcElement.tagName.toLowerCase() == "button"
-     || (   event.srcElement.tagName.toLowerCase() == "input"
-         && event.srcElement.type.toLowerCase() == "submit"))
-  event.srcElement.innerText = webwidgets_values['field_value_' + event.srcElement.id];
+  if (window.navigator.userAgent.indexOf ( "MSIE " ) <= 0)
+    return;
+  
+  buttons = document.getElementsByTagName('button');
+  for (i = buttons.length - 1; i >= 0; i--) {
+    if (buttons[i] != event.srcElement) {
+      buttons[i].disabled = true;
+    }
+  }
+  
+  buttons = document.getElementsByTagName('input');
+  for (i = buttons.length - 1; i >= 0; i--) {
+    if (buttons[i].type == "submit" && buttons[i] != event.srcElement) {
+      buttons[i].disabled = true;      
+    }
+  }
+  
+  if (event.srcElement.tagName.toLowerCase() == "button"
+      || (   event.srcElement.tagName.toLowerCase() == "input"
+	     && event.srcElement.type.toLowerCase() == "submit")) {
+    event.srcElement.innerText = webwidgets_values['field_value_' + event.srcElement.id];
+  }
 }
+
 
 function webwidgets_iefix_load() {
  buttons = document.getElementsByTagName('button');
