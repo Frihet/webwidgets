@@ -42,7 +42,7 @@ class RowsSimpleModelFilter(Base.Filter):
         self.old_sort = None
         self.old_page = None
         self.old_expand = None
-	self.expand_version = 0
+        self.expand_version = 0
         self.old_default_expand = None
 
     def get_rows(self, all = False, output_options = {}, **kw):
@@ -153,7 +153,7 @@ class RowsSimpleModelFilter(Base.Filter):
                 self.expand[row_id]['expanded_cols'].add(col)
             else:
                 self.expand[row_id]['expanded_cols'].remove(col)
-	self.expand_version += 1
+        self.expand_version += 1
 
     def needs_refresh(self):
         return (   self.object.ww_filter.sort != self.old_sort
@@ -164,7 +164,7 @@ class RowsSimpleModelFilter(Base.Filter):
     # Internal
     def ensure(self):
         """Reload the list after a repaging/resorting"""
-        if self.needs_refresh():
+        if self.object.ww_filter.needs_refresh():
             self.object.ww_filter.reread()
 
     def row_cmp(self, row1, row2):
