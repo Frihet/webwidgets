@@ -1604,15 +1604,23 @@ class DirectoryServer(Widget):
             assert item != '..'
 
         ext = os.path.splitext(path[-1])[1][1:]
-        file = open(os.path.join(cls.base_directory,
-                                 *path))
         try:
-            return {Webwidgets.Constants.FINAL_OUTPUT: file.read(),
-                    'Content-type': Webwidgets.Utils.FileHandling.extension_to_mime_type[ext],
-                    'Cache-Control': 'public; max-age=3600'
+            file = open(os.path.join(cls.base_directory,
+                                     *path))
+        except:
+            return {Webwidgets.Constants.FINAL_OUTPUT: "File not found",
+                    'Content-type': "text/plain",
+                    'Cache-Control': 'public; max-age=3600',
+                    'Status': '404 File not found'
                     }
-        finally:
-            file.close()
+        else:
+            try:
+                return {Webwidgets.Constants.FINAL_OUTPUT: file.read(),
+                        'Content-type': Webwidgets.Utils.FileHandling.extension_to_mime_type[ext],
+                        'Cache-Control': 'public; max-age=3600'
+                        }
+            finally:
+                file.close()
     class_output = classmethod(class_output)
 
     def calculate_url_to_directory_server(self, widget_class, location, output_options):
