@@ -21,17 +21,31 @@
 
 import Utils, Constants, csv
 
+allow_deny_strings = {"allow": True,
+                      "deny": False}
+allow_deny_values = dict((value, name) for (name, value) in allow_deny_strings.iteritems())
+scope_strings = {"sub": Constants.SUBTREE,
+                 "one": Constants.ONE}
+scope_values = dict((value, name) for (name, value) in scope_strings.iteritems())
+op_strings = {"view": Constants.VIEW,
+              "rarr": Constants.REARRANGE,
+              "edit": Constants.EDIT}
+op_values = dict((value, name) for (name, value) in op_strings.iteritems())
+
 class AccessManager(object):
     """This class can be overridden to control access to
     widgets."""
-    debug = False
+    debug = ()
     
     def __init__(self, session):
         self.session = session
 
     def debug_print(self, op, win_id, path, result):
-        if self.debug:
-            print "AccessManager: %s: %s: %s:%s" % (result, op, win_id, '.'.join(path))
+        if self.debug and (self.debug is True or result in self.debug):
+            print "AccessManager: %s, X, %s, %s, %s" % (allow_deny_values[result],
+                                                        op_values[op],
+                                                        win_id == Constants.DEFAULT_WINDOW and 'def' or win_id,
+                                                        Utils.path_to_id(path))
 
     def __call__(self, op, win_id, path):
         """Check if an operation is allowed to perform on a widget.
@@ -72,11 +86,13 @@ class ListAccessManager(AccessManager):
     debug_lists = False
     
     def debug_print_path(self, operation_path, result):
-        if self.debug:
-            print "AccessManager: %s: %s" % (result, '.'.join([str(item) for item in operation_path]))
+        if self.debug and (self.debug is True or result in self.debug):
+            print "AccessManager: %s: %s" % (result, Utils.path_to_id(operation_path))
 
     def __call__(self, op, win_id, path):
-        return self.call_path((op, win_id) + tuple(path))
+        result = self.call_path((op, win_id) + tuple(path))
+        self.debug_print(op, win_id, path, result)
+        return result
 
     def call_path(self, operation_path):
         lst = self.get_access_list()
@@ -95,7 +111,7 @@ class ListAccessManager(AccessManager):
                 print "AccessManager:  %s %s: %s%s" % (
                     marker, rule_result, '.'.join([str(item) for item in rule_path]), scope)
         if result is None: result = False
-        self.debug_print_path(operation_path, result)
+        #self.debug_print_path(operation_path, result)
         return result
 
     def get_access_list(self):
@@ -108,13 +124,9 @@ class ListAccessManager(AccessManager):
         for line in csv.reader(file):
             if not line or line[0].startswith('#'): continue
             (result, scope, op, win, path) = line
-            yield ({"allow": True,
-                    "deny": False}[result.strip()],
-                   {"sub": Constants.SUBTREE,
-                    "one": Constants.ONE}[scope.strip()],
-                   ({"view": Constants.VIEW,
-                     "rarr": Constants.REARRANGE,
-                     "edit": Constants.EDIT}[op.strip()],
+            yield (allow_deny_strings[result.strip()],
+                   scope_strings[scope.strip()],
+                   (op_strings[op.strip()],
                     (win.strip() == "def" and Constants.DEFAULT_WINDOW) or win.strip()
                     ) + tuple(Utils.id_to_path(path.strip())))
     load_access_list_from_file = classmethod(load_access_list_from_file)
