@@ -237,6 +237,9 @@ class TabbedView(SwitchingView, Base.ActionInput):
     attribute draw_inline=True on the child widget."""
     argument_name = None
 
+    hide_single_tab = True
+    """Hide the tab-header if there is only one tab (visible)."""
+
     def field_input(self, path, string_value):
         if string_value != '':
             page = Webwidgets.Utils.id_to_path(string_value, True)
@@ -294,6 +297,10 @@ class TabbedView(SwitchingView, Base.ActionInput):
                 else:
                     info['children'] = draw_tabs(children, path + [name])
                     tabs.append("<li><span>%(caption)s</span>%(children)s</li>" % info)
+
+            if len(tabs) < 2 and self.hide_single_tab:
+                return ''
+
             return """
                     <ul id="%(widget_id)s" class="tabs">
                      %(tabs)s
