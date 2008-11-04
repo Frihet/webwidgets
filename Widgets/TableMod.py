@@ -304,7 +304,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                 for row in self.ww_filter.selection]
 
     def get_active_expand(self, path):
-        return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['expand'] + path)
+        return self.session.AccessManager(Webwidgets.Constants.RARR, self.win_id, self.path + ['expand'] + path)
     def get_active_sort(self, path):
         if path and (   path[0] in self.disabled_columns
                      or [key for (key, order) in self.ww_filter.pre_sort
@@ -312,11 +312,11 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                      or [key for (key, order) in self.ww_filter.post_sort
                          if key == path[0]]
                      or path[0] in self.functions): return False
-        return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['sort'] + path)
+        return self.session.AccessManager(Webwidgets.Constants.RARR, self.win_id, self.path + ['sort'] + path)
     def get_active_page(self, path):
-        return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['page'] + path)
+        return self.session.AccessManager(Webwidgets.Constants.RARR, self.win_id, self.path + ['page'] + path)
     def get_active_reset_order(self, path):
-        return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['sort'] + path)
+        return self.session.AccessManager(Webwidgets.Constants.RARR, self.win_id, self.path + ['sort'] + path)
     def get_active_function(self, path):
         if path[0] in self.disabled_functions: return False
         return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, self.path + ['function'] + path)
@@ -632,7 +632,7 @@ class ExpandableTable(Table):
                 return ['']
 
             def get_active_expand(self, path):
-                return self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, self.path + ['expand'] + path)
+                return self.session.AccessManager(Webwidgets.Constants.RARR, self.win_id, self.path + ['expand'] + path)
 
             def get_row_id(self, row):
                 if hasattr(row, 'ww_is_expansion_parent'):

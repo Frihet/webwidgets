@@ -251,17 +251,17 @@ class TabbedView(SwitchingView, Base.ActionInput):
 
     def get_active_page(self, page):
         return getattr(self + page, 'active', True) and self.session.AccessManager(
-            Webwidgets.Constants.REARRANGE, self.win_id, self.path + page)
+            Webwidgets.Constants.RARR, self.win_id, self.path + page)
         
     def get_active_page_preview(self, page):
         return getattr(self + page, 'active', True) and self.session.AccessManager(
-            Webwidgets.Constants.REARRANGE, self.win_id, self.path + page)
+            Webwidgets.Constants.RARR, self.win_id, self.path + page)
         
     def get_active(self, path):
         """@return: Whether the widget is allowing input from the user
         or not.
         """
-        return self.active and self.session.AccessManager(Webwidgets.Constants.REARRANGE, self.win_id, path)
+        return self.active and self.session.AccessManager(Webwidgets.Constants.RARR, self.win_id, path)
 
     def draw_tabs(self, output_options):
         active = self.register_input(self.path, self.argument_name)

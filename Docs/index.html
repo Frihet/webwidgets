@@ -857,20 +857,20 @@ class MyFirstWidget(MyCallBacks.MyCallbackClass, html):
   action determines if the action is allowed or not.</p>
 
   <p><tt>Path</tt> is a path to the widget, with the action and window
-  prepended. <tt>Scope</tt> is either <tt>SUBTREE</tt> or <tt>ONE</tt>
+  prepended. <tt>Scope</tt> is either <tt>SUB</tt> or <tt>ONE</tt>
   to match the path and all child widgets to that path, or to match
   just that widget, respectively.</p>
 
   <p>The actions that can start a path are <tt>EDIT</tt>,
-  <tt>REARRANGE</tt> and <tt>VIEW</tt>. The window is either
+  <tt>RARR</tt> and <tt>VIEW</tt>. The window is either
   <tt>DEFAULT_WINDOW</tt> or a window name.</p>
 
   <blockquote><pre>
 (True,  ONE,     (VIEW, DEFAULT_WINDOW, 'Body', 'LogIn', 'Application', 'Menu', 'AppMenu')),
-(False, SUBTREE, (VIEW, DEFAULT_WINDOW, 'Body', 'LogIn', 'Application', 'Menu', 'AppMenu')),
-(False, SUBTREE, (VIEW, DEFAULT_WINDOW, 'Body', 'LogIn', 'Application', 'Menu', 'AppMenu', 'Home', 'Stones'),
-(True,  SUBTREE, (VIEW, DEFAULT_WINDOW, 'Body', 'LogIn', 'Application', 'Menu', 'AppMenu', 'Home'),
-(True,  SUBTREE, (VIEW, DEFAULT_WINDOW, 'Body', 'LogIn', 'Application')),
+(False, SUB, (VIEW, DEFAULT_WINDOW, 'Body', 'LogIn', 'Application', 'Menu', 'AppMenu')),
+(False, SUB, (VIEW, DEFAULT_WINDOW, 'Body', 'LogIn', 'Application', 'Menu', 'AppMenu', 'Home', 'Stones'),
+(True,  SUB, (VIEW, DEFAULT_WINDOW, 'Body', 'LogIn', 'Application', 'Menu', 'AppMenu', 'Home'),
+(True,  SUB, (VIEW, DEFAULT_WINDOW, 'Body', 'LogIn', 'Application')),
   </pre></blockquote>
 
   <p>To ease the creation of these lists, you can set the

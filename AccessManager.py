@@ -19,16 +19,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import Utils, Constants, csv
+import Utils, Constants, csv, re
 
 allow_deny_strings = {"allow": True,
                       "deny": False}
 allow_deny_values = dict((value, name) for (name, value) in allow_deny_strings.iteritems())
-scope_strings = {"sub": Constants.SUBTREE,
+scope_strings = {"sub": Constants.SUB,
                  "one": Constants.ONE}
 scope_values = dict((value, name) for (name, value) in scope_strings.iteritems())
 op_strings = {"view": Constants.VIEW,
-              "rarr": Constants.REARRANGE,
+              "rarr": Constants.RARR,
               "edit": Constants.EDIT}
 op_values = dict((value, name) for (name, value) in op_strings.iteritems())
 
@@ -42,10 +42,10 @@ class AccessManager(object):
 
     def debug_print(self, op, win_id, path, result):
         if self.debug and (self.debug is True or result in self.debug):
-            print "AccessManager: %s, X, %s, %s, %s" % (allow_deny_values[result],
-                                                        op_values[op],
-                                                        win_id == Constants.DEFAULT_WINDOW and 'def' or win_id,
-                                                        Utils.path_to_id(path))
+            print "AccessManager: %s, %s, %s, %s" % (allow_deny_values[result],
+                                                     op_values[op],
+                                                     win_id == Constants.DEFAULT_WINDOW and 'def' or win_id,
+                                                     Utils.path_to_id(path))
 
     def __call__(self, op, win_id, path):
         """Check if an operation is allowed to perform on a widget.
@@ -58,7 +58,49 @@ class AccessManager(object):
         self.debug_print(op, win_id, path, True)
         return True
 
-class ListAccessManager(AccessManager):
+class AbstractListAccessManager(AccessManager):
+    debug_lists = False
+    debug_list_match = False
+
+    def op_to_path(self, op, win_id, path):
+        return (op, win_id) + tuple(path)
+
+    def __call__(self, op, win_id, path):
+        result = self.call_path(self.op_to_path(op, win_id, path))
+        self.debug_print(op, win_id, path, result)
+        return result
+
+    def get_access_list(self):
+        """Returns the access control list. This version fetches it
+        using L{self.session.get_access_list} Override this in a
+        subclass to fetch/construct the list from somewhere else."""
+        return self.session.get_access_list()
+
+    @classmethod
+    def load_access_list_from_file_name(cls, name):
+        file = open(name)
+        try:
+            for line in cls.load_access_list_from_file(file):
+                yield line
+        finally:
+            file.close()
+
+    def call_path(self, operation_path):
+        for rule in self.get_access_list():
+            rule_result = self.call_rule_path(rule[1:], operation_path)
+            if self.debug_lists or (self.debug_list_match and rule_result):
+                print "AccessManager:  %s %s" % (['   ', '==>'][not not rule_result], self.print_rule(rule))
+            if rule_result:
+                return rule[0]
+        return False
+
+    def call_rule_path(self, rule, operation_path):
+        raise NotImplementedError
+
+    def load_access_list_from_file(cls, file):
+        raise NotImplementedError
+
+class ListAccessManager(AbstractListAccessManager):
     """ListAccessManager controlls access to widgets according to an
     access control list.
 
@@ -75,7 +117,7 @@ class ListAccessManager(AccessManager):
 
         - C{rule_scope} determines how to match the path -
           L{Constants.ONE} for exact comparation or
-          L{Constants.SUBTREE} for subtree matching.
+          L{Constants.SUB} for subtree matching.
 
         - C{rule_path} is the path to match, expressed as a list of
           strings/unicode strings. The first item is the operation to
@@ -83,43 +125,17 @@ class ListAccessManager(AccessManager):
           is the widget path.
     """
     
-    debug_lists = False
-    
-    def debug_print_path(self, operation_path, result):
-        if self.debug and (self.debug is True or result in self.debug):
-            print "AccessManager: %s: %s" % (result, Utils.path_to_id(operation_path))
+    def call_rule_path(self, (rule_scope, rule_path), operation_path):
+        return (   (rule_scope is Constants.SUB and Utils.is_prefix(rule_path, operation_path))
+                or (rule_scope is Constants.ONE and rule_path == operation_path))
 
-    def __call__(self, op, win_id, path):
-        result = self.call_path((op, win_id) + tuple(path))
-        self.debug_print(op, win_id, path, result)
-        return result
+    def print_rule(self, (rule_result, rule_scope, rule_path)):
+        scope = ''
+        if rule_scope is Constants.SUB:
+            scope = '.*'
+        return "%s: %s%s" % (rule_result, '.'.join([str(item) for item in rule_path]), scope)
 
-    def call_path(self, operation_path):
-        lst = self.get_access_list()
-        result = None
-        for rule_result, rule_scope, rule_path in lst:
-            marker = '   '
-            if (   (rule_scope is Constants.SUBTREE and Utils.is_prefix(rule_path, operation_path))
-                or (rule_scope is Constants.ONE and rule_path == operation_path)):
-                marker = ' ->'
-                if result is None:
-                    marker = '==>'
-                    result = rule_result
-            if self.debug_lists:
-                scope = ''
-                if rule_scope is Constants.SUBTREE: scope = '.*'
-                print "AccessManager:  %s %s: %s%s" % (
-                    marker, rule_result, '.'.join([str(item) for item in rule_path]), scope)
-        if result is None: result = False
-        #self.debug_print_path(operation_path, result)
-        return result
-
-    def get_access_list(self):
-        """Returns the access control list. This version fetches it
-        using L{self.session.get_access_list} Override this in a
-        subclass to fetch/construct the list from somewhere else."""
-        return self.session.get_access_list()
-
+    @classmethod
     def load_access_list_from_file(cls, file):
         for line in csv.reader(file):
             if not line or line[0].startswith('#'): continue
@@ -129,13 +145,61 @@ class ListAccessManager(AccessManager):
                    (op_strings[op.strip()],
                     (win.strip() == "def" and Constants.DEFAULT_WINDOW) or win.strip()
                     ) + tuple(Utils.id_to_path(path.strip())))
-    load_access_list_from_file = classmethod(load_access_list_from_file)
 
-    def load_access_list_from_file_name(cls, name):
-        file = open(name)
-        try:
-            for line in cls.load_access_list_from_file(file):
-                yield line
-        finally:
-            file.close()
-    load_access_list_from_file_name = classmethod(load_access_list_from_file_name)
+
+class RegexpListAccessManager(AbstractListAccessManager):
+    """RegexpListAccessManager controlls access to widgets according
+    to an access control list made up of regular expressions.
+
+    The list is traversed from head to tail comparing the widget path
+    to the path pattern for each item until a match is found. The
+    result (true or false) from the matching item is returned, or
+    False if no item was found matching.
+    
+    Each list item is a tuple of C{(rule_result, rule_path_pattern)}.
+
+        - C{rule_result} is the value to return if the item matches,
+          either C{True} or C{False}.
+
+        - C{rule_path} is the path to match, expressed as regular
+          expression object that is matched against
+          path_to_id(widget_path).
+    """
+
+    class Regexp(object):
+        def __init__(self, regexp_string):
+            self.regexp_string = regexp_string
+            self.regexp = re.compile("^%s$" % (regexp_string,))
+            
+        def __getattr__(self, name):
+            return getattr(self.regexp, name)
+
+        def __unicode__(self):
+            return unicode(self.regexp_string)
+
+        def __str__(self):
+            return str(self.regexp_string)
+
+        def __repr__(self):
+            return repr(self.regexp_string)
+
+    def op_to_path(self, op, win_id, path):
+        return Utils.path_to_id([unicode(item) for item in (op, win_id) + tuple(path)])
+
+    def debug_print(self, op, win_id, path, result):
+        if self.debug and (self.debug is True or result in self.debug):
+            print "AccessManager: %s, %s" % (allow_deny_values[result],
+                                             self.op_to_path(op, win_id, path))
+
+    def call_rule_path(self, (rule_regexp,), operation_path):
+        return rule_regexp.match(operation_path)
+
+    def print_rule(self, (rule_result, rule_regexp)):
+        return "%s: %s" % (rule_result, rule_regexp)
+
+    @classmethod
+    def load_access_list_from_file(cls, file):
+        for line in csv.reader(file):
+            if not line or line[0].startswith('#'): continue
+            (result, rule_regexp) = line
+            yield (allow_deny_strings[result.strip()], cls.Regexp(rule_regexp.strip()))

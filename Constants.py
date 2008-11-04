@@ -46,7 +46,7 @@ class OutputGiven(Exception):
 class NotASubwidgetException(Exception): pass
 
 class EDIT(Singleton): pass
-class REARRANGE(Singleton): pass
+class RARR(Singleton): pass
 class VIEW(Singleton): pass
-class SUBTREE(Singleton): pass
+class SUB(Singleton): pass
 class ONE(Singleton): pass
