@@ -173,7 +173,8 @@ class DialogContainer(Formatting.Div):
     add_dialog_to_nearest = classmethod(add_dialog_to_nearest)
 
 class Tabset(Base.StaticComposite):
-    def get_pages(self, path = []):
+    def get_pages(self, output_options):
+        nr_of_descendants = 0
         tabs = Webwidgets.Utils.OrderedDict()
         for name, child in self.get_children():
             #### fixme ####
@@ -183,24 +184,19 @@ class Tabset(Base.StaticComposite):
             #### end ####
             if not child.get_visible(child.path): continue
 
-            page = path + [name]
+            child_nr_of_descendants = 1
+            child_pages = []
 
             if isinstance(child, Tabset):
-                tabs[name] = (page, child, child.get_pages(page))
-            else:
-                tabs[name] = (page, child, None)
-        return tabs
-
-    def draw_page_titles(self, output_options):
-        def draw_page_titles(pages):
-            if pages is None: return None
-            res = Webwidgets.Utils.OrderedDict()
-            for name, (page, widget, children) in pages.iteritems():
-                res[name] = (page,
-                             widget._(widget.get_title(widget.path), output_options),
-                             draw_page_titles(children))
-            return res
-        return draw_page_titles(self.get_pages())
+                child_pages, child_nr_of_descendants = child.get_pages(output_options)
+            
+            tabs[name] = (child._(child.get_title(child.path), output_options),
+                          child,
+                          child_pages,
+                          child_nr_of_descendants)            
+            nr_of_descendants += child_nr_of_descendants
+            
+        return tabs, nr_of_descendants
 
 class SwitchingView(Tabset):
     """Provides a set of overlapping 'pages', of which only one is
@@ -266,10 +262,15 @@ class TabbedView(SwitchingView, Base.ActionInput):
     def draw_tabs(self, output_options):
         active = self.register_input(self.path, self.argument_name)
         widget_id = Webwidgets.Utils.path_to_id(self.path)
+        pages, nr_of_descendants = self.get_pages(output_options)
 
-        def draw_tabs(pages, path = []):
+        if nr_of_descendants < 2 and self.hide_single_tab:
+            return ''
+
+        def draw_tabs(widget, pages, nr_of_descendants):
             tabs = []
-            for name, (page, title, children) in pages.iteritems():
+            for name, (title, child_widget, child_pages, child_nr_of_descendants) in pages.iteritems():
+                page = child_widget.path[len(self.path):]
                 info = {'disabled': ['', 'disabled="disabled"'][   page == self.page
                                                                 or not active
                                                                 or not self.get_active_page_preview(page)],
@@ -277,11 +278,9 @@ class TabbedView(SwitchingView, Base.ActionInput):
                         'html_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'page'] + page),
                         'page': Webwidgets.Utils.path_to_id(page),
                         'caption': title}
-                if children is None:
-                    page_widget = self + page
-
-                    if getattr(page_widget, 'draw_inline', False):
-                        html = self.draw_child(page_widget.path, page_widget, output_options)
+                if not child_pages:
+                    if getattr(child_widget, 'draw_inline', False):
+                        html = self.draw_child(child_widget.path, child_widget, output_options)
                         if html is not None:
                             tabs.append("<li>%s</li>" % (html, ))
                     else:
@@ -295,19 +294,17 @@ class TabbedView(SwitchingView, Base.ActionInput):
                                       value="%(page)s">%(caption)s</button></li>
                                 """ % info)
                 else:
-                    info['children'] = draw_tabs(children, path + [name])
+                    info['children'] = draw_tabs(child_widget, child_pages, child_nr_of_descendants)
                     tabs.append("<li><span>%(caption)s</span>%(children)s</li>" % info)
-
-            if len(tabs) < 2 and self.hide_single_tab:
-                return ''
 
             return """
                     <ul id="%(widget_id)s" class="tabs">
                      %(tabs)s
                     </ul>
-                   """ % {'widget_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'group'] + path),
+                   """ % {'widget_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'group'] + widget.path[len(self.path):]),
                           'tabs': '\n'.join(tabs)}
-        return draw_tabs(self.draw_page_titles(output_options))
+
+        return draw_tabs(self, pages, nr_of_descendants)
 
     def draw(self, output_options):
         return """
