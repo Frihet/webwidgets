@@ -204,6 +204,7 @@ class Municipality(County):
         class Field(MunicipalityPart):
             field_name = "municipality"
             WwFilters = MunicipalityPart.WwFilters + [
-                Base.RedirectRenameFilter.redirect([], 2, value ='municipality'),
+                Base.RedirectRenameFilter.redirect([], 2, value = 'municipality'),
                 Base.MangleFilter.mangle(
-                region_prefix = lambda self: [self.parent.parent.ww_filter.county])]
+                region_prefix = lambda self: [self.parent.parent.ww_filter.country,
+                                              self.parent.parent.ww_filter.county])]
