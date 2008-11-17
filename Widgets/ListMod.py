@@ -1,5 +1,5 @@
-# -*- coding: UTF-8 -*-
-# vim: set fileencoding=UTF-8 :
+# -*- coding: utf-8 -*-
+# vim: set fileencoding=utf-8 :
 
 # Provides a list-selector widget
 # Copyright (C) 2008 FreeCode AS, Egil Moeller <egil.moller@freecode.no>
@@ -77,6 +77,10 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
     def draw(self, output_options):
         Base.ValueInput.draw(self, output_options)
 
+        # Disable widget if it is inactive or does not contain any
+        # elements.
+        disabled = not self.get_active(self.path) or len(self.ww_filter.get_rows(output_options = output_options)) == 0
+
         return """<select %(html_attributes)s %(multiple)s %(size)s name="%(name)s" %(disabled)s>
          %(options)s
          </select>""" % {
@@ -84,7 +88,7 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
             'multiple': self.ww_filter.multiple and 'multiple' or '',
             'size': self.size != 0 and 'size="%s"' % self.size or '',
             'name': Webwidgets.Utils.path_to_id(self.path),
-            'disabled': ['', 'disabled="disabled"'][not self.get_active(self.path)],
+            'disabled': ['', 'disabled="disabled"'][disabled],
             'options': '\n'.join(self.draw_options(output_options))
             }
 
