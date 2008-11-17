@@ -25,6 +25,7 @@ Webwidgets and in implementing new widgets and other objects.
 """
 
 import itertools, types, weakref, sys, os, os.path, traceback, syslog
+import Cache
 
 debug_class_loading = False
 

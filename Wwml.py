@@ -403,7 +403,10 @@ def generate_widgets_from_file(modulename, filename, file, path = None, bind_con
             bind_context,
             True)[2]
     except Exception, e:
-        e.args = ("Unable to parse file %s: %s" % (filename, e.args[0]),) + e.args[1:]
+        if e.args:
+            e.args = ("Unable to parse file %s: %s" % (filename, e.args[0]),) + e.args[1:]
+        else:
+            e.args = ("Unable to parse file %s" % (filename,),)
         raise type(e), e, sys.exc_info()[2]
 
 import imp, ihooks

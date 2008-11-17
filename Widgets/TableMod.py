@@ -339,11 +339,11 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
 
 
     paging_buttons_first_format = (
-        """<button type="submit" %(back_active)s id="%(html_id)s-_-first" name="%(html_id)s" value="%(first)s" title="First page">&lt;&lt;</button>""",
-        """<button type="submit" %(back_active)s id="%(html_id)s-_-first" name="%(html_id)s" value="%(first)s" title="First page">First page</button>""")
+        """<button type="submit" %(back_active)s id="%(html_id)s-_-first" name="%(html_id)s" value="%(first)s" title="First page"><span class='button-text'>&lt;&lt;</span></button>""",
+        """<button type="submit" %(back_active)s id="%(html_id)s-_-first" name="%(html_id)s" value="%(first)s" title="First page"><span class='button-text'>First page</span></button>""")
     paging_buttons_prev_format = (
-        """<button type="submit" %(back_active)s id="%(html_id)s-_-previous" name="%(html_id)s" value="%(previous)s" title="Previous page">&lt;</button>""",
-        """<button type="submit" %(back_active)s id="%(html_id)s-_-previous" name="%(html_id)s" value="%(previous)s" title="Previous page">Previous page</button>""")
+        """<button type="submit" %(back_active)s id="%(html_id)s-_-previous" name="%(html_id)s" value="%(previous)s" title="Previous page"><span class='button-text'>&lt;</span></button>""",
+        """<button type="submit" %(back_active)s id="%(html_id)s-_-previous" name="%(html_id)s" value="%(previous)s" title="Previous page"><span class='button-text'>Previous page</span></button>""")
     def draw_paging_buttons_prev(self, config, output_options):
         active, info = self.draw_paging_buttons_info(config, output_options)
         return (active, """<span class="back">%(first)s%(previous)s</span>""" % {
@@ -365,11 +365,11 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         return (active, self.draw_paging_buttons_by_format(self.paging_buttons_rows_of_rows_format, config, info, output_options))
 
     paging_buttons_next_format = (
-        """<button type="submit" %(forward_active)s id="%(html_id)s-_-next" name="%(html_id)s" value="%(next)s" title="Next page">&gt;</button>""",
-        """<button type="submit" %(forward_active)s id="%(html_id)s-_-next" name="%(html_id)s" value="%(next)s" title="Next page">Next page</button>""")
+        """<button type="submit" %(forward_active)s id="%(html_id)s-_-next" name="%(html_id)s" value="%(next)s" title="Next page"><span class='button-text'>&gt;</span></button>""",
+        """<button type="submit" %(forward_active)s id="%(html_id)s-_-next" name="%(html_id)s" value="%(next)s" title="Next page"><span class='button-text'>Next page</span></button>""")
     paging_buttons_last_format = (
-        """<button type="submit" %(forward_active)s id="%(html_id)s-_-last" name="%(html_id)s" value="%(last)s" title="Last page">&gt;&gt;</button>""",
-        """<button type="submit" %(forward_active)s id="%(html_id)s-_-last" name="%(html_id)s" value="%(last)s" title="Last page">Last page</button>""")
+        """<button type="submit" %(forward_active)s id="%(html_id)s-_-last" name="%(html_id)s" value="%(last)s" title="Last page"><span class='button-text'>&gt;&gt;</span></button>""",
+        """<button type="submit" %(forward_active)s id="%(html_id)s-_-last" name="%(html_id)s" value="%(last)s" title="Last page"><span class='button-text'>Last page</span></button>""")
 
     def draw_paging_buttons_next(self, config, output_options):
         active, info = self.draw_paging_buttons_info(config, output_options)
@@ -427,7 +427,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                 'reset_title': self._(self.reset_title, output_options)}
 
         self.register_input(self.path + ['_', 'reset_order'])
-        return (True, """<button type="submit" id="%(html_id)s" name="%(html_id)s" value="%(reset)s" title="%(reset_title)s">%(reset_title)s</button>""" % info)
+        return (True, """<button type="submit" id="%(html_id)s" name="%(html_id)s" value="%(reset)s" title="%(reset_title)s"><span class='button-text'>%(reset_title)s</span></button>""" % info)
 
     def draw_group_function(self, path, html_class, title, output_options):
         path = self.path + ['_'] + path
@@ -441,7 +441,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                    %(disabled)s
                    name="%(html_id)s"
                    title="%(title)s"
-                   value="selected">%(title)s</button>""" % {
+                   value="selected"><span class='button-text'>%(title)s</span></button>""" % {
                    'html_id': Webwidgets.Utils.path_to_id(path),
                    'html_class': html_class,
                    'disabled': ['disabled="disabled"', ''][active],
@@ -511,7 +511,7 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                                  """</th>""" % info])
             else:
                 headings.append(["""<th id="%(html_id)s-_-head-%(column)s" class="column %(column)s %(ww_classes)s">""" % info,
-                                 """<button type="submit" id="%(html_id)s-_-sort-%(column)s" class="column-heading" %(disabled)s name="%(html_id)s-_-sort" value="%(sort)s" title="%(caption)s">%(caption)s</button>""" % info,
+                                 """<button type="submit" id="%(html_id)s-_-sort-%(column)s" class="column-heading" %(disabled)s name="%(html_id)s-_-sort" value="%(sort)s" title="%(caption)s"><span class='button-text'>%(caption)s</span></button>""" % info,
                                  """</th>""" % info])
 
         if len(headings):

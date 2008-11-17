@@ -21,6 +21,7 @@
 
 import Webwidgets.Constants, Webwidgets.Utils, re, math, cgi, types, itertools
 import Base
+import Webwidgets.Utils
 
 class RowsSimpleModelFilter(Base.Filter):
     """This filter adds support for memmory mapped L{RowsComposite} -
@@ -489,6 +490,8 @@ class RowsComposite(Base.CachingComposite):
         b = self.ww_filter.default_expand # Invert the result if default_expand is not True
         return (a and not b) or (b and not a) # a xor b 
 
+
+    @Webwidgets.Utils.Cache.cache(per_request = True, per_class=True)
     def visible_columns(self, output_options, only_sortable = False):
         # Optimisation: we could have used get_active and constructed a path...
         return Webwidgets.Utils.OrderedDict([(name, definition)

@@ -26,10 +26,13 @@ This module contains the foundations for implementing a Webwidgets
 application.
 """
 
+from __future__ import with_statement
+
 import WebKit.Page
 import cgi, urllib, types, os, sys
-import Utils, Widgets, AccessManager, Constants
+import Utils, Utils.Cache, Widgets, AccessManager, Constants
 import hotshot, pdb, traceback
+import Webwidgets.Utils.Performance
 
 debug_exceptions = True
 
@@ -100,41 +103,52 @@ class Program(WebKit.Page.Page):
         """Main processing method, called by WebWare."""
 
         try:
+            if self.profile:
+                Webwidgets.Utils.Performance.start_report()
             return self.handle_request(transaction)
         except:
             sys.last_traceback = sys.exc_info()[2]
             pdb.pm()
             raise
+        finally:
+            if self.profile:
+                report = Webwidgets.Utils.Performance.get_report()
+                if report:
+                    with open("/tmp/greencycle-performance.html",'w') as f:
+                        f.write(report)
 
     def handle_request(self, transaction):
         type(self).request_nr += 1
+        try:
+            session = transaction.session()
+            request = transaction.request()
+            servlet = request.servletURI()
+            if not session.hasValue(servlet):
+                session[servlet] = self.Session(type(self))
+            session[servlet].program = self
+            fn = lambda: session[servlet].handle_request(transaction)
 
-        session = transaction.session()
-        request = transaction.request()
-        servlet = request.servletURI()
-        if not session.hasValue(servlet):
-            session[servlet] = self.Session(type(self))
-        session[servlet].program = self
-        fn = lambda: session[servlet].handle_request(transaction)
+            if self.profile:
+                non_profiled_fn = fn
+                def profile_fn():
+                    profiler = hotshot.Profile("webwidgets.profile.request.%s" % type(self).request_nr)
+                    profiler.addinfo('url', self.request_base(transaction) + request.extraURLPath() + '?' + request.queryString())
+                    try:
+                        return profiler.runcall(non_profiled_fn)
+                    finally:
+                        profiler.close()
+                fn = profile_fn
 
-        if self.profile:
-            non_profiled_fn = fn
-            def profile_fn():
-                profiler = hotshot.Profile("webwidgets.profile.request.%s" % type(self).request_nr)
-                profiler.addinfo('url', self.request_base(transaction) + request.extraURLPath() + '?' + request.queryString())
-                try:
-                    return profiler.runcall(non_profiled_fn)
-                finally:
-                    profiler.close()
-            fn = profile_fn
+            if self.debug:
+                non_debugged_fn = fn
+                def debug_fn():
+                    return pdb.runcall(non_debugged_fn)
+                fn = debug_fn
 
-        if self.debug:
-            non_debugged_fn = fn
-            def debug_fn():
-                return pdb.runcall(non_debugged_fn)
-            fn = debug_fn
-
-        return fn()
+            return fn()
+        
+        finally:
+            Utils.Cache.clear_per_request_cache()
 
     def webware_base(self, transaction):
         """@return: A URL to where the Webware installation is serving

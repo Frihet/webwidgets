@@ -194,7 +194,17 @@ class Button(Base.SingleActionInput):
 
     def draw(self, output_options):
         super(Button, self).draw(output_options)
-        return '<input %(html_attributes)s type="submit" %(disabled)s name="%(name)s" value="%(title)s" title="%(title)s" />' % {
+        return """
+<button %(html_attributes)s
+    type="submit"
+    %(disabled)s
+    name="%(name)s"
+    value="%(title)s"
+    title="%(title)s">
+ <span class="button-text">
+  %(title)s
+ </span>
+</button>""" % {
             'html_attributes': self.draw_html_attributes(self.path),
             'name': Webwidgets.Utils.path_to_id(self.path),
             'title': self._(self.title, output_options),
@@ -220,7 +230,18 @@ class UpdateButton(Base.SingleActionInput):
                               document.getElementById('%(id)s').style.display = 'none';
                              });
                             """ % info)
-        return '<input %(html_attributes)s type="submit" %(disabled)s name="%(id)s" value="%(title)s" />' % info
+        return """
+<button
+    %(html_attributes)s
+    type="submit"
+    %(disabled)s
+    name="%(id)s"
+    value="%(title)s"
+    title="%(title)s">
+ <span class="button-text">
+  %(title)s
+ </span>
+</button>""" % info
 
     def field_input(self, path, string_value):
         pass
@@ -248,14 +269,19 @@ class ButtonArray(Base.MultipleActionInput):
     def draw(self, output_options):
         super(ButtonArray, self).draw(output_options)
         input_id = Webwidgets.Utils.path_to_id(self.path)
-        buttons = ["""<button
-                       type="submit"
-                       %(disabled)s
-                       name="%(name)s"
-                       id="%(name)s-_-%(value)s"
-                       value="%(value)s"
-                       title="%(title)s"
-                       >%(title)s</button>""" %
+        buttons = ["""
+<button
+    type="submit"
+    %(disabled)s
+    name="%(name)s"
+    id="%(name)s-_-%(value)s"
+    value="%(value)s"
+    title="%(title)s"
+    >
+ <span class="button-text">
+  %(title)s
+ </span>
+</button>""" %
                    {'name': input_id,
                     'title': self._(title, output_options),
                     'value': value,

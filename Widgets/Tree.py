@@ -316,7 +316,7 @@ class Tree(Base.ActionInput, Base.DirectoryServer):
                 self.register_input(select_params['img_path'])
                 self.register_input(select_params['label_path'])
                 res += ('<input type="image" name="%(img_id)s" value="%(img_id)s" src="%(img_src)s" alt="%(img_alt)s" id="%(img_id)s" />' +
-                        '<input type="submit" name="%(label_id)s" value="%(label_text)s" id="%(label_id)s" />') % select_params
+                        """<button type="submit" name="%(label_id)s" value="%(label_text)s" title="%(label_text)s" id="%(label_id)s"><span class='button-text'>%(label_text)s</span></button>""") % select_params
             else:
                 res += '<img src="%(img_src)s" alt="%(img_alt)s" id="%(img_id)s" />%(label_text)s' % select_params
 
