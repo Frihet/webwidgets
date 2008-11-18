@@ -404,7 +404,7 @@ def generate_widgets_from_file(modulename, filename, file, path = None, bind_con
             True)[2]
     except Exception, e:
         if e.args:
-            e.args = ("Unable to parse file %s: %s" % (filename, e.args[0]),) + e.args[1:]
+            e.args = ("Unable to parse file %s:\n%s" % (filename, e.args[0]),) + e.args[1:]
         else:
             e.args = ("Unable to parse file %s" % (filename,),)
         raise type(e), e, sys.exc_info()[2]

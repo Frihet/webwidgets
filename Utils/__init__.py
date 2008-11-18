@@ -421,6 +421,30 @@ def is_prefix(prefix, list):
     prefix_len = len(prefix)
     return prefix_len <= len(list) and prefix == list[:prefix_len]
 
+def get_existing_class_prefix(name, using = []):
+    def get_existing_class_prefix(name):
+        path = name.split('.')
+        pos = 0
+        if pos < len(path) and path[pos] in sys.modules:
+            obj = sys.modules[path[pos]]
+            pos += 1
+            while pos < len(path) and hasattr(obj, path[pos]):
+                obj = getattr(obj, path[pos])
+                pos += 1
+        return '.'.join(path[:pos])
+
+    matches = []
+
+    match = get_existing_class_prefix(name)
+    if match: matches.append(match)
+    
+    for prefix in using:
+        match = get_existing_class_prefix("%s.%s" % (prefix, name))
+        if len(match) > len(prefix) + 1:
+            matches.append(match)
+    
+    return matches
+
 class LocalizedImportError(ImportError):
     def __init__(self, location, *args):
         ImportError.__init__(self, *args)
@@ -483,7 +507,11 @@ def load_class(name, using = [], imp = None, global_dict = None, local_dict = No
         return load_class_absolute(name)
     except ModuleDoesNotExistButWeDontCare, e:
         if debug_class_loading: print "load_class:         %s" % str(e)
-        raise ImportError("Class does not exist:", name, using, file)
+        raise ImportError("""Class does not exist:
+    Searched for: %s
+    Using: %s
+    Found partial matches: %s
+    In: %s""" % (name, ', '.join(using), ', '.join(get_existing_class_prefix(name, using)), file))
 
 def subclass_dict(superdict, members):
     res = type(superdict)(superdict)
