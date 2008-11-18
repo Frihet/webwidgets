@@ -58,7 +58,7 @@ class FunctionCell(SpecialCell):
             table.register_input(table.path + ['_'] + path)
         return """<button
                    type="submit"
-                   id="%(html_id)s-%(row)s"
+                   id="%(html_id)s"
                    class="%(html_class)s"
                    %(disabled)s
                    name="%(html_id)s"
@@ -68,7 +68,6 @@ class FunctionCell(SpecialCell):
                        'html_class': html_class,
                        'disabled': ['disabled="disabled"', ''][active],
                        'title': table._(title, output_options),
-                       'row': row_id,
                        'value': value}
                        
     def draw_table_cell(self, output_options, row, table, row_num, column_name, rowspan, colspan, first_level, last_level):
@@ -80,9 +79,9 @@ class FunctionCell(SpecialCell):
                 continue
             rendered_functions.append(
                 self.draw_function(table, row_id, row_id,
-                                   ['function', function],
+                                   ['function', function, row_id],
                                    function, title,
-                                   table.get_active(table.path + ['_', 'function', function]),
+                                   table.get_active(table.path + ['_', 'function', function, row_id]),
                                    output_options))
         return ''.join(rendered_functions)
 
