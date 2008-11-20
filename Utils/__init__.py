@@ -28,6 +28,7 @@ import itertools, types, weakref, sys, os, os.path, traceback, syslog
 import Cache
 
 debug_class_loading = False
+debug_class_load_caching = False
 
 def convert_to_str_any_way_possible(obj):
     try:
@@ -456,6 +457,10 @@ class ModuleDoesNotExistButWeDontCare(Exception): pass
 load_class_fail_cache = set()
 load_class_success_cache = {}
 
+load_class_fail_cache_hit= 0
+load_class_success_cache_hit= 0
+load_class_cache_miss= 0
+
 def load_class(name, using = [], imp = None, global_dict = None, local_dict = None, module = None):
     if debug_class_loading: print "load_class: Importing %s using %s:" % (name, ' '.join(using))
 
@@ -464,23 +469,40 @@ def load_class(name, using = [], imp = None, global_dict = None, local_dict = No
     file = getattr(module, '__file__', '<Interactive>')
 
     def load_class_absolute(name):
+        global load_class_cache_miss
+        global load_class_fail_cache_hit
+        global load_class_success_cache_hit
+        global load_class_success_cache_miss
+
         if debug_class_loading: print "load_class:     Trying %s" % name
         components = name.split('.')
         mod = None
-        prefix = list(components)
-        while prefix:
-            name = '.'.join(prefix)
-            if debug_class_loading: print "load_class:         Trying %s" % name
-            if name not in load_class_fail_cache:
+
+        for pos in xrange(1, len(components)):
+            name = '.'.join(components[:pos])
+            if name in load_class_fail_cache:
+                load_class_fail_cache_hit += 1
+                break                
+            elif name in load_class_success_cache:
+                load_class_success_cache_hit += 1
+                mod = load_class_success_cache[name]
+            else:
+                load_class_cache_miss += 1
+
                 try:
                     mod = (imp or __import__)(name, global_dict, local_dict)
-                    break
+                    load_class_success_cache[name] = mod
                 except LocalizedImportError, e:
                     if e.location != name:
                         raise
                     if debug_class_loading: print "load_class:             %s" % str(e)
-                load_class_fail_cache.add(name)
-            del prefix[-1]
+                    load_class_fail_cache.add(name)
+                    break
+
+        if debug_class_load_caching:
+            print "load_class_cache: fail hits: %s, sucess hits: %s, misses: %s" % (load_class_fail_cache_hit,
+                                                                                    load_class_success_cache_hit,
+                                                                                    load_class_cache_miss)            
         if mod is None:
             raise ModuleDoesNotExistButWeDontCare("Class does not exist:", name, using, file)
         for component in components[1:]:
@@ -608,3 +630,36 @@ def _log_exception_new():
             i += 1
 
     return (exc_id, exc_fo)
+
+class Ilen(object):
+    def __init__(self, itr):
+        self.iter = iter(itr)
+        
+    def __int__(self):
+        l = 0
+        for obj in self.iter:
+            l += 1
+        return l
+    
+    def __cmp__(self, other):
+        if not isinstance(other, Ilen):
+            other = Ilen(xrange(0, other)) 
+        while True:
+            try:
+                self.iter.next()
+            except StopIteration:
+                try:
+                    other.iter.next()
+                except StopIteration:
+                    return 0
+                else:
+                    return -1
+            try:
+                other.iter.next()
+            except StopIteration:
+                try:
+                    self.iter.next()
+                except StopIteration:
+                    return 0
+                else:
+                    return 1
