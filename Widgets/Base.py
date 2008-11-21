@@ -38,6 +38,106 @@ debug_exceptions = False
 print_exceptions = False
 log_exceptions = True
 
+
+class MagicalMysteryDict(object):
+    def __init__(self, source, output_options=None):
+        if output_options:
+            self.source = source
+            self.output_options = output_options
+            self.also = {}
+        else:
+            self.source = source.source
+            self.output_options = source.output_options
+            self.also = dict(source.also)
+
+    def __contains__(self, key):
+        return key in self.also or hasattr(self.source, key) or (key[0:17] == 'ww_untranslated__' and hasattr(self.source, key[17:]))
+
+    def __iter__(self):
+        raise Exception("NOT IMPLEMENTED")
+
+
+    def __delitem__(self, key):
+        raise Exception("NOT IMPLEMENTED")
+        
+    def __setitem__(self, key, value):
+        self.also[key] = value
+
+    def __getitem__(self, key):
+        if key in self.also:
+            res = self.also[key]
+            if isinstance(res, types.FunctionType):
+                res = self.also[key] = res()
+            return res
+        
+        if hasattr(self.source, key):
+            value = getattr(self.source, key)
+            if isinstance(value, (type, types.MethodType)):
+                raise KeyError
+            try:
+                return self.source._(value, self.output_options)
+            except:
+                return unicode(value)
+
+        if key[0:17] == 'ww_untranslated__':
+            key2 = key[17:]
+            if hasattr(self.source, key2):
+                value = getattr(self.source, key2)
+                if isinstance(value, (type, types.MethodType)):
+                    raise KeyError
+                return unicode(value)
+        raise KeyError
+
+    def __add__(self, other):
+        raise Exception("NOT IMPLEMENTED")
+
+    def __repr__(self):
+        raise Exception("NOT IMPLEMENTED")
+
+    def __str__(self):
+        raise Exception("NOT IMPLEMENTED")
+        
+    def clear(self):
+        raise Exception("NOT IMPLEMENTED")
+
+    def items(self):
+        raise Exception("NOT IMPLEMENTED")
+
+    def iteritems(self):
+        raise Exception("NOT IMPLEMENTED")
+
+    def iterkeys(self):
+        raise Exception("NOT IMPLEMENTED")
+
+    def itervalues(self):
+        raise Exception("NOT IMPLEMENTED")
+
+    def keys(self):
+        raise Exception("NOT IMPLEMENTED")
+
+    def pop(self, k, *arg):
+        raise Exception("NOT IMPLEMENTED")
+        
+    def popitem(self):
+        raise Exception("NOT IMPLEMENTED")
+            
+    def setdefault(self, k, d = None):
+        raise Exception("NOT IMPLEMENTED")
+
+    def update(self, other):
+        if hasattr(other, 'iteritems'):
+            other = other.iteritems()
+        for (name, value) in other:
+            self.also[name] = value
+
+    def values(self):
+        raise Exception("NOT IMPLEMENTED")
+    
+    def sort(self, *arg, **kw):
+        raise Exception("NOT IMPLEMENTED")
+
+
+
 class NoOldValue(object):
     """This class is used as a marker to signify that there was no old
     attribute set when doing setattr"""
@@ -319,12 +419,59 @@ class PersistentWrapper(Wrapper):
 class Model(Object):
     pass
 
+
 class Filter(Object):
     # These getattr/hasattr/setattr are very similar to the ones of
     # Object, except they work on self.ww_filter instead of on
     # self.ww_model...
+
+    attr_cache={}
+
+    def attr_cache_miss(self, filter, name):
+#        print "Cache miss in ", filter, name
+        cache = self.attr_cache
+        if name not in cache:
+            cache[name] = cache_row = {}
+        else:
+            cache_row = cache[name]
+            action = []
+            for (cache_filter, cache_value) in cache_row.iteritems():
+                if cache_value == filter:
+                    action.append(cache_filter)
+#                    print "move action pointer of field", name, "of element",cache_filter,"from", cache_value, "to", filter.ww_filter
+                    
+            for i in action:
+                cache_row[i] = filter.ww_filter
+            
+        cache_row[filter] = filter.ww_filter
+        
+
+    def attr_cache_get(self, filter, name):
+        cache = self.attr_cache
+        if name in cache:
+            cache_row = cache[name]
+            if filter in cache_row:
+#                print "Cache hit in ", filter, name
+                return (True, getattr(cache_row[filter], name))
+        
+        return (False, None)
+
+
     def __getattr__(self, name):
         """Lookup order: self, self.ww_filter"""
+
+        if not hasattr(self, 'object'):
+            raise AttributeError('Filter has no object')
+    
+        if hasattr(self.object, 'ww_filter'):
+            root = self.object.ww_filter
+
+            (status, value) = root.attr_cache_get(self, name)
+            if status:
+                return value
+
+            root.attr_cache_miss(self, name)
+            
         return getattr(self.ww_filter, name)
 
     def __hasattr__(self, name):
@@ -351,6 +498,7 @@ class Filter(Object):
         for i in xrange(0, index):
             filter = filter.ww_filter
         return filter
+
 
 class StandardFilter(Filter):
     """This class only groups all L{Filter} subclasses that provides
@@ -800,30 +948,7 @@ class Widget(Object):
                          if value])
 
     def draw_attributes(self, output_options):
-        def get_value_for_key(key):
-            def get_value():
-                value = getattr(self, key)
-                if isinstance(value, (type, types.MethodType)):
-                    raise KeyError
-                return unicode(value)
-            return get_value
-        def get_translated_value_for_key(key):
-            def get_value():
-                value = getattr(self, key)
-                if isinstance(value, (type, types.MethodType)):
-                    raise KeyError
-                try:
-                    return self._(value, output_options)
-                except:
-                    return unicode(value)
-            return get_value
-
-        res = Webwidgets.Utils.OrderedDict()
-        for key in dir(self):
-            #if key.startswith('_'): continue
-            res['ww_untranslated__' + key] = get_value_for_key(key)
-            res[key] = get_translated_value_for_key(key)
-        return Webwidgets.Utils.LazyDict(res)
+        return MagicalMysteryDict(self, output_options)
 
     def draw(self, output_options):
         """Renders the widget to HTML. Path is where the full path to

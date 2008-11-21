@@ -31,6 +31,8 @@ class NoBucket(object):
 
 
 def clear_per_request_cache():
+#    if hasattr(request_buckets,"buckets"):
+#        print "Clearing per request cache with", len(request_buckets.buckets), "buckets"
     request_buckets.buckets = {}    
 
 def cache_bucket_get(bucket_list, param):
