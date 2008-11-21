@@ -25,10 +25,10 @@ import Webwidgets.Utils.Performance
 thread_buckets = threading.local()
 request_buckets = threading.local()
 
-bucket_count = 30
+bucket_count = 10
 class NoBucket(object):
     pass
-
+    
 
 def clear_per_request_cache():
 #    if hasattr(request_buckets,"buckets"):
@@ -36,7 +36,7 @@ def clear_per_request_cache():
     request_buckets.buckets = {}    
 
 def cache_bucket_get(bucket_list, param):
-    for pos in xrange(0, len(bucket_list)):
+    for pos in xrange(len(bucket_list)-1, -1, -1):
         if bucket_list[pos][0] == param:
             res = bucket_list[pos]
             del bucket_list[pos]
