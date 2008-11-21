@@ -710,12 +710,13 @@ class EditFunctionCell(BaseTableMod.FunctionCell):
 
         res = ''
         for function in functions:
+            sub_path = ['edit_function', function, row_id]
             res += self.draw_function(table,
                                       row_id, row_id,
-                                      ['edit_function', function],
+                                      sub_path,
                                       function,
                                       self.edit_function_titles[function],
-                                      table.get_active(table.path + ['_', 'edit_function', function, row_id]),
+                                      table.get_active(table.path + ['_'] + sub_path),
                                       output_options)
         return res
 

@@ -53,9 +53,9 @@ class FunctionCell(SpecialCell):
     html_class = ['functions']
 
     def draw_function(self, table, row_id, value, path, html_class, title, active, output_options):
-        input_id = Webwidgets.Utils.path_to_id(table.path + ['_'] + path)
+        input_path = table.path + ['_'] + path
         if active:
-            table.register_input(table.path + ['_'] + path)
+            table.register_input(input_path)
         return """<button
                    type="submit"
                    id="%(html_id)s"
@@ -64,7 +64,7 @@ class FunctionCell(SpecialCell):
                    name="%(html_id)s"
                    title="%(title)s"
                    value="%(value)s"><span class='button-text'>%(title)s</span></button>""" % {
-                       'html_id': input_id,
+                       'html_id': Webwidgets.Utils.path_to_id(input_path),
                        'html_class': html_class,
                        'disabled': ['disabled="disabled"', ''][active],
                        'title': table._(title, output_options),
@@ -77,11 +77,12 @@ class FunctionCell(SpecialCell):
         for function, title in table.functions[column_name].iteritems():
             if enabled_functions is not True and function not in enabled_functions:
                 continue
+            sub_path = ['function', function, row_id, row_id]
             rendered_functions.append(
                 self.draw_function(table, row_id, row_id,
-                                   ['function', function, row_id],
+                                   sub_path,
                                    function, title,
-                                   table.get_active(table.path + ['_', 'function', function, row_id]),
+                                   table.get_active(table.path + ['_'] + sub_path),
                                    output_options))
         return ''.join(rendered_functions)
 
