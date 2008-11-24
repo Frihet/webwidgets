@@ -118,7 +118,7 @@ class CountyInput(CountryInput):
                 return CountryInput.Country.Field.draw(self, output_options)
 
     class County(Webwidgets.Field):
-        class Label(Webwidgets.Html): html = "County"
+        class Label(Webwidgets.Html): html = "Region"
         class Field(CountyPartInput):
             field_name = "county"
             WwFilters = CountyPartInput.WwFilters + [
@@ -185,7 +185,7 @@ class County(Country):
         county = ''
 
     class County(Webwidgets.Field):
-        class Label(Webwidgets.Html): html = "County"
+        class Label(Webwidgets.Html): html = "Region"
         class Field(CountyPart):
             field_name = "county"
             WwFilters = CountyPart.WwFilters + [
