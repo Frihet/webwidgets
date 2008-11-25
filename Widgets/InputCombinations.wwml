@@ -48,11 +48,22 @@
 
    <w:ReplacedList id="Dialogs" />
 
+   <w:Html id="Head" />
+
    <w:LogIn id="LogIn" title="Log in/log out">
     <w:MainMenu classid="Application" page=":path:logout">
      <w:LogOut id="LogOut" title="Log out" />
     </w:MainMenu>
    </w:LogIn>
+
+   <w:Html id="Foot">
+    Page processing times:
+    <w:VerticalFieldgroup id="Timings">
+     <w:Field id="Total" Label=":Html:Total"><w:Timing part="total" id="Field" /></w:Field>
+     <w:Field id="InputProcess" Label=":Html:Input"><w:Timing part="input_process" id="Field" /></w:Field>
+     <w:Field id="Output" Label=":Html:Rendering"><w:Timing part="output" id="Field" /></w:Field>
+    </w:VerticalFieldgroup>
+   </w:Html>
 
   </w:Html>
  </w:HtmlWindow>

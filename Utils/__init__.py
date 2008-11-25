@@ -24,7 +24,7 @@
 Webwidgets and in implementing new widgets and other objects.
 """
 
-import itertools, types, weakref, sys, os, os.path, traceback, syslog
+import itertools, types, weakref, sys, os, os.path, traceback, syslog, datetime
 import Cache
 
 debug_class_loading = False
@@ -663,3 +663,34 @@ class Ilen(object):
                     return 0
                 else:
                     return 1
+
+class Timings(object):
+    class Timing(object):
+        def __init__(self):
+            self.total = datetime.timedelta()
+            self.recurse = 0
+            
+        def start(self):
+            if not self.recurse:
+                self.begin = datetime.datetime.now()
+            self.recurse += 1
+
+        def stop(self):
+            self.recurse -= 1
+            if not self.recurse:
+                self.total += datetime.datetime.now() - self.begin
+
+        def __enter__(self): self.start()
+        def __exit__(self, exc_type, exc_value, traceback): self.stop()
+            
+    def __init__(self):
+        self.timings = {}
+    
+    def __getitem__(self, name):
+        if name not in self.timings:
+            timing = self.Timing()
+            self.timings[name] = timing
+        return self.timings[name]
+
+    def __getattr__(self, name):
+        return getattr(self.timings, name)

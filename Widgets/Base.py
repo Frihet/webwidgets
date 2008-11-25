@@ -1763,6 +1763,20 @@ class DirectoryServer(Widget):
                                    'location': location},
                                   {})
 
+class Timing(Widget):
+    part = 'total'
+    """Any of
+
+    total - total server time
+    input_decode - time to decode input fields
+    input_process - time to process input (e.g. notifcation handling)
+    class_output - total time application specific time 
+    output - time to run draw()
+    """
+
+    def draw(self, output_options):
+        return '<ww:timing part="%s" />' % (self.part,)
+
 class Window(Widget):
     """Window is the main widget and should allways be the top-level
     widget of any application. It has an attribute for the HTTP
@@ -1778,6 +1792,7 @@ class Window(Widget):
         super(Window, self).__init__(session, win_id, **attrs)
         self.fields = {}
         self.arguments = {}
+
     def output(self, output_options):
         result = {Webwidgets.Constants.OUTPUT: self.draw(output_options)}
         result.update(self.headers)

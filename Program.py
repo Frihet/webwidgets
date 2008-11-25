@@ -32,7 +32,7 @@ import WebKit.Page
 import cgi, urllib, types, os, sys
 import Utils, Utils.Cache, Widgets, AccessManager, Constants
 import hotshot, pdb, traceback
-import Webwidgets.Utils.Performance
+import Utils.Performance
 
 debug_exceptions = True
 
@@ -104,7 +104,7 @@ class Program(WebKit.Page.Page):
 
         try:
             if self.profile:
-                Webwidgets.Utils.Performance.start_report()
+                Utils.Performance.start_report()
             return self.handle_request(transaction)
         except:
             sys.last_traceback = sys.exc_info()[2]
@@ -112,7 +112,7 @@ class Program(WebKit.Page.Page):
             raise
         finally:
             if self.profile:
-                report = Webwidgets.Utils.Performance.get_report()
+                report = Utils.Performance.get_report()
                 if report:
                     with open("/tmp/greencycle-performance.html",'w') as f:
                         f.write(report)
@@ -120,8 +120,11 @@ class Program(WebKit.Page.Page):
     def handle_request(self, transaction):
         type(self).request_nr += 1
         try:
-            session = transaction.session()
             request = transaction.request()
+            request.timings = Utils.Timings()
+            request.timings['total'].start()
+            
+            session = transaction.session()
             servlet = request.servletURI()
             if not session.hasValue(servlet):
                 session[servlet] = self.Session(type(self))
@@ -405,6 +408,16 @@ class Program(WebKit.Page.Page):
 
             return changed_fields
 
+        def replace_timings(self, req, output, output_item):
+            if output.get('Content-Type', '').startswith('text/'):
+                for key, value in req.timings.iteritems():
+                    replace_string = '<ww:timing part="%s" />' % (key,)
+                    print "XYZZY", repr(replace_string)
+                    if replace_string in output_item:
+                        value = float(value.total.seconds) + (0.000001 * float(value.total.microseconds))
+                        output_item = output_item.replace(replace_string, '%.3f' % (value,))
+            return output_item
+            
         def handle_request(self, transaction):
             """Main processing method, called by WebWare. This method will
             notify widgets of changed input values, process any pending
@@ -412,47 +425,50 @@ class Program(WebKit.Page.Page):
             already been set by a notification, e.g. with
             L{redirect}, in which case that output is sent to the
             client instaed)."""
+
             req = transaction.request()
             response = transaction.response()
 
             self.output = None
 
-            # extraURLPath begins with a /, so remove the first empty item in location
-            location = req.extraURLPath().split('/')[1:]
+            with req.timings['input_decode']:
+                # extraURLPath begins with a /, so remove the first empty item in location
+                location = req.extraURLPath().split('/')[1:]
 
-            base_options = {'widget_class': Constants.DEFAULT_WIDGET_CLASS,
-                           'win_id': Constants.DEFAULT_WINDOW,
-                           'widget': Constants.DEFAULT_WIDGET}
-            if location and location[0].startswith('_'):
-                base_options['widget_class'] = location[0][1:]
-                location = location[1:]
-            if location and location[0].startswith('_'):
-                base_options['win_id'] = location[0][1:]
-                location = location[1:]
-            if location and location[0].startswith('_'):
-                base_options['widget'] = location[0][1:]
-                location = location[1:]
-            base_options['location'] = location
-            base_options['transaction'] = transaction
+                base_options = {'widget_class': Constants.DEFAULT_WIDGET_CLASS,
+                               'win_id': Constants.DEFAULT_WINDOW,
+                               'widget': Constants.DEFAULT_WIDGET}
+                if location and location[0].startswith('_'):
+                    base_options['widget_class'] = location[0][1:]
+                    location = location[1:]
+                if location and location[0].startswith('_'):
+                    base_options['win_id'] = location[0][1:]
+                    location = location[1:]
+                if location and location[0].startswith('_'):
+                    base_options['widget'] = location[0][1:]
+                    location = location[1:]
+                base_options['location'] = location
+                base_options['transaction'] = transaction
 
-            arguments = decode_fields(normalize_fields(cgi.parse_qs(req.queryString())))
-            arguments, output_options = filter_arguments(arguments)
-            output_options.update(base_options)
+                arguments = decode_fields(normalize_fields(cgi.parse_qs(req.queryString())))
+                arguments, output_options = filter_arguments(arguments)
+                output_options.update(base_options)
+            
+            with req.timings['class_output']:
+                obj = Utils.load_class(output_options['widget_class'])
+                if not (isinstance(obj, type)
+                        and (   issubclass(obj, Program.Session)
+                             or issubclass(obj, Widgets.Base.Widget))):
+                    raise Exception("Expected session or widget. Got", obj)
+                fn_name = 'class_output'
+                if 'aspect' in output_options:
+                    fn_name += '_' + output_options['aspect']
+                output_fn = getattr(obj, fn_name)
 
-            obj = Utils.load_class(output_options['widget_class'])
-            if not (isinstance(obj, type)
-                    and (   issubclass(obj, Program.Session)
-                         or issubclass(obj, Widgets.Base.Widget))):
-                raise Exception("Expected session or widget. Got", obj)
-            fn_name = 'class_output'
-            if 'aspect' in output_options:
-                fn_name += '_' + output_options['aspect']
-            output_fn = getattr(obj, fn_name)
-
-            try:
-                output = output_fn(self, arguments, output_options)
-            except Constants.OutputGiven, e:
-                output = e.output
+                try:
+                    output = output_fn(self, arguments, output_options)
+                except Constants.OutputGiven, e:
+                    output = e.output
 
             if output is None:
                 output = {'Status': '404 No such window',
@@ -470,11 +486,14 @@ class Program(WebKit.Page.Page):
                 content = output[Constants.OUTPUT]
             if Constants.FINAL_OUTPUT in output:
                 content = output[Constants.FINAL_OUTPUT]
+
+            req.timings['total'].stop()
+
             if isinstance(content, types.StringType):
-                response.write(content)
+                response.write(self.replace_timings(req, output, content))
             elif content is not None:
                 for item in content:
-                    response.write(item)
+                    response.write(self.replace_timings(req, output, content))
 
         def class_output(cls, session, arguments, output_options):
             req = output_options['transaction'].request()
@@ -482,51 +501,53 @@ class Program(WebKit.Page.Page):
 
             window = session.get_window(output_options['win_id'], output_options)
             if window:
-                # Collect changed attributes in order, then run field_input
-                changed = session.process_arguments(window, output_options['location'], arguments)
-                if req.method() == 'POST':
-                    changed.extend(session.process_fields(window,
-                                                          decode_fields(normalize_fields(req.fields()))))
+                with req.timings['input_process']:
+                    # Collect changed attributes in order, then run field_input
+                    changed = session.process_arguments(window, output_options['location'], arguments)
+                    if req.method() == 'POST':
+                        changed.extend(session.process_fields(window,
+                                                              decode_fields(normalize_fields(req.fields()))))
 
-                for field, path, value in changed:
-                    try:
-                        if not field.ignore_input_this_request:
-                            field.field_input(path, *value)
-                    except:
-                        field.append_exception()
+                    for field, path, value in changed:
+                        try:
+                            if not field.ignore_input_this_request:
+                                field.field_input(path, *value)
+                        except:
+                            field.append_exception()
 
-                for field in window.fields.itervalues():
-                    field.ignore_input_this_request = False
+                    for field in window.fields.itervalues():
+                        field.ignore_input_this_request = False
 
-                obj = window
-                fn_name = 'output'
-                args = (output_options,)
-                if 'widget' in output_options:
-                    for name in Utils.id_to_path(output_options['widget']):
-                        obj = obj[name]
-                if 'aspect' in output_options:
-                    fn_name += '_' + output_options['aspect']
-                output_fn = getattr(obj, fn_name)
+                    obj = window
+                    fn_name = 'output'
+                    args = (output_options,)
+                    if 'widget' in output_options:
+                        for name in Utils.id_to_path(output_options['widget']):
+                            obj = obj[name]
+                    if 'aspect' in output_options:
+                        fn_name += '_' + output_options['aspect']
+                    output_fn = getattr(obj, fn_name)
 
-                if not changed and output_fn is window.output:
-                    #### fixme ####
-                    # name = """changed will nearly allways be true due
-                    # to buttons"""
-                    # description = """If you clicked a button and
-                    # then you do a reload, you'd have the same POST
-                    # (non-empty-string) variable, but your
-                    # field_output would still output an empty
-                    # string."""
-                    #### end ####
+                    if not changed and output_fn is window.output:
+                        #### fixme ####
+                        # name = """changed will nearly allways be true due
+                        # to buttons"""
+                        # description = """If you clicked a button and
+                        # then you do a reload, you'd have the same POST
+                        # (non-empty-string) variable, but your
+                        # field_output would still output an empty
+                        # string."""
+                        #### end ####
 
-                    # Don't fire reload events except for reloads of
-                    # the page itself. Caching policies might result
-                    # in other items being reloaded now and then w/o
-                    # user interaction...
-                    window.notify("reload")
+                        # Don't fire reload events except for reloads of
+                        # the page itself. Caching policies might result
+                        # in other items being reloaded now and then w/o
+                        # user interaction...
+                        window.notify("reload")
 
+                with req.timings['output']:
+                    res = output_fn(*args)
 
-                res = output_fn(*args)
                 if (not res
                     or (    'Location' not in res
                         and Constants.FINAL_OUTPUT not in res)):
