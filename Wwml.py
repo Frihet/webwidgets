@@ -196,10 +196,14 @@ def merge_child_widgets(module, widget, binding, attributes={}, name=None, inden
         return types.TypeType(name, base_cls, merged_members)
 
     except TypeError, e:
-        raise TypeError("Unable to instantiate widget in %s: %s(%s): %s" % (
-                module, name,
+        raise TypeError("""Unable to instantiate widget: %s
+    In: %s
+    Widget: %s(%s)""" % (
+                str(e),
+                module,
+                name,
                 ', '.join([str(cls) for cls in base_cls]),
-                str(e)))
+                ))
 
 
 wwml_bind_status_names = ['require',
