@@ -29,7 +29,7 @@ application.
 from __future__ import with_statement
 
 import WebKit.Page
-import cgi, urllib, types, os, sys
+import cgi, urllib, types, os, sys, threading
 import Utils, Utils.Cache, Widgets, AccessManager, Constants
 import hotshot, pdb, traceback
 import Utils.Performance
@@ -91,6 +91,15 @@ class Program(WebKit.Page.Page):
     profile = False
     debug = False
 
+    _transaction_store = threading.local()
+
+    #FIXME: Use this instead of passing around lots of stuff in output_options
+    @classmethod
+    def transaction(cls):
+        if not hasattr(cls._transaction_store, 'transaction'):
+            raise AttributeError('There is no current transaction running')
+        return cls._transaction_store.transaction
+
     request_nr = 0
 
 #     def sleep(self, transaction):
@@ -101,21 +110,8 @@ class Program(WebKit.Page.Page):
 
     def _respond(self, transaction):
         """Main processing method, called by WebWare."""
-
-        try:
-            if self.profile:
-                Utils.Performance.start_report()
-            return self.handle_request(transaction)
-        except:
-            sys.last_traceback = sys.exc_info()[2]
-            pdb.pm()
-            raise
-        finally:
-            if self.profile:
-                report = Utils.Performance.get_report()
-                if report:
-                    with open("/tmp/greencycle-performance.html",'w') as f:
-                        f.write(report)
+        Program._transaction_store.transaction = transaction
+        return self.handle_request(transaction)
 
     def handle_request(self, transaction):
         type(self).request_nr += 1
@@ -136,9 +132,14 @@ class Program(WebKit.Page.Page):
                 def profile_fn():
                     profiler = hotshot.Profile("webwidgets.profile.request.%s" % type(self).request_nr)
                     profiler.addinfo('url', self.request_base(transaction) + request.extraURLPath() + '?' + request.queryString())
+                    Utils.Performance.start_report()
                     try:
                         return profiler.runcall(non_profiled_fn)
                     finally:
+                        report = Utils.Performance.get_report()
+                        if report:
+                            with open("/tmp/greencycle-performance.html",'w') as f:
+                                f.write(report)
                         profiler.close()
                 fn = profile_fn
 
@@ -412,7 +413,6 @@ class Program(WebKit.Page.Page):
             if output.get('Content-Type', '').startswith('text/'):
                 for key, value in req.timings.iteritems():
                     replace_string = '<ww:timing part="%s" />' % (key,)
-                    print "XYZZY", repr(replace_string)
                     if replace_string in output_item:
                         value = float(value.total.seconds) + (0.000001 * float(value.total.microseconds))
                         output_item = output_item.replace(replace_string, '%.3f' % (value,))

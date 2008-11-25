@@ -57,12 +57,16 @@
    </w:LogIn>
 
    <w:Html id="Foot">
+    
     Page processing times:
-    <w:VerticalFieldgroup id="Timings">
+    <w:Fieldgroup id="Timings">
      <w:Field id="Total" Label=":Html:Total"><w:Timing part="total" id="Field" /></w:Field>
      <w:Field id="InputProcess" Label=":Html:Input"><w:Timing part="input_process" id="Field" /></w:Field>
      <w:Field id="Output" Label=":Html:Rendering"><w:Timing part="output" id="Field" /></w:Field>
-    </w:VerticalFieldgroup>
+    </w:Fieldgroup>
+
+    <w:Div id="Copyright" />
+
    </w:Html>
 
   </w:Html>
