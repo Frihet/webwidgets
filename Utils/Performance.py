@@ -80,10 +80,10 @@ function toggleVisible(el)
     dt = t2-perf_data.start_time
     woot = dt.seconds + 0.000001* dt.microseconds
 
-    res += "Total rendering time: %.1f s<br/>" % woot
+    res += "\t\tTotal rendering time: %.1f s<br/>\n" % woot
     for perf_type in perf_data.added:
-        res += "Total %s time: %.1f s<br/>" % (perf_type, reduce(lambda x, y: x+y['time'], getattr(perf_data,perf_type), 0.0))
-        res += "Total number of %s items: %d<br/>" % (perf_type, len(getattr(perf_data,perf_type)))
+        res += "\t\tTotal %s time: %.1f s<br/>\n" % (perf_type, reduce(lambda x, y: x+y['time'], getattr(perf_data,perf_type), 0.0))
+        res += "\t\tTotal number of %s items: %d<br/>\n" % (perf_type, len(getattr(perf_data,perf_type)))
 
     res += """
 		<hr/>
@@ -94,7 +94,7 @@ function toggleVisible(el)
     for perf_type in perf_data.added:
         res +=  """
                 <h2>Details for %s</h2>
-                """ % perf_type
+""" % perf_type
         for i in sorted(getattr(perf_data,perf_type),lambda x, y: cmp(x['time'],y['time']),reverse=True):
             res += """
 		<hr/>
@@ -102,16 +102,20 @@ function toggleVisible(el)
 		Query:<pre>%(text)s</pre>
 		Traceback:
 		<button onclick="toggleVisible(getElementById('traceback_%(id)d'));">+</button>
-		<pre id='traceback_%(id)d' style='display: none;'>%(traceback)s</pre>""" % i
+		<pre id='traceback_%(id)d' style='display: none;'>%(traceback)s
+                </pre>
+""" % i
 
-    res += "</body></html>"
+    res += """
+        </body>
+</html>
+"""
     perf_data.start=False
     return res
 
 
 
 if __name__ == '__main__':
-    print "Testing performance library"
     start_report()
     add('sql', 'select hej', 0.1)
     add('sql', 'select hopp', 0.3)
