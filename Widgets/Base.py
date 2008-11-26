@@ -463,7 +463,8 @@ class Filter(Object):
         if not hasattr(self, 'object'):
             raise AttributeError('Filter has no object')
     
-        if hasattr(self.object, 'ww_filter'):
+        # TODO: enable caching again when bugs are fixxored
+        if False and hasattr(self.object, 'ww_filter'):
             root = self.object.ww_filter
 
             (status, value) = root.attr_cache_get(self, name)
