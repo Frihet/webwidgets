@@ -108,6 +108,8 @@ class CountryInput(Webwidgets.Html):
 class CountyInput(CountryInput):
     html = "%(County)s" + CountryInput.html
 
+    __input_subordinates__ = (CountryInput, )
+
     class WwModel(CountryInput.WwModel):
         county = ''
 
@@ -116,6 +118,13 @@ class CountyInput(CountryInput):
             def draw(self, output_options):
                 Base.HtmlWindow.register_submit_action(self, self.path, 'change')
                 return CountryInput.Country.Field.draw(self, output_options)
+
+            def value_changed(self, path, value):
+                # Ignore output this request as this changes the list
+                # of valid values.
+                self.parent.parent['County']['Field'].ignore_input_this_request = True
+                self.parent.parent['County']['Field'].ww_filter.value = []
+                CountryInput.Country.Field.value_changed(self, path, value)
 
     class County(Webwidgets.Field):
         class Label(Webwidgets.Html): html = "Region"
@@ -129,14 +138,33 @@ class CountyInput(CountryInput):
 class MunicipalityInput(CountyInput):
     html = "%(Municipality)s" + CountyInput.html
 
+    __input_subordinates__ = (CountyInput, )
+
     class WwModel(CountyInput.WwModel):
         municipality = ''
+
+    class Country(CountyInput.Country):
+        class Field(CountyInput.Country.Field):
+            def value_changed(self, path, value):
+                # Ignore output this request as this changes the list
+                # of valid values.                
+                for part in ('Municipality', 'County'):
+                    self.parent.parent[part]['Field'].ignore_input_this_request = True
+                    self.parent.parent[part]['Field'].ww_filter.value = []
+                CountyInput.Country.Field.value_changed(self, path, value)
 
     class County(CountyInput.County):
         class Field(CountyInput.County.Field):
             def draw(self, output_options):
                 Base.HtmlWindow.register_submit_action(self, self.path, 'change')
                 return CountyInput.County.Field.draw(self, output_options)
+
+            def value_changed(self, path, value):
+                # Ignore output this request as this changes the list
+                # of valid values.
+                self.parent.parent['Municipality']['Field'].ignore_input_this_request = True
+                self.parent.parent['Municipality']['Field'].ww_filter.value = []
+                CountyInput.County.Field.value_changed(self, path, value)
 
     class Municipality(Webwidgets.Field):
         class Label(Webwidgets.Html): html = "Municipality"
