@@ -48,7 +48,7 @@
 
    <w:ReplacedList id="Dialogs" />
 
-   <w:Html id="Head" />
+   <w:Div id="Head" />
 
    <w:LogIn id="LogIn" title="Log in/log out">
     <w:MainMenu classid="Application" page=":path:logout">
@@ -56,18 +56,22 @@
     </w:MainMenu>
    </w:LogIn>
 
-   <w:Html id="Foot">
-    
-    Page processing times:
-    <w:Fieldgroup id="Timings">
-     <w:Field id="Total" Label=":Html:Total"><w:Timing part="total" id="Field" /></w:Field>
-     <w:Field id="InputProcess" Label=":Html:Input"><w:Timing part="input_process" id="Field" /></w:Field>
-     <w:Field id="Output" Label=":Html:Rendering"><w:Timing part="output" id="Field" /></w:Field>
-    </w:Fieldgroup>
+   <w:Div id="Foot">
+
+    <w:Div id="Timings">
+     Page processing times:
+     <w:HorizontalFieldgroup id="Timings">
+      <w:Field id="Total" Label=":Html:Total"><w:Timing part="total" id="Field" /></w:Field>
+      <w:Field id="InputProcess" Label=":Html:Input"><w:Timing part="input_process" id="Field" /></w:Field>
+      <w:Field id="Output" Label=":Html:Rendering"><w:Timing part="output" id="Field" /></w:Field>
+      <w:Field id="Sql" Label=":Html:SQL query time"><w:Timing part="sql" id="Field" /></w:Field>
+      <w:Field id="Ldap" Label=":Html:LDAP query time"><w:Timing part="ldap" id="Field" /></w:Field>
+     </w:HorizontalFieldgroup>
+    </w:Div>
 
     <w:Div id="Copyright" />
 
-   </w:Html>
+   </w:Div>
 
   </w:Html>
  </w:HtmlWindow>

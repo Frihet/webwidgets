@@ -25,7 +25,7 @@ Webwidgets and in implementing new widgets and other objects.
 """
 
 import itertools, types, weakref, sys, os, os.path, traceback, syslog, datetime
-import Cache
+import Cache, Performance
 
 debug_class_loading = False
 debug_class_load_caching = False
@@ -663,13 +663,15 @@ class Ilen(object):
                     return 0
                 else:
                     return 1
-
 class Timings(object):
     class Timing(object):
-        def __init__(self):
+        def __init__(self, timings, name):
+            self.timings = timings
+            self.name = name
             self.total = datetime.timedelta()
             self.recurse = 0
-            
+            self.params = (None, None)
+                            
         def start(self):
             if not self.recurse:
                 self.begin = datetime.datetime.now()
@@ -678,19 +680,37 @@ class Timings(object):
         def stop(self):
             self.recurse -= 1
             if not self.recurse:
-                self.total += datetime.datetime.now() - self.begin
+                self.measure(self.params, datetime.datetime.now() - self.begin)
+                self.params = (None, None)
+
+        def measure(self, params, delta):
+            self.total += delta
+            self.timings.measure(self.name, params, delta)
 
         def __enter__(self): self.start()
         def __exit__(self, exc_type, exc_value, traceback): self.stop()
             
     def __init__(self):
         self.timings = {}
-    
-    def __getitem__(self, name):
-        if name not in self.timings:
-            timing = self.Timing()
-            self.timings[name] = timing
-        return self.timings[name]
 
+    def __getitem__(self, name):
+        return self(name)
+        
     def __getattr__(self, name):
         return getattr(self.timings, name)
+
+    def __call__(self, name, *arg, **kw):
+        if name not in self.timings:
+            timing = self.Timing(self, name)
+            self.timings[name] = timing
+        else:
+            timing = self.timings[name]
+
+        if not timing.recurse:
+            timing.params = (arg, kw)
+        return timing
+
+    def measure(self, name, params, time):
+        if params[0]:
+            Performance.add(name, params[0][0], float(time.seconds) + 0.000001 * time.microseconds)
+

@@ -187,14 +187,16 @@ def merge_child_widgets(module, widget, binding, attributes={}, name=None, inden
     # Override merged members with attributes from WWML
     merged_members.update(attributes)
 
-    if binding:
-        base_cls = (binding, widget)
-    else:
+    # Binding can be widget if we are merging children of a binding
+    # that inherits from the superclass of the widget it is bound
+    # to...
+    if not binding or binding is widget:
         base_cls = (widget, )
+    else:
+        base_cls = (binding, widget)
 
     try:
         return types.TypeType(name, base_cls, merged_members)
-
     except TypeError, e:
         raise TypeError("""Unable to instantiate widget: %s
     In: %s
