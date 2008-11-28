@@ -65,8 +65,8 @@
         <li>Total: <w:Timing part="total" id="FieldTotal2" /> s</li>
         <li>Input parsing: <w:Timing part="input_process" id="FieldInput" /> s</li>
         <li>Writing page: <w:Timing part="output" id="FieldOutput" /> s</li>
-        <li>Database access (SQL): <w:Timing part="sql" id="FieldSql" /> s</li>
-        <li>User lookup (LDAP):<w:Timing part="ldap" id="FieldLdap" /> s</li>
+        <li>Database access: <w:Timing part="sql" id="FieldSql" /> s</li>
+        <li>User lookup:<w:Timing part="ldap" id="FieldLdap" /> s</li>
        </ul>
       </w:Div>
     </w:Div>
