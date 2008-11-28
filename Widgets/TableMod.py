@@ -278,10 +278,10 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         for row in self.ww_filter.get_rows():
             row_id = self.ww_filter.get_row_id(row)
             if row_id in string_values:
-                if row not in self.ww_filter.selection:
+                if row.ww_model not in self.ww_filter.selection:
                     self.ww_filter.selection.append(row.ww_model)
             else:
-                if row in self.ww_filter.selection:
+                if row.ww_model in self.ww_filter.selection:
                     self.ww_filter.selection.remove(row.ww_model)
 
     def field_output_expand(self, path):

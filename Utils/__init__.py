@@ -663,7 +663,12 @@ class Ilen(object):
                     return 0
                 else:
                     return 1
+
 class Timings(object):
+    debug_timer_start = False
+    debug_timer_stop = False
+    debug_timer_measure = False
+   
     class Timing(object):
         def __init__(self, timings, name):
             self.timings = timings
@@ -673,17 +678,23 @@ class Timings(object):
             self.params = (None, None)
                             
         def start(self):
+            if self.timings.debug_timer_start:
+                print "Timings start %s(%s, %s)" % ((self.name,) + self.params)
             if not self.recurse:
                 self.begin = datetime.datetime.now()
             self.recurse += 1
 
         def stop(self):
+            if self.timings.debug_timer_stop:
+                print "Timings stop %s(%s, %s)" % ((self.name,) + self.params)
             self.recurse -= 1
             if not self.recurse:
                 self.measure(self.params, datetime.datetime.now() - self.begin)
                 self.params = (None, None)
 
         def measure(self, params, delta):
+            if self.timings.debug_timer_measure:
+                print "Timings measure %s(%s, %s): %s" % ((self.name,) + params + (delta,))
             self.total += delta
             self.timings.measure(self.name, params, delta)
 

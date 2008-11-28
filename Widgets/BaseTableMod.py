@@ -77,7 +77,7 @@ class FunctionCell(SpecialCell):
         for function, title in table.functions[column_name].iteritems():
             if enabled_functions is not True and function not in enabled_functions:
                 continue
-            sub_path = ['function', function, row_id, row_id]
+            sub_path = ['function', function, row_id]
             rendered_functions.append(
                 self.draw_function(table, row_id, row_id,
                                    sub_path,
