@@ -415,7 +415,7 @@ class Program(WebKit.Page.Page):
                     replace_string = '<ww:timing part="%s" />' % (key,)
                     if replace_string in output_item:
                         value = float(value.total.seconds) + (0.000001 * float(value.total.microseconds))
-                        output_item = output_item.replace(replace_string, '%.3f' % (value,))
+                        output_item = output_item.replace(replace_string, '%.1f' % (value,))
             return output_item
             
         def handle_request(self, transaction):

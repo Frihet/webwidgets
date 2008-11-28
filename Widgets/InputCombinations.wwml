@@ -59,16 +59,17 @@
    <w:Div id="Foot">
 
     <w:Div id="Timings">
-     Page processing times:
-     <w:HorizontalFieldgroup id="Timings">
-      <w:Field id="Total" Label=":Html:Total"><w:Timing part="total" id="Field" /></w:Field>
-      <w:Field id="InputProcess" Label=":Html:Input"><w:Timing part="input_process" id="Field" /></w:Field>
-      <w:Field id="Output" Label=":Html:Rendering"><w:Timing part="output" id="Field" /></w:Field>
-      <w:Field id="Sql" Label=":Html:SQL query time"><w:Timing part="sql" id="Field" /></w:Field>
-      <w:Field id="Ldap" Label=":Html:LDAP query time"><w:Timing part="ldap" id="Field" /></w:Field>
-     </w:HorizontalFieldgroup>
+     Page rendered in <w:Timing part="total" id="FieldTotal1" /> seconds.
+      <w:Div class='Timings-Detailed' id='Timings-Detailed'>
+       <ul>
+        <li>Total: <w:Timing part="total" id="FieldTotal2" /> s</li>
+        <li>Input parsing: <w:Timing part="input_process" id="FieldInput" /> s</li>
+        <li>Writing page: <w:Timing part="output" id="FieldOutput" /> s</li>
+        <li>Database access (SQL): <w:Timing part="sql" id="FieldSql" /> s</li>
+        <li>User lookup (LDAP):<w:Timing part="ldap" id="FieldLdap" /> s</li>
+       </ul>
+      </w:Div>
     </w:Div>
-
     <w:Div id="Copyright" />
 
    </w:Div>
