@@ -41,6 +41,9 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
         multiple = True
         """Allow the user to select multiple items."""
 
+        select_single = False
+        """If True, select the first element in the list if only one and value is None."""
+
         size = 0
         """Size of the widget."""
 
@@ -49,7 +52,26 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
     class ValueFilters(Base.Filter):
         """This filter groups all filters that mangles the L{value} of
         the widget, that is, the item selection."""
-        WwFilters = []
+        WwFilters = ["SelectSingleFilter"]
+
+        class SelectSingleFilter(Base.Filter):
+            """This filter sets L{value} to contain the only element in the
+            list if L{value} is None and object.select_single is True."""
+
+            class Value(object):
+                def __get__(self, instance, owner):
+                    if instance is None: return None
+                    if (     instance.ww_filter.value is None
+                         and instance.object.select_single
+                         and len(instance.object.rows) == 1 ):
+                        instance.ww_filter.value = instance.object.rows[0]
+                    return instance.ww_filter.value
+
+                def __set__(self, instance, value):
+                    instance.ww_filter.value = value
+
+            value = Value()
+
 
     def draw_option(self, selected, value, description, output_options):
         return """<option %(selected)s value="%(value)s">
