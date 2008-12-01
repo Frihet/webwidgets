@@ -203,6 +203,10 @@ class BaseTable(RowsMod.RowsComposite, Base.DirectoryServer):
         """
         
         widget_path = self.path
+
+        if '_' not in path:
+            return self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, path)
+
         sub_widget = self.path_to_subwidget_path(path)
 
         if not self.active: return False

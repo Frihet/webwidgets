@@ -1504,7 +1504,11 @@ class StaticComposite(DictComposite):
         child_classes = []
         for name in dir(self):
             if name in ('__class__', 'parent', 'window'): continue
-            value = getattr(self, name)
+            try:
+                value = getattr(self, name, None)
+            except:
+                value = None
+            
             if isinstance(value, type) and issubclass(value, Widget) and not value.__dict__.get('ww_explicit_load', False):
                 child_classes.append((name, value))
 
@@ -1588,11 +1592,20 @@ class Input(Widget):
         def __get__(self, instance, owner):
             if instance is None:
                 return None
-            err = ''
+            html_class = [Widget.HtmlClass.__get__(self, instance, owner)]
+
             if instance.error:
-                err = ' error'
-            return Widget.HtmlClass.__get__(self, instance, owner) + err
+                html_class.append('error')
+
+            if not instance.get_active(instance.path):
+                html_class.append('disabled')
+                            
+            return ' '.join(html_class)
     html_class = HtmlClass()
+
+    @property
+    def html_disabled(self):
+        return ['', 'disabled="disabled"'][not self.get_active(self.path)]
 
     def register_input(self, path = None, argument_name = None, field = True):
         if path is None: path = self.path
