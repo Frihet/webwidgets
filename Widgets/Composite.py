@@ -271,13 +271,16 @@ class TabbedView(SwitchingView, Base.ActionInput):
             tabs = []
             for name, (title, child_widget, child_pages, child_nr_of_descendants) in pages.iteritems():
                 page = child_widget.path[len(self.path):]
-                info = {'disabled': ['', 'disabled="disabled"'][   page == self.page
-                                                                or not active
-                                                                or not self.get_active_page_preview(page)],
+                page_is_active = (   page == self.page
+                                  or not active
+                                  or not self.get_active_page_preview(page))
+                info = {'class': ['', 'ww-disabled'][page_is_active],
+                        'disabled': ['', 'disabled="disabled"'][page_is_active],
                         'name': widget_id,
                         'html_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'page'] + page),
                         'page': Webwidgets.Utils.path_to_id(page),
                         'caption': title}
+                # FIXME: Maybe put id= on the li, not the button would make more sense?
                 if not child_pages:
                     if getattr(child_widget, 'draw_inline', False):
                         html = self.draw_child(child_widget.path, child_widget, output_options)
@@ -287,6 +290,7 @@ class TabbedView(SwitchingView, Base.ActionInput):
                         tabs.append("""
                                  <li><button
                                       type="submit"
+                                      class="%(class)s"
                                       %(disabled)s
                                       id="%(html_id)s"
                                       name="%(name)s"

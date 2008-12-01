@@ -65,7 +65,7 @@ class FunctionCell(SpecialCell):
                    title="%(title)s"
                    value="%(value)s"><span class='button-text'>%(title)s</span></button>""" % {
                        'html_id': Webwidgets.Utils.path_to_id(input_path),
-                       'html_class': html_class,
+                       'html_class': html_class + [' ww-disabled', ''][active],
                        'disabled': ['disabled="disabled"', ''][active],
                        'title': table._(title, output_options),
                        'value': value}

@@ -1595,10 +1595,10 @@ class Input(Widget):
             html_class = [Widget.HtmlClass.__get__(self, instance, owner)]
 
             if instance.error:
-                html_class.append('error')
+                html_class.append('ww-error')
 
             if not instance.get_active(instance.path):
-                html_class.append('disabled')
+                html_class.append('ww-disabled')
                             
             return ' '.join(html_class)
     html_class = HtmlClass()
