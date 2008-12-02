@@ -43,6 +43,20 @@ debug_childmerge = False
 xml_namespace_wwml = 'http://freecode.no/xml/namespaces/wwml-1.0'
 xml_namespace_html = 'http://www.w3.org/TR/REC-html40'
 
+def generate_error_for_value(message, message_details, widget, attributes = {}):
+    return TypeError("""%(message)s: %(message_details)s
+    Widget: %(widget)s
+%(attributes)s""" % {'message': message,
+                     'message_details': message_details,
+                     'widget': widget,
+                     'attributes': '\n'.join("    %s: %s" % (name, value) for (name, value) in attributes.iteritems())})
+
+def generate_error_for_widget(message, message_details, class_path, class_name, base_classes, attributes = {}):
+    return generate_error_for_value(message, message_details,
+                                    "%(class_path)s(%(base_classes)s)" % {'class_path': '.'.join(class_path + [class_name]),
+                                                                          'base_classes': ', '.join(str(cls) for cls in base_classes)},
+                                    attributes)
+
 def preprocess_node(module, node, using = [], class_path = [], bind_context = [], html_context = []):
     # The following pre-processing transforms
     #
@@ -182,7 +196,7 @@ def merge_child_widgets(module, widget, binding, attributes={}, name=None, inden
                  and isinstance(binding_member, type)):
                 merged_members[child_name] = merge_child_widgets(module, widget_member, binding_member, indent = indent + '    ')
             elif getattr(binding_member, "ww_bind_widget", None) == "require":
-                raise Exception("No child widget for binding %s in widget %s" % (binding_member, widget))
+                raise TypeError("No child widget for binding %s in widget %s" % (binding_member, widget))
 
     # Override merged members with attributes from WWML
     merged_members.update(attributes)
@@ -228,6 +242,11 @@ def generate_value(type_name, text, attributes, module, using, class_path, bind_
               fallback     dont-require        require              required
     """
 
+    value_classid = attributes.get('classid', None)
+    value_id = attributes.get('id', None)
+    if 'classid' in attributes: del attributes['classid']
+    if 'id' in attributes: del attributes['id']
+
     if type_name == 'false': value = False
     elif type_name == 'true': value = True
     elif type_name == 'none': value = None
@@ -239,20 +258,15 @@ def generate_value(type_name, text, attributes, module, using, class_path, bind_
     elif type_name == 'time': value = datetime.datetime(*(time.strptime(text, '%Y-%m-%d %H:%M:%S')[0:6]))
     elif type_name == 'odict':
         value = Utils.OrderedDict(attributes)
-        if 'classid' in value: del value['classid']
-        if 'id' in value: del value['id']
     elif type_name == 'dict':
         value = dict(attributes)
-        if 'classid' in value: del value['classid']
-        if 'id' in value: del value['id']
     elif type_name == 'list':
-        value = [value for name, value in attributes.iteritems()
-                 if name not in ('classid', 'id')]
+        value = attributes.values()
     else:
         callback_name = '.'.join(bind_context)
         if debug_subclass:
             if type_name != 'wwml':
-                print "WWML: class %s(%s, %s): pass" % (attributes['classid'], callback_name, type_name)
+                print "WWML: class %s(%s, %s): pass" % (value_classid, callback_name, type_name)
                 print "WWML:     using: %s" % ' '.join(using)
 
         wwml_bind_status = attributes.get('bind', 'fallback')
@@ -280,13 +294,14 @@ def generate_value(type_name, text, attributes, module, using, class_path, bind_
             bind_status = callback_bind_status
 
         if binding is not None and bind_status == "forbid":
-            raise Exception("Binding forbidden but present anyway for %s: %s" % (type_name, binding))
+            raise generate_error_for_widget("Binding forbidden but present anyway", "",
+                                            class_path, value_id or value_classid, (type_name, binding))
 
         if type_name == 'wwml':
             value = module
             for k, v in attributes.iteritems():
                 setattr(value, k, v)
-            attributes['classid'] = 'wwml'
+            value_classid = 'wwml'
         else:
             if isinstance(node_value, types.TypeType) and issubclass(node_value, Webwidgets.Widgets.Base.Widget):
                 if 'html' not in attributes and hasattr(node_value, '__wwml_html_override__') and node_value.__wwml_html_override__:
@@ -303,7 +318,7 @@ def generate_value(type_name, text, attributes, module, using, class_path, bind_
                         attributes['html'] = attributes['html'] + attributes[':post']
                         del attributes[':post']
 
-                if 'id' not in attributes:
+                if value_id is None:
                     attributes['ww_explicit_load'] = True
                 if '__wwml_html_override__' not in attributes:
                     attributes['__wwml_html_override__'] = False
@@ -313,20 +328,20 @@ def generate_value(type_name, text, attributes, module, using, class_path, bind_
                 # Create class
                 if debug_childmerge:
                     print "MERGE TOP LEVEL", node_value, binding, module
-                value = merge_child_widgets(module, node_value, binding, attributes, str(attributes['classid']))
+                value = merge_child_widgets(module, node_value, binding, attributes, str(value_classid))
 
             elif hasattr(node_value, '__iter__'):
                 value = Utils.OrderedDict(attributes)
-                if 'classid' in value: del value['classid']
-                if 'id' in value: del value['id']
                 if hasattr(node_value, 'iteritems'):
                     value = Utils.subclass_dict(node_value, value)
                 else:
                     value = Utils.subclass_list(node_value, value.values())
             else:
-                value = node_value
-
-    return value
+                #value = node_value
+                raise generate_error_for_widget("Unable to inherit from specified object:",
+                                                "Object must be a subclass of Widget, a list or a dict",
+                                                class_path, value_id or value_classid, (type_name, ))
+    return value_id, value_classid, value
 
 def mangle_attribute_value(attribute, text, module, using, class_path, bind_context):
     if not text.startswith(':'):
@@ -337,7 +352,10 @@ def mangle_attribute_value(attribute, text, module, using, class_path, bind_cont
     else:
         type_name = text
         text = None
-    return generate_value(type_name, text, {'id': attribute, 'classid': attribute}, module, using, class_path, bind_context + [attribute])
+    return generate_value(type_name, text,
+                          {'id': attribute, 'classid': attribute},
+                          module, using, class_path, bind_context + [attribute]
+                          )[2]
 
 def generate_value_for_node(module, node, using = [], class_path = [], bind_context = [], is_root_node = False):
     if not node.nodeType == node.ELEMENT_NODE:
@@ -349,7 +367,15 @@ def generate_value_for_node(module, node, using = [], class_path = [], bind_cont
                                     for (key, value)
                                     in node.attributes.items()])
 
-    if ('id' in attributes) == ('classid' in attributes) and not is_root_node:
+    if is_root_node:
+        if not node.localName == 'wwml':
+            raise Exception('The root node must be a wwml tag: %s' % str(node))
+        if ('id' in attributes) or ('classid' in attributes):
+            raise Exception('The root node must not have an id or classid: %s' % str(node))
+
+        attributes['classid'] = 'wwml'
+
+    if ('id' in attributes) == ('classid' in attributes):
         raise Exception('One of classid and id, and only one, must be set for an object: %s' % str(node))
 
     if 'id' in attributes:
@@ -366,20 +392,21 @@ def generate_value_for_node(module, node, using = [], class_path = [], bind_cont
     else:
         bind_context = bind_context + [attributes.get('classid', '__unknown__')]
 
-    class_path = class_path + [attributes.get('classid', '__unknown__')]
+    if is_root_node:
+        class_path = []
+    else:
+        class_path = class_path + [attributes.get('classid', '__unknown__')]
 
     children, text = generate_parts_for_node(module, node, using, class_path, bind_context)
     attributes.update(children)
 
-    return (attributes.get('id', None),
-            attributes.get('classid', None),
-            generate_value(node.localName,
-                           text,
-                           attributes,
-                           module,
-                           using,
-                           class_path,
-                           bind_context))
+    return generate_value(node.localName,
+                          text,
+                          attributes,
+                          module,
+                          using,
+                          class_path,
+                          bind_context)
 
 
 def generate_widgets_from_file(modulename, filename, file, path = None, bind_context = ''):
