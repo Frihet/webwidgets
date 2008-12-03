@@ -41,6 +41,11 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
         multiple = True
         """Allow the user to select multiple items."""
 
+        allow_none = True
+        """Allow the user to select no item at all. Only applicable if
+        multiple is False. Noet: that value can still be None if the
+        list is empty."""
+
         size = 0
         """Size of the widget."""
 
@@ -49,7 +54,28 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
     class ValueFilters(Base.Filter):
         """This filter groups all filters that mangles the L{value} of
         the widget, that is, the item selection."""
-        WwFilters = []
+        WwFilters = []        
+
+    def only_one_row(self):
+        # Check if there is exactly one row to select from
+        rows = self.ww_filter.get_rows(output_options = {})
+        
+        return (    not self.ww_filter.multiple
+                and not self.ww_filter.allow_none
+                and len(rows) == 1)
+
+    def no_rows(self):
+        # Check if there is no rows at all to select from from
+        rows = self.ww_filter.get_rows(output_options = {})
+        return len(rows) == 0
+        
+    def get_active(self, path):
+        return (    not self.no_rows()
+                and Base.ValueInput.get_active(self, path))
+
+    @property
+    def html_disabled(self):
+        return ['', 'disabled="disabled"'][self.only_one_row() or not self.get_active(self.path)]
 
     def draw_option(self, selected, value, description, output_options):
         return """<option %(selected)s value="%(value)s">
@@ -57,6 +83,7 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
                   </option>""" % {'selected': selected and 'selected="selected"' or '',
                                   'value': value,
                                   'description': description}
+
     def draw_row(self, row, output_options):
         return self.draw_option(
             row.ww_model in self.ww_filter.value,
@@ -66,31 +93,37 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
                  for (column_name, column_def)
                  in self.visible_columns(output_options).iteritems()]),
             output_options)
-        
+
     def draw_options(self, output_options):
         none = []
-        if not self.ww_filter.multiple:
+        if not self.ww_filter.multiple and self.allow_none:
             none = [self.draw_option(not self.ww_filter.value, "", "&lt;None selected&gt;", output_options)]
         return none + [self.draw_row(row, output_options)
                        for row in self.ww_filter.get_rows(output_options = output_options)]
-    
+
     def draw(self, output_options):
         Base.ValueInput.draw(self, output_options)
 
-        # Disable widget if it is inactive or does not contain any
-        # elements.
-        disabled = not self.get_active(self.path) or len(self.ww_filter.get_rows(output_options = output_options)) == 0
+        active = self.get_active(self.path)
 
-        return """<select %(html_attributes)s %(multiple)s %(size)s name="%(name)s" %(disabled)s>
+        res = """<select %(html_attributes)s %(multiple)s %(size)s name="%(name)s">
          %(options)s
          </select>""" % {
             'html_attributes': self.draw_html_attributes(self.path),
             'multiple': self.ww_filter.multiple and 'multiple' or '',
             'size': self.size != 0 and 'size="%s"' % self.size or '',
             'name': Webwidgets.Utils.path_to_id(self.path),
-            'disabled': ['', 'disabled="disabled"'][disabled],
             'options': '\n'.join(self.draw_options(output_options))
             }
+
+        if self.only_one_row():
+            rows = self.ww_filter.get_rows(output_options = output_options)
+            res += """<input id="%(html_id)s-_-only_one_row" type="hidden" name="%(name)s" value="%(value)s" />""" % {
+                'html_id': self.html_id,
+                'name': Webwidgets.Utils.path_to_id(self.path),
+                'value': self.ww_filter.get_row_id(rows[0]),
+                }
+        return res
 
     def field_input(self, path, *string_values):
         self.ww_filter.value = [self.ww_filter.get_row_by_id(value).ww_model
