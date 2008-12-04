@@ -467,7 +467,7 @@ select {
  right: 0;
 }
 
-.Webwidgets-Widgets-Composite-InfoDialog {
+.Webwidgets-Widgets-Composite-AbstractInfoDialog {
  left: 37%;
  width: 25%;
  top: 37%;

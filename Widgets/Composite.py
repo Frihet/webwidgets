@@ -132,10 +132,13 @@ class AbstractDialog(StaticDialog, Base.DirectoryServer):
 class Dialog(AbstractDialog):
     pass
 
-class InfoDialog(AbstractDialog):
+class AbstractInfoDialog(AbstractDialog):
     pass
 
-class ConfirmationDialog(InfoDialog):
+class InfoDialog(AbstractInfoDialog):
+    buttons = {'Ok': '1'}
+
+class ConfirmationDialog(AbstractInfoDialog):
     class Head(Formatting.Html):
         html = """Really perform action?"""
     class Body(Formatting.Html):
