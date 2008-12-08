@@ -674,23 +674,21 @@ class Timings(object):
             self.timings = timings
             self.name = name
             self.total = datetime.timedelta()
-            self.recurse = 0
-            self.params = (None, None)
+            self.begin = []
+            self.params = []
                             
         def start(self):
             if self.timings.debug_timer_start:
-                print "Timings start %s(%s, %s)" % ((self.name,) + self.params)
-            if not self.recurse:
-                self.begin = datetime.datetime.now()
-            self.recurse += 1
+                print "Timings start %s(%s, %s)" % ((self.name,) + self.params[-1])
+            self.begin.append(datetime.datetime.now())
 
         def stop(self):
             if self.timings.debug_timer_stop:
-                print "Timings stop %s(%s, %s)" % ((self.name,) + self.params)
-            self.recurse -= 1
-            if not self.recurse:
-                self.measure(self.params, datetime.datetime.now() - self.begin)
-                self.params = (None, None)
+                print "Timings stop %s(%s, %s)" % ((self.name,) + self.params[-1])
+            delta = datetime.datetime.now() - self.begin.pop()
+            self.measure(self.params.pop(), delta)
+            for tm in self.begin:
+                tm += delta
 
         def measure(self, params, delta):
             if self.timings.debug_timer_measure:
@@ -717,8 +715,7 @@ class Timings(object):
         else:
             timing = self.timings[name]
 
-        if not timing.recurse:
-            timing.params = (arg, kw)
+        timing.params.append((arg, kw))
         return timing
 
     def measure(self, name, params, time):
