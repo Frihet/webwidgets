@@ -202,7 +202,10 @@ class RowsPrintableFilter(Base.Filter):
     # right = RowsSimpleModelFilter
     
     def get_rows(self, **kw):
-        kw['all'] = 'printable_version' in kw.get('output_options', {})
+        # Previously this overwrote all parameter, which is not ok causing a
+        # call to get_rows(all=True) never to return all rows.
+        if 'printable_version' in kw.get('output_options', {}):
+            kw['all'] = True
         return self.ww_filter.get_rows(**kw)
 
 class RowsRowWrapperFilter(Base.Filter):
