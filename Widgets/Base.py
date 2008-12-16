@@ -251,14 +251,22 @@ class Object(object):
         self.__dict__.update(attrs)
         self.setup_filter()
 
-        for name in dir(self):
-            try:
-                attr = getattr(self, name, None)
-            except:
-                attr = None
+        # This should perform some extra code validation, but it
+        # doesnt work, for two reasons.  Firstly, when used with any
+        # slow attributes, e.g. properties, it adds several seconds to
+        # log in time. Not good.  Secondly, many object properties may
+        # not be called before the parent is set, which is done after
+        # object construction. In other words, enabling this code will
+        # throw exceptions like it's going out of style.
+        if False:
+            for name in dir(self):
+                try:
+                    attr = getattr(self, name, None)
+                except:
+                    attr = None
 
-            if attr is Required:
-                raise AttributeError('Required attribute %s missing' % (name, ))
+                if attr is Required:
+                    raise AttributeError('Required attribute %s missing' % (name, ))
 
     def get_filter(cls, filter_class):
         if isinstance(filter_class, (str, unicode)):
