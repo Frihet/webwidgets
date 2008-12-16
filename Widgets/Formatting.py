@@ -383,7 +383,7 @@ class Label(Base.StaticComposite):
         else:
             target = self + self.target_prefix + self.target
         target_path = target.path
-        res = self.draw_children(output_options, include_attributes = True)
+        res = self.draw_children(output_options, include_attributes = True, invisible_as_empty=True)
         if 'Label' in res:
             res['label'] = res['Label']
         else:
