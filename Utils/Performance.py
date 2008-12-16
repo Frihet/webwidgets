@@ -3,6 +3,7 @@ import threading, traceback, cgi
 import datetime
 
 perf_data = threading.local()
+save_stack_traces = False
 
 def start_report():
     perf_data.start = True
@@ -21,9 +22,13 @@ def add(perf_type, text, time):
     if perf_type not in dir(perf_data):
         setattr(perf_data,perf_type,[])
 
+#    print text
     perf_data.added[perf_type] = perf_type
-    
-    getattr(perf_data,perf_type).append( {'id':len(getattr(perf_data,perf_type)), 'time': time, 'text': cgi.escape(text), 'traceback': cgi.escape("".join(traceback.format_stack())), 'type': perf_type })
+    stack_trace = ""
+    if save_stack_traces:
+        stack_trace = cgi.escape("".join(traceback.format_stack()))
+
+    getattr(perf_data,perf_type).append( {'id':len(getattr(perf_data,perf_type)), 'time': time, 'text': cgi.escape(text), 'traceback': stack_trace, 'type': perf_type })
 
 def add_miss():
     if 'start' not in dir(perf_data) or not perf_data.start :

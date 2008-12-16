@@ -28,11 +28,12 @@ application.
 
 from __future__ import with_statement
 
+import time
 import WebKit.Page
 import cgi, urllib, types, os, sys, threading
 import Utils, Utils.Cache, Widgets, AccessManager, Constants
 import hotshot, pdb, traceback
-import Utils.Performance
+import Utils.Performance, os, datetime
 
 debug_exceptions = True
 
@@ -89,6 +90,9 @@ class Program(WebKit.Page.Page):
     """
 
     profile = False
+    performance_report = True
+    performance_report_directory = "/tmp/"
+    performance_report_min_time = 1.0
     debug = False
 
     _transaction_store = threading.local()
@@ -132,16 +136,40 @@ class Program(WebKit.Page.Page):
                 def profile_fn():
                     profiler = hotshot.Profile("webwidgets.profile.request.%s" % type(self).request_nr)
                     profiler.addinfo('url', self.request_base(transaction) + request.extraURLPath() + '?' + request.queryString())
-                    Utils.Performance.start_report()
                     try:
                         return profiler.runcall(non_profiled_fn)
                     finally:
-                        report = Utils.Performance.get_report()
-                        if report:
-                            with open("/tmp/greencycle-performance.html",'w') as f:
-                                f.write(report)
                         profiler.close()
                 fn = profile_fn
+
+            if self.performance_report:
+                non_reporting_fn = fn
+                def reporting_fn():
+                    Utils.Performance.start_report()
+                    t1 = time.time()
+                    try:
+                        return non_reporting_fn()
+                    finally:
+                        report = Utils.Performance.get_report()
+                        t2 = time.time()
+                        dt = t2-t1
+                        if report and dt > self.performance_report_min_time:
+                            filename=self.performance_report_directory + "/greencycle.performance.%s.%s.html" % (datetime.datetime.now().strftime("%Y-%m-%d"),
+                                                                                                                 type(self).request_nr)
+                            linkname=self.performance_report_directory + "/greencycle.performance.html"
+                            try:
+                                os.remove(filename)
+                            except:
+                                pass
+                            with open(filename,'w') as f:
+                                f.write(report)
+                            try:
+                                os.remove(linkname)
+                            except:
+                                pass
+
+                            os.symlink(filename, linkname)
+                fn = reporting_fn
 
             if self.debug:
                 non_debugged_fn = fn

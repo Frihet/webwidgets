@@ -28,11 +28,15 @@ request_buckets = threading.local()
 bucket_count = 10
 class NoBucket(object):
     pass
-    
+
+
+debug = False
 
 def clear_per_request_cache():
+    print "Clear per-request cache"
 #    if hasattr(request_buckets,"buckets"):
 #        print "Clearing per request cache with", len(request_buckets.buckets), "buckets"
+
     request_buckets.buckets = {}    
 
 def cache_bucket_get(bucket_list, param):
@@ -49,14 +53,15 @@ def cache_bucket_set(bucket_list, param, value):
     if len(bucket_list) > bucket_count:
         del bucket_list[0]
 
-
 def cache(per_request = False, per_class=False, per_thread=False):
-    #FIXME: Remove dependency here - either move perf library to WW or do some other clever thing...
 
     def cache_per_class(bucket_object):
         def cache_per_class(function):
             function_id = str(id(function))
             def result_function(self, *arg, **kw):
+                global debug
+                debug = (function.__name__ == "get_rows")
+
                 if not hasattr(bucket_object, 'buckets'):
                     bucket_object.buckets = {}
                 bucket_key = (id(type(self)), function_id)
@@ -67,11 +72,17 @@ def cache(per_request = False, per_class=False, per_thread=False):
                 bucket_list = bucket_object.buckets[bucket_key]
                 value = cache_bucket_get(bucket_list, param)
                 if value is NoBucket:
-                    value = function(self, *arg, **kw)
+                    try:
+                        value = function(self, *arg, **kw)
+                    except Exception, e:
+                        value = e
                     cache_bucket_set(bucket_list, param, value)
                     Webwidgets.Utils.Performance.add_miss()
                 else:
                     Webwidgets.Utils.Performance.add_hit()
+
+                if isinstance(value, Exception):
+                    raise value
                 return value
 
             return result_function
