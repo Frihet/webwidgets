@@ -19,7 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import smtplib
+import smtplib, email
 
 class Mailer(object):
     """Mailer class wrapping smtplib  with defaults for sending e-mail
@@ -36,7 +36,7 @@ class Mailer(object):
     smtp_password = None
     "If set, use this password when authenticating to the host."
     encoding_priority = ('ascii', 'iso-8859-1', 'utf-8')
-    "List of encoding, earlier elements have higher priority."""
+    #"List of encoding, earlier elements have higher priority."""
 
     def __init__(self, **kwargs):
         """Initialize Mailer, supported kwargs are smtp_KEYs defined
@@ -54,7 +54,7 @@ class Mailer(object):
         authentication fails."""
         smtp = self._init_connection()
 
-        smtp.sendmail(mail_from, mail_to, body)
+        smtp.sendmail(mail_from, mail_to, body.as_string())
 
         self._close_connection(smtp)
 
@@ -62,42 +62,40 @@ class Mailer(object):
         """Create mail body that can be sent with the mail
         method. template is a string with standard %(value)s format
         parameters and args is a dict with the values"""
-        template_enc = template
-        args_enc = None
+        #template_enc = template
+        #args_enc = None
 
-        if isinstance(template, unicode):
-            for encoding in self.encoding_priority:
-                try:
-                    template_enc = template.encode(encoding)
-                    args_enc = self._encode_arguments(encoding, args)
-                except UnicodeEncodeError:
-                    template_enc = None
+        assert isinstance(template, unicode)
+        
+        msg = template % args
 
-                if template_enc is not None and args_enc is not None:
-                    break
+        headers, body = msg.split('\n\n', 1)
+        headers = dict(header.split(': ', 1)
+                       for header in headers.split('\n'))
 
-            # If encoding failed, force encoding with last encoding in the list.
-            if template_enc is None:
-                template_enc = template.encode(self.encoding_priority[-1], 'replace')
+        body, enc = self._encode_value(body)
+        msg = email.MIMEText.MIMEText(body, 'plain', enc)
+        for key, value in self._encode_arguments(headers).iteritems():
+            msg[key] = value
 
-        # If encoding failed or default encoding is use, use last in
-        # priority and replace errors to be safe.
-        if args_enc is None:
-            args_enc = self._encode_arguments(self.encoding_priority[-1], args, 'replace')
+        return msg
 
-        return template_enc % args_enc
+    def _encode_value(self, value):
+        for pos in xrange(0, len(self.encoding_priority)):
+            if pos < len(self.encoding_priority) - 1:
+                errors = "strict"
+            else:
+                errors = "replace"
+            try:
+                return (value.encode(self.encoding_priority[pos], errors),
+                        self.encoding_priority[pos])
+            except UnicodeEncodeError:
+                pass
+        raise UnicodeEncodeError("End of encoding_priority reached and still can't encode")
 
-    def _encode_arguments(self, encoding, args, errors='strict'):
-        try:
-            args_encoded = {}
-            for key, value in args.iteritems():
-                if isinstance(value, unicode):
-                    value = value.encode(encoding, errors)
-                args_encoded[key] = value
-        except UnicodeEncodeError:
-            args_encoded = None
-
-        return args_encoded
+    def _encode_arguments(self, args):
+        return dict((key, email.Header.Header(*self._encode_value(value)))
+                    for key, value in args.iteritems())
 
     def _init_connection(self):
         """Connect to host, authenticate and return smtp
