@@ -749,6 +749,10 @@ class Widget(Object):
     """Displayed by a corresponding L{Label} if set to non-None.
     See that widget for further information."""
 
+    input_required = False
+    """Displayed by a corresponding L{Label} in some fashion if set to
+    True. See that widget for further information."""
+
     log_id_msg = u"""<div class="log-id">Log id for this exception is: %(log_id)s</div>"""
     """Error message displayed on widget error."""
 
@@ -1604,6 +1608,9 @@ class Input(Widget):
 
             if instance.error:
                 html_class.append('ww-error')
+
+            if instance.input_required:
+                html_class.append('ww-input-required')
 
             if not instance.get_active(instance.path):
                 html_class.append('ww-disabled')

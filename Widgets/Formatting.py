@@ -391,9 +391,11 @@ class Label(Base.StaticComposite):
         if getattr(target, 'error', None) is not None:
             error_arg = (target._(target.error, output_options),)
             if res['label'] == '':
-                res['label'] = """<span class="error">%s</span>""" % error_arg
+                res['label'] = """<span class="ww-error">%s</span>""" % error_arg
             else:
-                res['label'] += """ <span class="error">(%s)</span>""" % error_arg
+                res['label'] += """ <span class="ww-error">(%s)</span>""" % error_arg
+        if getattr(target, 'input_required', False):
+            res['label'] += ' <span class="ww-input-required">*</span>'
         if res['label']:
             res['label'] += self.separator
         res['target'] = Webwidgets.Utils.path_to_id(target_path)

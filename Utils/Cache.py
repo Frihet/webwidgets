@@ -22,22 +22,10 @@
 import threading
 import Webwidgets.Utils.Performance
 
-thread_buckets = threading.local()
-request_buckets = threading.local()
-
 bucket_count = 10
+
 class NoBucket(object):
     pass
-
-
-debug = False
-
-def clear_per_request_cache():
-    print "Clear per-request cache"
-#    if hasattr(request_buckets,"buckets"):
-#        print "Clearing per request cache with", len(request_buckets.buckets), "buckets"
-
-    request_buckets.buckets = {}    
 
 def cache_bucket_get(bucket_list, param):
     for pos in xrange(len(bucket_list)-1, -1, -1):
@@ -53,47 +41,48 @@ def cache_bucket_set(bucket_list, param, value):
     if len(bucket_list) > bucket_count:
         del bucket_list[0]
 
-def cache(per_request = False, per_class=False, per_thread=False):
+def cache_per_class(bucket_object):
+    def cache_per_class(function):
+        function_id = str(id(function))
+        def result_function(self, *arg, **kw):
+            if not hasattr(bucket_object, 'buckets'):
+                bucket_object.buckets = {}
+            bucket_key = (id(type(self)), function_id)
+            if bucket_key not in bucket_object.buckets:
+                bucket_object.buckets[bucket_key] = []
+            param = (self, arg, kw)
+            bucket_list = bucket_object.buckets[bucket_key]
+            value = cache_bucket_get(bucket_list, param)
+            if value is NoBucket:
+                try:
+                    value = function(self, *arg, **kw)
+                except Exception, e:
+                    value = e
+                cache_bucket_set(bucket_list, param, value)
+                Webwidgets.Utils.Performance.add_miss()
+            else:
+                Webwidgets.Utils.Performance.add_hit()
 
-    def cache_per_class(bucket_object):
-        def cache_per_class(function):
-            function_id = str(id(function))
-            def result_function(self, *arg, **kw):
-                global debug
-                debug = (function.__name__ == "get_rows")
+            if isinstance(value, Exception):
+                raise value
+            return value
+        return result_function
+    return cache_per_class
 
-                if not hasattr(bucket_object, 'buckets'):
-                    bucket_object.buckets = {}
-                bucket_key = (id(type(self)), function_id)
-                if bucket_key not in bucket_object.buckets:
-                    bucket_object.buckets[bucket_key] = []
+buckets = {'request_part': threading.local(),
+           'request': threading.local(),
+           'thread': threading.local()}
 
-                param = (self, arg, kw)
-                bucket_list = bucket_object.buckets[bucket_key]
-                value = cache_bucket_get(bucket_list, param)
-                if value is NoBucket:
-                    try:
-                        value = function(self, *arg, **kw)
-                    except Exception, e:
-                        value = e
-                    cache_bucket_set(bucket_list, param, value)
-                    Webwidgets.Utils.Performance.add_miss()
-                else:
-                    Webwidgets.Utils.Performance.add_hit()
+cache_functions = {'request_part': {'class': cache_per_class(buckets['request_part'])},
+                   'request': {'class': cache_per_class(buckets['request'])},
+                   'thread': {'class': cache_per_class(buckets['request'])}}
 
-                if isinstance(value, Exception):
-                    raise value
-                return value
+def clear_cache(time = "request"):
+    buckets[time].buckets = {}
 
-            return result_function
-        return cache_per_class
-
-    cache_per_request_and_class = cache_per_class(request_buckets)
-    cache_per_thread_and_class = cache_per_class(thread_buckets)
-    
-    if per_request and per_class and not per_thread:
-        return cache_per_request_and_class
-    if not per_request and per_class and per_thread:
-        return cache_per_thread_and_class
+def cache(time = "request", context="class"):
+    if (    time in cache_functions
+        and context in cache_functions[time]):
+        return cache_functions[time][context]
     raise NotImplementedError
 

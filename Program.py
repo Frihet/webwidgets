@@ -180,7 +180,8 @@ class Program(WebKit.Page.Page):
             return fn()
         
         finally:
-            Utils.Cache.clear_per_request_cache()
+            Utils.Cache.clear_cache(time="request_part")
+            Utils.Cache.clear_cache(time="request")
 
     def webware_base(self, transaction):
         """@return: A URL to where the Webware installation is serving
@@ -481,7 +482,7 @@ class Program(WebKit.Page.Page):
                 arguments = decode_fields(normalize_fields(cgi.parse_qs(req.queryString())))
                 arguments, output_options = filter_arguments(arguments)
                 output_options.update(base_options)
-            
+
             with req.timings['class_output']:
                 obj = Utils.load_class(output_options['widget_class'])
                 if not (isinstance(obj, type)
@@ -573,6 +574,8 @@ class Program(WebKit.Page.Page):
                         # user interaction...
                         window.notify("reload")
 
+                Utils.Cache.clear_cache(time="request_part")
+            
                 with req.timings['output']:
                     res = output_fn(*args)
 

@@ -494,7 +494,7 @@ class RowsComposite(Base.CachingComposite):
         return (a and not b) or (b and not a) # a xor b 
 
 
-    @Webwidgets.Utils.Cache.cache(per_request = True, per_class=True)
+    @Webwidgets.Utils.Cache.cache(time = "request", context="class")
     def visible_columns(self, output_options, only_sortable = False):
         # Optimisation: we could have used get_active and constructed a path...
         return Webwidgets.Utils.OrderedDict([(name, definition)
