@@ -274,11 +274,16 @@ class TabbedView(SwitchingView, Base.ActionInput):
             tabs = []
             for name, (title, child_widget, child_pages, child_nr_of_descendants) in pages.iteritems():
                 page = child_widget.path[len(self.path):]
-                page_is_active = (   page == self.page
-                                  or not active
+                page_is_active = (   not active
                                   or not self.get_active_page_preview(page))
-                info = {'class': ['', 'ww-disabled'][page_is_active],
-                        'disabled': ['', 'disabled="disabled"'][page_is_active],
+                clss = []
+                if page == self.page:
+                    clss.append('ww-selected')
+                if page_is_active:
+                    clss.append('ww-disabled')
+                info = {'class': ' '.join(clss),
+                        'disabled': ['', 'disabled="disabled"'][    page_is_active
+                                                                and not page == self.page],
                         'name': widget_id,
                         'html_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'page'] + page),
                         'page': Webwidgets.Utils.path_to_id(page),

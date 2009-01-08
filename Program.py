@@ -90,8 +90,9 @@ class Program(WebKit.Page.Page):
     """
 
     profile = False
+    profile_directory = "/tmp"
     performance_report = True
-    performance_report_directory = "/tmp/"
+    performance_report_directory = "/tmp"
     performance_report_min_time = 1.0
     debug = False
 
@@ -134,7 +135,7 @@ class Program(WebKit.Page.Page):
             if self.profile:
                 non_profiled_fn = fn
                 def profile_fn():
-                    profiler = hotshot.Profile("webwidgets.profile.request.%s" % type(self).request_nr)
+                    profiler = hotshot.Profile(os.path.join(self.profile_directory, "webwidgets.profile.request.%s" % type(self).request_nr))
                     profiler.addinfo('url', self.request_base(transaction) + request.extraURLPath() + '?' + request.queryString())
                     try:
                         return profiler.runcall(non_profiled_fn)
@@ -154,9 +155,10 @@ class Program(WebKit.Page.Page):
                         t2 = time.time()
                         dt = t2-t1
                         if report and dt > self.performance_report_min_time:
-                            filename=self.performance_report_directory + "/greencycle.performance.%s.%s.html" % (datetime.datetime.now().strftime("%Y-%m-%d"),
-                                                                                                                 type(self).request_nr)
-                            linkname=self.performance_report_directory + "/greencycle.performance.html"
+                            filename=os.path.join(self.performance_report_directory, "greencycle.performance.%s.%s.html" % (datetime.datetime.now().strftime("%Y-%m-%d"),
+                                                                                                                 type(self).request_nr))
+                            linkname=os.path.join(self.performance_report_directory, "greencycle.performance.html")
+                            
                             try:
                                 os.remove(filename)
                             except:
