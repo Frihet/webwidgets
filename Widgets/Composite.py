@@ -262,6 +262,65 @@ class TabbedView(SwitchingView, Base.ActionInput):
         """
         return self.active and self.session.AccessManager(Webwidgets.Constants.RARR, self.win_id, path)
 
+    def draw_tab_entry(self, child_widget, info, output_options):
+        tabs = []
+        # FIXME: Maybe put id= on the li, not the button would make more sense?
+        if info['children'] is None:
+            if getattr(child_widget, 'draw_inline', False):
+                html = self.draw_child(child_widget.path, child_widget, output_options)
+                if html is not None:
+                    tabs.append("<li>%s</li>" % (html, ))
+            else:
+                tabs.append("""
+                         <li><button
+                              type="submit"
+                              class="%(class)s"
+                              %(disabled)s
+                              id="%(html_id)s"
+                              name="%(name)s"
+                              title="%(caption)s"
+                              value="%(page)s">%(caption)s</button></li>
+                        """ % info)
+        else:
+            tabs.append("<li><span>%(caption)s</span>%(children)s</li>" % info)
+        return tabs
+
+    def draw_tabs_tablist(self, widget, tabs):
+        return """
+                <ul id="%(widget_id)s" class="tabs">
+                 %(tabs)s
+                </ul>
+               """ % {'widget_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'group'] + widget.path[len(self.path):]),
+                      'tabs': '\n'.join(tabs)}
+                
+    def draw_tabs_recurse(self, active, widget_id, widget, pages, nr_of_descendants, output_options):
+        tabs = []
+        for name, (title, child_widget, child_pages, child_nr_of_descendants) in pages.iteritems():
+            page = child_widget.path[len(self.path):]
+            page_is_active = (   not active
+                              or not self.get_active_page_preview(page))
+               
+            clss = []
+            if page == self.page:
+                clss.append('ww-selected')
+            if page_is_active:
+                clss.append('ww-disabled')
+            info = {'class': ' '.join(clss),
+                    'disabled': ['', 'disabled="disabled"'][    page_is_active
+                                                            and not page == self.page],
+                    'name': widget_id,
+                    'html_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'page'] + page),
+                    'page': Webwidgets.Utils.path_to_id(page),
+                    'caption': title,
+                    'children': None}
+
+            if child_pages:
+                info['children'] = self.draw_tabs_recurse(active, widget_id, child_widget, child_pages, child_nr_of_descendants, output_options)
+                
+            tabs.extend(self.draw_tab_entry(child_widget, info, output_options))
+
+        return self.draw_tabs_tablist(widget, tabs)
+
     def draw_tabs(self, output_options):
         active = self.register_input(self.path, self.argument_name)
         widget_id = Webwidgets.Utils.path_to_id(self.path)
@@ -270,53 +329,7 @@ class TabbedView(SwitchingView, Base.ActionInput):
         if nr_of_descendants < 2 and self.hide_single_tab:
             return ''
 
-        def draw_tabs(widget, pages, nr_of_descendants):
-            tabs = []
-            for name, (title, child_widget, child_pages, child_nr_of_descendants) in pages.iteritems():
-                page = child_widget.path[len(self.path):]
-                page_is_active = (   not active
-                                  or not self.get_active_page_preview(page))
-                clss = []
-                if page == self.page:
-                    clss.append('ww-selected')
-                if page_is_active:
-                    clss.append('ww-disabled')
-                info = {'class': ' '.join(clss),
-                        'disabled': ['', 'disabled="disabled"'][    page_is_active
-                                                                and not page == self.page],
-                        'name': widget_id,
-                        'html_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'page'] + page),
-                        'page': Webwidgets.Utils.path_to_id(page),
-                        'caption': title}
-                # FIXME: Maybe put id= on the li, not the button would make more sense?
-                if not child_pages:
-                    if getattr(child_widget, 'draw_inline', False):
-                        html = self.draw_child(child_widget.path, child_widget, output_options)
-                        if html is not None:
-                            tabs.append("<li>%s</li>" % (html, ))
-                    else:
-                        tabs.append("""
-                                 <li><button
-                                      type="submit"
-                                      class="%(class)s"
-                                      %(disabled)s
-                                      id="%(html_id)s"
-                                      name="%(name)s"
-                                      title="%(caption)s"
-                                      value="%(page)s">%(caption)s</button></li>
-                                """ % info)
-                else:
-                    info['children'] = draw_tabs(child_widget, child_pages, child_nr_of_descendants)
-                    tabs.append("<li><span>%(caption)s</span>%(children)s</li>" % info)
-
-            return """
-                    <ul id="%(widget_id)s" class="tabs">
-                     %(tabs)s
-                    </ul>
-                   """ % {'widget_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'group'] + widget.path[len(self.path):]),
-                          'tabs': '\n'.join(tabs)}
-
-        return draw_tabs(self, pages, nr_of_descendants)
+        return self.draw_tabs_recurse(active, widget_id, self, pages, nr_of_descendants, output_options)
 
     def draw(self, output_options):
         return """
