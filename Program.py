@@ -375,7 +375,7 @@ class Program(WebKit.Page.Page):
                     if not isinstance(value, types.ListType):
                         value = [value]
                     if argument.field_output(path) != value:
-                        changed_arguments.append((field, path, value))
+                        changed_arguments.append((argument, path, value))
 
             return changed_arguments
 
