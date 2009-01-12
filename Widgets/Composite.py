@@ -285,14 +285,14 @@ class TabbedView(SwitchingView, Base.ActionInput):
             tabs.append("<li><span>%(caption)s</span>%(children)s</li>" % info)
         return tabs
 
-    def draw_tabs_tablist(self, widget, tabs):
+    def draw_tabs_tablist(self, widget, tabs, output_options):
         return """
                 <ul id="%(widget_id)s" class="tabs">
                  %(tabs)s
                 </ul>
                """ % {'widget_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'group'] + widget.path[len(self.path):]),
                       'tabs': '\n'.join(tabs)}
-                
+
     def draw_tabs_recurse(self, active, widget_id, widget, pages, nr_of_descendants, output_options):
         tabs = []
         for name, (title, child_widget, child_pages, child_nr_of_descendants) in pages.iteritems():
@@ -309,6 +309,9 @@ class TabbedView(SwitchingView, Base.ActionInput):
                     'disabled': ['', 'disabled="disabled"'][    page_is_active
                                                             and not page == self.page],
                     'name': widget_id,
+                    'child_id': Webwidgets.Utils.path_to_id(page),
+                    'child_name': '_'.join(['menu_bar'] + page),
+                    'parent_name': '_'.join(['menu_bar'] + page[:-1]),
                     'html_id': Webwidgets.Utils.path_to_id(self.path + ['_', 'page'] + page),
                     'page': Webwidgets.Utils.path_to_id(page),
                     'caption': title,
@@ -319,7 +322,10 @@ class TabbedView(SwitchingView, Base.ActionInput):
                 
             tabs.extend(self.draw_tab_entry(child_widget, info, output_options))
 
-        return self.draw_tabs_tablist(widget, tabs)
+        return self.draw_tabs_tablist(widget, tabs, output_options)
+
+    def draw_tabs_container(self, widget_id, tabs, output_options):
+        return tabs
 
     def draw_tabs(self, output_options):
         active = self.register_input(self.path, self.argument_name)
@@ -329,7 +335,10 @@ class TabbedView(SwitchingView, Base.ActionInput):
         if nr_of_descendants < 2 and self.hide_single_tab:
             return ''
 
-        return self.draw_tabs_recurse(active, widget_id, self, pages, nr_of_descendants, output_options)
+        return self.draw_tabs_container(
+            widget_id,
+            self.draw_tabs_recurse(active, widget_id, self, pages, nr_of_descendants, output_options),
+            output_options)
 
     def draw(self, output_options):
         return """

@@ -26,31 +26,30 @@ import Webwidgets.Utils, Webwidgets.Constants
 import Composite, Base
 
 class MainMenu(Base.DirectoryServer, Composite.TabbedView):
-    def draw_tabs(self, output_options):
-        active = self.register_input(self.path, self.argument_name)
-        widget_id = Webwidgets.Utils.path_to_id(self.path)
-
-        def draw_tabs(pages):
-            tabs = []
-            for name, (page, title, children) in pages.iteritems():
-                info = {'child_id': Webwidgets.Utils.path_to_id(page),
-                        'child_name': '_'.join(['menu_bar'] + page),
-                        'parent_name': '_'.join(['menu_bar'] + page[:-1]),
-                        'caption': title}
-                if children is None:
-                    tabs.append("""
+    def draw_tab_entry(self, child_widget, info, output_options):
+        if output_options.get('MainMenu.noscript_version', False):
+            return Composite.TabbedView.draw_tab_entry(self, child_widget, info, output_options)
+        if info['children'] is None:
+            return ["""
 var %(child_name)s_item = new dhtmlXMenuItemObject("%(child_id)s","%(caption)s","");
 menu_bar_menu.addItem(%(parent_name)s_menu,%(child_name)s_item);
-""" % info)
-                else:
-                    tabs.append("""
+""" % info]
+        else:
+            return ["""
 var %(child_name)s_item = new dhtmlXMenuItemObject("%(child_id)s","%(caption)s","");
 menu_bar_menu.addItem(%(parent_name)s_menu,%(child_name)s_item);
 var %(child_name)s_menu = new dhtmlXMenuBarPanelObject(%(parent_name)s_menu,%(child_name)s_item,false,120,true);
-""" % info)
-                    tabs.extend(draw_tabs(children))
-            return tabs
+%(children)s
+""" % info]
+            
+    def draw_tabs_tablist(self, widget, tabs, output_options):
+        if output_options.get('MainMenu.noscript_version', False):
+            return Composite.TabbedView.draw_tabs_tablist(self, widget, tabs, output_options)
+        return '\n'.join(tabs)
 
+    def draw_tabs_container(self, widget_id, tabs, output_options):
+        if output_options.get('MainMenu.noscript_version', False):
+            return Composite.TabbedView.draw_tabs_container(self, widget_id, tabs, output_options)
         return """
                 <div id="%(widget_id)s-_-menu" class="menu"></div>
                 %(noscript_version)s
@@ -65,11 +64,11 @@ menu_bar_menu.setOnClickHandler(onButtonClick);
 %(tabs)s
 
                 </script>
-               """ % {'noscript_version': Composite.TabbedView.draw_tabs(self, output_options),
+               """ % {'noscript_version': Composite.TabbedView.draw_tabs(self, Webwidgets.Utils.subclass_dict(output_options, {'MainMenu.noscript_version': True})),
                       'widget_id': widget_id,
                       'title': self._(self.title, output_options),
-                      'tabs': '\n'.join(draw_tabs(self.draw_page_titles(output_options)))}
- 
+                      'tabs': tabs}
+
     def draw(self, output_options):
         def calculate_url(location):
             return self.calculate_url_to_directory_server('Webwidgets.MainMenu', location, output_options)
@@ -77,4 +76,4 @@ menu_bar_menu.setOnClickHandler(onButtonClick);
         Base.HtmlWindow.register_script_link(self, calculate_url(['js', 'dhtmlXProtobar.js']))
         Base.HtmlWindow.register_script_link(self, calculate_url(['js', 'dhtmlXMenuBar.js']))
         Base.HtmlWindow.register_script_link(self, calculate_url(['js', 'dhtmlXCommon.js']))
-        return Composite.TabbedView.draw(self, output_options)
+        return Composite.TabbedView.draw(self, Webwidgets.Utils.subclass_dict(output_options, {'MainMenu.noscript_version': False}))
