@@ -171,7 +171,7 @@ class NewPasswordInput(Formatting.Html, Base.ValueInput):
                 self.parent.value = value
             else:
                 self.parent.value = None
-                self.parent.error = self._(msg_password_no_match)
+                self.parent.error = self._(self.parent.msg_password_no_match, {})
             return True
 
         def get_active(self, path):
