@@ -315,7 +315,7 @@ class RadioInput(Base.ValueInput, Base.StaticComposite):
         self.register_input(self.group.path, self.argument_name)
         result = self.draw_children(output_options, include_attributes = True)
         result['name'] = Webwidgets.Utils.path_to_id(self.group.path)
-        result['value'] = result['id']
+        result['value'] = result['html_id']
         result['checked'] = ['', 'checked'][self.value == self.get_group().value]
         return """<input
                    %(ww_untranslated__html_attributes)s
