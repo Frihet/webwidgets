@@ -54,6 +54,7 @@
      </w:Html>
 
     </w:List>
+    <w:variable id="Listing" />
    </table>
    <w:Button id="UpdateFiles" title="Update Files" />
   </w:Html>
