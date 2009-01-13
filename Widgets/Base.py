@@ -41,14 +41,16 @@ log_exceptions = True
 
 class MagicalMysteryDict(object):
     def __init__(self, source, output_options=None):
-        if output_options:
+        if output_options is not None:
             self.source = source
             self.output_options = output_options
             self.also = {}
-        else:
+        elif isinstance(source, type(self)):
             self.source = source.source
             self.output_options = source.output_options
             self.also = dict(source.also)
+        else:
+            raise Exception("No output_options supplied to constructor of MagicalMysteryDict")
 
     def __contains__(self, key):
         return key in self.also or hasattr(self.source, key) or (key[0:17] == 'ww_untranslated__' and hasattr(self.source, key[17:]))
