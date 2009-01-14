@@ -519,12 +519,13 @@ class Program(WebKit.Page.Page):
                 content = output[Constants.FINAL_OUTPUT]
 
             req.timings['total'].stop()
-
+            if isinstance(content, types.UnicodeType):
+                content = content.encode('utf-8')
             if isinstance(content, types.StringType):
                 response.write(self.replace_timings(req, output, content))
             elif content is not None:
                 for item in content:
-                    response.write(self.replace_timings(req, output, content))
+                    response.write(self.replace_timings(req, output, item))
 
         def class_output(cls, session, arguments, output_options):
             req = output_options['transaction'].request()
