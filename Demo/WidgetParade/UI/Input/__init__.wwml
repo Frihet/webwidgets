@@ -59,6 +59,11 @@
 
   </w:Html>
 
+  <w:Html id="PageLoad" title="Page load callback">
+   Please reload this page a few times :)
+   <div>Number of page-loads: <w:Html id="Count">0</w:Html></div>
+   <w:PageLoadNotifier id="PageLoad" />
+  </w:Html>
 
   <w:Fieldgroup id="Data" title="Data input">
    <w:Field id="LongText" Label=":Html:A longer text">

@@ -33,3 +33,9 @@ class Input(object):
                         if newpwd.value is not None:
                             lastpwd.html = newpwd.value
 
+    class PageLoad(object):
+        class PageLoad(object):
+            count = 0
+            def page_load(self, path, mode):
+                self.count += 1
+                self.parent['Count'].html = str(self.count)

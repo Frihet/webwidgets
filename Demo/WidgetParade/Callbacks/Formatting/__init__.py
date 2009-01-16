@@ -1,4 +1,4 @@
-import Webwidgets
+import Webwidgets, time
 
 class Formatting(object):
     class Tables(object):
@@ -44,3 +44,20 @@ class Formatting(object):
                              {"foo":"Bertil", "bar":"Bengtsson", "fie":"57", "x":"X", "y":"Y", "z":"Z"}]
 
             
+    class ProgressMeter(object):
+        class Wait(object):
+            pass
+        class ResetWait(object):
+            def clicked(self, path):
+                self.parent['Wait'].progress_position = 0.0
+
+        class ThreadWait(object):
+            def run(self):
+                for x in range(0, 101, 10):
+                    time.sleep(2)
+                    self.progress_position = float(x)
+            
+        class ThreadReset(object):
+            def clicked(self, path):
+                Webwidgets.DialogContainer.add_dialog_to_nearest(
+                    self, self.parent.ThreadWait(self.session, self.win_id))

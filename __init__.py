@@ -61,6 +61,7 @@ if __name__ == "Webwidgets":
     from Widgets.Formatting import *
     from Widgets.Input import *
     from Widgets.Composite import *
+    from Widgets.Progress import *
     from Widgets.Tree import *
     from Widgets.RowsMod import *
     from Widgets.ListMod import *

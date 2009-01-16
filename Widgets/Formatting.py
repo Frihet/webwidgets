@@ -493,3 +493,38 @@ class DrawError(Base.Widget):
 
     def draw(self, output_options):
 	raise self.error
+
+class ProgressMeter(Base.Widget):
+    progress_position = 0.0
+    scale_start = 0.0
+    scale_end = 100.0
+    scale_units = "%"
+    width = 100.0
+    width_unit = "px"
+
+    def draw(self, output_options):
+        progress_position = (self.progress_position - self.scale_start) / (self.scale_end - self.scale_start)
+        return """
+%(scale_start)s%(scale_units)s
+<span class="%(progress_box_class)s">
+<span style="width: %(width)s%(width_unit)s" class="%(progress_label_class)s">
+  %(progress)s%(scale_units)s
+ </span>
+ <span
+  style="padding-right: %(progress_done)s%(width_unit)s;
+         margin-right: %(progress_left)s%(width_unit)s"
+  class="%(progress_position_class)s">&nbsp;</span>
+</span>
+%(scale_end)s%(scale_units)s
+""" % {'width': self.width,
+       'width_unit': self.width_unit,
+       'scale_start': self.scale_start,
+       'scale_end': self.scale_end,
+       'scale_units': self.scale_units,
+       'progress': self.progress_position,
+       'progress_done': self.width * progress_position,
+       'progress_left': self.width * (1 - progress_position),
+       'progress_box_class': Webwidgets.Utils.classes_to_css_classes(self.ww_classes, ['progress_box']),
+       'progress_label_class': Webwidgets.Utils.classes_to_css_classes(self.ww_classes, ['progress_label']),
+       'progress_position_class': Webwidgets.Utils.classes_to_css_classes(self.ww_classes, ['progress_position'])
+       }

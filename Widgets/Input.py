@@ -185,6 +185,25 @@ class NewPasswordInput(Formatting.Html, Base.ValueInput):
         self['input1'].value = self['input2'].value = self.value
         self.error = None
 
+class PageLoadNotifier(Base.SingleActionInput):
+    """Throws a 'clicked' notification for every page load,
+    unconditionally."""
+
+    argument_name = None
+    allways_do_field_input = True
+
+    def field_input(self, path, string_value):
+        self.notify('page_load', string_value)
+
+    def field_output(self, path):
+        return 'get'
+
+    def draw(self, output_options):
+        self.register_input(self.path, self.argument_name or Webwidgets.Utils.path_to_id(self.path))
+        return '<input %(html_attributes)s type="hidden" name="%(name)s" value="post" />' % {
+            'html_attributes': self.draw_html_attributes(self.path),
+            'name': Webwidgets.Utils.path_to_id(self.path)}
+
 class Button(Base.SingleActionInput):
     """Button widget - throws a "clicked" notification when clicked"""
     title = ''

@@ -556,7 +556,7 @@ select {
  border-right: none;
 }
 
-.Webwidgets-Widgets-Formatting-HorizontalFieldgroup > .Webwidgets-Widgets-Formatting-Field > *{
+.Webwidgets-Widgets-Formatting-HorizontalFieldgroup > .Webwidgets-Widgets-Formatting-Field > * {
  display: block;
 }
 
@@ -570,3 +570,18 @@ select {
 
 .Webwidgets-Widgets-FileEditor-FileEditor-editors {
 }
+
+.Webwidgets-Widgets-Formatting-ProgressMeter-_-progress_box {
+ background: red;
+}
+
+.Webwidgets-Widgets-Formatting-ProgressMeter-_-progress_label {
+ position: fixed;
+ text-align: center;
+}
+
+.Webwidgets-Widgets-Formatting-ProgressMeter-_-progress_position {
+ background: green;
+}
+
+
