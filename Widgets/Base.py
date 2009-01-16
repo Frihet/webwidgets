@@ -1602,6 +1602,7 @@ class Input(Widget):
 
     ww_bind_callback = "require"
 
+    allways_do_field_input = False
 
     class HtmlClass(Widget.HtmlClass):
         def __get__(self, instance, owner):
@@ -1835,6 +1836,106 @@ class Window(Widget):
         self.arguments = {}
         return ''
 
+    def process_fields(self, fields):
+        """Process fields (POST field values) and generate
+        notifications for those that have changed."""
+
+        if self.session.debug_fields:
+            print "Fields:", fields
+            print "Original:", dict([(name, value.field_output(Webwidgets.Utils.id_to_path(name)))
+                                     for (name, value)
+                                     in self.fields.iteritems()])
+        if self.session.debug_field_registrations:
+            print "Field registrations:"
+            for (name, value) in self.fields.iteritems():
+                print name, value
+
+        sorted_fields = self.fields.items()
+        sorted_fields.sort(lambda (name1, field1), (name2, field2):
+                          field1.input_order(field2))
+
+        changed_fields = []
+        for fieldname, field in sorted_fields:
+            path = Webwidgets.Utils.id_to_path(fieldname)
+
+            # Check an extra time that the widget is active, just
+            # for added paranoia :) The field should'nt ever be
+            # there if it isn't but some sloppy widget hacker migt
+            # have forgotten to not to add it...
+            if field.get_active(path):
+                value = fields.get(fieldname, '')
+                if not isinstance(value, types.ListType):
+                    value = [value]
+                try:
+                    old_value = field.field_output(path)
+                except:
+                    # If old value crashes, make sure we update
+                    # the value no matter what, it might, just
+                    # might, fix the problem :)
+                    old_value = None
+                    field.append_exception()
+                if old_value != value:
+                    changed_fields.append((field, path, value))
+
+        return changed_fields
+
+    def process_arguments(self, location, arguments):
+        """Process arguments (query parameters) and location and
+        generate notifications for those that have changed."""
+
+        arguments = dict(arguments)
+        extra = {}
+        for argumentname in arguments.keys():
+            if argumentname not in self.arguments and argumentname != '__extra__':
+                extra[argumentname] = arguments[argumentname]
+                del arguments[argumentname]
+
+        if '__location__' in self.arguments:
+            arguments['__location__'] = location
+        else:
+            extra['__location__'] = location
+        if '__extra__' in self.arguments:
+            arguments['__extra__'] = extra
+
+        if self.session.debug_arguments: print "Arguments:", arguments
+
+        sorted_arguments = self.arguments.items()
+        sorted_arguments.sort(lambda (name1, argument1), (name2, argument2):
+                             argument1['widget'].input_order(argument2['widget']))
+
+        changed_arguments = []
+        for argumentname, argument in sorted_arguments:
+            path = argument['path']
+            argument = argument['widget']
+            # Check an extra time that the widget is active, just
+            # for added paranoia :) The argument shouldn't ever be
+            # there if it isn't but some sloppy widget hacker
+            # might have forgotten to not to add it.
+            if argument.get_active(path):
+                value = arguments.get(argumentname, '')
+                if not isinstance(value, types.ListType):
+                    value = [value]
+                if argument.field_output(path) != value or argument.allways_do_field_input:
+                    changed_arguments.append((argument, path, value))
+
+        return changed_arguments
+
+    def input(self, fields, arguments, output_options):
+        # Collect changed attributes in order, then run field_input
+        changed = self.process_arguments(output_options['location'], arguments)
+        if fields is not None:
+            changed.extend(self.process_fields(fields))
+
+        for field, path, value in changed:
+            try:
+                if not field.ignore_input_this_request:
+                    field.field_input(path, *value)
+            except:
+                field.append_exception()
+
+        for field in self.fields.itervalues():
+            field.ignore_input_this_request = False
+        
 
 class HtmlWindow(Window, StaticComposite, DirectoryServer):
     """HtmlWindow is the main widget for any normal application window

@@ -338,47 +338,6 @@ class Program(WebKit.Page.Page):
                         return None
                 return window
 
-        def process_arguments(self, window, location, arguments):
-            """Process arguments (query parameters) and location and
-            generate notifications for those that have changed."""
-
-            arguments = dict(arguments)
-            extra = {}
-            for argumentname in arguments.keys():
-                if argumentname not in window.arguments and argumentname != '__extra__':
-                    extra[argumentname] = arguments[argumentname]
-                    del arguments[argumentname]
-
-            if '__location__' in window.arguments:
-                arguments['__location__'] = location
-            else:
-                extra['__location__'] = location
-            if '__extra__' in window.arguments:
-                arguments['__extra__'] = extra
-
-            if self.debug_arguments: print "Arguments:", arguments
-
-            sorted_arguments = window.arguments.items()
-            sorted_arguments.sort(lambda (name1, argument1), (name2, argument2):
-                                 argument1['widget'].input_order(argument2['widget']))
-
-            changed_arguments = []
-            for argumentname, argument in sorted_arguments:
-                path = argument['path']
-                argument = argument['widget']
-                # Check an extra time that the widget is active, just
-                # for added paranoia :) The argument shouldn't ever be
-                # there if it isn't but some sloppy widget hacker
-                # might have forgotten to not to add it.
-                if argument.get_active(path):
-                    value = arguments.get(argumentname, '')
-                    if not isinstance(value, types.ListType):
-                        value = [value]
-                    if argument.field_output(path) != value:
-                        changed_arguments.append((argument, path, value))
-
-            return changed_arguments
-
         def generate_arguments(self, window):
             """Return a tuple of the location and arguments (query
             parameters) that the user should be at given the state of
@@ -397,48 +356,6 @@ class Program(WebKit.Page.Page):
                     new_arguments[argumentname] = value
             return new_location, new_arguments
 
-        def process_fields(self, window, fields):
-            """Process fields (POST field values) and generate
-            notifications for those that have changed."""
-
-            if self.debug_fields:
-                print "Fields:", fields
-                print "Original:", dict([(name, value.field_output(Utils.id_to_path(name)))
-                                         for (name, value)
-                                         in window.fields.iteritems()])
-            if self.debug_field_registrations:
-                print "Field registrations:"
-                for (name, value) in window.fields.iteritems():
-                    print name, value
-
-            sorted_fields = window.fields.items()
-            sorted_fields.sort(lambda (name1, field1), (name2, field2):
-                              field1.input_order(field2))
-
-            changed_fields = []
-            for fieldname, field in sorted_fields:
-                path = Utils.id_to_path(fieldname)
-
-                # Check an extra time that the widget is active, just
-                # for added paranoia :) The field should'nt ever be
-                # there if it isn't but some sloppy widget hacker migt
-                # have forgotten to not to add it...
-                if field.get_active(path):
-                    value = fields.get(fieldname, '')
-                    if not isinstance(value, types.ListType):
-                        value = [value]
-                    try:
-                        old_value = field.field_output(path)
-                    except:
-                        # If old value crashes, make sure we update
-                        # the value no matter what, it might, just
-                        # might, fix the problem :)
-                        old_value = None
-                        field.append_exception()
-                    if old_value != value:
-                        changed_fields.append((field, path, value))
-
-            return changed_fields
 
         def replace_timings(self, req, output, output_item):
             if output.get('Content-Type', '').startswith('text/'):
@@ -534,48 +451,22 @@ class Program(WebKit.Page.Page):
             window = session.get_window(output_options['win_id'], output_options)
             if window:
                 with req.timings['input_process']:
-                    # Collect changed attributes in order, then run field_input
-                    changed = session.process_arguments(window, output_options['location'], arguments)
+                    fields = None
                     if req.method() == 'POST':
-                        changed.extend(session.process_fields(window,
-                                                              decode_fields(normalize_fields(req.fields()))))
+                        fields = decode_fields(normalize_fields(req.fields()))
+                    
+                    window.input(fields, arguments, output_options)
 
-                    for field, path, value in changed:
-                        try:
-                            if not field.ignore_input_this_request:
-                                field.field_input(path, *value)
-                        except:
-                            field.append_exception()
+                    def find_fn(obj, fn_name, output_options):
+                        if 'widget' in output_options:
+                            for name in Utils.id_to_path(output_options['widget']):
+                                obj = obj[name]
+                        if 'aspect' in output_options:
+                            fn_name += '_' + output_options['aspect']
+                        return getattr(obj, fn_name, None)
 
-                    for field in window.fields.itervalues():
-                        field.ignore_input_this_request = False
-
-                    obj = window
-                    fn_name = 'output'
                     args = (output_options,)
-                    if 'widget' in output_options:
-                        for name in Utils.id_to_path(output_options['widget']):
-                            obj = obj[name]
-                    if 'aspect' in output_options:
-                        fn_name += '_' + output_options['aspect']
-                    output_fn = getattr(obj, fn_name)
-
-                    if not changed and output_fn is window.output:
-                        #### fixme ####
-                        # name = """changed will nearly allways be true due
-                        # to buttons"""
-                        # description = """If you clicked a button and
-                        # then you do a reload, you'd have the same POST
-                        # (non-empty-string) variable, but your
-                        # field_output would still output an empty
-                        # string."""
-                        #### end ####
-
-                        # Don't fire reload events except for reloads of
-                        # the page itself. Caching policies might result
-                        # in other items being reloaded now and then w/o
-                        # user interaction...
-                        window.notify("reload")
+                    output_fn = find_fn(window, 'output', output_options)
 
                 Utils.Cache.clear_cache(time="request_part")
             
