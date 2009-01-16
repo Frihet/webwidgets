@@ -450,28 +450,37 @@ class Program(WebKit.Page.Page):
 
             window = session.get_window(output_options['win_id'], output_options)
             if window:
+                def find_fn(window, fn_base_name, output_options, fallback = False):
+                    widget = window
+                    fn_name = fn_base_name
+                    if 'widget' in output_options:
+                        for name in Utils.id_to_path(output_options['widget']):
+                            widget = widget[name]
+                    if 'aspect' in output_options:
+                        fn_name += '_' + output_options['aspect']
+
+                    for name in (fn_name, fn_base_name):
+                        for obj in (widget, window):
+                            if fallback and not hasattr(obj, name):
+                                continue
+                            return getattr(obj, name)
+
+                fields = None
+                if req.method() == 'POST':
+                    fields = decode_fields(normalize_fields(req.fields()))
+
+                input_fn = find_fn(window, 'input', output_options, True)
+                output_fn = find_fn(window, 'output', output_options)
+
+                # Do input/output processing in the window/widget
                 with req.timings['input_process']:
-                    fields = None
-                    if req.method() == 'POST':
-                        fields = decode_fields(normalize_fields(req.fields()))
-                    
-                    window.input(fields, arguments, output_options)
-
-                    def find_fn(obj, fn_name, output_options):
-                        if 'widget' in output_options:
-                            for name in Utils.id_to_path(output_options['widget']):
-                                obj = obj[name]
-                        if 'aspect' in output_options:
-                            fn_name += '_' + output_options['aspect']
-                        return getattr(obj, fn_name, None)
-
-                    args = (output_options,)
-                    output_fn = find_fn(window, 'output', output_options)
+                    input_fn(fields, arguments, output_options)
 
                 Utils.Cache.clear_cache(time="request_part")
             
                 with req.timings['output']:
-                    res = output_fn(*args)
+                    res = output_fn(output_options)
+
 
                 if (not res
                     or (    'Location' not in res
