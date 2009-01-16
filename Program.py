@@ -77,6 +77,21 @@ def filter_arguments(arguments):
                           if key.startswith('_')])
     return res_args, output_options
 
+def find_fn(window, fn_base_name, output_options, fallback = False):
+    widget = window
+    fn_name = fn_base_name
+    if 'widget' in output_options:
+        for name in Utils.id_to_path(output_options['widget']):
+            widget = widget[name]
+    if 'aspect' in output_options:
+        fn_name += '_' + output_options['aspect']
+
+    for name in (fn_name, fn_base_name):
+        for obj in (widget, window):
+            if fallback and not hasattr(obj, name):
+                continue
+            return getattr(obj, name)
+
 class Program(WebKit.Page.Page):
     """This class is the foundation of a Webwidgets application. An
     application consists of a Program instance, and any number of
@@ -450,27 +465,13 @@ class Program(WebKit.Page.Page):
 
             window = session.get_window(output_options['win_id'], output_options)
             if window:
-                def find_fn(window, fn_base_name, output_options, fallback = False):
-                    widget = window
-                    fn_name = fn_base_name
-                    if 'widget' in output_options:
-                        for name in Utils.id_to_path(output_options['widget']):
-                            widget = widget[name]
-                    if 'aspect' in output_options:
-                        fn_name += '_' + output_options['aspect']
+                with req.timings['input_decode']:
+                    fields = None
+                    if req.method() == 'POST':
+                        fields = decode_fields(normalize_fields(req.fields()))
 
-                    for name in (fn_name, fn_base_name):
-                        for obj in (widget, window):
-                            if fallback and not hasattr(obj, name):
-                                continue
-                            return getattr(obj, name)
-
-                fields = None
-                if req.method() == 'POST':
-                    fields = decode_fields(normalize_fields(req.fields()))
-
-                input_fn = find_fn(window, 'input', output_options, True)
-                output_fn = find_fn(window, 'output', output_options)
+                    input_fn = find_fn(window, 'input', output_options, True)
+                    output_fn = find_fn(window, 'output', output_options)
 
                 # Do input/output processing in the window/widget
                 with req.timings['input_process']:
