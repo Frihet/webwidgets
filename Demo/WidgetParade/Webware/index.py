@@ -27,9 +27,9 @@ Webwidgets.Program.Session.debug_receive_notification = False
 Webwidgets.Program.Session.debug_arguments = False
 Webwidgets.Wwml.debug_import = True
 
-import UI
+import Webwidgets.Demo.WidgetParade.UI
 
 class index(Webwidgets.Program):
     class Session(Webwidgets.Program.Session):
         def new_window(self, win_id):
-            return UI.MyWindow(self, win_id)
+            return Webwidgets.Demo.WidgetParade.UI.MyWindow(self, win_id)
