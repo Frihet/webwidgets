@@ -23,7 +23,7 @@
  xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
  xmlns:html="http://www.w3.org/TR/REC-html40"
  using="Webwidgets.Demo.WidgetParade.UI.Input"
- bind="Webwidgets.Demo.WidgetParade.Callbacks.Input"
+ bind="Webwidgets.Demo.WidgetParade.UICallbacks.Input"
  >
  <w:Tabset id="Input" title="Input">
 

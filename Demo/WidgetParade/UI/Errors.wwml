@@ -22,7 +22,7 @@
  xmlns="http://www.w3.org/TR/REC-html40"
  xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
  xmlns:html="http://www.w3.org/TR/REC-html40"
- bind="Webwidgets.Demo.WidgetParade.Callbacks.Errors"
+ bind="Webwidgets.Demo.WidgetParade.UICallbacks.Errors"
  >
  <w:Html id="Errors" title="Errors">
   <h1>Notification error</h1>

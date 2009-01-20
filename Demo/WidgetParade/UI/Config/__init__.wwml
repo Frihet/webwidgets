@@ -22,7 +22,7 @@
  xmlns="http://www.w3.org/TR/REC-html40"
  xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
  xmlns:html="http://www.w3.org/TR/REC-html40"
- bind="Webwidgets.Demo.WidgetParade.Callbacks.Config"
+ bind="Webwidgets.Demo.WidgetParade.UICallbacks.Config"
  >
  <w:Tabset id="Config" title="Configuration">
   <w:Html id="language" title="Language">
