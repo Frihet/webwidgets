@@ -184,8 +184,10 @@ class Program(WebKit.Page.Page):
                                 os.remove(linkname)
                             except:
                                 pass
-
-                            os.symlink(filename, linkname)
+                            try:
+                                os.symlink(filename, linkname)
+                            except:
+                                pass
                 fn = reporting_fn
 
             if self.debug:
