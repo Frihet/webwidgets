@@ -19,17 +19,227 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-"""This module implements a new, XML-based syntax for defining widgets
-- Wwml. It has no public ww_classes, functions or members. Instead, when
-loaded, Wwml-files can be imported using the ordinary Python methods
-of importing modules, e.g.
+"""
 
- >>> import foo
+This module implements a XML-based syntax for defining widgets - Wwml.
+It has no public classes, functions or members. Instead, when loaded,
+Wwml-files can be imported using the ordinary Python methods of
+importing modules, e.g.::
 
-to import the file foo.wwml.
+  import foo
 
-For any introduction to wwml, see the file testwwml.wwml in the
-Webwidgets directory.
+to import the file C{foo.wwml}.
+
+
+The Wwml user interface markup language
+=======================================
+
+  Wwml provides an alternative and much shorter
+  syntax for defining widget classes than to define them using pure
+  Python. It does however not add any extra functionality. That is,
+  every Wwml construct can be mapped into an equivalent Python
+  construct, and is indeed compiled to one when the Wwml file is
+  loaded. 
+
+
+The module system
+=================
+
+  Wwml integrates with Python and its module system in a way that
+  makes Wwml files appear as normal Python modules to a Python
+  program. Those modules can be imported and used in the same way as
+  ordinary Python modules as long as the Webwidgets module has been
+  loaded prior to the attempt to load a Wwml module.
+
+  Wwml also imports Python modules (or Wwml files) along with
+  widget definitions for widgets that are used in a Wwml file. When
+  referring to widgets Wwml uses Python module paths (e.g.
+  C{Module.SubModule.SomeClass.SomeClassWithinTheFirstClass}).
+
+XML syntax
+==========
+
+  Wwml is an U{XML<http://www.w3.org/XML/>} application, and uses
+  U{XML namespaces<http://www.w3.org/TR/REC-xml-names>} to separate
+  embedded HTML code from Wwml code. Wwml tags live in the namespace
+  U{http://freecode.no/xml/namespaces/wwml-1.0}. The outermost tag of
+  a Wwml document is always the C{wwml} tag which serves the purpose
+  of containing namespace declarationsm the callback bindings and
+  declaring a search path for widgets::
+
+    <?xml version="1.0"?>
+    <w:wwml
+     xmlns="http://www.w3.org/TR/REC-html40"
+     xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
+     xmlns:html="http://www.w3.org/TR/REC-html40"
+     >
+
+Basic tag structure
+===================
+
+  Each tag except for the top-level C{wwml} tag defines a
+  widget class. It consists of a tag name, an id attribute, any number
+  of attributes, any number of child widgets and an implicit HTML
+  format string (if the tag has children).
+
+  The tag name is the name (or module path) of some existing widget
+  to subclass and the id attribute defines the name of the new
+  class.
+
+  Attributes and children are interchangable and defines class
+  variables for the new class. These can hold either child widgets or
+  Python values (e.g. strings, integers, lists, dictionaries...).
+
+  Example::
+      
+    <w:MyModule.MyWidget id="MyFirstWidget" foo="xyzzy">
+     <w:OtherModule.SubMod.OtherWidget id="bar" />
+    </w:MyModule.MyWidget>
+  
+  This compiles (roughly) into::
+
+    import MyModule, OtherModule.SubMod
+
+    class MyFirstWidget(MyModule.MyWidget):
+        foo="xyzzy"
+        class bar(OtherModule.SubMod.OtherWidget):
+            pass
+
+Special tags and attribute types
+================================
+  Wwml allows for attributes to hold values of different types
+  (e.g. strings, integers, booleans...). By default an attribute value is
+  considered a string. To define an attribute value of a different
+  type the attribute value must be prefixed with a C{":type:"},
+  (e.g. C{":string:My string value here"}, C{":integer:4711"},
+  C{":time:2007-07-31 17:22:05"}).
+
+  These same types are also available as tags to make attributes
+  and children more interchangable.
+
+  Example::
+
+    <w:MyModule.MyWidget id="MyFirstWidget" foo=":integer:4711">
+     <w:integer id="bar">4712</w:integer>
+    </w:MyModule.MyWidget>
+
+HTML format strings
+===================
+
+  Wwml is intended to assist in writing complicated user interfaces
+  that mixes widgets and static HTML content. To help with this, Wwml
+  provides widgets with a special attribute called C{html} that holds
+  a Python format string corresponding to the content inside the Wwml
+  tag for the widget. All non-wwml content (e.g. HTML tags and text)
+  is copied as-is to this attribute while Wwml tags are replaced by
+  C{%(id)s}, where id is the value of the C{id} attribute of the child
+  tag.
+
+  Example::
+
+    <w:Html id="MySearchBox">
+     <div class="SearchBox">
+      <w:StringInput id="query" value="*.*" />
+      <img src="http://example.org/pic.png" />
+      <w:Button id="search" title="Search" />
+     </div>
+    </w:Html>
+  
+  This compiles (roughly) into::
+
+    import MyModule, OtherModule.SubMod
+
+    class MySearchBox(Html):
+        html = '''
+    <div class="SearchBox">
+     %(query)s
+     <img src="http://example.org/pic.png" />
+     %(search)s
+    </div>
+    '''
+    class query(StringInput):
+        value = "*.*"
+    class search(Button):
+        title = "Search"
+
+  This is the foundation for using the C{Html} widget, which
+  uses this format string to merge the rendering of its child widgets.
+  This widget is useful for implementing fancy layouts, extra CSS
+  hooks and intermingle widgets with static text (e.g. labels,
+  descriptions, help-texts etc).
+
+
+Callback binding
+================
+
+  A user interface is nothing without interactivity, in Webwidgets
+  this is provided by callback functions. Callback functions can not
+  be declared within Wwml as Wwml is not a programming language but a
+  purely declarative UI definition language. Instead the Wwml widget
+  definition has to "bind" to some Python class implementing the
+  callbacks.
+
+  A callback class is bound to a widget using the the C{bind}
+  attribute which specifies a class with callback methods.
+
+  Example::
+
+    <w:MyModule.MyWidget id="MyFirstWidget" foo="xyzzy" bind="MyCallBacks.MyCallbackClass" />
+  
+  This compiles into::
+
+    import MyModule, MyCallBacks
+
+    class MyFirstWidget(MyCallBacks.MyCallbackClass, MyModule.MyWidget):
+        foo="xyzzy"
+
+  To reduce code overhead, callback binding recurses through
+  widgets so that child widgets are bound to member classes:
+
+  Example::
+
+    <w:Html id="MyFirstWidget" bind="MyCallBacks.MyCallbackClass">
+     <w:Html id="SomeWidget">
+      <w:Button id="SomeButton" title="Push me" />
+     </w:Html>
+    </w:Html>
+  
+  This compiles into::
+
+    import MyModule, MyCallBacks
+
+    class MyFirstWidget(MyCallBacks.MyCallbackClass, html):
+        class SomeWidget(MyCallBacks.MyCallbackClass.SomeWidget, Html):
+            class MyFirstWidget(MyCallBacks.MyCallbackClass.SomeWidget.SomeButton, Button):
+                title = "Push me"
+
+Search paths for widgets
+========================
+
+  As already stated tag names are module paths to existing widget
+  classes. But these paths need not be complete - they are looked up
+  along a search path of modules.
+
+  Consider a search path consisting of C{MyProg.UI},
+  C{MyLib.Widgets} and C{Webwidgets}. The tag
+  C{<w:Foo.SomeWidget />} then results in a lookup for
+
+    - C{MyProg.UI.Foo.SomeWidget}
+    - C{MyLib.Widgets.Foo.SomeWidget}
+    - C{Webwidgets.Foo.SomeWidget}
+   
+  and the first existing class in that list will be used.
+
+  Search paths can be overridden for any widget and its children by
+  specifying the C{using} attribute. The contents of this attribute is
+  a space separated list of module paths which is prepended to the
+  search path used to lookup the widget and all its children::
+
+    <w:Html id="MyFirstWidget" using="Webwidgets" >
+     <w:Html id="SomeWidget" using="MyProg.UI MyLib.Widgets">
+      <w:Button id="SomeButton" title="Push me" />
+     </w:Html>
+    </w:Html>
 """
 
 import Webwidgets.Widgets.Base, Utils
@@ -232,14 +442,14 @@ def generate_value(type_name, text, attributes, module, using, class_path, bind_
 
     Source:   Wwml         Widget class        Callback class       Result: Bind is
     Variable: bind         ww_bind_callback    ww_bind_widget
-              require                                               required
-              forbid                                                forbidden
-              dont-require                     dont-require         allowed
-              dont-require                     require              required
-              fallback     forbid                                   forbidden
-              fallback     require                                  required
-              fallback     dont-require        dont-require         allowed
-              fallback     dont-require        require              required
+    |         require                                               required
+    |         forbid                                                forbidden
+    |         dont-require                     dont-require         allowed
+    |         dont-require                     require              required
+    |         fallback     forbid                                   forbidden
+    |         fallback     require                                  required
+    |         fallback     dont-require        dont-require         allowed
+    |         fallback     dont-require        require              required
     """
 
     value_classid = attributes.get('classid', None)

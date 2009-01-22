@@ -25,10 +25,10 @@ import Webwidgets.Utils
 
 class RowsSimpleModelFilter(Base.Filter):
     """This filter adds support for memmory mapped L{RowsComposite} -
-    that is for when L{RowsComposite.non_memory_storage} is set to
-    C{False} and for row caching when set to C{True}. It also provides
-    a base implementation of the row/tree collapse algorithm for rows
-    with merged cells (in L{get_rows}).
+    that is for when L{RowsComposite.WwModel.non_memory_storage} is
+    set to C{False} and for row caching when set to C{True}. It also
+    provides a base implementation of the row/tree collapse algorithm
+    for rows with merged cells (in L{get_rows}).
     """
 
     # left = RowsPrintableFilter
@@ -209,10 +209,10 @@ class RowsPrintableFilter(Base.Filter):
         return self.ww_filter.get_rows(**kw)
 
 class RowsRowWrapperFilter(Base.Filter):
-    """This filter wraps all rows in L{RowsRowModelWrapper}. This adds
+    """This filter wraps all rows in L{RowsComposite.RowsRowModelWrapper}. This adds
        a filtering chain on individual rows; to override cells in a
        row (columns) you can add L{WwFilters} to the
-       L{RowsRowModelWrapper} class."""
+       L{RowsComposite.RowsRowModelWrapper} class."""
     
     def get_rows(self, **kw):
         return [self.RowsRowModelWrapper(table = self.object, ww_model = row)

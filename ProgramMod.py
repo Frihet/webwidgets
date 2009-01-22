@@ -31,7 +31,7 @@ from __future__ import with_statement
 import time
 import WebKit.Page
 import cgi, urllib, types, os, sys, threading
-import Utils, Utils.Cache, Widgets, AccessManager, Constants
+import Utils, Utils.Cache, Widgets, AccessManagerMod, Constants
 import hotshot, pdb, traceback
 import Utils.Performance, os, datetime
 
@@ -184,10 +184,8 @@ class Program(WebKit.Page.Page):
                                 os.remove(linkname)
                             except:
                                 pass
-                            try:
-                                os.symlink(filename, linkname)
-                            except:
-                                pass
+
+                            os.symlink(filename, linkname)
                 fn = reporting_fn
 
             if self.debug:
@@ -263,7 +261,7 @@ class Program(WebKit.Page.Page):
             self.session = self
             self.languages = None
 
-        AccessManager = AccessManager.AccessManager
+        AccessManager = AccessManagerMod.AccessManager
 
         class Notification(object):
             def __init__(self, widget, message, args = (), kw = {}, path = None):

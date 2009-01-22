@@ -19,6 +19,50 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+"""
+Webwidgets provide a built-in access control
+method, where access to individual widgets (both viewing and
+changing values) can be controlled using a type of ACL (Access
+Control List).
+
+To enable this feature, you must override the
+C{AccessManager} class attribute when subclassing
+C{Webwidgets.Program.Session}.
+
+AccessManager should be a subclass of
+C{Webwidgets.ListAccessManager} and provide a method
+C{get_access_list()} that returns an apropriate ACL list,
+given the status of the current session (a user is logged in, the
+user is of this or that type, is a member of this or that group,
+etc).
+
+The format of the ACL is a list of tripples C{(Allow, Scope, Path)}.
+The list is traversed from top to bottom, and the boolean C{Allow}
+attribute first row whose C{Path} and C{Scope} matches the widget and
+action determines if the action is allowed or not.
+
+C{Path} is a path to the widget, with the action and window
+prepended. C{Scope} is either C{SUB} or C{ONE}
+to match the path and all child widgets to that path, or to match
+just that widget, respectively.
+
+The actions that can start a path are C{EDIT},
+C{RARR} and C{VIEW}. The window is either
+C{DEFAULT_WINDOW} or a window name::
+
+  (True,  ONE,     (VIEW, DEFAULT_WINDOW, 'Body', 'LogIn', 'Application', 'Menu', 'AppMenu')),
+  (False, SUB, (VIEW, DEFAULT_WINDOW, 'Body', 'LogIn', 'Application', 'Menu', 'AppMenu')),
+  (False, SUB, (VIEW, DEFAULT_WINDOW, 'Body', 'LogIn', 'Application', 'Menu', 'AppMenu', 'Home', 'Stones'),
+  (True,  SUB, (VIEW, DEFAULT_WINDOW, 'Body', 'LogIn', 'Application', 'Menu', 'AppMenu', 'Home'),
+  (True,  SUB, (VIEW, DEFAULT_WINDOW, 'Body', 'LogIn', 'Application')),
+
+To ease the creation of these lists, you can set the
+C{debug} class attribute to C{True} on your
+C{AccessManager} class. This will print the paths for all
+attempts that Webwidgets does to access your widgets, and the
+outcome of each attempt.
+"""
+
 import Utils, Constants, csv, re
 
 allow_deny_strings = {"allow": True,
