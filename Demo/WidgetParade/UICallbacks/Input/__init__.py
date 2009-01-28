@@ -35,7 +35,7 @@ user more or less directly (as soon as the webpage finishes loading
 
 The layout of the classes defined inside each other in the callbacks
 file exactly mirrors the widget tags in the Wwml file. Compare the
-class-structure (see below) to the following exerpt:
+class-structure (see below) to the following exerpt::
 
  <w:Tabset id="Input" title="Input">
   <w:Html id="PageLoad" title="Page load callback">

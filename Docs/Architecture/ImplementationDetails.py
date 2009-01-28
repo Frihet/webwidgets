@@ -39,12 +39,38 @@ Instantiation and initialization
     Whenever manual instantiation is used for child widgets they
     should be initialized in the parents initialization function. The
     parents initialization function should also give those children as
-    parameters to its superclass' initialization function.
+    parameters to the initialization function of its superclass.
 
     It is practical to encapsulate child widget classes within the
     parent widget class as this makes the widget more portable and
     parts of it more overrideable. The automatic instantiation solves
     the problem nine times out of ten in practice.
+
+Models and filters
+==================
+
+    More complex widgets usually interacts with more complex data
+    models - database mapped objects, complex middle-ware. The API
+    between such a model and the widget is part of the definition of
+    the widget, and quite naturally can become rather complex too.
+
+    When subclassing such widgets, the widget-model API might need
+    changing too. There might be a need to add more callbacks on the
+    model object, or even remove some existing ones replacing them
+    with more specific ones.
+
+    Sometimes however the API needs no change, but the data needs to
+    be mangled, presented in a different way.
+
+    For this purpose Webwidgets provides filters. Filters sit between
+    the model object and the widget, and can be stacked. Each of them
+    can transform the data, or the API in some way. Subclasses can
+    insert filters anywhere in the stack (usually at predefined
+    places, specified by the superclass however).
+
+    When a widget is instantiated, the model class (C{WwModel}) and
+    the filter classes (C{WwFilters}) are also instantiated (into
+    C{ww_model} and C{ww_filter}) and connected up to each other.
 
 Output
 ======
