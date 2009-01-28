@@ -51,9 +51,11 @@ and uses the Webware application server framework.
 
   - L{Standard widgets<Webwidgets.Widgets>}
 
-@copyright: 2006 uAnywhere, Egil Moeller <redhog@redhog.org>
+@copyright: 2008-2009 FreeCode AS, Claes Nasten <claes.nasten@freecode.no>
+@copyright: 2008-2009 FreeCode AS, Axel Liljencrantz <axel.liljencrantz@freecode.no>
 @copyright: 2007-2009 FreeCode AS, Egil Moeller <egil.moller@freecode.no>
 @copyright: 2007-2009 Egil Moeller <redhog@redhog.org>
+@copyright: 2006 uAnywhere, Egil Moeller <redhog@redhog.org>
 
 @license:
 This program is free software; you can redistribute it and/or modify
