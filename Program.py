@@ -512,10 +512,11 @@ class Program(WebKit.Page.Page):
                     for value_part in value:
                         url_arg_list.append(('_' + key, value_part))
 
+            args = ''
             if url_arg_list:
-                path.append('?' + urllib.urlencode(url_arg_list))
+                args = '?' + urllib.urlencode(url_arg_list)
 
-            return '/'.join(path)
+            return '/'.join(path) + args
 
         def redirect(self, output_options, arguments):
             self.output = {'Status': '303 See Other',
