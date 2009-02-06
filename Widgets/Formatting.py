@@ -23,7 +23,7 @@
 """Output formatting widgets.
 """
 
-import types, StringIO, cgi, sys, os
+import types, StringIO, cgi, sys, os, re
 import Webwidgets.Utils, Webwidgets.Constants
 import Base, GridLayoutModel
 
@@ -528,3 +528,13 @@ class ProgressMeter(Base.Widget):
        'progress_label_class': Webwidgets.Utils.classes_to_css_classes(self.ww_classes, ['progress_label']),
        'progress_position_class': Webwidgets.Utils.classes_to_css_classes(self.ww_classes, ['progress_position'])
        }
+
+class BrowserWarning(Base.StaticComposite):
+    def draw(self, output_options):
+        agent = output_options['transaction'].request()._environ['HTTP_USER_AGENT']
+        for name, child in self.get_children():
+            if not hasattr(child, 'match_agent_compiled'):
+                child.match_agent_compiled = re.compile(child.match_agent)
+            if child.match_agent_compiled.match(agent):
+                return self.draw_child(child.path, child, output_options, True)
+        return ''
