@@ -34,6 +34,11 @@ C{/var/www/WebWare}, accessible using Apache and mod_webkit at
 C{http://yourhostname.com/WKMod} and directly at
 C{http://yourhostname.com:8080}.
 
+Webwidgets needs ExtraPathInfo to be enabled in Webware. To enable
+that, edit the file C{$WEBWAREDIR/Configs/Application.config} and set:
+
+    ExtraPathInfo = True
+
 Python modules must be installed in a directory in the python
 path. By default, only the directory
 C{/usr/lib/python$#PYTONVERSION/site-packages} is in the
