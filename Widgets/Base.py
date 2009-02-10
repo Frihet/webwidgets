@@ -1624,7 +1624,7 @@ class Input(Widget):
 
     @property
     def html_disabled(self):
-        return ['', 'disabled="disabled"'][not self.get_active(self.path)]
+        return ['', 'disabled'][not self.get_active(self.path)]
 
     def register_input(self, path = None, argument_name = None, field = True):
         if path is None: path = self.path
