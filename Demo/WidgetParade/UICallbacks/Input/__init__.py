@@ -71,8 +71,8 @@ class Input(object):
             def page_load(self, path, mode):
                 """This callback is called onece every page load. We
                 use it to display a page-load counter, C{Count}."""
-                self.count += 1 self.parent['Count'].html =
-                str(self.count)
+                self.count += 1
+                self.parent['Count'].html = str(self.count)
 
     class Data(object):
         class UpdatePwd(object):
