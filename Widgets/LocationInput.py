@@ -82,10 +82,12 @@ class CountryPartInput(RegionPartInput):
         region_prefix = []
 
 class CountyPartInput(RegionPartInput):
+    __input_subordinates__ = (CountryPartInput, )
     class WwModel(RegionPartInput.WwModel):
         region_prefix = [""]
 
 class MunicipalityPartInput(RegionPartInput):
+    __input_subordinates__ = (RegionPartInput, )
     class WwModel(RegionPartInput.WwModel):
         region_prefix = ["", ""]
 
@@ -107,8 +109,6 @@ class CountryInput(Webwidgets.Html):
 
 class CountyInput(CountryInput):
     html = "%(County)s" + CountryInput.html
-
-    __input_subordinates__ = (CountryInput, )
 
     class WwModel(CountryInput.WwModel):
         county = ''
@@ -138,8 +138,6 @@ class CountyInput(CountryInput):
 class MunicipalityInput(CountyInput):
     html = "%(Municipality)s" + CountyInput.html
 
-    __input_subordinates__ = (CountyInput, )
-
     class WwModel(CountyInput.WwModel):
         municipality = ''
 
@@ -160,7 +158,7 @@ class MunicipalityInput(CountyInput):
                 return CountyInput.County.Field.draw(self, output_options)
 
             def value_changed(self, path, value):
-                # Ignore output this request as this changes the list
+                # Ignore input this request as this changes the list
                 # of valid values.
                 self.parent.parent['Municipality']['Field'].ignore_input_this_request = True
                 self.parent.parent['Municipality']['Field'].ww_filter.value = []

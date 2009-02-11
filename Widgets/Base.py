@@ -1927,14 +1927,14 @@ class Window(Widget):
             changed.extend(self.process_fields(fields))
 
         for field, path, value in changed:
+            field.ignore_input_this_request = False
+
+        for field, path, value in changed:
             try:
                 if not field.ignore_input_this_request:
                     field.field_input(path, *value)
             except:
                 field.append_exception()
-
-        for field in self.fields.itervalues():
-            field.ignore_input_this_request = False
         
 
 class HtmlWindow(Window, StaticComposite, DirectoryServer):
