@@ -267,7 +267,7 @@ class RowsComposite(Base.CachingComposite):
         all rows are collapsed until expanded. This reverses the
         meaning of the expand attribute."""
 
-        rows_per_page = 10
+        rows_per_page = 8
 
         columns = {'title': 'Title'}
         """{column_name: title | {"title":title, ...}}"""

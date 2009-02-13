@@ -35,9 +35,32 @@ C{http://yourhostname.com/WKMod} and directly at
 C{http://yourhostname.com:8080}.
 
 Webwidgets needs ExtraPathInfo to be enabled in Webware. To enable
-that, edit the file C{$WEBWAREDIR/Configs/Application.config} and set:
+that, edit the file C{$WEBWAREDIR/Configs/Application.config} and
+set::
 
-    ExtraPathInfo = True
+  ExtraPathInfo = True
+
+Since Webwidgets supports multiple languages and internationalization,
+it requires you to set the Python default encoding to something
+sensible, e.g. the same as your locale. B{Webwidgets has only been
+tested under a UTF-8 environment}, and only UTF-8 locales are
+officially supported. To make your Python locale aware, modify
+C{/usr/lib/python$PYTONVERSION/site.py}::
+
+  def setencoding():
+      '''Set the string encoding used by the Unicode implementation.  The
+      default is 'ascii', but if you're willing to experiment, you can
+      change this.'''
+      encoding = "ascii" # Default value set by _PyUnicode_Init()
+
+      ############ Change from 0 to one in the if below ############
+
+      if 1:
+          # Enable to support locale aware default string encodings.
+          import locale
+          loc = locale.getdefaultlocale()
+          if loc[1]:
+              encoding = loc[1]
 
 Python modules must be installed in a directory in the python
 path. By default, only the directory
@@ -46,7 +69,7 @@ python path. Additional directories can be added using the
 C{PYTHONPATH} environment variable
 
 Unpack C{Webwidgets.$VERSION.tgz} under
-C{/usr/lib/python$#PYTONVERSION/site-packages}, or anywhere else in
+C{/usr/lib/python$PYTONVERSION/site-packages}, or anywhere else in
 the python path.
 
 

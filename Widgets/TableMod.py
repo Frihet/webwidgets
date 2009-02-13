@@ -151,7 +151,8 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                        Webwidgets.Utils.OrderedDict([('group_functions', {'level': 1}),
                                                      ('printable_link',  {'level': 2,
                                                                           'title': 'Printable version'}),
-                                                     ('order_functions', {'level': 1})
+                                                     ('order_functions', {'level': 1}),
+                                                     ('rows_per_page', {'level': 1}),
                                                      ]),
 #                        'bottom-center':
 #                        Webwidgets.Utils.OrderedDict([('title_bar', {'level': 2}),
@@ -283,6 +284,9 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
             else:
                 if row.ww_model in self.ww_filter.selection:
                     self.ww_filter.selection.remove(row.ww_model)
+    def field_input_rows_per_page(self, path, string_value):
+        if string_value == '': return
+        self.ww_filter.rows_per_page = int(string_value)
 
     def field_output_expand(self, path):
         return ['']
@@ -302,6 +306,8 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
     def field_output_selection(self, path):
         return [self.ww_filter.get_row_id_from_row_model(row)
                 for row in self.ww_filter.selection]
+    def field_output_rows_per_page(self, path):
+        return [str(self.ww_filter.rows_per_page)]
 
     def get_active_expand(self, path):
         return self.session.AccessManager(Webwidgets.Constants.RARR, self.win_id, self.path + ['expand'] + path)
@@ -325,6 +331,8 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, self.path + ['group_function'] + path)
     def get_active_selection(self, path):
         return self.session.AccessManager(Webwidgets.Constants.EDIT, self.win_id, self.path + ['selection'] + path)
+    def get_active_rows_per_page(self, path):
+        return self.session.AccessManager(Webwidgets.Constants.RARR, self.win_id, self.path + ['rows_per_page'] + path)
 
     def draw_title_bar(self, config, output_options):
         title = getattr(self, 'title', None)
@@ -475,6 +483,24 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         if not button_bars_html:
             return ''
         return "<div class='buttons buttons-%s'>%s</div>" % (position, button_bars_html,)
+
+    def draw_rows_per_page(self, position, output_options):
+        path = self.path + ['_', 'rows_per_page']
+
+        self.register_input(path, self.argument_name and self.argument_name + '_rows_per_page' or None)
+        Webwidgets.HtmlWindow.register_submit_action(self, path, 'change')
+
+        options = '\n'.join(
+            """<option %(selected)s value="%(value)s">%(value)s</option>""" % {'selected': self.ww_filter.rows_per_page == value and 'selected="selected"' or '',
+                                                                               'value': value}
+            for value in (2 ** x for x in xrange(2,10)))
+
+        return (True, """Rows per page: <select id="%(html_id)s" name="%(html_id)s">
+         %(options)s
+         </select>""" % {
+            'html_id': Webwidgets.Utils.path_to_id(path),
+            'options': options
+            })
 
     def draw_headings(self, visible_columns, reverse_dependent_columns, output_options):
         sort_path = self.path + ['_', 'sort']

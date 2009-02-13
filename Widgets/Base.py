@@ -76,7 +76,7 @@ class MagicalMysteryDict(object):
         if hasattr(self.source, key):
             value = getattr(self.source, key)
             if isinstance(value, (type, types.MethodType)):
-                raise KeyError
+                raise KeyError(key)
             try:
                 return self.source._(value, self.output_options)
             except:
@@ -87,9 +87,9 @@ class MagicalMysteryDict(object):
             if hasattr(self.source, key2):
                 value = getattr(self.source, key2)
                 if isinstance(value, (type, types.MethodType)):
-                    raise KeyError
+                    raise KeyError(key)
                 return unicode(value)
-        raise KeyError
+        raise KeyError(key)
 
     def __add__(self, other):
         raise Exception("NOT IMPLEMENTED")
