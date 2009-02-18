@@ -24,8 +24,10 @@
 Python code."""
 
 import Webwidgets
+Webwidgets.Widgets.Base.debug_exceptions = True
+Webwidgets.Widgets.Base.log_exceptions = True
        
-class pytest(Webwidgets.Program):
+class index(Webwidgets.Program):
     """The most important part of a Webwidgets application is a
     Webware page. That is a file in a Webware context containing a
     classwith the same name as the file, that inherits from
@@ -53,40 +55,40 @@ class pytest(Webwidgets.Program):
             """The title of the application, shown in the title bar of
             the webbrowser."""
 
-            class head(Webwidgets.StyleLink):
+            class Head(Webwidgets.StyleLink):
                 """Any content that should go """
                 style = '../../Widgets.css'
 
-            class body(Webwidgets.Html):
-                html = """<div id="%(id)s-header">
-                           Upload: %(upload)s
-                           <span id="%(id)s-header-search">Search: %(Search)s</span>
-                           <span id="%(id)s-header-dir">%(CurrentDirectory)s</span>
-                           <span id="%(id)s-header-right">
-                            <span id="%(id)s-header-date">Date: %(SelectDate)s</span>
+            class Body(Webwidgets.Html):
+                html = """<div id="%(html_id)s-header">
+                           Upload: %(Upload)s
+                           <span id="%(html_id)s-header-search">Search: %(Search)s</span>
+                           <span id="%(html_id)s-header-dir">%(CurrentDirectory)s</span>
+                           <span id="%(html_id)s-header-right">
+                            <span id="%(html_id)s-header-date">Date: %(SelectDate)s</span>
                             %(Filter)s
                            </span>
                           </div>
-                          <div id="%(id)s-body">
+                          <div id="%(html_id)s-body">
                           %(ShowDialog)s<br />
                           %(SomeDialog)s<br />
 
-                          %(table)s<br />
+                          %(Table)s<br />
 
-                          Last password: %(lastpwd)s<br />
-                          %(newpwd)s<br />
-                          %(pwdclear)s %(pwdset)s<br />
+                          Last password: %(Lastpwd)s<br />
+                          %(Newpwd)s<br />
+                          %(Pwdclear)s %(Pwdset)s<br />
 
                           %(Dirlisting)s
                           </div>
-                          <div id="%(id)s-footer">
+                          <div id="%(html_id)s-footer">
                           xxx
                           </div>
                           """
                           
-                class upload(Webwidgets.FileInput): pass
+                class Upload(Webwidgets.FileInput): pass
 
-                class table(Webwidgets.GridLayout):
+                class Table(Webwidgets.GridLayout):
                     hidden_cols = set((1,))
                     class cell_0_0_1_1(Webwidgets.Html): html='Foo'
                     class cell_1_0_1_1(Webwidgets.Html): html='Bar'
@@ -95,21 +97,21 @@ class pytest(Webwidgets.Program):
                     class cell_1_2_1_1(Webwidgets.Html): html='Ba'
                     class cell_2_0_1_3(Webwidgets.Html): html='Foo'
 
-                class lastpwd(Webwidgets.Html):
+                class Lastpwd(Webwidgets.Html):
                     html = ''
 
-                class newpwd(Webwidgets.NewPasswordInput):
+                class Newpwd(Webwidgets.NewPasswordInput):
                     value = 'foo'
 
-                class pwdclear(Webwidgets.Button):
+                class Pwdclear(Webwidgets.Button):
                     title = 'Clear new password'
                     def clicked(self, path):
-                        self.parent.children['newpwd'].notify('value_changed', '')
+                        self.parent.children['Newpwd'].notify('value_changed', '')
 
-                class pwdset(Webwidgets.Button):
+                class Pwdset(Webwidgets.Button):
                     title = 'Set new password'
                     def clicked(self, path):
-                        self.parent.children['lastpwd'].html = self.parent.children['newpwd'].value
+                        self.parent.children['Lastpwd'].html = self.parent.children['Newpwd'].value
 
                 class CurrentDirectory(Webwidgets.Html): html = '/foo/bar/fie'
                 class Search(Webwidgets.StringInput): value = '/foo/bar/fie'
@@ -136,11 +138,11 @@ class pytest(Webwidgets.Program):
 
                 class SomeDialog(Webwidgets.Dialog):
                     visible = False
-                    head = 'My dialog'
-                    body = 'Click ok or cancel, please'
+                    Head = 'My dialog'
+                    Body = 'Click ok or cancel, please'
 
                 class Dirlisting(Webwidgets.Html):
-                    html = """<table id="%(id)s">
+                    html = """<table id="%(html_id)s">
                      <tr><th>Type</th><th>Filename</th><th>Dates</th><th>Actions</th></tr>
                      %(Listing)s
                     </table>"""

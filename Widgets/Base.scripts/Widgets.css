@@ -225,7 +225,7 @@ input.error,
 
 .Webwidgets-Widgets-TableMod-Table th * {
  display: table-cell;
- width: 100%;
+/* width: 100%; # FXIME: Removed because of a firefox bug pertaining to the extra magic padding to buttons */
  background: inherit;
  border: inherit;
  margin: 0px;

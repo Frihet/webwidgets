@@ -36,16 +36,16 @@ separation between graphic design, interaction design and application
 logic. Webwidgets is implemented in the Python programming language
 and uses the Webware application server framework.
 
-  - L{Installing Webwidgets<Webwidgets.Docs.Installation>}
+  - L{Installing Webwidgets<Webwidgets.DocSource.Installation>}
 
   - L{Install and/or writing webwidgets applications<Webwidgets.Demo>}
 
-  - L{Architecture overview<Webwidgets.Docs.Architecture>}
+  - L{Architecture overview<Webwidgets.DocSource.Architecture>}
 
   - L{Wwml user interface definition language<Webwidgets.Wwml>}
 
   - L{Internationalization and
-    localization<Webwidgets.Docs.Internationalization>}
+    localization<Webwidgets.DocSource.Internationalization>}
 
   - L{Access control<Webwidgets.AccessManagerMod>}
 

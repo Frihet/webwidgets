@@ -71,8 +71,8 @@ class Input(object):
             def page_load(self, path, mode):
                 """This callback is called onece every page load. We
                 use it to display a page-load counter, C{Count}."""
-                self.count += 1 self.parent['Count'].html =
-                str(self.count)
+                self.count += 1
+                self.parent['Count'].html = str(self.count)
 
     class Data(object):
         class UpdatePwd(object):
@@ -93,3 +93,14 @@ class Input(object):
                         lastpwd = self.parent.parent.parent['LastPwd']['Field']
                         if newpwd.value is not None:
                             lastpwd.html = newpwd.value
+
+        class SpecialButton1(object):
+            class Field(object):
+                def clicked(self, path):
+                    print "1 Everything OK"
+
+        class SpecialButton2(object):
+            class Field(object):
+                def clicked(self, path):
+                    print "2 Everything OK"
+            

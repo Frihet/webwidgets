@@ -76,7 +76,7 @@ class MagicalMysteryDict(object):
         if hasattr(self.source, key):
             value = getattr(self.source, key)
             if isinstance(value, (type, types.MethodType)):
-                raise KeyError
+                raise KeyError(key)
             try:
                 return self.source._(value, self.output_options)
             except:
@@ -87,9 +87,9 @@ class MagicalMysteryDict(object):
             if hasattr(self.source, key2):
                 value = getattr(self.source, key2)
                 if isinstance(value, (type, types.MethodType)):
-                    raise KeyError
+                    raise KeyError(key)
                 return unicode(value)
-        raise KeyError
+        raise KeyError(key)
 
     def __add__(self, other):
         raise Exception("NOT IMPLEMENTED")
@@ -1624,7 +1624,7 @@ class Input(Widget):
 
     @property
     def html_disabled(self):
-        return ['', 'disabled="disabled"'][not self.get_active(self.path)]
+        return ['', 'disabled'][not self.get_active(self.path)]
 
     def register_input(self, path = None, argument_name = None, field = True):
         if path is None: path = self.path
@@ -1927,14 +1927,14 @@ class Window(Widget):
             changed.extend(self.process_fields(fields))
 
         for field, path, value in changed:
+            field.ignore_input_this_request = False
+
+        for field, path, value in changed:
             try:
                 if not field.ignore_input_this_request:
                     field.field_input(path, *value)
             except:
                 field.append_exception()
-
-        for field in self.fields.itervalues():
-            field.ignore_input_this_request = False
         
 
 class HtmlWindow(Window, StaticComposite, DirectoryServer):
