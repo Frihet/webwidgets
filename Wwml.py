@@ -476,7 +476,7 @@ def generate_value(type_name, text, attributes, module, using, class_path, bind_
         callback_name = '.'.join(bind_context)
         if debug_subclass:
             if type_name != 'wwml':
-                print "WWML: class %s(%s, %s): pass" % (value_classid, callback_name, type_name)
+                print "WWML: class %s(%s, %s): pass" % ('.'.join(class_path + [value_classid]), callback_name, type_name)
                 print "WWML:     using: %s" % ' '.join(using)
 
         wwml_bind_status = attributes.get('bind', 'fallback')
