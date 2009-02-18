@@ -93,3 +93,14 @@ class Input(object):
                         lastpwd = self.parent.parent.parent['LastPwd']['Field']
                         if newpwd.value is not None:
                             lastpwd.html = newpwd.value
+
+        class SpecialButton1(object):
+            class Field(object):
+                def clicked(self, path):
+                    print "1 Everything OK"
+
+        class SpecialButton2(object):
+            class Field(object):
+                def clicked(self, path):
+                    print "2 Everything OK"
+            
