@@ -634,7 +634,7 @@ class RedirectFilter(StandardFilter):
             rest['redirect_attribute'] = rest['redirect_attribute'][0]
 
         if relative_path:
-            rest['redirect_path'] = Webwidgets.Utils.RelativePath(*relative_path)
+            rest['redirect_path'] = Webwidgets.Utils.WidgetPath(*relative_path)
 
         return cls.derive(
             name="RedirectFilter(%s)" % (', '.join(['%s=%s' % (key, value)
@@ -849,13 +849,19 @@ class Widget(Object):
         return self.visible and self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, path)
 
     def get_widget_by_path(self, path):
-        path = Webwidgets.Utils.RelativePath(path)
+        path = Webwidgets.Utils.WidgetPath(path)
         res = self
-        for i in xrange(0, path.levels):
-            res = res.parent
+        if path.levels is None:
+            res = res.window
+        else:
+            for i in xrange(0, path.levels):
+                res = res.parent
         for name in path.path:
             res = res[name]
         return res
+
+    def get_path_by_widget(self, widget):
+        return Webwidgets.Utils.WidgetPath(widget.path) - Webwidgets.Utils.WidgetPath(self.path)
 
     def get_ansestor_by_attribute(self, *arg, **kw):
         """
@@ -1129,11 +1135,14 @@ class Widget(Object):
             class_path += '.' + type(self).ww_class_path
         class_path += '.' + type(self).__name__
         return "<%(class_path)s/%(path)s at %(id)s>" % {'class_path': class_path,
-                                                        'path': Webwidgets.Utils.path_to_id(self.path, accept_None = True),
+                                                        'path': Webwidgets.Utils.path_to_id(self.path, accept_none = True),
                                                         'id': id(self)}
 
     def __add__(self, other):
         return self.get_widget_by_path(other)
+
+    def __sub__(self, other):
+        return other.get_path_by_widget(self)
 
 class Text(Widget):
     """This widget is a simple string output widget.
@@ -2002,6 +2011,8 @@ class HtmlWindow(Window, StaticComposite, DirectoryServer):
         result['ww_untranslated__head_content'] = '\n'.join(self.head_content.values())
         result['ww_untranslated__replaced_content'] = '\n'.join(self.replaced_content.values())
 
+        result['ww_untranslated__html_form_id'] = Webwidgets.Utils.path_to_id(self.path + ['_', 'body', 'form'])
+
         return ("""
 %(doctype)s
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -2012,7 +2023,7 @@ class HtmlWindow(Window, StaticComposite, DirectoryServer):
   %(Head)s
  </head>
  <body %(ww_untranslated__html_attributes)s>
-  <form name="%(ww_untranslated__html_id)s" method='post' enctype='multipart/form-data' action='%(ww_untranslated__uri)s' id="%(ww_untranslated__html_id)s-_-body-form">
+  <form name="%(ww_untranslated__html_id)s" method='post' enctype='multipart/form-data' action='%(ww_untranslated__uri)s' id="%(ww_untranslated__html_form_id)s">
    %(ww_untranslated__replaced_content)s
    %(Body)s
   </form>

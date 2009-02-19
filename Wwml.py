@@ -462,7 +462,7 @@ def generate_value(type_name, text, attributes, module, using, class_path, bind_
     elif type_name == 'none': value = None
     elif type_name == 'string': value = text
     elif type_name == 'id': value = Utils.id_to_path(text)
-    elif type_name == 'path': value = Utils.RelativePath(text, path_as_list = True)
+    elif type_name == 'path': value = Utils.WidgetPath(text, path_as_list = True)
     elif type_name == 'integer': value = int(text)
     elif type_name == 'float': value = float(text)
     elif type_name == 'time': value = datetime.datetime(*(time.strptime(text, '%Y-%m-%d %H:%M:%S')[0:6]))

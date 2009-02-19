@@ -29,7 +29,7 @@ class Singleton(object):
 
 DEFAULT_WIDGET_CLASS = 'Webwidgets.Program.Session'
 DEFAULT_WINDOW = 'default'
-DEFAULT_WIDGET = 'root'
+DEFAULT_WIDGET = 'root:'
 
 class OUTPUT(Singleton): pass
 class FINAL_OUTPUT(OUTPUT): pass
