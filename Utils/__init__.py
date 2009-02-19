@@ -314,6 +314,9 @@ class WidgetPath(object):
          - 'WidgetPath(WidgetPath path)' copies an existing path.
         """
 
+        if path is None:
+            return None
+
         self = super(WidgetPath, cls).__new__(cls)
         
         if isinstance(path, basestring):
@@ -416,19 +419,11 @@ class WidgetPath(object):
 def path_to_id(path, accept_none = False):
     """Converts a widget path to a string suitable for use in a HTML
     id attribute"""
-    if path is None:
-        if accept_none:
-            return 'none'
-        raise ValueError("Path is None and accept_none is False")
     return unicode(WidgetPath(path, None))
 
 def id_to_path(id, accept_none = False):
     """Convert a string previously created using L{path_to_id} back into
     a widget path."""
-    if id == 'none':
-        if accept_none:
-            return None
-        raise ValueError("Path is 'none' and accept_none is False")
     return WidgetPath(id, path_as_list=True)
 
 def classes_remove_bases(classes, cls):
