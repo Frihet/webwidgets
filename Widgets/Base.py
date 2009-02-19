@@ -1135,7 +1135,7 @@ class Widget(Object):
             class_path += '.' + type(self).ww_class_path
         class_path += '.' + type(self).__name__
         return "<%(class_path)s/%(path)s at %(id)s>" % {'class_path': class_path,
-                                                        'path': Webwidgets.Utils.path_to_id(self.path, accept_none = True),
+                                                        'path': Webwidgets.Utils.path_to_id(self.path),
                                                         'id': id(self)}
 
     def __add__(self, other):

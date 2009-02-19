@@ -416,12 +416,12 @@ class WidgetPath(object):
     def __str__(self):
         return str(unicode(self))
 
-def path_to_id(path, accept_none = False):
+def path_to_id(path):
     """Converts a widget path to a string suitable for use in a HTML
     id attribute"""
     return unicode(WidgetPath(path, None))
 
-def id_to_path(id, accept_none = False):
+def id_to_path(id):
     """Convert a string previously created using L{path_to_id} back into
     a widget path."""
     return WidgetPath(id, path_as_list=True)

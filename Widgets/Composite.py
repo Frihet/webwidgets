@@ -241,7 +241,7 @@ class TabbedView(SwitchingView, Base.ActionInput):
 
     def field_input(self, path, string_value):
         if string_value != '':
-            page = Webwidgets.Utils.id_to_path(string_value, True)
+            page = Webwidgets.Utils.id_to_path(string_value)
             if self.get_active_page(page):
                 self.page = page
 
