@@ -364,12 +364,12 @@ class DownloadLink(Media):
 class Label(Base.StaticComposite):
     """Renders a label for an input field. The input field can be
     specified either as the widget itself, or a
-    L{Webwidgets.Utils.RelativePath} to the widget"""
+    L{Webwidgets.Utils.WidgetPath} to the widget"""
     
 
     target = []
     """The widget this widget is a label for. This is either the
-    actual widget, or a L{Webwidgets.Utils.RelativePath} referencing
+    actual widget, or a L{Webwidgets.Utils.WidgetPath} referencing
     the widget.
     """
 

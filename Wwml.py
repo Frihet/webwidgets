@@ -462,7 +462,7 @@ def generate_value(type_name, text, attributes, module, using, class_path, bind_
     elif type_name == 'none': value = None
     elif type_name == 'string': value = text
     elif type_name == 'id': value = Utils.id_to_path(text)
-    elif type_name == 'path': value = Utils.RelativePath(text, path_as_list = True)
+    elif type_name == 'path': value = Utils.WidgetPath(text, path_as_list = True)
     elif type_name == 'integer': value = int(text)
     elif type_name == 'float': value = float(text)
     elif type_name == 'time': value = datetime.datetime(*(time.strptime(text, '%Y-%m-%d %H:%M:%S')[0:6]))
@@ -476,7 +476,7 @@ def generate_value(type_name, text, attributes, module, using, class_path, bind_
         callback_name = '.'.join(bind_context)
         if debug_subclass:
             if type_name != 'wwml':
-                print "WWML: class %s(%s, %s): pass" % (value_classid, callback_name, type_name)
+                print "WWML: class %s(%s, %s): pass" % ('.'.join(class_path + [value_classid]), callback_name, type_name)
                 print "WWML:     using: %s" % ' '.join(using)
 
         wwml_bind_status = attributes.get('bind', 'fallback')
@@ -553,7 +553,7 @@ def generate_value(type_name, text, attributes, module, using, class_path, bind_
                                                 class_path, value_id or value_classid, (type_name, ))
     return value_id, value_classid, value
 
-def mangle_attribute_value(attribute, text, module, using, class_path, bind_context):
+def generate_value_for_attribute(attribute, text, module, using, class_path, bind_context):
     if not text.startswith(':'):
         return text
     text = text[1:]
@@ -564,51 +564,56 @@ def mangle_attribute_value(attribute, text, module, using, class_path, bind_cont
         text = None
     return generate_value(type_name, text,
                           {'id': attribute, 'classid': attribute},
-                          module, using, class_path, bind_context + [attribute]
+                          module, using, class_path + [attribute], bind_context + [attribute]
                           )[2]
 
 def generate_value_for_node(module, node, using = [], class_path = [], bind_context = [], is_root_node = False):
     if not node.nodeType == node.ELEMENT_NODE:
         raise Exception('Non element node given to generate_value_for_node: %s' % str(node))
-    # Yes, ordered dict here, since we mix it with child nodes further
-    # down, and they _do_ have order... A pity really XMl doesn't
-    # preserve the order of attributes...
-    attributes = Utils.OrderedDict([(key, mangle_attribute_value(key, value, module, using, class_path, bind_context))
-                                    for (key, value)
-                                    in node.attributes.items()])
 
+    sys_attributes = {}
     if is_root_node:
         if not node.localName == 'wwml':
             raise Exception('The root node must be a wwml tag: %s' % str(node))
-        if ('id' in attributes) or ('classid' in attributes):
+        if node.attributes.has_key('id') or node.attributes.has_key('classid'):
             raise Exception('The root node must not have an id or classid: %s' % str(node))
+        sys_attributes['classid'] = 'wwml'
+    else:
+        if node.attributes.has_key('id') == node.attributes.has_key('classid'):
+            raise Exception('One of classid and id, and only one, must be set for an object: %s' % str(node))
 
-        attributes['classid'] = 'wwml'
+        if node.attributes.has_key('id'):
+            sys_attributes['classid'] = node.attributes['id'].value
+        else:
+            sys_attributes['classid'] = node.attributes['classid'].value
 
-    if ('id' in attributes) == ('classid' in attributes):
-        raise Exception('One of classid and id, and only one, must be set for an object: %s' % str(node))
-
-    if 'id' in attributes:
-        attributes['classid'] = attributes['id']
-
-    if 'using' in attributes:
-        using = attributes['using'].split(' ') + using
+    if node.attributes.has_key('using'):
+        using = node.attributes['using'].value.split(' ') + using
 
     # If bind is the name of a class or module, set that as
     # bind-context, otherwize append the name of the widget to the
     # bind context of the parent widget.
-    if attributes.get('bind', 'fallback') not in wwml_bind_status_names:
-        bind_context = attributes['bind'].split('.')
+    if node.attributes.has_key('bind') and node.attributes['bind'].value not in wwml_bind_status_names:
+        bind_context = node.attributes['bind'].value.split('.')
     else:
-        bind_context = bind_context + [attributes.get('classid', '__unknown__')]
+        bind_context = bind_context + [sys_attributes.get('classid', '__unknown__')]
 
     if is_root_node:
         class_path = []
     else:
-        class_path = class_path + [attributes.get('classid', '__unknown__')]
+        class_path = class_path + [sys_attributes.get('classid', '__unknown__')]
+
+    # Yes, ordered dict here, since we mix it with child nodes further
+    # down, and they _do_ have order... A pity really XMl doesn't
+    # preserve the order of attributes...
+    attributes = Utils.OrderedDict([(key, generate_value_for_attribute(key, value, module, using, class_path, bind_context))
+                                    for (key, value)
+                                    in node.attributes.items()])
 
     children, text = generate_parts_for_node(module, node, using, class_path, bind_context)
     attributes.update(children)
+
+    attributes.update(sys_attributes)
 
     return generate_value(node.localName,
                           text,

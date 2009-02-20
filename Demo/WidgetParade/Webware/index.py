@@ -35,6 +35,8 @@ Webwidgets.Program.Session.debug_fields = False
 Webwidgets.Program.Session.debug_field_input = False
 Webwidgets.Program.Session.debug_receive_notification = False
 Webwidgets.Program.Session.debug_arguments = False
+Webwidgets.Widgets.Base.debug_exceptions = True
+Webwidgets.Widgets.Base.log_exceptions = True
 Webwidgets.Wwml.debug_import = True
 
 import Webwidgets.Demo.WidgetParade.UI

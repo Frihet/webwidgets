@@ -102,6 +102,13 @@ Titta här skall ni få se vad farbror frej tar fram!
    <w:Field id="Address" Label=":Html:Some address">
     <w:AddressInput id="Field" error=":none" />
    </w:Field>
+
+   <w:Field id="SpecialButton1">
+    <w:SpecialButton.SpecialButton id="Field" />
+   </w:Field>
+
+   <w:Field id="SpecialButton2" bind="require" Field=":SpecialButton.SpecialButton" />
+
   </w:Fieldgroup>
 
   <w:Tabset id="Third" title="Third item">
