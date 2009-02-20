@@ -61,12 +61,6 @@ def obj_info(obj):
     res += [convert_to_str_any_way_possible(t)]
     return '[' + ' '.join(res) + ']'
 
-def common_prefix(l1, l2):
-    for index in xrange(0, min(len(l1), len(l2))):
-        if l1[index] != l2[index]:
-            return l1[:index]
-    return l1[:index + 1]
-
 class ImmutableDict(dict):
     '''A hashable dict.'''
 
@@ -276,79 +270,64 @@ class LazyDict(dict):
 
 
 #### fixme ####
-# name = "Generalize WidgetPath to some kind of WidgetSelector"
-# description = """Generalize WidgetPath to some kind of
+# name = "Generalize RelativePath to some kind of WidgetSelector"
+# description = """Generalize RelativePath to some kind of
 # WidgetSelector set of classes that can select widgets based on
 # several different criterias, esp. doing what
 # get_widgets_by_attribute is doing."""
 #### end ####
 
-class WidgetPath(object):
-    """WidgetPath is a representation of a path that identifies some
-    point in the widget tree (that is, some widget in your
-    application).
-
-    Relative paths consists of a number of steps (the level) to walk
-    'upwards' in the tree (like cd .. in unix), and then some path to
-    walk downwards from that point. Example: 3:foo-bar-fie means go
-    three levels up, then down along the branch foo and bar and end up
-    at the node fie.
-
-    Absolute paths consists of just the path to walk downward from the
-    root. Example: root:foo-bar-fie means to go down along the branch
-    foo and bar and end up at the node fie.
+class RelativePath(object):
+    """RelativePath is a representation of a path that relative one
+    point in a tree identifies some other point. It consists of a
+    number of steps to walk "upwards" in the tree (like cd .. in
+    unix), and then some path to walk downwards from that point.
+    Example: 3/foo/bar/fie means go three levels up, then down along
+    the branch foo and bar and end up at the node fie.
     """
     def __new__(cls, path, levels = 0, path_as_list = False):
-        """Create a new WidgetPath instance. There are three formats
-        for creating WidgetPath instances:
+        """Create a new RelativePath instance. There are three formats
+        for creating RelativePath instances:
 
-         - 'WidgetPath(string path)' The string should be of the
-           format 3:foo-bar-fie, which is also the format output from
+         - 'RelativePath(string path)' The string should be of the
+           format 3/foo-bar-fie, which is also the format output from
            L{__str__}.
 
-         - 'WidgetPath(list path, int levels = 0)' creates a
+         - 'RelativePath(list path, int levels = 0)' creates a
            relative path from its two components - a list of strings
            representing the path, and an integer for the levels to
-           walk upwards or None for an absolute path.
+           walk upwards.
 
-         - 'WidgetPath(WidgetPath path)' copies an existing path.
+         - 'RelativePath(RelativePath path)' copies an existing
+           relative path.
         """
 
-        self = super(WidgetPath, cls).__new__(cls)
+        self = super(RelativePath, cls).__new__(cls)
         
         if isinstance(path, basestring):
-            if ':' in path:
-                levels, path = path.split(':')
-                if levels == 'root':
-                    levels = None
-                else:
-                    levels = int(levels)
+            if '/' in path:
+                levels, path = path.split('/')
+                levels = int(levels)
             if path:
                 path = path.split('-')
             else:
                 path = []
-        elif isinstance(path, WidgetPath):
+        elif isinstance(path, RelativePath):
             levels = path.levels
             path = path.path
         self.levels = levels
         self.path = list(path)
 
-        # Both relative and absolute paths can be represented as
-        # simple lists... This ambiguity is intentional.
-        if path_as_list and not self.levels:
+        if path_as_list and self.levels == 0:
             return self.path
         return self
         
     def __add__(self, child):
         """If a is rooted at c and b is rooted at a, then a + b
         references b and is rooted at c."""
-        if not isinstance(child, WidgetPath):
+        if not isinstance(child, RelativePath):
             child = type(self)(child)
-        if child.levels is None:
-            raise ValueError("Can not add an absolute path to a relative path: %s + %s" % (self, child))
         if child.levels > len(self.path):
-            if self.levels is None:
-                raise ValueError("Can not add a relative pointing above the root of an absolute path: %s + %s" % (self, child))
             levels = self.levels + child.levels - len(self.path)
             path = child.path
         else:
@@ -358,78 +337,66 @@ class WidgetPath(object):
                 path = path[:-child.levels]
             path = path + child.path
         return type(self)(path, levels)
-    
+    def __radd__(self, child):
+        return type(self)(child) + self
     def __sub__(self, child):
         """If a and b are both rooted at c, a - b will reference a but
         rooted at b. This _assumes_ a actually resides under b, if
-        not, the result is: garbage in - garbage out :P. Examples:
-        '3:foo-bar-fie-naja' - '3:foo-bar' = '0:fie-naja'
-        '3:foo-bar-fie-naja' - '3:foo-xxx' = '1:bar-fie-naja'
+        not, the result is random garbage. Examples:
+        3/foo.bar.fie.naja - 3/foo.bar = 0/fie.naja
+        3/foo.bar.fie.naja - 3/foo.xxx = 1/bar.fie.naja
         
         And the 'let's just assume things' ones:
-        '4:xxx-foo-bar-fie-naja' - '3:foo-bar' = '0:fie-naja'
-        '3:foo-bar-fie-naja' - '4:xxx-foo-bar' = '0:fie-naja'
+        4/xxx.foo.bar.fie.naja - 3/foo.bar = 0/fie.naja
+        3/foo.bar.fie.naja - 4/xxx.foo.bar = 0/fie.naja
         
         """
-        if not isinstance(child, WidgetPath):
+        if not isinstance(child, RelativePath):
             child = type(self)(child)
-
+        self_levels = self.levels
         self_path = self.path
+        child_levels = child.levels
         child_path = child.path
-
-        if (self.levels is None) != (child.levels is None):
-            raise ValueError("Can not subtract relative path from absolute or absolute from relative: %s - %s" % (self, child))
-
-        if self.levels is not None:
-            if self.levels > child.levels:
-                self_path = self_path[self.levels - child.levels:]
-            elif self.levels < child.levels:
-                child_path = child_path[child.levels - self.levels:]
+        
+        if self_levels > child_levels:
+            self_path = self_path[self_levels - child_levels:]
+        if child_levels > self_levels:
+            child_path = child_path[child_levels - self_levels:]
+        self_levels = child_levels = min(self_levels, child_levels)
 
         # self and child paths are now rooted at the same place
-        prefix_len = len(common_prefix(self_path, child_path))
+        prefix_len = len(Grimoire.Utils.common_prefix(self_path, child_path))
         path = self_path[prefix_len:]
         levels = len(child_path) - prefix_len
-        return type(self)(path, levels)
-    
-    def __radd__(self, child):
-        return type(self)(child) + self
+        return type(self)(path, levels)        
     def __rsub__(self, child):
         return type(self)(child) - self
-
     def __iter__(self):
-        if self.levels:
-            raise TypeError('Unable to iterate over a relative path with non-zero levels')
+        if self.levels != 0:
+            raise TypeError('Levels non-zero')
         return iter(self.path)
-
     def __unicode__(self):
-        levels = 'root'
-        if self.levels is not None:
-            levels = self.levels
-        return "%s:%s" % (levels, u'-'.join([
+        return unicode(self.levels) + '/' + u'-'.join([
             item.replace('\\', '\\\\').replace('-', '\\.')
-            for item in self.path]))
-
+            for item in self.path])
     def __str__(self):
         return str(unicode(self))
 
-def path_to_id(path, accept_none = False):
+def path_to_id(path, accept_None = False):
     """Converts a widget path to a string suitable for use in a HTML
     id attribute"""
-    if path is None:
-        if accept_none:
-            return 'none'
-        raise ValueError("Path is None and accept_none is False")
-    return unicode(WidgetPath(path, None))
+    if path is None and accept_None:
+        return 'none'
+    return '-'.join(['root'] + path)
 
-def id_to_path(id, accept_none = False):
+def id_to_path(id, accept_None = False):
     """Convert a string previously created using L{path_to_id} back into
     a widget path."""
-    if id == 'none':
-        if accept_none:
-            return None
-        raise ValueError("Path is 'none' and accept_none is False")
-    return WidgetPath(id, path_as_list=True)
+    if id == 'none' and accept_None:
+        return None
+    path = id.split('-')
+    assert path[0] == 'root'
+    return path[1:]
 
 def classes_remove_bases(classes, cls):
     base_classes = set()

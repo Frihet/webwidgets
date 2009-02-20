@@ -57,7 +57,7 @@ var %(child_name)s_menu = new dhtmlXMenuBarPanelObject(%(parent_name)s_menu,%(ch
                 <script language="javascript">
 function onButtonClick(itemId, itemValue) {
  document.getElementById("%(widget_id)s-_-value").value = itemId;
- document.getElementById("root:_-body-form").submit();
+ document.getElementById("root-_-body-form").submit();
 }
 menu_bar_menu = new dhtmlXMenuBarObject('%(widget_id)s-_-menu','100%%',30,"%(title)s");
 menu_bar_menu.setOnClickHandler(onButtonClick);
