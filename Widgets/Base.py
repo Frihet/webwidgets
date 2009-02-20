@@ -530,12 +530,11 @@ class RenameFilter(StandardFilter):
             name = self.name_map.get(name, name)
         setattr(self.ww_filter, name, value)
 
+    @classmethod
     def rename(cls, **name_map):
         return cls.derive(name="RenameFilter(%s)" % (', '.join(['%s=%s' % (orig, new)
                                                                 for (orig, new) in name_map.iteritems()]),),
                           name_map = name_map)
-    rename = classmethod(rename)
-
 
 class RetrieveFromFilter(StandardFilter):
     do_retrieve = []
@@ -566,13 +565,13 @@ class RetrieveFromFilter(StandardFilter):
         else:
             setattr(obj, name, value)
 
+    @classmethod
     def retrieve_from(cls, retrieve_from, propagate_none=False, **arg):
         return cls.derive(name="RetrieveFromFilter(%s, %s)" % (retrieve_from,
                                                                ', '.join(['%s=%s' % (key, value)
                                                                           for (key, value) in arg.iteritems()]),),
                           propagate_none = propagate_none,
                           retrieve_from = retrieve_from, **arg)
-    retrieve_from = classmethod(retrieve_from)
 
 class RedirectFilter(StandardFilter):
     """This filter redirects model lookups and changes to (the
@@ -614,6 +613,7 @@ class RedirectFilter(StandardFilter):
     def __setattr__(self, name, value):
         setattr(self.get_redirected_widget(name).ww_filter, name, value)
 
+    @classmethod
     def redirect(cls, *redirect_args, **rest):
         """Derive a subclass given a path, a set of levels (upwards)
         and optionally values for do_redirect, dont_redirect and
@@ -640,7 +640,6 @@ class RedirectFilter(StandardFilter):
             name="RedirectFilter(%s)" % (', '.join(['%s=%s' % (key, value)
                                                     for (key, value) in rest.iteritems()]),),
             **rest)
-    redirect = classmethod(redirect)
 
 class RedirectRenameFilter(StandardFilter):
     """This is the combination of the RedirectFilter and RenameFilter
@@ -651,6 +650,7 @@ class RedirectRenameFilter(StandardFilter):
     class RedirectFilter(RedirectFilter):
         dont_redirect = ["name_map"] + RedirectFilter.dont_redirect
 
+    @classmethod
     def redirect(cls, *redirect_args, **name_map):
         """Derive a subclass given a path, a set of levels (upwards)
         and a name map (name = name_to_rewrite_to). A value to search
@@ -664,7 +664,6 @@ class RedirectRenameFilter(StandardFilter):
             RenameFilter = cls.RenameFilter.derive(name_map = name_map),
             RedirectFilter = cls.RedirectFilter.redirect(do_redirect = name_map.values(),
                                                          *redirect_args))
-    redirect = classmethod(redirect)
 
 class MapValueFilter(StandardFilter):
     """Allows variable values to be mapped arbitrarily to other values."""
@@ -684,6 +683,7 @@ class MapValueFilter(StandardFilter):
             value = self.value_maps[name][0][value]
         setattr(self.ww_filter, name, value)
 
+    @classmethod
     def map_values(cls, **value_maps):
         value_maps = dict([(name, (value_map,
                                    dict([(map_to, map_from)
@@ -695,12 +695,88 @@ class MapValueFilter(StandardFilter):
 
         return cls.derive(name = "MapValueFilter(%s)" % (', '.join(value_maps.keys()),),
                           value_maps = value_maps)
-    map_values = classmethod(map_values)
+
+class DebugFilter(StandardFilter):
+    debug_result = False
+    debug_value = False
+    debug_exception = True
+    debug_getattr = True
+    debug_setattr = True
+    debug_collapse = True
+
+    def __init__(self, *arg, **kw):
+        self.__dict__['_collapsed'] = set()
+        StandardFilter.__init__(self, *arg, **kw)
+
+    def _print_debug(self, name, **kw): #(name, value, res, exc):
+        res = "%s: %s" % (type(self).__name__, name)
+        
+        if 'value' in kw:
+            if self.debug_value:
+                res += " <- %s" % (kw['value'],)
+        elif 'result' in kw:
+            if self.debug_result:
+                res += " -> %s" % (kw['result'],)
+        if 'exception' in kw:
+            if debug_exception:
+                res += " -@!%§!!-> %s" % (kw['exception'],)
+        print res
+    
+    def __getattr__(self, name):
+        if not self.debug_getattr or self.debug_collapse and name in self._collapsed:
+            return getattr(self.ww_filter, name)
+        if self.debug_collapse:
+            self._collapsed.add(name)
+        try:
+            res = getattr(self.ww_filter, name)
+            self._print_debug(name, result=res)
+            return res
+        except Exception, e:
+            self._print_debug(name, exception=e)
+            raise
+
+    def __setattr__(self, name, value):
+        if not self.debug_setattr or self.debug_collapse and name in self._collapsed:
+            return setattr(self.ww_filter, name, value)
+        if self.debug_collapse:
+            self._collapsed.add(name)
+        try:
+            setattr(self.ww_filter, name, value)
+            self._print_debug(name, value=value)
+        except Exception, e:
+            self._print_debug(name, value=value, exception=e)
+            raise
+
+    @classmethod
+    def debug(cls, name, **kw):
+        return cls.derive(name = name, **dict(("debug_" + name, value) for (name, value) in kw.iteritems()))
+
+class TeeFilter(StandardFilter):
+    def _get_tee_filter_prefixes(self, name):
+        return self.tee_map.get(name, self.tee_map.get('__all__', ['']))
+
+    def __getattr__(self, name):
+        if name != 'tee_map':
+            name = self._get_tee_filter_prefixes(name)[0] + name
+        return getattr(self.ww_filter, name)
+
+    def __setattr__(self, name, value):
+        prefixes = [""]
+        if name != 'tee_map':
+            prefixes = self._get_tee_filter_prefixes(name)
+        for prefix in prefixes:
+            setattr(self.ww_filter, prefix + name, value)
+
+    @classmethod
+    def tee(cls, **tee_map):
+        return cls.derive(name = "TeeFilter(%s)" % (', '.join("%s=%s" % (name, value) for (name, value) in tee_map.iteritems()),),
+                          tee_map = tee_map)
 
 class MangleFilter(StandardFilter):
     """This is the most generic of the redirection/renaming filters.
     It allows the redirection/renaming to be done by arbitrary
     functions provided by the user."""
+    @classmethod
     def mangle(cls, **mangle_rules):
         """Derive a subclass given a set of redirection rules. Every
         rule is of the form attribute_name = getter of attribute_name
@@ -711,7 +787,6 @@ class MangleFilter(StandardFilter):
                 rule = (rule,)
             properties[name] = property(*rule)
         return cls.derive(**properties)
-    mangle = classmethod(mangle)
 
 class Widget(Object):
     """Widget is the base class for all widgets. It manages class name
@@ -1001,16 +1076,16 @@ class Widget(Object):
         if self.__dict__.get('widget_script', None):
             HtmlWindow.register_script_link(self, calculate_widget_url(self, 'script'))
 
+    @classmethod
     def class_output_style(cls, session, arguments, output_options):
         return cls.widget_style
-    class_output_style = classmethod(class_output_style)
 
     def output_style(self, output_options):
         return self.widget_style
 
+    @classmethod
     def class_output_script(cls, session, arguments, output_options):
         return cls.widget_script
-    class_output_script = classmethod(class_output_script)
 
     def output_script(self, output_options):
         return self.widget_script
@@ -1086,6 +1161,7 @@ class Widget(Object):
 
         return ()
 
+    @classmethod
     def _get_translations(cls, languages, fallback = False):
         if '__translations__' not in cls.__dict__: cls.__translations__ = {}
         if languages not in cls.__translations__:
@@ -1104,7 +1180,6 @@ class Widget(Object):
 
             cls.__translations__[languages] = obj
         return cls.__translations__[languages]
-    _get_translations = classmethod(_get_translations)
 
     def get_translations(self, output_options, languages = None):
         if languages is None:
@@ -1569,11 +1644,11 @@ class Input(Widget):
 
             return Widget.__metaclass__.__new__(cls, name, bases, members)
 
+    @classmethod
     def input_order(cls, other):
         if isinstance(other, Input):
             other = type(other)
         return cmp(cls._input_level, other._input_level) or cmp(cls, other) or cmp(id(cls), id(other))
-    input_order = classmethod(input_order)
 
     active = True
     """Enables the user to actually use this input field."""
@@ -1756,6 +1831,7 @@ class DirectoryServer(Widget):
             return Webwidgets.Utils.module_file_path(owner.__module__)
     base_directory = BaseDirectory()
 
+    @classmethod
     def class_output(cls, session, arguments, output_options):
         path = output_options['location']
         for item in path:
@@ -1779,7 +1855,6 @@ class DirectoryServer(Widget):
                         }
             finally:
                 file.close()
-    class_output = classmethod(class_output)
 
     def calculate_url_to_directory_server(self, widget_class, location, output_options):
         """Calculates a URL to a file in the directory served by this class.
@@ -2019,50 +2094,51 @@ class HtmlWindow(Window, StaticComposite, DirectoryServer):
  </body>
 </html>""" % result).encode(self.encoding)
 
+    @classmethod
     def register_header(cls, widget, name, value):
         widget.session.windows[widget.win_id].headers[name] = value
-    register_header = classmethod(register_header)
 
+    @classmethod
     def register_head_content(cls, widget, content, content_name):
         content_name = content_name or Webwidgets.Utils.path_to_id(widget.path)
         widget.session.windows[widget.win_id].head_content[content_name] = content
-    register_head_content = classmethod(register_head_content)
 
+    @classmethod
     def register_replaced_content(cls, widget, content, content_name = None):
         content_name = content_name or Webwidgets.Utils.path_to_id(widget.path)
         widget.session.windows[widget.win_id].replaced_content[content_name] = content
-    register_replaced_content = classmethod(register_replaced_content)
 
+    @classmethod
     def register_script_link(cls, widget, *uris):
         cls.register_head_content(
             widget,
             '\n'.join(["<script src='%s' type='text/javascript' ></script>" % (cgi.escape(uri),)
                        for uri in uris]),
             'script: ' + ' '.join(uris))
-    register_script_link = classmethod(register_script_link)
 
+    @classmethod
     def register_style_link(cls, widget, *uris):
         cls.register_head_content(
             widget,
             '\n'.join(["<link href='%s' rel='stylesheet' type='text/css' />" % (cgi.escape(uri),)
                        for uri in uris]),
             'style: ' + ' '.join(uris))
-    register_style_link = classmethod(register_style_link)
 
+    @classmethod
     def register_script(cls, widget, name, script):
         cls.register_head_content(
             widget,
             "<script language='javascript' type='text/javascript'>%s</script>" % (script,),
             name)
-    register_script = classmethod(register_script)
 
+    @classmethod
     def register_style(cls, widget, name, style):
         cls.register_head_content(
             widget,
             "<style type='text/css'>%s</style>" % (style,),
             name)
-    register_style = classmethod(register_style)
 
+    @classmethod
     def register_submit_action(cls, widget, path, event):
         info = {'id': Webwidgets.Utils.path_to_id(path),
                 'event': event}
@@ -2079,8 +2155,8 @@ class HtmlWindow(Window, StaticComposite, DirectoryServer):
               document.getElementById('root-_-body-form').submit();
              });
             """ % info)
-    register_submit_action = classmethod(register_submit_action)
 
+    @classmethod
     def register_value(cls, widget, name, value):
         cls.register_head_content(
             widget,
@@ -2088,4 +2164,3 @@ class HtmlWindow(Window, StaticComposite, DirectoryServer):
                 'name': name,
                 'value': value},
             'value: ' + name)
-    register_value = classmethod(register_value)
