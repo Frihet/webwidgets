@@ -378,3 +378,32 @@ class MangleFilter(StandardFilter):
                 rule = (rule,)
             properties[name] = property(*rule)
         return cls.derive(**properties)
+
+
+class Wrapper(Webwidgets.ObjectMod.Object):
+    def __init__(self, ww_model, **attrs):
+        if hasattr(ww_model, 'ww_filter'):
+            attrs['ww_filter'] = ww_model.ww_filter
+        Webwidgets.ObjectMod.Object.__init__(self, ww_model = ww_model, **attrs)
+
+class PersistentWrapper(Wrapper):
+    def ww_wrapper_key(cls, ww_model, **attrs):
+        return str(id(ww_model))
+    ww_wrapper_key = classmethod(ww_wrapper_key)
+
+    def __new__(cls, **attrs):
+        if 'wrappers' not in cls.__dict__:
+                cls.wrappers = {}
+        wrapper_key = cls.ww_wrapper_key(**attrs)
+        if wrapper_key not in cls.wrappers:
+            wrapper = cls.wrappers[wrapper_key] = Wrapper.__new__(cls, **attrs)
+            wrapper.ww_first_init(**attrs)
+        else:
+            wrapper = cls.wrappers[wrapper_key]
+        return wrapper
+
+    def __init__(self, *arg, **kw):
+        self.__dict__.update(kw)
+
+    def ww_first_init(self, *arg, **kw):
+        Wrapper.__init__(self, *arg, **kw)

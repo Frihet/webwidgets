@@ -25,7 +25,7 @@
 
 import types, StringIO, cgi, sys, os, re
 import Webwidgets.Utils, Webwidgets.Constants
-import Base, GridLayoutModel
+import Base, WindowMod, GridLayoutModel
 
 class List(Base.StaticComposite):
     """Concatenates all children in name order, drawing the "sep"
@@ -48,7 +48,7 @@ class List(Base.StaticComposite):
 
 class ReplacedList(List):
     def draw(self, output_options):
-        Base.HtmlWindow.register_replaced_content(
+        WindowMod.HtmlWindow.register_replaced_content(
             self,
             List.draw(self, output_options))
         return ''
@@ -295,7 +295,7 @@ class Media(Base.Widget):
     
     def draw_inline_text__css(self, output_options):
         if self.get_option('merge'):
-            Base.HtmlWindow.register_style_link(self, self.calculate_output_url(output_options))
+            WindowMod.HtmlWindow.register_style_link(self, self.calculate_output_url(output_options))
             return self.draw_inline_default(output_options)
         else:
             return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>""" % {
@@ -309,7 +309,7 @@ class Media(Base.Widget):
 
     def draw_inline_application__x_javascript(self, output_options):
         if self.get_option('merge'):
-            Base.HtmlWindow.register_script_link(self, self.calculate_output_url(output_options))
+            WindowMod.HtmlWindow.register_script_link(self, self.calculate_output_url(output_options))
             return self.draw_inline_default(output_options)
         else:
             return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>""" % {
@@ -538,3 +538,17 @@ class BrowserWarning(Base.StaticComposite):
             if child.match_agent_compiled.match(agent):
                 return self.draw_child(child.path, child, output_options, True)
         return ''
+
+class Timing(Base.Widget):
+    part = 'total'
+    """Any of
+
+    total - total server time
+    input_decode - time to decode input fields
+    input_process - time to process input (e.g. notifcation handling)
+    class_output - total time application specific time 
+    output - time to run draw()
+    """
+
+    def draw(self, output_options):
+        return '<ww:timing part="%s" />' % (self.part,)

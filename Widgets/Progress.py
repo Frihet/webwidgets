@@ -24,7 +24,7 @@
 
 import types, StringIO, cgi, sys, os
 import Webwidgets.Utils, Webwidgets.Constants
-import Base, Formatting, Input, Composite, threading
+import Base, WindowMod, Formatting, Input, Composite, threading
 
 class ModalProgressPage(Formatting.ProgressMeter, Input.PageLoadNotifier):
     frefresh_interval = 1
@@ -32,7 +32,7 @@ class ModalProgressPage(Formatting.ProgressMeter, Input.PageLoadNotifier):
     
     def draw(self, output_options):
         if self.progress_position < self.scale_end:
-            Base.HtmlWindow.register_header(
+            WindowMod.HtmlWindow.register_header(
                 self, 'Refresh',
                 '0;URL=%s' % (self.calculate_url({'transaction': output_options['transaction'],
                                                   'widget': Webwidgets.Utils.path_to_id(self.path)}),))

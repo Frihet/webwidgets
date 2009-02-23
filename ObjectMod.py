@@ -280,3 +280,6 @@ class Object(object):
 
     def __repr__(self):
         return str(self)
+
+class Model(Object):
+    pass

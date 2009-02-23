@@ -26,7 +26,7 @@
 
 import types, cgi
 import Webwidgets.Utils, Webwidgets.Utils.Locale, Webwidgets.Constants
-import Base, Formatting
+import Base, WindowMod, Formatting
 
 class ArgumentInput(Base.ValueInput):
     """This input widget does not actually renders into any HTML but
@@ -235,7 +235,7 @@ class UpdateButton(Base.SingleActionInput):
         info = {'html_attributes': self.draw_html_attributes(self.path),
                 'id': Webwidgets.Utils.path_to_id(self.path),
                 'title': self._("Update", output_options)}
-        Base.HtmlWindow.register_script(self, 'update_button: %(id)s' % info,
+        WindowMod.HtmlWindow.register_script(self, 'update_button: %(id)s' % info,
                             """
                             webwidgets_add_event_handler(window, 'load',
                              'webwidgets_update_button: %(id)s',

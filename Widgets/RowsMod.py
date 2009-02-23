@@ -255,7 +255,7 @@ class RowsComposite(Base.CachingComposite):
 
     """
 
-    class WwModel(Base.Model):
+    class WwModel(Webwidgets.ObjectMod.Model):
         rows = []
         sort = []
 
@@ -388,7 +388,7 @@ class RowsComposite(Base.CachingComposite):
 
     WwFilters = ["OutputOptionsFilters", "RowsFilters", "SourceErrorFilter", "SourceFilters"]
 
-    class RowsRowModelWrapper(Base.PersistentWrapper):
+    class RowsRowModelWrapper(Webwidgets.FilterMod.PersistentWrapper):
         """This class is a wrapper that all rows are wrapped in by
         L{RowsRowWrapperFilter}. This adds a filtering chain on
         individual rows; to override cells in a row (columns) you can
@@ -399,7 +399,7 @@ class RowsComposite(Base.CachingComposite):
         ww_wrapper_key = classmethod(ww_wrapper_key)
 
         def ww_first_init(self, ww_model, *arg, **kw):
-            Base.PersistentWrapper.ww_first_init(self, ww_model = ww_model, *arg, **kw)
+            Webwidgets.FilterMod.PersistentWrapper.ww_first_init(self, ww_model = ww_model, *arg, **kw)
             self.__dict__['items'] = {}
 
             # FIXME: Just remove this stuff I guess? Shouldn't be used...

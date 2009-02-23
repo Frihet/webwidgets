@@ -23,7 +23,7 @@
 """
 
 import Webwidgets.Utils, Webwidgets.Constants
-import Composite, Base
+import Composite, Base, WindowMod
 
 class MainMenu(Base.DirectoryServer, Composite.TabbedView):
     def draw_tab_entry(self, child_widget, info, output_options):
@@ -72,8 +72,8 @@ menu_bar_menu.setOnClickHandler(onButtonClick);
     def draw(self, output_options):
         def calculate_url(location):
             return self.calculate_url_to_directory_server('Webwidgets.MainMenu', location, output_options)
-        Base.HtmlWindow.register_style_link(self, calculate_url(['css', 'dhtmlXMenu.css']))
-        Base.HtmlWindow.register_script_link(self, calculate_url(['js', 'dhtmlXProtobar.js']))
-        Base.HtmlWindow.register_script_link(self, calculate_url(['js', 'dhtmlXMenuBar.js']))
-        Base.HtmlWindow.register_script_link(self, calculate_url(['js', 'dhtmlXCommon.js']))
+        WindowMod.HtmlWindow.register_style_link(self, calculate_url(['css', 'dhtmlXMenu.css']))
+        WindowMod.HtmlWindow.register_script_link(self, calculate_url(['js', 'dhtmlXProtobar.js']))
+        WindowMod.HtmlWindow.register_script_link(self, calculate_url(['js', 'dhtmlXMenuBar.js']))
+        WindowMod.HtmlWindow.register_script_link(self, calculate_url(['js', 'dhtmlXCommon.js']))
         return Composite.TabbedView.draw(self, Webwidgets.Utils.subclass_dict(output_options, {'MainMenu.noscript_version': False}))

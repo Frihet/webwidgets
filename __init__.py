@@ -95,6 +95,7 @@ if __name__ == "Webwidgets":
     from AccessManagerMod import *
 
     from Widgets.Base import *
+    from Widgets.WindowMod import *
     from Widgets.Formatting import *
     from Widgets.Input import *
     from Widgets.Composite import *

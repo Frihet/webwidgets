@@ -27,7 +27,7 @@
 
 import types
 import Webwidgets.Utils, Webwidgets.Constants
-import Base, Input, Formatting
+import Base, WindowMod, Input, Formatting
 
 class LanguageInput(Input.ListInput):
     languages = {'en':u'English', 'sv':u'Svenska', 'no':u'Norsk'}
@@ -111,7 +111,7 @@ class AbstractDialog(StaticDialog, Base.DirectoryServer):
     remove_on_close = False
 
     def draw(self, output_options):
-        Base.HtmlWindow.register_script_link(
+        WindowMod.HtmlWindow.register_script_link(
             self, 
             self.calculate_url_to_directory_server(
                 'Webwidgets.Dialog',

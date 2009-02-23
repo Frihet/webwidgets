@@ -26,7 +26,7 @@ the user to sort the rows and simultaneously group the rows according
 to their content and the sorting."""
 
 import Webwidgets.Constants, Webwidgets.Utils, Webwidgets.FilterMod, re, math, cgi, types, itertools
-import Base, RowsMod
+import Base, WindowMod, RowsMod
 
 class RenderedRowType(object): pass
 class RenderedRowTypeRow(RenderedRowType): pass
@@ -358,7 +358,7 @@ class BaseTable(RowsMod.RowsComposite, Base.DirectoryServer):
         return self.ww_filter.html_output_cache
 
     def draw(self, output_options):
-        Base.HtmlWindow.register_style_link(self, self.calculate_url({'transaction': output_options['transaction'],
+        WindowMod.HtmlWindow.register_style_link(self, self.calculate_url({'transaction': output_options['transaction'],
                                                      'widget_class': 'Webwidgets.BaseTable',
                                                      'location': ['Table.css']},
                                                     {}))

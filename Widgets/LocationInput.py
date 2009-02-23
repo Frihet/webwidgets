@@ -19,7 +19,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import Webwidgets.Utils, Webwidgets.ObjectMod, Webwidgets.FilterMod
-import Base, Formatting, ListMod, LocationInputLocations
+import Base, WindowMod, Formatting, ListMod, LocationInputLocations
 
 class GenericRegionPart(Webwidgets.ObjectMod.Object):
     class WwModel(Webwidgets.ObjectMod.Object):
@@ -116,7 +116,7 @@ class CountyInput(CountryInput):
     class Country(CountryInput.Country):
         class Field(CountryInput.Country.Field):
             def draw(self, output_options):
-                Base.HtmlWindow.register_submit_action(self, self.path, 'change')
+                WindowMod.HtmlWindow.register_submit_action(self, self.path, 'change')
                 return CountryInput.Country.Field.draw(self, output_options)
 
             def value_changed(self, path, value):
@@ -154,7 +154,7 @@ class MunicipalityInput(CountyInput):
     class County(CountyInput.County):
         class Field(CountyInput.County.Field):
             def draw(self, output_options):
-                Base.HtmlWindow.register_submit_action(self, self.path, 'change')
+                WindowMod.HtmlWindow.register_submit_action(self, self.path, 'change')
                 return CountyInput.County.Field.draw(self, output_options)
 
             def value_changed(self, path, value):
