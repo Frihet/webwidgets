@@ -19,19 +19,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-"""Miscelanous classes and functions needed to implement the rest of
-Webwidgets and in implementing new widgets and other objects.
-"""
+def subclass_list(superlist, members):
+    return superlist + members
 
-# FIXME: Change API to from * import!
-import Cache, Performance
+def common_prefix(l1, l2):
+    for index in xrange(0, min(len(l1), len(l2))):
+        if l1[index] != l2[index]:
+            return l1[:index]
+    return l1[:index + 1]
 
-from Obj import *
-from Dict import *
-from List import *
-from Iterator import *
-from Widget.Path import *
-from Widget.CssClass import *
-from Module import *
-from Exception import *
-from Timing import *
+def is_prefix(prefix, list):
+    prefix_len = len(prefix)
+    return prefix_len <= len(list) and prefix == list[:prefix_len]

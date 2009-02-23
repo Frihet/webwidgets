@@ -19,19 +19,22 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-"""Miscelanous classes and functions needed to implement the rest of
-Webwidgets and in implementing new widgets and other objects.
-"""
+def classes_remove_bases(classes, cls):
+    base_classes = set()
+    for base in cls.__bases__:
+        base_classes.update(base.ww_classes)
+    return [cls for cls in classes if cls not in base_classes]
 
-# FIXME: Change API to from * import!
-import Cache, Performance
-
-from Obj import *
-from Dict import *
-from List import *
-from Iterator import *
-from Widget.Path import *
-from Widget.CssClass import *
-from Module import *
-from Exception import *
-from Timing import *
+def classes_to_css_classes(classes, postfix = []):
+    if postfix:
+        postfix = ['', '_'] + postfix
+    cls_set = set(classes)
+    if len(cls_set) != len(classes):
+        res = []
+        for cls in reversed(classes):
+            if cls in cls_set:
+                res.append(cls)
+                cls_set.remove(cls)
+        classes = reversed(res)
+    return ' '.join([c.replace('.', '-') + '-'.join(postfix)
+                     for c in classes])

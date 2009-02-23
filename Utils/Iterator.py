@@ -19,19 +19,35 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-"""Miscelanous classes and functions needed to implement the rest of
-Webwidgets and in implementing new widgets and other objects.
-"""
-
-# FIXME: Change API to from * import!
-import Cache, Performance
-
-from Obj import *
-from Dict import *
-from List import *
-from Iterator import *
-from Widget.Path import *
-from Widget.CssClass import *
-from Module import *
-from Exception import *
-from Timing import *
+class Ilen(object):
+    def __init__(self, itr):
+        self.iter = iter(itr)
+        
+    def __int__(self):
+        l = 0
+        for obj in self.iter:
+            l += 1
+        return l
+    
+    def __cmp__(self, other):
+        if not isinstance(other, Ilen):
+            other = Ilen(xrange(0, other)) 
+        while True:
+            try:
+                self.iter.next()
+            except StopIteration:
+                try:
+                    other.iter.next()
+                except StopIteration:
+                    return 0
+                else:
+                    return -1
+            try:
+                other.iter.next()
+            except StopIteration:
+                try:
+                    self.iter.next()
+                except StopIteration:
+                    return 0
+                else:
+                    return 1
