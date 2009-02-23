@@ -45,7 +45,7 @@
        <td>
 	<w:Html id="Actions">
 	 <w:Checkbox id="Check" value="1" />
-	 <w:Label id="Label" target="1/Check">
+	 <w:Label id="Label" target="1:Check">
 	  <w:Html id="Label">Restore</w:Html>
 	 </w:Label>
 	</w:Html>

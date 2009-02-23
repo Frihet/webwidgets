@@ -153,7 +153,7 @@
 	 <td>
 	  <w:Html id="actions">
 	   <w:Checkbox id="check" value="1" />
-	   <w:Label id="label" target="1/check">
+	   <w:Label id="label" target="1:check">
 	    <w:Html id="label">Restore</w:Html>
 	   </w:Label>
 	  </w:Html>
