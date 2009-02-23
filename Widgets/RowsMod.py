@@ -19,11 +19,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import Webwidgets.Constants, Webwidgets.Utils, re, math, cgi, types, itertools
+import re, math, cgi, types, itertools
+import Webwidgets.Constants, Webwidgets.Utils, Webwidgets.FilterMod
 import Base
-import Webwidgets.Utils
 
-class RowsSimpleModelFilter(Base.Filter):
+class RowsSimpleModelFilter(Webwidgets.FilterMod.Filter):
     """This filter adds support for memmory mapped L{RowsComposite} -
     that is for when L{RowsComposite.WwModel.non_memory_storage} is
     set to C{False} and for row caching when set to C{True}. It also
@@ -39,7 +39,7 @@ class RowsSimpleModelFilter(Base.Filter):
     # API used by Table
     
     def __init__(self, *arg, **kw):
-        Base.Filter.__init__(self, *arg, **kw)
+        Webwidgets.FilterMod.Filter.__init__(self, *arg, **kw)
         self.old_sort = None
         self.old_page = None
         self.old_expand = None
@@ -195,7 +195,7 @@ class RowsSimpleModelFilter(Base.Filter):
         self.old_expand = self.expand_version
         self.old_default_expand = self.default_expand
 
-class RowsPrintableFilter(Base.Filter):
+class RowsPrintableFilter(Webwidgets.FilterMod.Filter):
     """This filter handles the 'printable_version' output option -
     when set, I{all} rows are returned, not just the current page."""
     # left = BaseTable
@@ -208,7 +208,7 @@ class RowsPrintableFilter(Base.Filter):
             kw['all'] = True
         return self.ww_filter.get_rows(**kw)
 
-class RowsRowWrapperFilter(Base.Filter):
+class RowsRowWrapperFilter(Webwidgets.FilterMod.Filter):
     """This filter wraps all rows in L{RowsComposite.RowsRowModelWrapper}. This adds
        a filtering chain on individual rows; to override cells in a
        row (columns) you can add L{WwFilters} to the
@@ -340,7 +340,7 @@ class RowsComposite(Base.CachingComposite):
 
     class RowsRowWidget(Base.CachingComposite): pass
 
-    class SourceFilters(Base.Filter):
+    class SourceFilters(Webwidgets.FilterMod.Filter):
         """This filter groups all filters that provides rows from some
         kind of back-end - e.g. a database query, a redirect from
         another table etc.""" 
@@ -348,7 +348,7 @@ class RowsComposite(Base.CachingComposite):
         WwFilters = ["RowsSimpleModelFilter"]
         class RowsSimpleModelFilter(RowsSimpleModelFilter): pass
 
-    class SourceErrorFilter(Base.Filter):
+    class SourceErrorFilter(Webwidgets.FilterMod.Filter):
         """This filter is before the SourceFilter and is there to be
         able to catch errors in the data fetching SourceFilters."""
 
@@ -372,14 +372,14 @@ class RowsComposite(Base.CachingComposite):
                 return result
 
 
-    class RowsFilters(Base.Filter):
+    class RowsFilters(Webwidgets.FilterMod.Filter):
         """This filter groups all filters that mangle rows in some way
         - wrapping them, adding extra rows, hiding rows etc."""
         
         WwFilters = ["RowsRowWrapperFilter"]
         class RowsRowWrapperFilter(RowsRowWrapperFilter): pass
 
-    class OutputOptionsFilters(Base.Filter):
+    class OutputOptionsFilters(Webwidgets.FilterMod.Filter):
         """This filter groups all filters that generate options for
         L{get_rows} based on L{output_options}."""
         
@@ -409,7 +409,7 @@ class RowsComposite(Base.CachingComposite):
                 self.ww_row_id = getattr(ww_model, 'ww_row_id', id(ww_model))
 
         WwFilters = ["RowFilters"]
-        class RowFilters(Base.Filter):
+        class RowFilters(Webwidgets.FilterMod.Filter):
             """This filter groups are ordinary filters for cells in
             the row."""
 

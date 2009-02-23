@@ -1,4 +1,3 @@
-#! /bin/env python
 # -*- coding: utf-8 -*-
 # vim: set fileencoding=utf-8 :
 
@@ -30,6 +29,7 @@ widgets.
 """
 
 import types, xml.sax.saxutils, os.path, cgi, re, sys, weakref
+import Webwidgets.ObjectMod
 import Webwidgets.Utils, Webwidgets.Utils.Gettext, Webwidgets.Constants
 import Webwidgets.Utils.FileHandling
 import Webwidgets.Utils.Threads
@@ -40,37 +40,33 @@ print_exceptions = False
 log_exceptions = True
 
 
-class MagicalMysteryDict(object):
+class LazyTranslatingAttributeDict(object):
     def __init__(self, source, output_options=None):
         if output_options is not None:
             self.source = source
             self.output_options = output_options
-            self.also = {}
+            self.cache = {}
         elif isinstance(source, type(self)):
             self.source = source.source
             self.output_options = source.output_options
-            self.also = dict(source.also)
+            self.cache = dict(source.cache)
         else:
-            raise Exception("No output_options supplied to constructor of MagicalMysteryDict")
+            raise Exception("No output_options supplied to constructor of LazyTranslatingAttributeDict")
 
     def __contains__(self, key):
-        return key in self.also or hasattr(self.source, key) or (key[0:17] == 'ww_untranslated__' and hasattr(self.source, key[17:]))
+        return (   key in self.cache
+                or hasattr(self.source, key)
+                or (    key[0:17] == 'ww_untranslated__'
+                    and hasattr(self.source, key[17:])))
 
-    def __iter__(self):
-        raise Exception("NOT IMPLEMENTED")
-
-
-    def __delitem__(self, key):
-        raise Exception("NOT IMPLEMENTED")
-        
     def __setitem__(self, key, value):
-        self.also[key] = value
+        self.cache[key] = value
 
     def __getitem__(self, key):
-        if key in self.also:
-            res = self.also[key]
+        if key in self.cache:
+            res = self.cache[key]
             if isinstance(res, types.FunctionType):
-                res = self.also[key] = res()
+                res = self.cache[key] = res()
             return res
         
         if hasattr(self.source, key):
@@ -91,319 +87,25 @@ class MagicalMysteryDict(object):
                 return unicode(value)
         raise KeyError(key)
 
-    def __add__(self, other):
-        raise Exception("NOT IMPLEMENTED")
-
-    def __repr__(self):
-        raise Exception("NOT IMPLEMENTED")
-
-    def __str__(self):
-        raise Exception("NOT IMPLEMENTED")
-        
-    def clear(self):
-        raise Exception("NOT IMPLEMENTED")
-
-    def items(self):
-        raise Exception("NOT IMPLEMENTED")
-
-    def iteritems(self):
-        raise Exception("NOT IMPLEMENTED")
-
-    def iterkeys(self):
-        raise Exception("NOT IMPLEMENTED")
-
-    def itervalues(self):
-        raise Exception("NOT IMPLEMENTED")
-
-    def keys(self):
-        raise Exception("NOT IMPLEMENTED")
-
-    def pop(self, k, *arg):
-        raise Exception("NOT IMPLEMENTED")
-        
-    def popitem(self):
-        raise Exception("NOT IMPLEMENTED")
-            
-    def setdefault(self, k, d = None):
-        raise Exception("NOT IMPLEMENTED")
-
     def update(self, other):
         if hasattr(other, 'iteritems'):
             other = other.iteritems()
         for (name, value) in other:
-            self.also[name] = value
+            self.cache[name] = value
 
-    def values(self):
+    def not_implemented(self, *arg, **kw):
         raise Exception("NOT IMPLEMENTED")
     
-    def sort(self, *arg, **kw):
-        raise Exception("NOT IMPLEMENTED")
+    __iter__ = __delitem__ = __add__ = __repr__ = __str__ = clear = items = iteritems = iterkeys = itervalues = keys = pop = popitem = setdefault = values = sort = not_implemented
 
 
 
-class NoOldValue(object):
-    """This class is used as a marker to signify that there was no old
-    attribute set when doing setattr"""
 
-class Type(type):
-    ww_class_order_nr = Webwidgets.Utils.Threads.Counter()
-
-    def __new__(cls, name, bases, members):
-        members = dict(members)
-        ww_classes = []
-
-        # This dictionary contains data specific to this class, that
-        # can not be inherited.
-        if 'ww_class_data' not in members:
-            members['ww_class_data'] = {}
-        members['ww_class_data'] = {}
-
-
-        for key in members.keys():
-            if key.startswith('ww_class_data__'):
-                members['ww_class_data'][key[len('ww_class_data__'):]] = members[key]
-                del members[key]
-
-        members['ww_classes'] = []
-        if not members['ww_class_data'].get('no_classes_name', False):
-            members['ww_classes'].append(None) # Our own one is set later on
-        for base in bases:
-            if hasattr(base, 'ww_classes'):
-                members['ww_classes'].extend(base.ww_classes)
-
-        members['ww_class_order_nr'] = cls.ww_class_order_nr.next()
-
-        def set_class_path(widget, path = ()):
-            widget.ww_class_path = '.'.join(path)
-            widget.ww_update_classes()
-            sub_path = path + (widget.__name__,)
-            for key, value in widget.__dict__.iteritems():
-                if isinstance(value, cls):
-                    set_class_path(value, sub_path)
-            return widget
-
-        return set_class_path(type.__new__(cls, name, bases, members))
-
-    def ww_update_classes(self):
-        if not self.ww_class_data.get('no_classes_name', False):
-            self.ww_classes[0] = Webwidgets.Utils.class_full_name(self)
-
-class Required(object):
-    """Required value, if set on a class the member must be set or
-    overridden in a subclass or instance."""
-    pass
-
-class Object(object):
-    """Object is a more elaborate version of object, providing a few
-    extra utility methods, some extra"magic" class attributes -
-    L{ww_classes}, L{ww_class_order_nr} and L{ww_class_path} and
-    model/model-filter handling."""
-
-    __metaclass__ = Type
-
-    ww_class_data__no_classes_name = True
-    """Do not include the name of this particular class in L{ww_classes}
-    for subclasses of this class (and for this class itself)."""
-
-    ww_classes = ("Webwidgets.Object",)
-    """Read-only attribute containing a list of the names of all
-    inherited ww_classes except ones with L{ww_class_data__no_classes_name} set to
-    True. This is mainly usefull for automatic CSS class generation."""
-
-    ww_class_order_nr = 0
-    """Read-only attribute containing a sequence number for the class,
-    similar too id(class), but guaranteed to be monotonically
-    increasing, so that a class created after another one will have a
-    greater number than the other one."""
-
-    ww_class_path = ''
-    """The path between the module (__module__) and the class
-    (__name__). For ww_classes that are created directly in the module
-    scope, this is the empty string. For ww_classes created as members of
-    some ther class, this is the ww_class_path and __name__ of that
-    other class joined. The path is dot-separated."""
-
-    ww_model = None
-    """If non-None, any attribute not found on this object will be
-    searched for on this object."""
-
-    WwModel = None
-    """If non-None and the model attribute is None, this class will be
-    instantiated and the instance placed in the model attribute."""
-
-    WwFilters = []
-    """Filter is a set of classes that are to be instantiated and
-    chained together as filters for this object. Ech of these will
-    have its filter attribute set to the next one, except for the last
-    one, which will have it set to this very object."""
-
-    def __init__(self, **attrs):
-        """Creates a new object
-        raise AttributeError(self, name)
-
-        @param ww_filter: The next filter when building a filter
-            tree/chain. None for the root node, next
-            filter in chain otherwise.
-        @param attrs: Any attributes to set for the object.
-        """
-        if 'ww_model' in attrs and attrs['ww_model'] is None:
-            del attrs['ww_model']
-        if 'ww_model' not in attrs and self.WwModel is not None:
-            attrs['ww_model'] = self.WwModel()
-        # FIXME: Does not attribute on ww_model as it should
-        self.__dict__.update(attrs)
-        self.setup_filter()
-
-        # This should perform some extra code validation, but it
-        # doesnt work, for two reasons.  Firstly, when used with any
-        # slow attributes, e.g. properties, it adds several seconds to
-        # log in time. Not good.  Secondly, many object properties may
-        # not be called before the parent is set, which is done after
-        # object construction. In other words, enabling this code will
-        # throw exceptions like it's going out of style.
-        if False:
-            for name in dir(self):
-                try:
-                    attr = getattr(self, name, None)
-                except:
-                    attr = None
-
-                if attr is Required:
-                    raise AttributeError('Required attribute %s missing' % (name, ))
-
-    def get_filter(cls, filter_class):
-        if isinstance(filter_class, (str, unicode)):
-            filter_class = getattr(cls, filter_class)
-        return filter_class
-    get_filter = classmethod(get_filter)
-
-    def setup_filter(self, name = 'ww_filter', ww_filter_classes = None, ww_filter = None, object = None):
-        if ww_filter is None: ww_filter = self.__dict__.get(name, self)
-        if object is None: object = self.__dict__.get('object', self)
-        if ww_filter_classes is None: ww_filter_classes = self.WwFilters
-        for filter_class in reversed(ww_filter_classes):
-            ww_filter = self.get_filter(filter_class)(ww_filter = ww_filter, object = object)
-        self.__dict__[name] = ww_filter
-        self.__dict__["object"] = object
-
-    def is_first_filter(self):
-        if not hasattr(self, 'object'):
-            # We haven't set anything up in __init__ yet, so pretend
-            # we're not first (we can't really know yet either way) so
-            # that no notifications are thrown anywhere random...
-            return False
-        return self.object.ww_filter is self
-    is_first_filter = property(is_first_filter)
-
-    def print_filter_class_stack(cls, ww_filter_classes = None, indent = ''):
-        if ww_filter_classes is None: ww_filter_classes = cls.WwFilters
-        return indent + '%s.%s\n%s' % (cls.__module__, cls.__name__,
-                                         ''.join([cls.get_filter(filter).print_filter_class_stack(indent = indent + '  ')
-                                                  for filter in ww_filter_classes]))
-    print_filter_class_stack = classmethod(print_filter_class_stack)
-
-    def print_filter_instance_stack(self, name = 'ww_filter', attrs = []):
-        ww_filter = getattr(self, name)
-        ww_filters = []
-        while ww_filter is not self and ww_filter is not self.ww_model:
-            ww_filters.append(ww_filter)
-            ww_filter = ww_filter.ww_filter
-        return '\n'.join(["%s.%s @ %s %s" % (type(ww_filter).__module__, type(ww_filter).__name__, id(ww_filter),
-                                             ', '.join([str(getattr(ww_filter, attr, None)) for attr in attrs]))
-                          for ww_filter in ww_filters]) + '\n'
-
-    def derive(cls, *clss, **members):
-        name = 'anonymous'
-        if 'name' in members:
-            name = members.pop('name')
-        return types.TypeType(name, (cls,) + clss, members)
-    derive = classmethod(derive)
-
-    #### fixme ####
-    # name = "Inheriting properties from parent widget"
-    #
-    # description = """It would be usefull to have widgets inherit
-    # (read-only) attributes from their parent widgets. This would be
-    # especially usefull for database sessions and the like, where the
-    # session could be overridden for a part of an application and all
-    # of its sub-parts.
-    #
-    # This has been tested, but was found to be too slow (when an
-    # attribute is not found, it still had to traverse the whole tree
-    # to the root every time), and the code was removed."""
-    #### end ####
-
-    def __getattr__(self, name):
-        """Lookup order: self, self.ww_model"""
-        if self.ww_model is None:
-            raise AttributeError(self, name)
-        try:
-            return getattr(self.ww_model, name)
-        except:
-            e = sys.exc_info()[1]
-            e.args = (self,) + e.args
-            raise type(e), e, sys.exc_info()[2]
-
-    def __hasattr__(self, name):
-        """Lookup order: self, self.ww_model"""
-        model_has_name = (   self.ww_model is not None
-                          and hasattr(self.ww_model, name))
-        self_has_name = (   name in self.__dict__
-                         or hasattr(type(self), name))
-        return (   self_has_name
-                or model_has_name)
-
-    def _setattr_dispatch(self, name, value):
-        """Lookup order: self, self.ww_model"""
-        model_has_name = (   self.ww_model is not None
-                          and hasattr(self.ww_model, name))
-        self_has_name = (   name in self.__dict__
-                         or hasattr(type(self), name))
-        if (   not model_has_name
-            or self_has_name):
-            object.__setattr__(self, name, value)
-        else:
-            setattr(self.ww_model, name, value)
-
-    def __setattr__(self, name, value):
-        """Lookup order: self, self.ww_model"""
-        old_value = getattr(self, name, NoOldValue)
-
-        if value is not old_value:
-            self._setattr_dispatch(name, value)
-
-            # Don't compare Objects, e.g. widgets - might not allways
-            # work, and it's sort of meaningless anyway in this
-            # context.
-            if (    self.is_first_filter
-                and (   isinstance(value, Object)
-                     or isinstance(old_value, Object)
-                     or value != old_value)):
-                self.object.notify('%s_changed' % name, value)
-
-    def notify(self, message, *args, **kw):
-        """See L{notify_kw}."""
-        self.notify_kw(message, args, kw)
-
-    def notify_kw(self, message, args = (), kw = {}, path = None):
-        """To handle notifications for a kind of Object, override this
-        method in the subclass to do something usefull."""
-        pass
-
-    def __unicode__(self):
-        return object.__repr__(self)
-
-    def __str__(self):
-        return str(unicode(self))
-
-    def __repr__(self):
-        return str(self)
-
-class Wrapper(Object):
+class Wrapper(Webwidgets.ObjectMod.Object):
     def __init__(self, ww_model, **attrs):
         if hasattr(ww_model, 'ww_filter'):
             attrs['ww_filter'] = ww_model.ww_filter
-        Object.__init__(self, ww_model = ww_model, **attrs)
+        Webwidgets.ObjectMod.Object.__init__(self, ww_model = ww_model, **attrs)
 
 class PersistentWrapper(Wrapper):
     def ww_wrapper_key(cls, ww_model, **attrs):
@@ -427,368 +129,12 @@ class PersistentWrapper(Wrapper):
     def ww_first_init(self, *arg, **kw):
         Wrapper.__init__(self, *arg, **kw)
 
-class Model(Object):
+class Model(Webwidgets.ObjectMod.Object):
     pass
 
 
-class Filter(Object):
-    # These getattr/hasattr/setattr are very similar to the ones of
-    # Object, except they work on self.ww_filter instead of on
-    # self.ww_model...
 
-    attr_cache={}
-
-    def attr_cache_miss(self, filter, name):
-#        print "Cache miss in ", filter, name
-        cache = self.attr_cache
-        if name not in cache:
-            cache[name] = cache_row = {}
-        else:
-            cache_row = cache[name]
-            action = []
-            for (cache_filter, cache_value) in cache_row.iteritems():
-                if cache_value == filter:
-                    action.append(cache_filter)
-#                    print "move action pointer of field", name, "of element",cache_filter,"from", cache_value, "to", filter.ww_filter
-                    
-            for i in action:
-                cache_row[i] = filter.ww_filter
-            
-        cache_row[filter] = filter.ww_filter
-        
-
-    def attr_cache_get(self, filter, name):
-        cache = self.attr_cache
-        if name in cache:
-            cache_row = cache[name]
-            if filter in cache_row:
-#                print "Cache hit in ", filter, name
-                return (True, getattr(cache_row[filter], name))
-        
-        return (False, None)
-
-
-    def __getattr__(self, name):
-        """Lookup order: self, self.ww_filter"""
-
-        if not hasattr(self, 'object'):
-            raise AttributeError('Filter has no object')
-    
-        # TODO: enable caching again when bugs are fixxored
-        if False and hasattr(self.object, 'ww_filter'):
-            root = self.object.ww_filter
-
-            (status, value) = root.attr_cache_get(self, name)
-            if status:
-                return value
-
-            root.attr_cache_miss(self, name)
-            
-        return getattr(self.ww_filter, name)
-
-    def __hasattr__(self, name):
-        """Lookup order: self, self.ww_filter"""
-        ww_filter_has_name = hasattr(self.ww_filter, name)
-        self_has_name = (   name in self.__dict__
-                         or hasattr(type(self), name))
-        return (   self_has_name
-                or ww_filter_has_name)
-
-    def _setattr_dispatch(self, name, value):
-        """Lookup order: self, self.ww_filter"""
-        ww_filter_has_name = hasattr(self.ww_filter, name)
-        self_has_name = (   name in self.__dict__
-                         or hasattr(type(self), name))
-        if (  not ww_filter_has_name
-            or self_has_name):
-            object.__setattr__(self, name, value)
-        else:
-            setattr(self.ww_filter, name, value)
-
-    def __getitem__(self, index):
-        filter = self
-        for i in xrange(0, index):
-            filter = filter.ww_filter
-        return filter
-
-
-class StandardFilter(Filter):
-    """This class only groups all L{Filter} subclasses that provides
-    generic, reusable functionality (as opposed to widget-specific
-    filters)."""
-
-class RenameFilter(StandardFilter):
-    """This filter renames one or more attributes using a dictionary
-    mapping in the name_map attribute."""
-    def __getattr__(self, name):
-        if name != 'name_map':
-            name = self.name_map.get(name, name)
-        return getattr(self.ww_filter, name)
-
-    def __setattr__(self, name, value):
-        if name != 'name_map':
-            name = self.name_map.get(name, name)
-        setattr(self.ww_filter, name, value)
-
-    @classmethod
-    def rename(cls, **name_map):
-        return cls.derive(name="RenameFilter(%s)" % (', '.join(['%s=%s' % (orig, new)
-                                                                for (orig, new) in name_map.iteritems()]),),
-                          name_map = name_map)
-
-class RetrieveFromFilter(StandardFilter):
-    do_retrieve = []
-    dont_retrieve = ['retrieve_from']
-    retrieve_from = "some_attribute"
-
-    def get_retrieve_object(self, name):
-        obj = self.ww_filter
-
-        if (    name not in self.dont_retrieve
-            and (not self.do_retrieve
-                 or name in self.do_retrieve)):
-
-            obj = getattr(obj, self.retrieve_from)
-        return obj
-
-    def __getattr__(self, name):
-        obj = self.get_retrieve_object(name)
-        if obj is None and self.propagate_none:
-            return None
-        else:
-            return getattr(obj, name)
-
-    def __setattr__(self, name, value):
-        obj = self.get_retrieve_object(name)
-        if obj is None and value is None and self.propagate_none:
-            return
-        else:
-            setattr(obj, name, value)
-
-    @classmethod
-    def retrieve_from(cls, retrieve_from, propagate_none=False, **arg):
-        return cls.derive(name="RetrieveFromFilter(%s, %s)" % (retrieve_from,
-                                                               ', '.join(['%s=%s' % (key, value)
-                                                                          for (key, value) in arg.iteritems()]),),
-                          propagate_none = propagate_none,
-                          retrieve_from = retrieve_from, **arg)
-
-class RedirectFilter(StandardFilter):
-    """This filter redirects model lookups and changes to (the
-    ww_filter of) another widget."""
-
-    do_redirect = []
-    """If do_redirect is empty everything except the names in
-    dont_redirect is redirected. If non-empty, only the named
-    attributes are redirected."""
-    dont_redirect = ['redirect_path']
-
-    redirect_path = None
-    """The widget path relative to this widget to redirect to."""
-
-    redirect_attribute = None
-    """Name-value pair (tuple) to search for among parent widgets to
-    get the widget to redirect to. If set to a non tuple, search for
-    ('__name__', value)."""
-
-    def get_redirected_widget(self, name):
-        parent = self
-        if (    name not in self.dont_redirect
-            and (not self.do_redirect
-                 or name in self.do_redirect)):
-            parent = self.object
-            if self.redirect_path is not None:
-                parent = parent + self.redirect_path
-            if self.redirect_attribute is not None:
-                name = '__name__'
-                value = self.redirect_attribute
-                if isinstance(value, (tuple, list)):
-                    name, value = value
-                parent = parent.get_ansestor_by_attribute(name, value)
-        return parent
-
-    def __getattr__(self, name):
-        return getattr(self.get_redirected_widget(name).ww_filter, name)
-
-    def __setattr__(self, name, value):
-        setattr(self.get_redirected_widget(name).ww_filter, name, value)
-
-    @classmethod
-    def redirect(cls, *redirect_args, **rest):
-        """Derive a subclass given a path, a set of levels (upwards)
-        and optionally values for do_redirect, dont_redirect and
-        redirect_attribute (see doc. for the class attributes for more
-        info on how they work)."""
-        relative_path = []
-        if len(redirect_args) > 2:
-            relative_path = redirect_args[:2]
-            rest['redirect_attribute'] = redirect_args[2:]
-        elif (len(redirect_args) == 2
-              and isinstance(redirect_args[0], (list, tuple))
-              and isinstance(redirect_args[1], int)):
-            relative_path = redirect_args
-        elif redirect_args:
-            rest['redirect_attribute'] = redirect_args
-
-        if 'redirect_attribute' in rest and len(rest['redirect_attribute']) == 1:
-            rest['redirect_attribute'] = rest['redirect_attribute'][0]
-
-        if relative_path:
-            rest['redirect_path'] = Webwidgets.Utils.WidgetPath(*relative_path)
-
-        return cls.derive(
-            name="RedirectFilter(%s)" % (', '.join(['%s=%s' % (key, value)
-                                                    for (key, value) in rest.iteritems()]),),
-            **rest)
-
-class RedirectRenameFilter(StandardFilter):
-    """This is the combination of the RedirectFilter and RenameFilter
-    - it first renames attributes and the redirects them to another widget."""
-
-    WwFilters = ["RenameFilter", "RedirectFilter"]
-    RenameFilter = RenameFilter
-    class RedirectFilter(RedirectFilter):
-        dont_redirect = ["name_map"] + RedirectFilter.dont_redirect
-
-    @classmethod
-    def redirect(cls, *redirect_args, **name_map):
-        """Derive a subclass given a path, a set of levels (upwards)
-        and a name map (name = name_to_rewrite_to). A value to search
-        for among parent widgets (and attribute name) can optionally
-        be supplied. See RenameFilter for more details."""
-
-        return cls.derive(
-            name = "RedirectRenameFilter(%s, %s)" % (', '.join([str(item) for item in redirect_args]),
-                                                     ', '.join(['%s=%s' % (key, value)
-                                                                for (key, value) in name_map.iteritems()])),
-            RenameFilter = cls.RenameFilter.derive(name_map = name_map),
-            RedirectFilter = cls.RedirectFilter.redirect(do_redirect = name_map.values(),
-                                                         *redirect_args))
-
-class MapValueFilter(StandardFilter):
-    """Allows variable values to be mapped arbitrarily to other values."""
-    value_maps = {}
-    """Dictionary with member variable names as keys, and two
-    dictionaries (one for each direction) for value mappings as
-    values."""
-
-    def __getattr__(self, name):
-        res = getattr(self.ww_filter, name)
-        if name != 'value_maps' and name in self.value_maps and res in self.value_maps[name][1]:
-            res = self.value_maps[name][1][res]
-        return res
-
-    def __setattr__(self, name, value):
-        if name != 'value_maps' and name in self.value_maps and value in self.value_maps[name][0]:
-            value = self.value_maps[name][0][value]
-        setattr(self.ww_filter, name, value)
-
-    @classmethod
-    def map_values(cls, **value_maps):
-        value_maps = dict([(name, (value_map,
-                                   dict([(map_to, map_from)
-                                         for (map_from, map_to)
-                                         in value_map.iteritems()])))
-                           for (name, value_map)
-                           in value_maps.iteritems()])
-
-
-        return cls.derive(name = "MapValueFilter(%s)" % (', '.join(value_maps.keys()),),
-                          value_maps = value_maps)
-
-class DebugFilter(StandardFilter):
-    debug_result = False
-    debug_value = False
-    debug_exception = True
-    debug_getattr = True
-    debug_setattr = True
-    debug_collapse = True
-
-    def __init__(self, *arg, **kw):
-        self.__dict__['_collapsed'] = set()
-        StandardFilter.__init__(self, *arg, **kw)
-
-    def _print_debug(self, name, **kw): #(name, value, res, exc):
-        res = "%s: %s" % (type(self).__name__, name)
-        
-        if 'value' in kw:
-            if self.debug_value:
-                res += " <- %s" % (kw['value'],)
-        elif 'result' in kw:
-            if self.debug_result:
-                res += " -> %s" % (kw['result'],)
-        if 'exception' in kw:
-            if debug_exception:
-                res += " -@!%§!!-> %s" % (kw['exception'],)
-        print res
-    
-    def __getattr__(self, name):
-        if not self.debug_getattr or self.debug_collapse and name in self._collapsed:
-            return getattr(self.ww_filter, name)
-        if self.debug_collapse:
-            self._collapsed.add(name)
-        try:
-            res = getattr(self.ww_filter, name)
-            self._print_debug(name, result=res)
-            return res
-        except Exception, e:
-            self._print_debug(name, exception=e)
-            raise
-
-    def __setattr__(self, name, value):
-        if not self.debug_setattr or self.debug_collapse and name in self._collapsed:
-            return setattr(self.ww_filter, name, value)
-        if self.debug_collapse:
-            self._collapsed.add(name)
-        try:
-            setattr(self.ww_filter, name, value)
-            self._print_debug(name, value=value)
-        except Exception, e:
-            self._print_debug(name, value=value, exception=e)
-            raise
-
-    @classmethod
-    def debug(cls, name, **kw):
-        return cls.derive(name = name, **dict(("debug_" + name, value) for (name, value) in kw.iteritems()))
-
-class TeeFilter(StandardFilter):
-    def _get_tee_filter_prefixes(self, name):
-        return self.tee_map.get(name, self.tee_map.get('__all__', ['']))
-
-    def __getattr__(self, name):
-        if name != 'tee_map':
-            name = self._get_tee_filter_prefixes(name)[0] + name
-        return getattr(self.ww_filter, name)
-
-    def __setattr__(self, name, value):
-        prefixes = [""]
-        if name != 'tee_map':
-            prefixes = self._get_tee_filter_prefixes(name)
-        for prefix in prefixes:
-            setattr(self.ww_filter, prefix + name, value)
-
-    @classmethod
-    def tee(cls, **tee_map):
-        return cls.derive(name = "TeeFilter(%s)" % (', '.join("%s=%s" % (name, value) for (name, value) in tee_map.iteritems()),),
-                          tee_map = tee_map)
-
-class MangleFilter(StandardFilter):
-    """This is the most generic of the redirection/renaming filters.
-    It allows the redirection/renaming to be done by arbitrary
-    functions provided by the user."""
-    @classmethod
-    def mangle(cls, **mangle_rules):
-        """Derive a subclass given a set of redirection rules. Every
-        rule is of the form attribute_name = getter of attribute_name
-        = (getter, setter)."""
-        properties = {}
-        for name, rule in mangle_rules.iteritems():
-            if not isinstance(rule, (tuple, list)):
-                rule = (rule,)
-            properties[name] = property(*rule)
-        return cls.derive(**properties)
-
-class Widget(Object):
+class Widget(Webwidgets.ObjectMod.Object):
     """Widget is the base class for all widgets. It manages class name
     collection, attribute handling, child instantiation and
     notifications.
@@ -866,7 +212,7 @@ class Widget(Object):
             'system_errors': [],
             'name': 'anonymous',
             'parent': None})
-        Object.__init__(self, **attrs)
+        Webwidgets.ObjectMod.Object.__init__(self, **attrs)
 
     class HtmlId(object):
         def __get__(self, instance, owner):
@@ -1045,7 +391,7 @@ class Widget(Object):
                          if value])
 
     def draw_attributes(self, output_options):
-        return MagicalMysteryDict(self, output_options)
+        return LazyTranslatingAttributeDict(self, output_options)
 
     def draw(self, output_options):
         """Renders the widget to HTML. Path is where the full path to

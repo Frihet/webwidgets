@@ -80,9 +80,17 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 # directory. Doing so makes us have copies of some classes, which
 # fucks up isinstance()-calls.
 if __name__ == "Webwidgets":
+    # Note: These two are a tiny itsy bitsy bit magical and modifies
+    # your entire world when loaded... So make sure they're loaded
+    # FIRST!
     import Compatibility
     import Wwml
+    
     from Constants import *
+
+    from ObjectMod import *
+    from FilterMod import *
+
     from ProgramMod import *
     from AccessManagerMod import *
 

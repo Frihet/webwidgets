@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import Webwidgets
+import Webwidgets.Utils, Webwidgets.FilterMod
 import Base, RowsMod
 
 class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
@@ -51,7 +51,7 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
 
     WwFilters = RowsMod.RowsComposite.WwFilters + ["ValueFilters"]
 
-    class ValueFilters(Base.Filter):
+    class ValueFilters(Webwidgets.FilterMod.Filter):
         """This filter groups all filters that mangles the L{value} of
         the widget, that is, the item selection."""
         WwFilters = []        
@@ -146,7 +146,7 @@ class RowsSingleValueListInput(RowsListInput):
     class ValueFilters(RowsListInput.ValueFilters):
         WwFilters = ["SingleValueFilter"] + RowsListInput.ValueFilters.WwFilters
 
-        class SingleValueFilter(Base.Filter):
+        class SingleValueFilter(Webwidgets.FilterMod.Filter):
             """This filter makes L{value} contain either the currently
             selected list item (row), or C{None} if none is currently
             selected."""

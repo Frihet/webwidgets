@@ -18,11 +18,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import Webwidgets
+import Webwidgets.Utils, Webwidgets.ObjectMod, Webwidgets.FilterMod
 import Base, Formatting, ListMod, LocationInputLocations
 
-class GenericRegionPart(Base.Object):
-    class WwModel(Base.Object):
+class GenericRegionPart(Webwidgets.ObjectMod.Object):
+    class WwModel(Webwidgets.ObjectMod.Object):
         string_based = True
         store_symbol = True
         region_prefix = []
@@ -43,7 +43,7 @@ class GenericRegionPart(Base.Object):
     
     WwFilters = ['RegionNameFilter']
 
-    class RegionNameFilter(Base.Filter):
+    class RegionNameFilter(Webwidgets.FilterMod.Filter):
         class Value(object):
             def __get__(self, instance, owner):
                 if instance is None: return None
@@ -105,7 +105,7 @@ class CountryInput(Webwidgets.Html):
         class Label(Webwidgets.Html): html = "Country"
         class Field(CountryPartInput):
             field_name = "country"
-            WwFilters = CountryPartInput.WwFilters + [Base.RedirectRenameFilter.redirect([], 2, active = "active", value ='country')]
+            WwFilters = CountryPartInput.WwFilters + [Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, active = "active", value ='country')]
 
 class CountyInput(CountryInput):
     html = "%(County)s" + CountryInput.html
@@ -131,8 +131,8 @@ class CountyInput(CountryInput):
         class Field(CountyPartInput):
             field_name = "county"
             WwFilters = CountyPartInput.WwFilters + [
-                Base.RedirectRenameFilter.redirect([], 2, active = "active", value ='county'),
-                Base.MangleFilter.mangle(
+                Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, active = "active", value ='county'),
+                Webwidgets.FilterMod.MangleFilter.mangle(
                     region_prefix = lambda self: [self.parent.parent.ww_filter.country])]
 
 class MunicipalityInput(CountyInput):
@@ -169,15 +169,15 @@ class MunicipalityInput(CountyInput):
         class Field(MunicipalityPartInput):
             field_name = "municipality"
             WwFilters = MunicipalityPartInput.WwFilters + [
-                Base.RedirectRenameFilter.redirect([], 2, active = "active", value ='municipality'),
-                Base.MangleFilter.mangle(
+                Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, active = "active", value ='municipality'),
+                Webwidgets.FilterMod.MangleFilter.mangle(
                 region_prefix = lambda self: [self.parent.parent.ww_filter.country,
                                               self.parent.parent.ww_filter.county])]
 
 class RegionPart(GenericRegionPart, Formatting.Html):
     class WwModel(GenericRegionPart.WwModel): pass
-    WwFilters = Formatting.Html.WwFilters + [Base.RenameFilter.rename(html = "value"),
-                                             Base.MapValueFilter.map_values(value = {'-': None})] + GenericRegionPart.WwFilters
+    WwFilters = Formatting.Html.WwFilters + [Webwidgets.FilterMod.RenameFilter.rename(html = "value"),
+                                             Webwidgets.FilterMod.MapValueFilter.map_values(value = {'-': None})] + GenericRegionPart.WwFilters
 
 class CountryPart(RegionPart):
     class WwModel(RegionPart.WwModel):
@@ -202,7 +202,7 @@ class Country(Webwidgets.Html):
         class Label(Webwidgets.Html): html = "Country"
         class Field(CountryPart):
             field_name = "country"
-            WwFilters = CountryPart.WwFilters + [Base.RedirectRenameFilter.redirect([], 2, value ='country')]
+            WwFilters = CountryPart.WwFilters + [Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, value ='country')]
 
 class County(Country):
     html = "%(County)s" + Country.html
@@ -215,8 +215,8 @@ class County(Country):
         class Field(CountyPart):
             field_name = "county"
             WwFilters = CountyPart.WwFilters + [
-                Base.RedirectRenameFilter.redirect([], 2, value ='county'),
-                Base.MangleFilter.mangle(
+                Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, value ='county'),
+                Webwidgets.FilterMod.MangleFilter.mangle(
                     region_prefix = lambda self: [self.parent.parent.ww_filter.country])]
 
 class Municipality(County):
@@ -230,7 +230,7 @@ class Municipality(County):
         class Field(MunicipalityPart):
             field_name = "municipality"
             WwFilters = MunicipalityPart.WwFilters + [
-                Base.RedirectRenameFilter.redirect([], 2, value = 'municipality'),
-                Base.MangleFilter.mangle(
+                Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, value = 'municipality'),
+                Webwidgets.FilterMod.MangleFilter.mangle(
                 region_prefix = lambda self: [self.parent.parent.ww_filter.country,
                                               self.parent.parent.ww_filter.county])]

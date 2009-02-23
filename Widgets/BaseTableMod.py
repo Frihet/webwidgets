@@ -25,7 +25,7 @@
 the user to sort the rows and simultaneously group the rows according
 to their content and the sorting."""
 
-import Webwidgets.Constants, Webwidgets.Utils, re, math, cgi, types, itertools
+import Webwidgets.Constants, Webwidgets.Utils, Webwidgets.FilterMod, re, math, cgi, types, itertools
 import Base, RowsMod
 
 class RenderedRowType(object): pass
@@ -116,7 +116,7 @@ class ExpandCell(FunctionCell):
 
 ExpandCellInstance = ExpandCell()
 
-class TableRowsToTreeFilter(Base.Filter):
+class TableRowsToTreeFilter(Webwidgets.FilterMod.Filter):
     """This filter creates the virtual tree of the table content,
     where rows that merges a cell with a previous row, are children of
     that previous row""" 
@@ -180,14 +180,14 @@ class BaseTable(RowsMod.RowsComposite, Base.DirectoryServer):
     class SourceFilters(RowsMod.RowsComposite.SourceFilters):
 
         WwFilters = ["HtmlCacheFilter"] + RowsMod.RowsComposite.SourceFilters.WwFilters
-        class HtmlCacheFilter(Base.Filter):
+        class HtmlCacheFilter(Webwidgets.FilterMod.Filter):
             def reread(self):
                 self.html_output_cache = None
                 self.ww_filter.reread()
 
     empty_table_message = """There is no data in this table / no entries matched your search."""
 
-    class TreeFilters(Base.Filter):
+    class TreeFilters(Webwidgets.FilterMod.Filter):
         """This filter groups filters that mangle the virtual tree of
         rows (that has merged cells, according to the current sorting
         order)."""

@@ -18,10 +18,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import Webwidgets.FilterMod
 import Base, ListMod, LocationInput, LocationInputLocations
 
 def redirect_value_to_address(name):
-    return [Base.RedirectRenameFilter.redirect([], 2, active = "active", value = name)]
+    return [Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, active = "active", value = name)]
     
 class AddressInput(object):
     class WwModel(object):
@@ -44,14 +45,14 @@ class AddressInput(object):
         class Field(object): WwFilters = redirect_value_to_address('city')
     class Region(object):
         WwFilters = LocationInput.MunicipalityInput.WwFilters + [
-            Base.RedirectRenameFilter.redirect([], 1,
-                                               active = "active",
-                                               municipality = "municipality",
-                                               county = "county",
-                                               country = "country")]
+            Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 1,
+                                                               active = "active",
+                                                               municipality = "municipality",
+                                                               county = "county",
+                                                               country = "country")]
 
 def redirect_html_to_address(name):
-    return [Base.RedirectRenameFilter.redirect([], 2, html = name)]
+    return [Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, html = name)]
     
 class Address(object):
     class WwModel(object):
@@ -73,10 +74,10 @@ class Address(object):
         class Field(object): WwFilters = redirect_html_to_address('city')
     class Region(object):
         WwFilters = LocationInput.Municipality.WwFilters + [
-            Base.RedirectRenameFilter.redirect([], 1,
-                                               municipality = "municipality",
-                                               county = "county",
-                                               country = "country")]
+            Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 1,
+                                                               municipality = "municipality",
+                                                               county = "county",
+                                                               country = "country")]
 
 class ApplicationWindow(object):
     is_dialog_container = True
