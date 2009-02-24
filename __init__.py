@@ -96,7 +96,7 @@ if __name__ == "Webwidgets":
 
     from Widgets.Base import *
     from Widgets.Formatting import *
-    from Widgets.Input import *
+    from Widgets.BaseInput import *
     from Widgets.Composite import *
     from Widgets.Progress import *
     from Widgets.Tree import *

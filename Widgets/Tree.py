@@ -27,7 +27,7 @@
 
 import types, math
 import Webwidgets.Utils, Webwidgets.Constants
-import Base, Input, Formatting
+import Base, Formatting
 
 class TreeModelNode(object):
     def __init__(self, tree, parent = None, name = 'Unknown', value = None):
