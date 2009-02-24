@@ -95,7 +95,6 @@ if __name__ == "Webwidgets":
     from AccessManagerMod import *
 
     from Widgets.Base import *
-    from Widgets.WindowMod import *
     from Widgets.Formatting import *
     from Widgets.Input import *
     from Widgets.Composite import *
@@ -113,8 +112,11 @@ if __name__ == "Webwidgets":
     from Widgets.FileEditorMod.CssFileEditor import *
     from Widgets.FileEditorMod.HtmlFileEditor import *
     from Widgets.FileEditorMod.GenericFileEditor import *
-
     from Widgets.FileEditorList import *
-    from Widgets.MainMenu import *
+
     from Widgets.LocationInput import *
-    from Widgets.InputCombinations import *
+    from Widgets.AddressMod import *
+
+    from Widgets.WindowMod import *
+    from Widgets.MainMenu import *
+    from Widgets.ApplicationWindow import *

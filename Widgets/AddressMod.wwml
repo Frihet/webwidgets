@@ -21,7 +21,7 @@
  xmlns="http://www.w3.org/TR/REC-html40"
  xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
  xmlns:h="http://www.w3.org/TR/REC-html40"
- bind="Webwidgets.Widgets.InputCombinationCallbacks">
+ bind="Webwidgets.Widgets.AddressModCallbacks">
  >
 
  <w:Fieldgroup id="AddressInput">
@@ -39,42 +39,5 @@
   <w:Field id="City" Label=":Text:City"><w:Html id="Field" field_name="city" /></w:Field>
   <w:Municipality id="Region" />
  </w:Fieldgroup>
-
- <w:HtmlWindow
-  id="ApplicationWindow"
-  title="Application window">
-
-  <w:Html id="Body">
-
-   <w:ReplacedList id="Dialogs" />
-
-   <w:Div id="Head" />
-
-   <w:LogIn id="LogIn" title="Log in/log out">
-    <w:MainMenu classid="Application" page=":path:logout">
-     <w:LogOut id="LogOut" title="Log out" />
-    </w:MainMenu>
-   </w:LogIn>
-
-   <w:Div id="Foot">
-
-    <w:Div id="Timings">
-     Page rendered in <w:Timing part="total" id="FieldTotal1" /> seconds.
-      <w:Div class='Timings-Detailed' id='Timings-Detailed'>
-       <ul>
-        <li>Total: <w:Timing part="total" id="FieldTotal2" /> s</li>
-        <li>Input parsing: <w:Timing part="input_process" id="FieldInput" /> s</li>
-        <li>Writing page: <w:Timing part="output" id="FieldOutput" /> s</li>
-        <li>Database access: <w:Timing part="sql" id="FieldSql" /> s</li>
-        <li>User lookup:<w:Timing part="ldap" id="FieldLdap" /> s</li>
-       </ul>
-      </w:Div>
-    </w:Div>
-    <w:Div id="Copyright" />
-
-   </w:Div>
-
-  </w:Html>
- </w:HtmlWindow>
 
 </w:wwml>

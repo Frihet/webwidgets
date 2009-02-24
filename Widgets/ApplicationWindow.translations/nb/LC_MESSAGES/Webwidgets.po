@@ -1,0 +1,290 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) AUTHOR AND YEAR
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.1\n"
+"POT-Creation-Date: Fri Oct 26 11:35:32 2007\n"
+"PO-Revision-Date: DATEANDTIME\n"
+"Last-Translator: Egil Möller, Anette Furulund\n"
+"Language-Team: EMAIL\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "%(Dialogs)s%(LogIn)s"
+msgstr ""
+
+msgid "AddressInput"
+msgstr ""
+
+msgid "Application"
+msgstr "Program"
+
+msgid "Application window"
+msgstr "Programvindu"
+
+msgid "ApplicationWindow"
+msgstr ""
+
+msgid "Body"
+msgstr "Kropp"
+
+msgid "City"
+msgstr "By"
+
+msgid "Co"
+msgstr "Co"
+
+msgid "Country"
+msgstr "Land"
+
+msgid "County"
+msgstr "Kommune"
+
+msgid "County/State"
+msgstr "Fylke"
+
+msgid "Dialogs"
+msgstr "Dialoger"
+
+msgid "Field"
+msgstr "Felt"
+
+msgid "Label"
+msgstr ""
+
+msgid "Log in/log out"
+msgstr "Logg inn/Logg ut"
+
+msgid "Log out"
+msgstr "Logg ut"
+
+msgid "LogIn"
+msgstr ""
+
+msgid "LogOut"
+msgstr ""
+
+msgid "Post-code/zip code"
+msgstr "Postkode"
+
+msgid "Street"
+msgstr "Gate"
+
+msgid "Webwidgets"
+msgstr ""
+
+msgid "Webwidgets.Widgets.InputCombinationCallbacks"
+msgstr ""
+
+msgid "Webwidgets.Widgets.InputCombinationsCallbacks"
+msgstr ""
+
+msgid "Zip"
+msgstr "Postkode"
+
+msgid "c/o"
+msgstr "c/o"
+
+msgid "co"
+msgstr "co"
+
+msgid "country"
+msgstr "land"
+
+msgid "county"
+msgstr "kommune"
+
+msgid "http://freecode.no/xml/namespaces/wwml-1.0"
+msgstr ""
+
+msgid "http://www.w3.org/TR/REC-html40"
+msgstr ""
+
+msgid "logout"
+msgstr "logge ut"
+
+msgid "street"
+msgstr "gate"
+
+msgid "zip"
+msgstr ""
+
+#~ msgid "&lt;No file&gt"
+#~ msgstr "&lt;Ingen fil&gt"
+
+#~ msgid "&lt;No file&gt;"
+#~ msgstr "&lt;Ingen fil&gt;"
+
+#~ msgid "404 Page not implemented"
+#~ msgstr "404 Siden finnes ikke"
+
+#~ msgid ""
+#~ "<div class=\"system-errors click-expand\">\n"
+#~ "                               <div class=\"header\">Error</div>\n"
+#~ "                               <div class=\"content\">\n"
+#~ "                                This widget caused errors:\n"
+#~ "                                %(tracebacks)s\n"
+#~ "                               </div>\n"
+#~ "                              </div>"
+#~ msgstr ""
+#~ "<div class=\"system-errors click-expand\">\n"
+#~ "                               <div class=\"header\">Feil</div>\n"
+#~ "                               <div class=\"content\">\n"
+#~ "                                Denne widget feilet:\n"
+#~ "                                %(tracebacks)s\n"
+#~ "                               </div>\n"
+#~ "                              </div>"
+
+#~ msgid "Action"
+#~ msgstr "Handling"
+
+#~ msgid "Add new file"
+#~ msgstr "Legg til ny fil"
+
+#~ msgid "All files"
+#~ msgstr "Alle filer"
+
+#~ msgid "CSS stylesheet"
+#~ msgstr "CSS stylesheet"
+
+#~ msgid "Clear"
+#~ msgstr "Slett"
+
+#~ msgid "Delete"
+#~ msgstr "Slett"
+
+#~ msgid "Description"
+#~ msgstr "Beskrivelse"
+
+#~ msgid "Edit"
+#~ msgstr "Endre"
+
+#~ msgid "Edit file"
+#~ msgstr "Endre fil"
+
+#~ msgid "Editors"
+#~ msgstr "Editorer"
+
+#~ msgid "English"
+#~ msgstr "Engelsk"
+
+#~ msgid "False"
+#~ msgstr "Falsk"
+
+#~ msgid "File"
+#~ msgstr "Fil"
+
+#~ msgid "Filename"
+#~ msgstr "Filnavn"
+
+#~ msgid "HTML document"
+#~ msgstr "HTML dokument"
+
+#~ msgid "Head"
+#~ msgstr "Hode"
+
+#~ msgid "Hide"
+#~ msgstr "Skjul"
+
+#~ msgid "Hide editor"
+#~ msgstr "Skjul editor"
+
+#~ msgid "Message"
+#~ msgstr "Beskjed"
+
+#~ msgid "Name"
+#~ msgstr "Navn"
+
+#~ msgid "No file"
+#~ msgstr "Ingen fil"
+
+#~ msgid "No file created or uploaded"
+#~ msgstr "Ingen fil laget eller oppladet"
+
+#~ msgid "Norsk"
+#~ msgstr "Norsk"
+
+#~ msgid "Page not available"
+#~ msgstr "Siden ikke tilgjengelig"
+
+#~ msgid "Password"
+#~ msgstr "Passord"
+
+#~ msgid "Plain text"
+#~ msgstr "Ren tekst"
+
+#~ msgid "Please log in:"
+#~ msgstr "Logg inn:"
+
+#~ msgid "Preview"
+#~ msgstr "Forhåndsvis"
+
+#~ msgid "Printable version"
+#~ msgstr "Utskrivbar versjon"
+
+#~ msgid "Really log out?"
+#~ msgstr "Vil du virkelig logge ut?"
+
+#~ msgid "Set"
+#~ msgstr "Sett"
+
+#~ msgid "Show"
+#~ msgstr "Vis"
+
+#~ msgid "Svenska"
+#~ msgstr "Svensk"
+
+#~ msgid "True"
+#~ msgstr "Sant"
+
+#~ msgid "Update"
+#~ msgstr "Oppdater"
+
+#~ msgid "Upload"
+#~ msgstr "Lad opp"
+
+#~ msgid "Upload file: "
+#~ msgstr "Lad opp fil"
+
+#~ msgid "Username"
+#~ msgstr "Brukernavn"
+
+#~ msgid "anonymous"
+#~ msgstr "anonym"
+
+#~ msgid "city"
+#~ msgstr "by"
+
+#~ msgid "default"
+#~ msgstr "default"
+
+#~ msgid "description"
+#~ msgstr "beskrivelse"
+
+#~ msgid "filename"
+#~ msgstr "filnavn"
+
+#~ msgid "functions"
+#~ msgstr "funksjoner"
+
+#~ msgid "input"
+#~ msgstr "input"
+
+#~ msgid "login"
+#~ msgstr "logge inn"
+
+#~ msgid "none"
+#~ msgstr "ingen"
+
+#~ msgid "password"
+#~ msgstr "passord"
+
+#~ msgid "preview"
+#~ msgstr "forhåndsvis"
+
+#~ msgid "update"
+#~ msgstr "oppdater"
+
+#~ msgid "username"
+#~ msgstr "brukernavn"
