@@ -292,7 +292,7 @@ class HtmlWindow(Window, Base.StaticComposite, Base.DirectoryServer):
              'webwidgets_submit_action',
              function () {
               webwidgets_submit_button_iefix();
-              document.getElementById('root-_-body-form').submit();
+              document.getElementById('root:_-body-form').submit();
              });
             """ % info)
 
