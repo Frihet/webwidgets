@@ -18,9 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import Input
+import Webwidgets
 
-class TextFileEditor(Input.FieldStorageInput, Input.StringInput):
-    cols = 40
-    rows = 15
-    mime_type = 'text/plain'
+class HtmlFileEditor(Webwidgets.FieldStorageInput, Webwidgets.HtmlInput):
+    mime_type = 'text/html'

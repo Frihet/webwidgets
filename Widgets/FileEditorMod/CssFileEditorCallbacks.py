@@ -18,9 +18,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import Base, Formatting, cgi
+import Webwidgets, cgi
 
-class CssFileEditor(Formatting.Html, Base.ValueInput):
+class CssFileEditor(Webwidgets.Html, Webwidgets.ValueInput):
     original_value = value = None
 
     class input(object):
@@ -34,7 +34,7 @@ class CssFileEditor(Formatting.Html, Base.ValueInput):
         value = Value()
 
     class preview(object):
-        types = dict(Formatting.Media.types)
+        types = dict(Webwidgets.Media.types)
         types['default'] = dict(types['default'])
         types['default']['width'] = None
         types['default']['height'] = None

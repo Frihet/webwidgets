@@ -107,11 +107,13 @@ if __name__ == "Webwidgets":
     from Widgets.TableMod import *
     from Widgets.LogIn import *
     from Widgets.DateInput import *
-    from Widgets.TextFileEditor import *
-    from Widgets.CssFileEditor import *
     from Widgets.HtmlInput import *
-    from Widgets.HtmlFileEditor import *
-    from Widgets.FileEditor import *
+
+    from Widgets.FileEditorMod.TextFileEditor import *
+    from Widgets.FileEditorMod.CssFileEditor import *
+    from Widgets.FileEditorMod.HtmlFileEditor import *
+    from Widgets.FileEditorMod.GenericFileEditor import *
+
     from Widgets.FileEditorList import *
     from Widgets.MainMenu import *
     from Widgets.LocationInput import *

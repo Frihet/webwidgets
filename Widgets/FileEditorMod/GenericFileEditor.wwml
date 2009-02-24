@@ -21,7 +21,8 @@
  xmlns="http://www.w3.org/TR/REC-html40"
  xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
  xmlns:h="http://www.w3.org/TR/REC-html40"
- bind="Webwidgets.Widgets.FileEditorCallbacks">
+ using="Webwidgets.Widgets.FileEditorMod"
+ bind="Webwidgets.Widgets.FileEditorMod.GenericFileEditorCallbacks">
  >
  <w:Html id="FileEditor" top_level="div" expanded=":false">
   <div class="top">
@@ -37,9 +38,9 @@
 
   <w:TabbedView id="Editors" page=":path:none">
    <w:Html id="none" title="No file">No file created or uploaded</w:Html>
-   <w:TextFileEditor id="text__plain" title="Plain text" />
-   <w:HtmlFileEditor id="text__html" title="HTML document" />
-   <w:CssFileEditor id="text__css" title="CSS stylesheet" />
+   <w:TextFileEditor.TextFileEditor id="text__plain" title="Plain text" />
+   <w:HtmlFileEditor.HtmlFileEditor id="text__html" title="HTML document" />
+   <w:CssFileEditor.CssFileEditor id="text__css" title="CSS stylesheet" />
    <w:Media id="default" title="All files" visible=":false">
     <w:Media.types id="types">
      <w:Media.types-default id="default">
