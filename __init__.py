@@ -95,17 +95,20 @@ if __name__ == "Webwidgets":
     from Webwidgets.AccessManagerMod import *
 
     from Webwidgets.Widgets.Base import *
+
+    from Webwidgets.Widgets.RowsMod import *
+
     from Webwidgets.Widgets.FormattingMod.BaseFormatting import *
+    from Webwidgets.Widgets.FormattingMod.ListMod import *
+
     from Webwidgets.Widgets.InputMod.BaseInput import *
+
     from Webwidgets.Widgets.RearrangeMod.DialogMod import *
     from Webwidgets.Widgets.RearrangeMod.SwitchingMod import *
-    from Webwidgets.Widgets.Progress import *
+    from Webwidgets.Widgets.RearrangeMod.MainMenu import *
     from Webwidgets.Widgets.RearrangeMod.Tree import *
-    from Webwidgets.Widgets.RowsMod import *
-    from Webwidgets.Widgets.FormattingMod.ListMod import *
     from Webwidgets.Widgets.RearrangeMod.BaseTableMod import *
     from Webwidgets.Widgets.RearrangeMod.TableMod import *
-    from Webwidgets.Widgets.ApplicationMod.LogIn import *
 
     from Webwidgets.Widgets.InputMod.LanguageMod import *
     from Webwidgets.Widgets.InputMod.DateInput import *
@@ -120,6 +123,8 @@ if __name__ == "Webwidgets":
     from Webwidgets.Widgets.InputMod.LocationInput import *
     from Webwidgets.Widgets.InputMod.AddressMod import *
 
+    from Webwidgets.Widgets.Progress import *
+
+    from Webwidgets.Widgets.ApplicationMod.LogIn import *
     from Webwidgets.Widgets.ApplicationMod.WindowMod import *
-    from Webwidgets.Widgets.RearrangeMod.MainMenu import *
     from Webwidgets.Widgets.ApplicationMod.ApplicationWindow import *
