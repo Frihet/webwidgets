@@ -30,7 +30,7 @@ import Webwidgets.Utils.Locale
 import Webwidgets.Constants
 import Webwidgets.Widgets.Base
 import Webwidgets.Widgets.WindowMod
-import Webwidgets.Widgets.Formatting
+import Webwidgets.Widgets.BaseFormatting
 
 class ArgumentInput(Webwidgets.Widgets.Base.ValueInput):
     """This input widget does not actually renders into any HTML but
@@ -142,7 +142,7 @@ class PasswordInput(Webwidgets.Widgets.Base.ValueInput):
             'name': Webwidgets.Utils.path_to_id(self.path),
             'value': self.field_output(self.path)[0]}
 
-class NewPasswordInput(Webwidgets.Widgets.Formatting.Html, Webwidgets.Widgets.Base.ValueInput):
+class NewPasswordInput(Webwidgets.Widgets.BaseFormatting.Html, Webwidgets.Widgets.Base.ValueInput):
     """Used for entering new passwords - the password has to be
     repeated twice and the two values entered are compared. A
     value_changed is only propagated if the two values matches"""
@@ -160,7 +160,7 @@ class NewPasswordInput(Webwidgets.Widgets.Formatting.Html, Webwidgets.Widgets.Ba
     """Message displayed when passwords entered do not match."""
 
     def __init__(self, session, win_id, **attrs):
-        Webwidgets.Widgets.Formatting.Html.__init__(
+        Webwidgets.Widgets.BaseFormatting.Html.__init__(
             self, session, win_id,
             **attrs)
         self.children['input1'] = self.Input(session, win_id, value=self.value)
@@ -421,7 +421,7 @@ class FileInput(Webwidgets.Widgets.Base.ValueInput, Webwidgets.Widgets.Base.Stat
     def field_output(self, path):
         return [self.value]
 
-    class Preview(Webwidgets.Widgets.Formatting.Media):
+    class Preview(Webwidgets.Widgets.BaseFormatting.Media):
         class Content(object):
             def __get__(self, instance, owner):
                 if instance is None or instance.parent is None:

@@ -22,7 +22,7 @@ import Webwidgets.Utils
 import Webwidgets.ObjectMod
 import Webwidgets.FilterMod
 import Webwidgets.Widgets.WindowMod
-import Webwidgets.Widgets.Formatting
+import Webwidgets.Widgets.BaseFormatting
 import Webwidgets.Widgets.ListMod
 import Webwidgets.Widgets.InputMod.LocationInputLocations
 
@@ -179,9 +179,9 @@ class MunicipalityInput(CountyInput):
                 region_prefix = lambda self: [self.parent.parent.ww_filter.country,
                                               self.parent.parent.ww_filter.county])]
 
-class RegionPart(GenericRegionPart, Webwidgets.Widgets.Formatting.Html):
+class RegionPart(GenericRegionPart, Webwidgets.Widgets.BaseFormatting.Html):
     class WwModel(GenericRegionPart.WwModel): pass
-    WwFilters = Webwidgets.Widgets.Formatting.Html.WwFilters + [Webwidgets.FilterMod.RenameFilter.rename(html = "value"),
+    WwFilters = Webwidgets.Widgets.BaseFormatting.Html.WwFilters + [Webwidgets.FilterMod.RenameFilter.rename(html = "value"),
                                              Webwidgets.FilterMod.MapValueFilter.map_values(value = {'-': None})] + GenericRegionPart.WwFilters
 
 class CountryPart(RegionPart):

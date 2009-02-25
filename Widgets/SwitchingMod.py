@@ -31,7 +31,7 @@ import Webwidgets.Constants
 import Webwidgets.Widgets.Base
 import Webwidgets.Widgets.WindowMod
 import Webwidgets.Widgets.InputMod.BaseInput
-import Webwidgets.Widgets.Formatting
+import Webwidgets.Widgets.BaseFormatting
 
 class Tabset(Webwidgets.Widgets.Base.StaticComposite):
     def get_pages(self, output_options):

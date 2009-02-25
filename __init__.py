@@ -95,7 +95,7 @@ if __name__ == "Webwidgets":
     from Webwidgets.AccessManagerMod import *
 
     from Webwidgets.Widgets.Base import *
-    from Webwidgets.Widgets.Formatting import *
+    from Webwidgets.Widgets.BaseFormatting import *
     from Webwidgets.Widgets.InputMod.BaseInput import *
     from Webwidgets.Widgets.DialogMod import *
     from Webwidgets.Widgets.SwitchingMod import *
