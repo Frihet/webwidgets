@@ -22,8 +22,8 @@ import Webwidgets.Utils
 import Webwidgets.ObjectMod
 import Webwidgets.FilterMod
 import Webwidgets.Widgets.WindowMod
-import Webwidgets.Widgets.BaseFormatting
-import Webwidgets.Widgets.ListMod
+import Webwidgets.Widgets.FormattingMod.BaseFormatting
+import Webwidgets.Widgets.FormattingMod.ListMod
 import Webwidgets.Widgets.InputMod.LocationInputLocations
 
 class GenericRegionPart(Webwidgets.ObjectMod.Object):
@@ -71,9 +71,9 @@ class GenericRegionPart(Webwidgets.ObjectMod.Object):
                 instance.ww_filter.value = value
         value = Value()
 
-class RegionPartInput(GenericRegionPart, Webwidgets.Widgets.ListMod.RowsSingleValueListInput):
-    class WwModel(GenericRegionPart.WwModel, Webwidgets.Widgets.ListMod.RowsSingleValueListInput.WwModel): pass
-    WwFilters = Webwidgets.Widgets.ListMod.RowsSingleValueListInput.WwFilters + GenericRegionPart.WwFilters
+class RegionPartInput(GenericRegionPart, Webwidgets.Widgets.FormattingMod.ListMod.RowsSingleValueListInput):
+    class WwModel(GenericRegionPart.WwModel, Webwidgets.Widgets.FormattingMod.ListMod.RowsSingleValueListInput.WwModel): pass
+    WwFilters = Webwidgets.Widgets.FormattingMod.ListMod.RowsSingleValueListInput.WwFilters + GenericRegionPart.WwFilters
     
     def get_rows(self):
         if self.ww_model.store_symbol:
@@ -179,9 +179,9 @@ class MunicipalityInput(CountyInput):
                 region_prefix = lambda self: [self.parent.parent.ww_filter.country,
                                               self.parent.parent.ww_filter.county])]
 
-class RegionPart(GenericRegionPart, Webwidgets.Widgets.BaseFormatting.Html):
+class RegionPart(GenericRegionPart, Webwidgets.Widgets.FormattingMod.BaseFormatting.Html):
     class WwModel(GenericRegionPart.WwModel): pass
-    WwFilters = Webwidgets.Widgets.BaseFormatting.Html.WwFilters + [Webwidgets.FilterMod.RenameFilter.rename(html = "value"),
+    WwFilters = Webwidgets.Widgets.FormattingMod.BaseFormatting.Html.WwFilters + [Webwidgets.FilterMod.RenameFilter.rename(html = "value"),
                                              Webwidgets.FilterMod.MapValueFilter.map_values(value = {'-': None})] + GenericRegionPart.WwFilters
 
 class CountryPart(RegionPart):

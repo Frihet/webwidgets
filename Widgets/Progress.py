@@ -26,11 +26,11 @@ import types, StringIO, cgi, sys, os, threading
 import Webwidgets.Utils
 import Webwidgets.Constants
 import Webwidgets.Widgets.WindowMod
-import Webwidgets.Widgets.BaseFormatting
+import Webwidgets.Widgets.FormattingMod.BaseFormatting
 import Webwidgets.Widgets.InputMod.BaseInput
 import Webwidgets.Widgets.RearrangeMod.DialogMod
 
-class ModalProgressPage(Webwidgets.Widgets.BaseFormatting.ProgressMeter, Webwidgets.Widgets.InputMod.BaseInput.PageLoadNotifier):
+class ModalProgressPage(Webwidgets.Widgets.FormattingMod.BaseFormatting.ProgressMeter, Webwidgets.Widgets.InputMod.BaseInput.PageLoadNotifier):
     frefresh_interval = 1
     title = "Please wait"
     
@@ -81,7 +81,7 @@ class ModalProgressPage(Webwidgets.Widgets.BaseFormatting.ProgressMeter, Webwidg
                                                                               ['Widgets.css'],
                                                                               output_options),
                        'title': self._(self.title, output_options),
-                       'progress_bar': Webwidgets.Widgets.BaseFormatting.ProgressMeter.draw(self, output_options),
+                       'progress_bar': Webwidgets.Widgets.FormattingMod.BaseFormatting.ProgressMeter.draw(self, output_options),
                        'progress_dialog_class': Webwidgets.Utils.classes_to_css_classes(self.ww_classes, ['progress_dialog'])
                        },
                 'Refresh': "%s;URL=%s" % (self.frefresh_interval, destination),
@@ -126,10 +126,10 @@ class ModalThreadProgressPage(ModalProgressPage):
 class ModalThreadProgressPageDialog(Webwidgets.Widgets.RearrangeMod.DialogMod.InfoDialog, ModalThreadProgressPage):
     buttons = {}
     
-    class Head(Webwidgets.Widgets.BaseFormatting.Html):
+    class Head(Webwidgets.Widgets.FormattingMod.BaseFormatting.Html):
         html = "Operation in progress"
         
-    class Body(Webwidgets.Widgets.BaseFormatting.Html):
+    class Body(Webwidgets.Widgets.FormattingMod.BaseFormatting.Html):
         html = "The operation is in progress. Please wait. If this page does not refresh automatically, if it does not, refresh the page manually."
 
     def __init__(self, *arg, **kw):
@@ -150,7 +150,7 @@ class ModalThreadProgressPageDialog(Webwidgets.Widgets.RearrangeMod.DialogMod.In
                 + ModalThreadProgressPage.draw(self, output_options))
 
     class Done(Webwidgets.Widgets.RearrangeMod.DialogMod.InfoDialog):
-        class Head(Webwidgets.Widgets.BaseFormatting.Html):
+        class Head(Webwidgets.Widgets.FormattingMod.BaseFormatting.Html):
             html = "Done"
-        class Body(Webwidgets.Widgets.BaseFormatting.Html):
+        class Body(Webwidgets.Widgets.FormattingMod.BaseFormatting.Html):
             html = "The operation completed successfully"

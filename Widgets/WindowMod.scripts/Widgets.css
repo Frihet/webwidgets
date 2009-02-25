@@ -136,8 +136,8 @@ input.error,
  margin: 0;
 }
 
-.Webwidgets-Widgets-RearrangeMod-BaseTableMod-BaseTable > table > tbody > tr > td > .Webwidgets-Widgets-BaseFormatting-Label,
-.Webwidgets-Widgets-RearrangeMod-BaseTableMod-BaseTable > table > tbody > tr > td > .Webwidgets-Widgets-BaseFormatting-Label > div {
+.Webwidgets-Widgets-RearrangeMod-BaseTableMod-BaseTable > table > tbody > tr > td > .Webwidgets-Widgets-FormattingMod-BaseFormatting-Label,
+.Webwidgets-Widgets-RearrangeMod-BaseTableMod-BaseTable > table > tbody > tr > td > .Webwidgets-Widgets-FormattingMod-BaseFormatting-Label > div {
  display: inline;
  padding: 0px;
 }
@@ -386,8 +386,8 @@ select {
  display: block;
 }
 
-.Webwidgets-Widgets-Tree-Tree *,
-.Webwidgets-Widgets-Tree-Tree input {
+.Webwidgets-Widgets-RearrangeMod-Tree-Tree *,
+.Webwidgets-Widgets-RearrangeMod-Tree-Tree input {
  border-style: none;
  padding: 0px;
  margin: 0px;
@@ -397,7 +397,7 @@ select {
  color: #555555;
 }
 
-.Webwidgets-Widgets-Tree-Tree input {
+.Webwidgets-Widgets-RearrangeMod-Tree-Tree input {
  color: #000000;
 }
 
@@ -492,71 +492,71 @@ select {
  display: block;
 }
 
-.Webwidgets-Widgets-BaseFormatting-Field > *{
+.Webwidgets-Widgets-FormattingMod-BaseFormatting-Field > *{
  vertical-align: top;
  text-align: left;
  padding: 2px;
 }
 
-.Webwidgets-Widgets-BaseFormatting-Field > .field > *{
+.Webwidgets-Widgets-FormattingMod-BaseFormatting-Field > .field > *{
  vertical-align: top;
  text-align: left;
  margin: 0;
 }
 
-.Webwidgets-Widgets-BaseFormatting-AbstractFieldgroup > .Webwidgets-Widgets-BaseFormatting-Field {
+.Webwidgets-Widgets-FormattingMod-BaseFormatting-AbstractFieldgroup > .Webwidgets-Widgets-FormattingMod-BaseFormatting-Field {
  display: table-row;
 }
-.Webwidgets-Widgets-BaseFormatting-AbstractFieldgroup > .Webwidgets-Widgets-BaseFormatting-Field > * {
+.Webwidgets-Widgets-FormattingMod-BaseFormatting-AbstractFieldgroup > .Webwidgets-Widgets-FormattingMod-BaseFormatting-Field > * {
  display: table-cell;
 }
-.Webwidgets-Widgets-BaseFormatting-AbstractFieldgroup > .Webwidgets-Widgets-BaseFormatting-Field > .field > *{
+.Webwidgets-Widgets-FormattingMod-BaseFormatting-AbstractFieldgroup > .Webwidgets-Widgets-FormattingMod-BaseFormatting-Field > .field > *{
  width: 95%; /* really it should be 100% - whatever border we have, but CSS doesn't allow that kind of thing */
 }
 
-.Webwidgets-Widgets-BaseFormatting-AbstractFieldgroup {
+.Webwidgets-Widgets-FormattingMod-BaseFormatting-AbstractFieldgroup {
  display: table;
  padding: 5pt;
  border-collapse: collapse;
  margin: 5pt;
 }
 
-.Webwidgets-Widgets-BaseFormatting-VerticalFieldgroup > .Webwidgets-Widgets-BaseFormatting-VerticalFieldgroup {
+.Webwidgets-Widgets-FormattingMod-BaseFormatting-VerticalFieldgroup > .Webwidgets-Widgets-FormattingMod-BaseFormatting-VerticalFieldgroup {
  display: table-row-group;
 }
 
-.Webwidgets-Widgets-BaseFormatting-VerticalFieldgroup > .Webwidgets-Widgets-BaseFormatting-VerticalFieldgroup {
+.Webwidgets-Widgets-FormattingMod-BaseFormatting-VerticalFieldgroup > .Webwidgets-Widgets-FormattingMod-BaseFormatting-VerticalFieldgroup {
  border-bottom: 1px solid black;
 }
 
-.Webwidgets-Widgets-BaseFormatting-VerticalFieldgroup > .Webwidgets-Widgets-BaseFormatting-VerticalFieldgroup:last-child {
+.Webwidgets-Widgets-FormattingMod-BaseFormatting-VerticalFieldgroup > .Webwidgets-Widgets-FormattingMod-BaseFormatting-VerticalFieldgroup:last-child {
  border-bottom: none;
 }
 
-.Webwidgets-Widgets-BaseFormatting-HorizontalFieldgroup > *,
-.Webwidgets-Widgets-BaseFormatting-HorizontalFieldgroup > .Webwidgets-Widgets-BaseFormatting-Field {
+.Webwidgets-Widgets-FormattingMod-BaseFormatting-HorizontalFieldgroup > *,
+.Webwidgets-Widgets-FormattingMod-BaseFormatting-HorizontalFieldgroup > .Webwidgets-Widgets-FormattingMod-BaseFormatting-Field {
  display: table-cell;
  vertical-align:top;
 }
 
-.Webwidgets-Widgets-BaseFormatting-HorizontalFieldgroup,
-.Webwidgets-Widgets-BaseFormatting-VerticalFieldgroup > .Webwidgets-Widgets-BaseFormatting-HorizontalFieldgroup {
+.Webwidgets-Widgets-FormattingMod-BaseFormatting-HorizontalFieldgroup,
+.Webwidgets-Widgets-FormattingMod-BaseFormatting-VerticalFieldgroup > .Webwidgets-Widgets-FormattingMod-BaseFormatting-HorizontalFieldgroup {
  display: table-row;
 }
 
-.Webwidgets-Widgets-BaseFormatting-HorizontalFieldgroup > .Webwidgets-Widgets-BaseFormatting-HorizontalFieldgroup {
+.Webwidgets-Widgets-FormattingMod-BaseFormatting-HorizontalFieldgroup > .Webwidgets-Widgets-FormattingMod-BaseFormatting-HorizontalFieldgroup {
  display: table-column-group;
 }
 
-.Webwidgets-Widgets-BaseFormatting-HorizontalFieldgroup > .Webwidgets-Widgets-BaseFormatting-HorizontalFieldgroup {
+.Webwidgets-Widgets-FormattingMod-BaseFormatting-HorizontalFieldgroup > .Webwidgets-Widgets-FormattingMod-BaseFormatting-HorizontalFieldgroup {
  border-right: 1px solid black;
 }
 
-.Webwidgets-Widgets-BaseFormatting-HorizontalFieldgroup > .Webwidgets-Widgets-BaseFormatting-HorizontalFieldgroup:last-child {
+.Webwidgets-Widgets-FormattingMod-BaseFormatting-HorizontalFieldgroup > .Webwidgets-Widgets-FormattingMod-BaseFormatting-HorizontalFieldgroup:last-child {
  border-right: none;
 }
 
-.Webwidgets-Widgets-BaseFormatting-HorizontalFieldgroup > .Webwidgets-Widgets-BaseFormatting-Field > * {
+.Webwidgets-Widgets-FormattingMod-BaseFormatting-HorizontalFieldgroup > .Webwidgets-Widgets-FormattingMod-BaseFormatting-Field > * {
  display: block;
 }
 
@@ -571,16 +571,16 @@ select {
 .Webwidgets-Widgets-FileEditor-FileEditor-editors {
 }
 
-.Webwidgets-Widgets-BaseFormatting-ProgressMeter-_-progress_box {
+.Webwidgets-Widgets-FormattingMod-BaseFormatting-ProgressMeter-_-progress_box {
  background: red;
 }
 
-.Webwidgets-Widgets-BaseFormatting-ProgressMeter-_-progress_label {
+.Webwidgets-Widgets-FormattingMod-BaseFormatting-ProgressMeter-_-progress_label {
  position: fixed;
  text-align: center;
 }
 
-.Webwidgets-Widgets-BaseFormatting-ProgressMeter-_-progress_position {
+.Webwidgets-Widgets-FormattingMod-BaseFormatting-ProgressMeter-_-progress_position {
  background: green;
 }
 

@@ -31,7 +31,7 @@ import Webwidgets.Constants
 import Webwidgets.Widgets.Base
 import Webwidgets.Widgets.WindowMod
 import Webwidgets.Widgets.InputMod.BaseInput
-import Webwidgets.Widgets.BaseFormatting
+import Webwidgets.Widgets.FormattingMod.BaseFormatting
 
 class InfoFrame(Webwidgets.Widgets.Base.StaticComposite):
     def draw_head(self, children, output_options):
@@ -125,30 +125,30 @@ class InfoDialog(AbstractInfoDialog):
     buttons = {'Ok': '1'}
 
 class ConfirmationDialog(AbstractInfoDialog):
-    class Head(Webwidgets.Widgets.BaseFormatting.Html):
+    class Head(Webwidgets.Widgets.FormattingMod.BaseFormatting.Html):
         html = """Really perform action?"""
-    class Body(Webwidgets.Widgets.BaseFormatting.Html):
+    class Body(Webwidgets.Widgets.FormattingMod.BaseFormatting.Html):
         html = """Do you really want to perform this action?"""
 
 class DisableConfirmationDialog(ConfirmationDialog):
-    class Head(Webwidgets.Widgets.BaseFormatting.Html):
+    class Head(Webwidgets.Widgets.FormattingMod.BaseFormatting.Html):
         html = """Really disable this item?"""
-    class Body(Webwidgets.Widgets.BaseFormatting.Html):
+    class Body(Webwidgets.Widgets.FormattingMod.BaseFormatting.Html):
         html = """Do you really want to disable this item?"""
 
 class DeleteConfirmationDialog(ConfirmationDialog):
-    class Head(Webwidgets.Widgets.BaseFormatting.Html):
+    class Head(Webwidgets.Widgets.FormattingMod.BaseFormatting.Html):
         html = """Really delete this item?"""
-    class Body(Webwidgets.Widgets.BaseFormatting.Html):
+    class Body(Webwidgets.Widgets.FormattingMod.BaseFormatting.Html):
         html = """Do you really want to delete this item?"""
 
-class DialogContainer(Webwidgets.Widgets.BaseFormatting.Div):
+class DialogContainer(Webwidgets.Widgets.FormattingMod.BaseFormatting.Div):
     is_dialog_container = True
 
     __wwml_html_override__ = False
     html = "%(Dialogs)s%(Body)s"
-    class Dialogs(Webwidgets.Widgets.BaseFormatting.ReplacedList): pass
-    class Body(Webwidgets.Widgets.BaseFormatting.Html): pass
+    class Dialogs(Webwidgets.Widgets.FormattingMod.BaseFormatting.ReplacedList): pass
+    class Body(Webwidgets.Widgets.FormattingMod.BaseFormatting.Html): pass
 
     def add_dialog(self, dialog, name = None):
         if name is None: name = str(len(self['Dialogs'].children))

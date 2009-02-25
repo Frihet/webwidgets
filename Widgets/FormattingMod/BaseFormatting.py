@@ -28,7 +28,7 @@ import Webwidgets.Utils
 import Webwidgets.Constants
 import Webwidgets.Widgets.Base
 import Webwidgets.Widgets.WindowMod
-import Webwidgets.Widgets.GridLayoutModel
+import Webwidgets.Widgets.FormattingMod.GridLayoutModel
 
 class List(Webwidgets.Widgets.Base.StaticComposite):
     """Concatenates all children in name order, drawing the "sep"
@@ -442,32 +442,32 @@ class HorizontalFieldgroup(AbstractFieldgroup): pass
 # Compatibility and convienence
 class Fieldgroup(VerticalFieldgroup): pass
 
-class GridLayout(Webwidgets.Widgets.Base.StaticComposite, Webwidgets.Widgets.GridLayoutModel.GridLayout):
+class GridLayout(Webwidgets.Widgets.Base.StaticComposite, Webwidgets.Widgets.FormattingMod.GridLayoutModel.GridLayout):
     """GridLayout that works similar to a GtkTable in Gtk - child widgets
     are attatched to cells by coordinates."""
 
-    class Cell(Webwidgets.Widgets.GridLayoutModel.GridLayout.Cell):
+    class Cell(Webwidgets.Widgets.FormattingMod.GridLayoutModel.GridLayout.Cell):
         def name(self):
             return 'cell_' + str(self.x) + '_' + str(self.y) + '_' + str(self.w) + '_' + str(self.h)
 
     def __init__(self, session, win_id, **attrs):
         Webwidgets.Widgets.Base.StaticComposite.__init__(self, session, win_id, **attrs)
-        Webwidgets.Widgets.GridLayoutModel.GridLayout.__init__(self)
+        Webwidgets.Widgets.FormattingMod.GridLayoutModel.GridLayout.__init__(self)
         for name, child in self.children.iteritems():
             if name.startswith('cell_'):
                 x, y, w, h = self.child_name_to_coord(name)
-                Webwidgets.Widgets.GridLayoutModel.GridLayout.insert(self, child, x, y, w, h)
+                Webwidgets.Widgets.FormattingMod.GridLayoutModel.GridLayout.insert(self, child, x, y, w, h)
                 
     def child_name_to_coord(self, name):
         dummy, x, y, w, h = name.split('_')
         return (int(x), int(y), int(w), int(h))
     
     def insert(self, content, x, y, w = 1, h = 1):
-        cell = Webwidgets.Widgets.GridLayoutModel.GridLayout.insert(self, content, x, y, w, h)
+        cell = Webwidgets.Widgets.FormattingMod.GridLayoutModel.GridLayout.insert(self, content, x, y, w, h)
         self.children[cell.name()] = content
         
     def remove(self, x, y):
-        cell = Webwidgets.Widgets.GridLayoutModel.GridLayout.remove(self, x, y)
+        cell = Webwidgets.Widgets.FormattingMod.GridLayoutModel.GridLayout.remove(self, x, y)
         if cell: del self.children[cell.name()]
     
     def draw(self, output_options):
