@@ -24,10 +24,13 @@
 """
 
 import types, StringIO, cgi, sys, os, re
-import Webwidgets.Utils, Webwidgets.Constants
-import Base, WindowMod, GridLayoutModel
+import Webwidgets.Utils
+import Webwidgets.Constants
+import Webwidgets.Widgets.Base
+import Webwidgets.Widgets.WindowMod
+import Webwidgets.Widgets.GridLayoutModel
 
-class List(Base.StaticComposite):
+class List(Webwidgets.Widgets.Base.StaticComposite):
     """Concatenates all children in name order, drawing the "sep"
     string inbetween each and the "pre" and "post" strings before and
     after the whole list, respectively."""
@@ -48,7 +51,7 @@ class List(Base.StaticComposite):
 
 class ReplacedList(List):
     def draw(self, output_options):
-        WindowMod.HtmlWindow.register_replaced_content(
+        Webwidgets.Widgets.WindowMod.HtmlWindow.register_replaced_content(
             self,
             List.draw(self, output_options))
         return ''
@@ -59,7 +62,7 @@ class BulletList(List):
     frame= "<li>%(child)s</li>"
     post = "</ul>"
 
-class Html(Base.Text, Base.StaticComposite):
+class Html(Webwidgets.Widgets.Base.Text, Webwidgets.Widgets.Base.StaticComposite):
     """This widget is the base widget for most output widgets and the
     main method of concatenating and grouping widgets. It provides a
     way to "format" together other widgets with some custom HTML
@@ -109,7 +112,7 @@ class Style(Html):
     """Includes the css style from the child "style"
     """
     __wwml_html_override__ = False
-    class style(Base.Text): html = ''
+    class style(Webwidgets.Widgets.Base.Text): html = ''
     html = """<style %(html_attributes)s type='text/css'>%(style)s</style>"""
     
 class StyleLink(Html):
@@ -126,7 +129,7 @@ class Message(Html):
     """Informative message display. If no message is set, this widget
     is invisible."""
     __wwml_html_override__ = False
-    class message(Base.Text): html = ''
+    class message(Webwidgets.Widgets.Base.Text): html = ''
     def draw(self, output_options):
         if self.children['message']:
             self.html = '<div %(html_attributes)s>%(message)s</div>'
@@ -134,7 +137,7 @@ class Message(Html):
             self.html = ''
         return Html.draw(self, output_options)
 
-class Media(Base.Widget):
+class Media(Webwidgets.Widgets.Base.Widget):
     """Media (file) viewing widget"""
     content = None
     "Object with file (file object), type (mimetype) and filename attributes, i.e. cgi.FieldStorage"
@@ -295,7 +298,7 @@ class Media(Base.Widget):
     
     def draw_inline_text__css(self, output_options):
         if self.get_option('merge'):
-            WindowMod.HtmlWindow.register_style_link(self, self.calculate_output_url(output_options))
+            Webwidgets.Widgets.WindowMod.HtmlWindow.register_style_link(self, self.calculate_output_url(output_options))
             return self.draw_inline_default(output_options)
         else:
             return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>""" % {
@@ -309,7 +312,7 @@ class Media(Base.Widget):
 
     def draw_inline_application__x_javascript(self, output_options):
         if self.get_option('merge'):
-            WindowMod.HtmlWindow.register_script_link(self, self.calculate_output_url(output_options))
+            Webwidgets.Widgets.WindowMod.HtmlWindow.register_script_link(self, self.calculate_output_url(output_options))
             return self.draw_inline_default(output_options)
         else:
             return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>""" % {
@@ -334,7 +337,7 @@ class Media(Base.Widget):
     draw_inline_text__html = draw_inline_text
     draw_inline_text__xml = draw_inline_text
 
-class ImageButton(Base.SingleActionInput, Media):
+class ImageButton(Webwidgets.Widgets.Base.SingleActionInput, Media):
     """ImageButton, combination of SingleActionInput and Media with
     inline_only set. Used to get clickable images."""
 
@@ -344,7 +347,7 @@ class ImageButton(Base.SingleActionInput, Media):
         return self.draw_inline_image_button
 
     def draw(self, output_options):
-        Base.SingleActionInput.draw(self, output_options)
+        Webwidgets.Widgets.Base.SingleActionInput.draw(self, output_options)
         return Media.draw(self, output_options)
 
     def draw_inline_image_button(self, output_options):
@@ -361,7 +364,7 @@ class DownloadLink(Media):
     types = {'default': Webwidgets.Utils.subclass_dict(Media.types['default'],
                                                       {'inline':False})}
 
-class Label(Base.StaticComposite):
+class Label(Webwidgets.Widgets.Base.StaticComposite):
     """Renders a label for an input field. The input field can be
     specified either as the widget itself, or a
     L{Webwidgets.Utils.WidgetPath} to the widget"""
@@ -378,7 +381,7 @@ class Label(Base.StaticComposite):
     separator = ''
 
     def draw_label_parts(self, output_options):
-        if isinstance(self.target, Base.Widget):
+        if isinstance(self.target, Webwidgets.Widgets.Base.Widget):
             target = self.target
         else:
             target = self + self.target_prefix + self.target
@@ -439,32 +442,32 @@ class HorizontalFieldgroup(AbstractFieldgroup): pass
 # Compatibility and convienence
 class Fieldgroup(VerticalFieldgroup): pass
 
-class GridLayout(Base.StaticComposite, GridLayoutModel.GridLayout):
+class GridLayout(Webwidgets.Widgets.Base.StaticComposite, Webwidgets.Widgets.GridLayoutModel.GridLayout):
     """GridLayout that works similar to a GtkTable in Gtk - child widgets
     are attatched to cells by coordinates."""
 
-    class Cell(GridLayoutModel.GridLayout.Cell):
+    class Cell(Webwidgets.Widgets.GridLayoutModel.GridLayout.Cell):
         def name(self):
             return 'cell_' + str(self.x) + '_' + str(self.y) + '_' + str(self.w) + '_' + str(self.h)
 
     def __init__(self, session, win_id, **attrs):
-        Base.StaticComposite.__init__(self, session, win_id, **attrs)
-        GridLayoutModel.GridLayout.__init__(self)
+        Webwidgets.Widgets.Base.StaticComposite.__init__(self, session, win_id, **attrs)
+        Webwidgets.Widgets.GridLayoutModel.GridLayout.__init__(self)
         for name, child in self.children.iteritems():
             if name.startswith('cell_'):
                 x, y, w, h = self.child_name_to_coord(name)
-                GridLayoutModel.GridLayout.insert(self, child, x, y, w, h)
+                Webwidgets.Widgets.GridLayoutModel.GridLayout.insert(self, child, x, y, w, h)
                 
     def child_name_to_coord(self, name):
         dummy, x, y, w, h = name.split('_')
         return (int(x), int(y), int(w), int(h))
     
     def insert(self, content, x, y, w = 1, h = 1):
-        cell = GridLayoutModel.GridLayout.insert(self, content, x, y, w, h)
+        cell = Webwidgets.Widgets.GridLayoutModel.GridLayout.insert(self, content, x, y, w, h)
         self.children[cell.name()] = content
         
     def remove(self, x, y):
-        cell = GridLayoutModel.GridLayout.remove(self, x, y)
+        cell = Webwidgets.Widgets.GridLayoutModel.GridLayout.remove(self, x, y)
         if cell: del self.children[cell.name()]
     
     def draw(self, output_options):
@@ -488,13 +491,13 @@ class GridLayout(Base.StaticComposite, GridLayoutModel.GridLayout):
         return result
 
 
-class DrawError(Base.Widget):
+class DrawError(Webwidgets.Widgets.Base.Widget):
     error = Exception("Example error")
 
     def draw(self, output_options):
 	raise self.error
 
-class ProgressMeter(Base.Widget):
+class ProgressMeter(Webwidgets.Widgets.Base.Widget):
     progress_position = 0.0
     scale_start = 0.0
     scale_end = 100.0
@@ -529,7 +532,7 @@ class ProgressMeter(Base.Widget):
        'progress_position_class': Webwidgets.Utils.classes_to_css_classes(self.ww_classes, ['progress_position'])
        }
 
-class BrowserWarning(Base.StaticComposite):
+class BrowserWarning(Webwidgets.Widgets.Base.StaticComposite):
     def draw(self, output_options):
         agent = output_options['transaction'].request()._environ['HTTP_USER_AGENT']
         for name, child in self.get_children():
@@ -539,7 +542,7 @@ class BrowserWarning(Base.StaticComposite):
                 return self.draw_child(child.path, child, output_options, True)
         return ''
 
-class Timing(Base.Widget):
+class Timing(Webwidgets.Widgets.Base.Widget):
     part = 'total'
     """Any of
 

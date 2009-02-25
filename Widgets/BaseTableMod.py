@@ -25,8 +25,13 @@
 the user to sort the rows and simultaneously group the rows according
 to their content and the sorting."""
 
-import Webwidgets.Constants, Webwidgets.Utils, Webwidgets.FilterMod, re, math, cgi, types, itertools
-import Base, WindowMod, RowsMod
+import re, math, cgi, types, itertools
+import Webwidgets.Constants
+import Webwidgets.Utils
+import Webwidgets.FilterMod
+import Webwidgets.Widgets.Base
+import Webwidgets.Widgets.WindowMod
+import Webwidgets.Widgets.RowsMod
 
 class RenderedRowType(object): pass
 class RenderedRowTypeRow(RenderedRowType): pass
@@ -143,8 +148,8 @@ class TableRowsToTreeFilter(Webwidgets.FilterMod.Filter):
                              and node['children']
                              and 'value' in node['children'][-1]
                              and (   not self.dont_merge_widgets
-                                  or (    not isinstance(node['children'][-1]['value'], Base.Widget)
-                                      and not isinstance(col_value, Base.Widget)))
+                                  or (    not isinstance(node['children'][-1]['value'], Webwidgets.Widgets.Base.Widget)
+                                      and not isinstance(col_value, Webwidgets.Widgets.Base.Widget)))
                              and node['children'][-1]['value'] == col_value)
                     if not merge:
                         node['children'].append({'level': node['level'] + 1,
@@ -156,14 +161,14 @@ class TableRowsToTreeFilter(Webwidgets.FilterMod.Filter):
                     node['rows'] += 1
         return (rows, tree)
 
-class BaseTable(RowsMod.RowsComposite, Base.DirectoryServer):
+class BaseTable(Webwidgets.Widgets.RowsMod.RowsComposite, Webwidgets.Widgets.Base.DirectoryServer):
     """This is the basic version of L{Table}; it formats the table
     itself, but does not include any user input controls for changing
     the sorting order, the current page, or for operating on the rows
     in the table.
     """
 
-    class WwModel(RowsMod.RowsComposite.WwModel):
+    class WwModel(Webwidgets.Widgets.RowsMod.RowsComposite.WwModel):
         allow_collapse_columns = ()
         """List of columns that the user can collapse/expand if allow_collapse_columns_exclude = False or
         not if True"""
@@ -177,9 +182,9 @@ class BaseTable(RowsMod.RowsComposite, Base.DirectoryServer):
         idea if your table contains other widgets..."""
         html_output_cache = None
 
-    class SourceFilters(RowsMod.RowsComposite.SourceFilters):
+    class SourceFilters(Webwidgets.Widgets.RowsMod.RowsComposite.SourceFilters):
 
-        WwFilters = ["HtmlCacheFilter"] + RowsMod.RowsComposite.SourceFilters.WwFilters
+        WwFilters = ["HtmlCacheFilter"] + Webwidgets.Widgets.RowsMod.RowsComposite.SourceFilters.WwFilters
         class HtmlCacheFilter(Webwidgets.FilterMod.Filter):
             def reread(self):
                 self.html_output_cache = None
@@ -195,7 +200,7 @@ class BaseTable(RowsMod.RowsComposite, Base.DirectoryServer):
         WwFilters = ["TableRowsToTreeFilter"]
         class TableRowsToTreeFilter(TableRowsToTreeFilter): pass
 
-    WwFilters = ["TreeFilters"] + RowsMod.RowsComposite.WwFilters
+    WwFilters = ["TreeFilters"] + Webwidgets.Widgets.RowsMod.RowsComposite.WwFilters
     
     def get_active(self, path):
         """@return: Whether the widget is allowing the user to acces
@@ -358,7 +363,7 @@ class BaseTable(RowsMod.RowsComposite, Base.DirectoryServer):
         return self.ww_filter.html_output_cache
 
     def draw(self, output_options):
-        WindowMod.HtmlWindow.register_style_link(self, self.calculate_url({'transaction': output_options['transaction'],
+        Webwidgets.Widgets.WindowMod.HtmlWindow.register_style_link(self, self.calculate_url({'transaction': output_options['transaction'],
                                                      'widget_class': 'Webwidgets.BaseTable',
                                                      'location': ['Table.css']},
                                                     {}))

@@ -18,8 +18,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import Webwidgets.Utils, Webwidgets.ObjectMod, Webwidgets.FilterMod
-import Base, WindowMod, Formatting, ListMod, LocationInputLocations
+import Webwidgets.Utils
+import Webwidgets.ObjectMod
+import Webwidgets.FilterMod
+import Webwidgets.Widgets.WindowMod
+import Webwidgets.Widgets.Formatting
+import Webwidgets.Widgets.ListMod
+import Webwidgets.Widgets.LocationInputLocations
 
 class GenericRegionPart(Webwidgets.ObjectMod.Object):
     class WwModel(Webwidgets.ObjectMod.Object):
@@ -28,14 +33,14 @@ class GenericRegionPart(Webwidgets.ObjectMod.Object):
         region_prefix = []
 
     def get_region_from_sym(self):
-        region = LocationInputLocations.world
+        region = Webwidgets.Widgets.LocationInputLocations.world
         for prefix in self.ww_filter.region_prefix:
             if prefix not in region.sym_dict: return None
             region = region.sym_dict[prefix]
         return region
 
     def get_region_from_name(self):
-        region = LocationInputLocations.world
+        region = Webwidgets.Widgets.LocationInputLocations.world
         for prefix in self.ww_filter.region_prefix:
             if prefix not in region.name_dict: return None
             region = region.name_dict[prefix]
@@ -66,9 +71,9 @@ class GenericRegionPart(Webwidgets.ObjectMod.Object):
                 instance.ww_filter.value = value
         value = Value()
 
-class RegionPartInput(GenericRegionPart, ListMod.RowsSingleValueListInput):
-    class WwModel(GenericRegionPart.WwModel, ListMod.RowsSingleValueListInput.WwModel): pass
-    WwFilters = ListMod.RowsSingleValueListInput.WwFilters + GenericRegionPart.WwFilters
+class RegionPartInput(GenericRegionPart, Webwidgets.Widgets.ListMod.RowsSingleValueListInput):
+    class WwModel(GenericRegionPart.WwModel, Webwidgets.Widgets.ListMod.RowsSingleValueListInput.WwModel): pass
+    WwFilters = Webwidgets.Widgets.ListMod.RowsSingleValueListInput.WwFilters + GenericRegionPart.WwFilters
     
     def get_rows(self):
         if self.ww_model.store_symbol:
@@ -116,7 +121,7 @@ class CountyInput(CountryInput):
     class Country(CountryInput.Country):
         class Field(CountryInput.Country.Field):
             def draw(self, output_options):
-                WindowMod.HtmlWindow.register_submit_action(self, self.path, 'change')
+                Webwidgets.Widgets.WindowMod.HtmlWindow.register_submit_action(self, self.path, 'change')
                 return CountryInput.Country.Field.draw(self, output_options)
 
             def value_changed(self, path, value):
@@ -154,7 +159,7 @@ class MunicipalityInput(CountyInput):
     class County(CountyInput.County):
         class Field(CountyInput.County.Field):
             def draw(self, output_options):
-                WindowMod.HtmlWindow.register_submit_action(self, self.path, 'change')
+                Webwidgets.Widgets.WindowMod.HtmlWindow.register_submit_action(self, self.path, 'change')
                 return CountyInput.County.Field.draw(self, output_options)
 
             def value_changed(self, path, value):
@@ -174,9 +179,9 @@ class MunicipalityInput(CountyInput):
                 region_prefix = lambda self: [self.parent.parent.ww_filter.country,
                                               self.parent.parent.ww_filter.county])]
 
-class RegionPart(GenericRegionPart, Formatting.Html):
+class RegionPart(GenericRegionPart, Webwidgets.Widgets.Formatting.Html):
     class WwModel(GenericRegionPart.WwModel): pass
-    WwFilters = Formatting.Html.WwFilters + [Webwidgets.FilterMod.RenameFilter.rename(html = "value"),
+    WwFilters = Webwidgets.Widgets.Formatting.Html.WwFilters + [Webwidgets.FilterMod.RenameFilter.rename(html = "value"),
                                              Webwidgets.FilterMod.MapValueFilter.map_values(value = {'-': None})] + GenericRegionPart.WwFilters
 
 class CountryPart(RegionPart):

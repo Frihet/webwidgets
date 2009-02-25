@@ -20,9 +20,11 @@
 
 import datetime, time, os.path
 import Webwidgets.Utils
-import BaseInput, Base, WindowMod
+import Webwidgets.Widgets.BaseInput
+import Webwidgets.Widgets.Base
+import Webwidgets.Widgets.WindowMod
 
-class DateInput(BaseInput.StringInput, Base.DirectoryServer):
+class DateInput(Webwidgets.Widgets.BaseInput.StringInput, Webwidgets.Widgets.Base.DirectoryServer):
     """
     Date Selector Widget.
     """
@@ -41,8 +43,8 @@ class DateInput(BaseInput.StringInput, Base.DirectoryServer):
                 location,
                 output_options)
         
-        WindowMod.HtmlWindow.register_style_link(self, calculate_url(['calendar-blue.css']))
-        WindowMod.HtmlWindow.register_script_link(self, 
+        Webwidgets.Widgets.WindowMod.HtmlWindow.register_style_link(self, calculate_url(['calendar-blue.css']))
+        Webwidgets.Widgets.WindowMod.HtmlWindow.register_script_link(self, 
             calculate_url(['calendar.js']),
             calculate_url(['lang', 'calendar-en.js']),
             calculate_url(['calendar-setup.js']))

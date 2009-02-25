@@ -26,8 +26,9 @@
 """
 
 import types, math
-import Webwidgets.Utils, Webwidgets.Constants
-import Base, Formatting
+import Webwidgets.Utils
+import Webwidgets.Constants
+import Webwidgets.Widgets.Base
 
 class TreeModelNode(object):
     def __init__(self, tree, parent = None, name = 'Unknown', value = None):
@@ -244,7 +245,7 @@ class TreeModel(object):
         return self.render_tree(render_entry)
 
 
-class Tree(Base.ActionInput, Base.DirectoryServer):
+class Tree(Webwidgets.Widgets.Base.ActionInput, Webwidgets.Widgets.Base.DirectoryServer):
     """Expandable tree widget similar to the tree-view in Nautilus or
     Windows Explorer. The tree must support the render_tree() protocol."""
 
@@ -268,7 +269,7 @@ class Tree(Base.ActionInput, Base.DirectoryServer):
                   ('empty', '&nbsp;&nbsp;&nbsp;'))
 
     def __init__(self, session, win_id, **attrs):
-        Base.Input.__init__(self, session, win_id, **attrs)
+        Webwidgets.Widgets.Base.Input.__init__(self, session, win_id, **attrs)
         if not hasattr(self, 'tree'):
             self.tree = self.TreeModel()
 

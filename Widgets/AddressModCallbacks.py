@@ -19,7 +19,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import Webwidgets.FilterMod
-import Base, ListMod, LocationInput, LocationInputLocations
+import Webwidgets.Widgets.LocationInput
+import Webwidgets.Widgets.LocationInputLocations
 
 def redirect_value_to_address(name):
     return [Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, active = "active", value = name)]
@@ -44,7 +45,7 @@ class AddressInput(object):
     class City(object):
         class Field(object): WwFilters = redirect_value_to_address('city')
     class Region(object):
-        WwFilters = LocationInput.MunicipalityInput.WwFilters + [
+        WwFilters = Webwidgets.Widgets.LocationInput.MunicipalityInput.WwFilters + [
             Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 1,
                                                                active = "active",
                                                                municipality = "municipality",
@@ -73,7 +74,7 @@ class Address(object):
     class City(object):
         class Field(object): WwFilters = redirect_html_to_address('city')
     class Region(object):
-        WwFilters = LocationInput.Municipality.WwFilters + [
+        WwFilters = Webwidgets.Widgets.LocationInput.Municipality.WwFilters + [
             Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 1,
                                                                municipality = "municipality",
                                                                county = "county",

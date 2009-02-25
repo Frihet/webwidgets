@@ -83,40 +83,40 @@ if __name__ == "Webwidgets":
     # Note: These two are a tiny itsy bitsy bit magical and modifies
     # your entire world when loaded... So make sure they're loaded
     # FIRST!
-    import Compatibility
-    import Wwml
+    import Webwidgets.Compatibility
+    import Webwidgets.Wwml
     
-    from Constants import *
+    from Webwidgets.Constants import *
 
-    from ObjectMod import *
-    from FilterMod import *
+    from Webwidgets.ObjectMod import *
+    from Webwidgets.FilterMod import *
 
-    from ProgramMod import *
-    from AccessManagerMod import *
+    from Webwidgets.ProgramMod import *
+    from Webwidgets.AccessManagerMod import *
 
-    from Widgets.Base import *
-    from Widgets.Formatting import *
-    from Widgets.BaseInput import *
-    from Widgets.Composite import *
-    from Widgets.Progress import *
-    from Widgets.Tree import *
-    from Widgets.RowsMod import *
-    from Widgets.ListMod import *
-    from Widgets.BaseTableMod import *
-    from Widgets.TableMod import *
-    from Widgets.LogIn import *
-    from Widgets.DateInput import *
-    from Widgets.HtmlInput import *
+    from Webwidgets.Widgets.Base import *
+    from Webwidgets.Widgets.Formatting import *
+    from Webwidgets.Widgets.BaseInput import *
+    from Webwidgets.Widgets.Composite import *
+    from Webwidgets.Widgets.Progress import *
+    from Webwidgets.Widgets.Tree import *
+    from Webwidgets.Widgets.RowsMod import *
+    from Webwidgets.Widgets.ListMod import *
+    from Webwidgets.Widgets.BaseTableMod import *
+    from Webwidgets.Widgets.TableMod import *
+    from Webwidgets.Widgets.LogIn import *
+    from Webwidgets.Widgets.DateInput import *
+    from Webwidgets.Widgets.HtmlInput import *
 
-    from Widgets.FileEditorMod.TextFileEditor import *
-    from Widgets.FileEditorMod.CssFileEditor import *
-    from Widgets.FileEditorMod.HtmlFileEditor import *
-    from Widgets.FileEditorMod.GenericFileEditor import *
-    from Widgets.FileEditorList import *
+    from Webwidgets.Widgets.FileEditorMod.TextFileEditor import *
+    from Webwidgets.Widgets.FileEditorMod.CssFileEditor import *
+    from Webwidgets.Widgets.FileEditorMod.HtmlFileEditor import *
+    from Webwidgets.Widgets.FileEditorMod.GenericFileEditor import *
+    from Webwidgets.Widgets.FileEditorList import *
 
-    from Widgets.LocationInput import *
-    from Widgets.AddressMod import *
+    from Webwidgets.Widgets.LocationInput import *
+    from Webwidgets.Widgets.AddressMod import *
 
-    from Widgets.WindowMod import *
-    from Widgets.MainMenu import *
-    from Widgets.ApplicationWindow import *
+    from Webwidgets.Widgets.WindowMod import *
+    from Webwidgets.Widgets.MainMenu import *
+    from Webwidgets.Widgets.ApplicationWindow import *

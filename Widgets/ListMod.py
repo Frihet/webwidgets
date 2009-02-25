@@ -18,10 +18,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import Webwidgets.Utils, Webwidgets.FilterMod
-import Base, RowsMod
+import Webwidgets.Utils
+import Webwidgets.FilterMod
+import Webwidgets.Widgets.Base
+import Webwidgets.Widgets.RowsMod
 
-class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
+class RowsListInput(Webwidgets.Widgets.Base.ValueInput, Webwidgets.Widgets.RowsMod.RowsComposite):
     """Scrollable list of selectable items. The list can optionally
     allow the user to select multiple items. The currently selected
     item(s) are stored in a list, regardless of if multiple items can
@@ -29,7 +31,7 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
     
     original_value = []
 
-    class WwModel(RowsMod.RowsComposite.WwModel, Base.ValueInput.WwModel):
+    class WwModel(Webwidgets.Widgets.RowsMod.RowsComposite.WwModel, Webwidgets.Widgets.Base.ValueInput.WwModel):
         rows_per_page = 0
         
         value = []
@@ -49,7 +51,7 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
         size = 0
         """Size of the widget."""
 
-    WwFilters = RowsMod.RowsComposite.WwFilters + ["ValueFilters"]
+    WwFilters = Webwidgets.Widgets.RowsMod.RowsComposite.WwFilters + ["ValueFilters"]
 
     class ValueFilters(Webwidgets.FilterMod.Filter):
         """This filter groups all filters that mangles the L{value} of
@@ -71,7 +73,7 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
         
     def get_active(self, path):
         return (    not self.no_rows()
-                and Base.ValueInput.get_active(self, path))
+                and Webwidgets.Widgets.Base.ValueInput.get_active(self, path))
 
     @property
     def html_disabled(self):
@@ -102,7 +104,7 @@ class RowsListInput(Base.ValueInput, RowsMod.RowsComposite):
                        for row in self.ww_filter.get_rows(output_options = output_options)]
 
     def draw(self, output_options):
-        Base.ValueInput.draw(self, output_options)
+        Webwidgets.Widgets.Base.ValueInput.draw(self, output_options)
 
         active = self.get_active(self.path)
 

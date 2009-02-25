@@ -25,10 +25,14 @@
 """
 
 import types, cgi
-import Webwidgets.Utils, Webwidgets.Utils.Locale, Webwidgets.Constants
-import Base, WindowMod, Formatting
+import Webwidgets.Utils
+import Webwidgets.Utils.Locale
+import Webwidgets.Constants
+import Webwidgets.Widgets.Base
+import Webwidgets.Widgets.WindowMod
+import Webwidgets.Widgets.Formatting
 
-class ArgumentInput(Base.ValueInput):
+class ArgumentInput(Webwidgets.Widgets.Base.ValueInput):
     """This input widget does not actually renders into any HTML but
     instead represents a parameter in the URL. L{argument_name} is
     mandatory for this widget to be usefull.
@@ -48,7 +52,7 @@ class ArgumentInput(Base.ValueInput):
         self.register_input(self.path, self.argument_name, False)
         return ''
 
-class HiddenInput(Base.ValueInput):
+class HiddenInput(Webwidgets.Widgets.Base.ValueInput):
     """Hidden input box. Note that this is only usefull to communicate
     with some JavaScript."""
     def draw(self, output_options):
@@ -58,7 +62,7 @@ class HiddenInput(Base.ValueInput):
             'name': Webwidgets.Utils.path_to_id(self.path),
             'value': self.field_output(self.path)[0]}
 
-class StringInput(Base.ValueInput):
+class StringInput(Webwidgets.Widgets.Base.ValueInput):
     """Text input box"""
     rows = 1
     cols = None
@@ -81,7 +85,7 @@ class AbstractNumberInput(StringInput):
     num_to_str = staticmethod(Webwidgets.Utils.Locale.str)
 
     original_value = None
-    class WwModel(Base.ValueInput.WwModel):
+    class WwModel(Webwidgets.Widgets.Base.ValueInput.WwModel):
         value = None
         original_value = None
     def field_input(self, path, string_value):
@@ -128,7 +132,7 @@ class PromilleInput(AbstractPercentageInput):
     unit_value = 0.001
     postfix = u'‰'
 
-class PasswordInput(Base.ValueInput):
+class PasswordInput(Webwidgets.Widgets.Base.ValueInput):
     """Like StringInput, but hides the user input"""
     def draw(self, output_options):
         super(PasswordInput, self).draw(output_options)
@@ -138,12 +142,12 @@ class PasswordInput(Base.ValueInput):
             'name': Webwidgets.Utils.path_to_id(self.path),
             'value': self.field_output(self.path)[0]}
 
-class NewPasswordInput(Formatting.Html, Base.ValueInput):
+class NewPasswordInput(Webwidgets.Widgets.Formatting.Html, Webwidgets.Widgets.Base.ValueInput):
     """Used for entering new passwords - the password has to be
     repeated twice and the two values entered are compared. A
     value_changed is only propagated if the two values matches"""
     __wwml_html_override__ = False
-    class WwModel(Base.ValueInput.WwModel):
+    class WwModel(Webwidgets.Widgets.Base.ValueInput.WwModel):
         value = ''
     html = """
     <span %(html_attributes)s>
@@ -156,7 +160,7 @@ class NewPasswordInput(Formatting.Html, Base.ValueInput):
     """Message displayed when passwords entered do not match."""
 
     def __init__(self, session, win_id, **attrs):
-        Formatting.Html.__init__(
+        Webwidgets.Widgets.Formatting.Html.__init__(
             self, session, win_id,
             **attrs)
         self.children['input1'] = self.Input(session, win_id, value=self.value)
@@ -185,7 +189,7 @@ class NewPasswordInput(Formatting.Html, Base.ValueInput):
         self['input1'].value = self['input2'].value = self.value
         self.error = None
 
-class PageLoadNotifier(Base.SingleActionInput):
+class PageLoadNotifier(Webwidgets.Widgets.Base.SingleActionInput):
     """Throws a 'clicked' notification for every page load,
     unconditionally."""
 
@@ -204,7 +208,7 @@ class PageLoadNotifier(Base.SingleActionInput):
             'html_attributes': self.draw_html_attributes(self.path),
             'name': Webwidgets.Utils.path_to_id(self.path)}
 
-class Button(Base.SingleActionInput):
+class Button(Webwidgets.Widgets.Base.SingleActionInput):
     """Button widget - throws a "clicked" notification when clicked"""
     title = ''
 
@@ -224,18 +228,18 @@ class Button(Base.SingleActionInput):
             'name': Webwidgets.Utils.path_to_id(self.path),
             'title': self._(self.title, output_options)}
 
-class UpdateButton(Base.SingleActionInput):
+class UpdateButton(Webwidgets.Widgets.Base.SingleActionInput):
     """This is a special kind of button that only submits the form and
     causes other widgets to get their input. In addition, it
     dissapears if JavaScript is enabled. It is intended to be used in
     conjunction with register_submit_action() on other widgets."""
 
     def draw(self, output_options):
-        Base.SingleActionInput.draw(self, output_options)
+        Webwidgets.Widgets.Base.SingleActionInput.draw(self, output_options)
         info = {'html_attributes': self.draw_html_attributes(self.path),
                 'id': Webwidgets.Utils.path_to_id(self.path),
                 'title': self._("Update", output_options)}
-        WindowMod.HtmlWindow.register_script(self, 'update_button: %(id)s' % info,
+        Webwidgets.Widgets.WindowMod.HtmlWindow.register_script(self, 'update_button: %(id)s' % info,
                             """
                             webwidgets_add_event_handler(window, 'load',
                              'webwidgets_update_button: %(id)s',
@@ -258,7 +262,7 @@ class UpdateButton(Base.SingleActionInput):
     def field_input(self, path, string_value):
         pass
 
-class ButtonArray(Base.MultipleActionInput):
+class ButtonArray(Webwidgets.Widgets.Base.MultipleActionInput):
     """Button array widget - throws a "selected" notification when any one of the buttons is clicked"""
 
     pre = ''
@@ -304,21 +308,21 @@ class ButtonArray(Base.MultipleActionInput):
             'buttons': self._(self.sep, output_options).join(buttons),
             'pre': self._(self.pre, output_options), 'post': self._(self.post, output_options)}
 
-class RadioButtonGroup(Base.ValueInput):
+class RadioButtonGroup(Webwidgets.Widgets.Base.ValueInput):
     """Group of radio buttons must be joined together. This is
     performed by setting the 'group' attribute on each of the
     L{RadioInput} in the group to the same instance of this class."""
 
     #FIXME: What should original_value really be here? '' or None, or something else?
     
-class RadioInput(Base.ValueInput, Base.StaticComposite):
+class RadioInput(Webwidgets.Widgets.Base.ValueInput, Webwidgets.Widgets.Base.StaticComposite):
     """A radio button (selection list item). You must create a
     L{RadioButtonGroup} instance and set the 'group' attribute to that
     instance so that all radio buttons in the group knows about each
     other."""
 
     def get_group(self):
-        if isinstance(self.group, Base.Widget):
+        if isinstance(self.group, Webwidgets.Widgets.Base.Widget):
             return self.group
         return self + self.group
 
@@ -344,9 +348,9 @@ class RadioInput(Base.ValueInput, Base.StaticComposite):
                    %(checked)s
                   />""" % result
 
-class Checkbox(Base.ValueInput):
+class Checkbox(Webwidgets.Widgets.Base.ValueInput):
     """Boolean input widget - it's value can either be true or false."""
-    class WwModel(Base.ValueInput.WwModel):
+    class WwModel(Webwidgets.Widgets.Base.ValueInput.WwModel):
         value = False
     def draw(self, output_options):
         super(Checkbox, self).draw(output_options)
@@ -362,13 +366,13 @@ class Checkbox(Base.ValueInput):
     def field_output(self, path):
         return [['', 'checked'][not not self.ww_filter.value]]
 
-class ListInput(Base.ValueInput, Base.StaticComposite):
+class ListInput(Webwidgets.Widgets.Base.ValueInput, Webwidgets.Widgets.Base.StaticComposite):
     """Scrollable list of selectable items. The list can optionally
     allow the user to select multiple items."""
     
     original_value = []
 
-    class WwModel(Base.ValueInput.WwModel):
+    class WwModel(Webwidgets.Widgets.Base.ValueInput.WwModel):
         value = []
 
         multiple = False
@@ -378,7 +382,7 @@ class ListInput(Base.ValueInput, Base.StaticComposite):
         """Size of the widget."""
 
     def draw(self, output_options):
-        Base.ValueInput.draw(self, output_options)
+        Webwidgets.Widgets.Base.ValueInput.draw(self, output_options)
         values = self.value
         if not isinstance(values, types.ListType):
             values = [values]
@@ -402,10 +406,10 @@ class ListInput(Base.ValueInput, Base.StaticComposite):
             'options': options
             }
 
-class FileInput(Base.ValueInput, Base.StaticComposite):
+class FileInput(Webwidgets.Widgets.Base.ValueInput, Webwidgets.Widgets.Base.StaticComposite):
     """File upload box"""
     original_value = None
-    class WwModel(Base.ValueInput.WwModel):
+    class WwModel(Webwidgets.Widgets.Base.ValueInput.WwModel):
         value = None
     
     def field_input(self, path, field_value):
@@ -417,7 +421,7 @@ class FileInput(Base.ValueInput, Base.StaticComposite):
     def field_output(self, path):
         return [self.value]
 
-    class Preview(Formatting.Media):
+    class Preview(Webwidgets.Widgets.Formatting.Media):
         class Content(object):
             def __get__(self, instance, owner):
                 if instance is None or instance.parent is None:
@@ -456,7 +460,7 @@ class FileInput(Base.ValueInput, Base.StaticComposite):
                    %(Clear)s
                   </span>""" % result
 
-class ToggleButton(Base.ValueInput, Button):
+class ToggleButton(Webwidgets.Widgets.Base.ValueInput, Button):
     """
     A toggle button is very similar to a checkbox button, except it is
     rendered as a normal button, and instantly cause a page-load when
@@ -466,7 +470,7 @@ class ToggleButton(Base.ValueInput, Button):
     true_title = 'True'
     false_title = 'False'
     original_value = False
-    class WwModel(Base.ValueInput.WwModel):
+    class WwModel(Webwidgets.Widgets.Base.ValueInput.WwModel):
         value = False
 
     class HtmlClass(object):
@@ -498,9 +502,9 @@ class ToggleButton(Base.ValueInput, Button):
     def field_output(self, path):
         return []
 
-class FieldStorageInput(Base.ValueInput):
+class FieldStorageInput(Webwidgets.Widgets.Base.ValueInput):
     original_value = None
-    class WwModel(Base.ValueInput.WwModel):
+    class WwModel(Webwidgets.Widgets.Base.ValueInput.WwModel):
         value = None
 
     def field_input(self, path, string_value):
@@ -524,7 +528,7 @@ class FieldStorageInput(Base.ValueInput):
             res = self.value.file.read().decode('utf-8')
         return [res]
 
-class NotificationError(Base.SingleActionInput):
+class NotificationError(Webwidgets.Widgets.Base.SingleActionInput):
     error = Exception("Example error")
     ww_bind_callback = "dont-require"
     

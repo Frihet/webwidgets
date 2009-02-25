@@ -19,7 +19,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import Webwidgets, Webwidgets.Utils, Webwidgets.Utils.Mail, traceback
+import traceback
+import Webwidgets
+import Webwidgets.Utils
+import Webwidgets.Utils.Mail
 
 class LogIn(object):
     global_session = True

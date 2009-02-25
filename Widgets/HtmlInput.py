@@ -20,9 +20,11 @@
 
 import time, os.path
 import Webwidgets.Utils
-import BaseInput, Base, WindowMod
+import Webwidgets.Widgets.BaseInput
+import Webwidgets.Widgets.Base
+import Webwidgets.Widgets.WindowMod
 
-class HtmlInput(BaseInput.StringInput, Base.DirectoryServer):
+class HtmlInput(Webwidgets.Widgets.BaseInput.StringInput, Webwidgets.Widgets.Base.DirectoryServer):
     """
     Html Input Widget.
     """
@@ -33,11 +35,11 @@ class HtmlInput(BaseInput.StringInput, Base.DirectoryServer):
         """
         Draw input widget.
         """
-        WindowMod.HtmlWindow.register_script_link(self, self.calculate_url({'widget_class': 'Webwidgets.HtmlInput',
+        Webwidgets.Widgets.WindowMod.HtmlWindow.register_script_link(self, self.calculate_url({'widget_class': 'Webwidgets.HtmlInput',
                                                    'location': ['fckeditor.js']},
                                                   {}))
         widget_id = Webwidgets.Utils.path_to_id(self.path)
-        WindowMod.HtmlWindow.register_script(self, 'fckeditor: ' + widget_id,
+        Webwidgets.Widgets.WindowMod.HtmlWindow.register_script(self, 'fckeditor: ' + widget_id,
                             """
 webwidgets_add_event_handler(
  window,

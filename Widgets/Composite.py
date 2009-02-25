@@ -26,10 +26,14 @@
 """
 
 import types
-import Webwidgets.Utils, Webwidgets.Constants
-import Base, WindowMod, BaseInput, Formatting
+import Webwidgets.Utils
+import Webwidgets.Constants
+import Webwidgets.Widgets.Base
+import Webwidgets.Widgets.WindowMod
+import Webwidgets.Widgets.BaseInput
+import Webwidgets.Widgets.Formatting
 
-class LanguageInput(BaseInput.ListInput):
+class LanguageInput(Webwidgets.Widgets.BaseInput.ListInput):
     languages = {'en':u'English', 'sv':u'Svenska', 'no':u'Norsk'}
     
     def get_children(self):
@@ -47,7 +51,7 @@ class LanguageSelector(LanguageInput):
             instance.session.languages = (value,)
     value = Value()
 
-class InfoFrame(Base.StaticComposite):
+class InfoFrame(Webwidgets.Widgets.Base.StaticComposite):
     def draw_head(self, children, output_options):
         if 'Head' not in children:
             children['Head'] = children['Body'].title
@@ -96,7 +100,7 @@ class StaticDialog(InfoFrame):
                    %(Buttons)s
                   </div>""" % children
 
-    class Buttons(BaseInput.ButtonArray):
+    class Buttons(Webwidgets.Widgets.BaseInput.ButtonArray):
         def selected(self, path, value):
             self.parent.notify('selected', value)
             raise StopIteration
@@ -107,11 +111,11 @@ class StaticDialog(InfoFrame):
 
         buttons = Buttons()
 
-class AbstractDialog(StaticDialog, Base.DirectoryServer):
+class AbstractDialog(StaticDialog, Webwidgets.Widgets.Base.DirectoryServer):
     remove_on_close = False
 
     def draw(self, output_options):
-        WindowMod.HtmlWindow.register_script_link(
+        Webwidgets.Widgets.WindowMod.HtmlWindow.register_script_link(
             self, 
             self.calculate_url_to_directory_server(
                 'Webwidgets.Dialog',
@@ -139,30 +143,30 @@ class InfoDialog(AbstractInfoDialog):
     buttons = {'Ok': '1'}
 
 class ConfirmationDialog(AbstractInfoDialog):
-    class Head(Formatting.Html):
+    class Head(Webwidgets.Widgets.Formatting.Html):
         html = """Really perform action?"""
-    class Body(Formatting.Html):
+    class Body(Webwidgets.Widgets.Formatting.Html):
         html = """Do you really want to perform this action?"""
 
 class DisableConfirmationDialog(ConfirmationDialog):
-    class Head(Formatting.Html):
+    class Head(Webwidgets.Widgets.Formatting.Html):
         html = """Really disable this item?"""
-    class Body(Formatting.Html):
+    class Body(Webwidgets.Widgets.Formatting.Html):
         html = """Do you really want to disable this item?"""
 
 class DeleteConfirmationDialog(ConfirmationDialog):
-    class Head(Formatting.Html):
+    class Head(Webwidgets.Widgets.Formatting.Html):
         html = """Really delete this item?"""
-    class Body(Formatting.Html):
+    class Body(Webwidgets.Widgets.Formatting.Html):
         html = """Do you really want to delete this item?"""
 
-class DialogContainer(Formatting.Div):
+class DialogContainer(Webwidgets.Widgets.Formatting.Div):
     is_dialog_container = True
 
     __wwml_html_override__ = False
     html = "%(Dialogs)s%(Body)s"
-    class Dialogs(Formatting.ReplacedList): pass
-    class Body(Formatting.Html): pass
+    class Dialogs(Webwidgets.Widgets.Formatting.ReplacedList): pass
+    class Body(Webwidgets.Widgets.Formatting.Html): pass
 
     def add_dialog(self, dialog, name = None):
         if name is None: name = str(len(self['Dialogs'].children))
@@ -175,7 +179,7 @@ class DialogContainer(Formatting.Div):
             ).add_dialog(dialog, name)
     add_dialog_to_nearest = classmethod(add_dialog_to_nearest)
 
-class Tabset(Base.StaticComposite):
+class Tabset(Webwidgets.Widgets.Base.StaticComposite):
     def get_pages(self, output_options):
         nr_of_descendants = 0
         tabs = Webwidgets.Utils.OrderedDict()
@@ -227,7 +231,7 @@ class SwitchingView(Tabset):
                                output_options,
                                True)
 
-class TabbedView(SwitchingView, Base.ActionInput):
+class TabbedView(SwitchingView, Webwidgets.Widgets.Base.ActionInput):
     """Provides a set of overlapping 'pages' with tabs, each tab
     holding some other widget, through wich a user can browse using
     the tabs.
@@ -355,7 +359,7 @@ class TabbedView(SwitchingView, Base.ActionInput):
                           Webwidgets.Utils.classes_remove_bases(self.ww_classes, TabbedView), ['page'])
                       }
 
-class Hide(Base.StaticComposite):
+class Hide(Webwidgets.Widgets.Base.StaticComposite):
     """
     A hide/show widget
 
@@ -366,7 +370,7 @@ class Hide(Base.StaticComposite):
     update at the expense of longer reloads
     """
 
-    class HideButton(BaseInput.ToggleButton):
+    class HideButton(Webwidgets.Widgets.BaseInput.ToggleButton):
         true_title = "Hide"
         false_title = "Show"
 

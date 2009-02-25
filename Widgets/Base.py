@@ -29,11 +29,13 @@ widgets.
 """
 
 import types, xml.sax.saxutils, os.path, cgi, re, sys, weakref
+import traceback, WebUtils.HTMLForException, pdb
+import Webwidgets.Constants
 import Webwidgets.ObjectMod
-import Webwidgets.Utils, Webwidgets.Utils.Gettext, Webwidgets.Constants
+import Webwidgets.Utils
+import Webwidgets.Utils.Gettext
 import Webwidgets.Utils.FileHandling
 import Webwidgets.Utils.Threads
-import traceback, WebUtils.HTMLForException, pdb
 
 debug_exceptions = False
 print_exceptions = False

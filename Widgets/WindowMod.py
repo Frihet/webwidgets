@@ -21,9 +21,11 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import re, cgi, types
-import Webwidgets.Constants, Webwidgets.Utils, Base, Formatting
+import Webwidgets.Constants
+import Webwidgets.Utils
+import Webwidgets.Widgets.Base
 
-class Window(Base.Widget):
+class Window(Webwidgets.Widgets.Base.Widget):
     """Window is the main widget and should allways be the top-level
     widget of any application. It has an attribute for the HTTP
     headers and handles form submission values and URL arguments."""
@@ -150,15 +152,15 @@ class Window(Base.Widget):
                 field.append_exception()
         
 
-class HtmlWindow(Window, Base.StaticComposite, Base.DirectoryServer):
+class HtmlWindow(Window, Webwidgets.Widgets.Base.StaticComposite, Webwidgets.Widgets.Base.DirectoryServer):
     """HtmlWindow is the main widget for any normal application window
     displaying HTML. It has two children - head and body aswell as
     attributes for title, encoding and doctype"""
 
     headers = {'Status': '200 OK'}
     title = 'Page not available'
-    Head = Base.Text.derive(html = '')
-    Body = Base.Text.derive(html = 'Page not available')
+    Head = Webwidgets.Widgets.Base.Text.derive(html = '')
+    Body = Webwidgets.Widgets.Base.Text.derive(html = 'Page not available')
     encoding = 'UTF-8'
     doctype = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
 

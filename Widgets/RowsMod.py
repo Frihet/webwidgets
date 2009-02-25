@@ -20,8 +20,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import re, math, cgi, types, itertools
-import Webwidgets.Constants, Webwidgets.Utils, Webwidgets.FilterMod
-import Base
+import Webwidgets.Constants
+import Webwidgets.Utils
+import Webwidgets.FilterMod
+import Webwidgets.Widgets.Base
 
 class RowsSimpleModelFilter(Webwidgets.FilterMod.Filter):
     """This filter adds support for memmory mapped L{RowsComposite} -
@@ -229,7 +231,7 @@ class RowsRowWrapperFilter(Webwidgets.FilterMod.Filter):
             ww_model = self.ww_filter.get_row_by_id(row_id[5:], **kwargs))
     
 
-class RowsComposite(Base.CachingComposite):
+class RowsComposite(Webwidgets.Widgets.Base.CachingComposite):
     """
     RowsComposite is the base class for widgets that provide some
     kind of list or table of other widgets that can be sorted,
@@ -338,7 +340,7 @@ class RowsComposite(Base.CachingComposite):
             """
             raise NotImplementedError("get_pages")
 
-    class RowsRowWidget(Base.CachingComposite): pass
+    class RowsRowWidget(Webwidgets.Widgets.Base.CachingComposite): pass
 
     class SourceFilters(Webwidgets.FilterMod.Filter):
         """This filter groups all filters that provides rows from some
@@ -457,8 +459,8 @@ class RowsComposite(Base.CachingComposite):
                     and column in parent
                     and column in child
                     and (   not self.dont_merge_widgets
-                         or (    not isinstance(parent[column], Base.Widget)
-                             and not isinstance(child[column], Base.Widget)))
+                         or (    not isinstance(parent[column], Webwidgets.Widgets.Base.Widget)
+                             and not isinstance(child[column], Webwidgets.Widgets.Base.Widget)))
                     and parent[column] == child[column]):
                 break
             level += 1
