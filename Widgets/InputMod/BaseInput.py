@@ -29,7 +29,7 @@ import Webwidgets.Utils
 import Webwidgets.Utils.Locale
 import Webwidgets.Constants
 import Webwidgets.Widgets.Base
-import Webwidgets.Widgets.WindowMod
+import Webwidgets.Widgets.ApplicationMod.WindowMod
 import Webwidgets.Widgets.FormattingMod.BaseFormatting
 
 class ArgumentInput(Webwidgets.Widgets.Base.ValueInput):
@@ -239,7 +239,7 @@ class UpdateButton(Webwidgets.Widgets.Base.SingleActionInput):
         info = {'html_attributes': self.draw_html_attributes(self.path),
                 'id': Webwidgets.Utils.path_to_id(self.path),
                 'title': self._("Update", output_options)}
-        Webwidgets.Widgets.WindowMod.HtmlWindow.register_script(self, 'update_button: %(id)s' % info,
+        Webwidgets.Widgets.ApplicationMod.WindowMod.HtmlWindow.register_script(self, 'update_button: %(id)s' % info,
                             """
                             webwidgets_add_event_handler(window, 'load',
                              'webwidgets_update_button: %(id)s',

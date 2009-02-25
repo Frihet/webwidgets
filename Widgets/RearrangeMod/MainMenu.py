@@ -26,7 +26,7 @@ import Webwidgets.Utils
 import Webwidgets.Constants
 import Webwidgets.Widgets.RearrangeMod.DialogMod
 import Webwidgets.Widgets.Base
-import Webwidgets.Widgets.WindowMod
+import Webwidgets.Widgets.ApplicationMod.WindowMod
 
 class MainMenu(Webwidgets.Widgets.Base.DirectoryServer, Webwidgets.Widgets.RearrangeMod.SwitchingMod.TabbedView):
     def draw_tab_entry(self, child_widget, info, output_options):
@@ -75,8 +75,8 @@ menu_bar_menu.setOnClickHandler(onButtonClick);
     def draw(self, output_options):
         def calculate_url(location):
             return self.calculate_url_to_directory_server('Webwidgets.MainMenu', location, output_options)
-        Webwidgets.Widgets.WindowMod.HtmlWindow.register_style_link(self, calculate_url(['css', 'dhtmlXMenu.css']))
-        Webwidgets.Widgets.WindowMod.HtmlWindow.register_script_link(self, calculate_url(['js', 'dhtmlXProtobar.js']))
-        Webwidgets.Widgets.WindowMod.HtmlWindow.register_script_link(self, calculate_url(['js', 'dhtmlXMenuBar.js']))
-        Webwidgets.Widgets.WindowMod.HtmlWindow.register_script_link(self, calculate_url(['js', 'dhtmlXCommon.js']))
+        Webwidgets.Widgets.ApplicationMod.WindowMod.HtmlWindow.register_style_link(self, calculate_url(['css', 'dhtmlXMenu.css']))
+        Webwidgets.Widgets.ApplicationMod.WindowMod.HtmlWindow.register_script_link(self, calculate_url(['js', 'dhtmlXProtobar.js']))
+        Webwidgets.Widgets.ApplicationMod.WindowMod.HtmlWindow.register_script_link(self, calculate_url(['js', 'dhtmlXMenuBar.js']))
+        Webwidgets.Widgets.ApplicationMod.WindowMod.HtmlWindow.register_script_link(self, calculate_url(['js', 'dhtmlXCommon.js']))
         return Webwidgets.Widgets.RearrangeMod.SwitchingMod.TabbedView.draw(self, Webwidgets.Utils.subclass_dict(output_options, {'MainMenu.noscript_version': False}))

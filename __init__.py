@@ -105,7 +105,7 @@ if __name__ == "Webwidgets":
     from Webwidgets.Widgets.FormattingMod.ListMod import *
     from Webwidgets.Widgets.RearrangeMod.BaseTableMod import *
     from Webwidgets.Widgets.RearrangeMod.TableMod import *
-    from Webwidgets.Widgets.LogIn import *
+    from Webwidgets.Widgets.ApplicationMod.LogIn import *
 
     from Webwidgets.Widgets.InputMod.LanguageMod import *
     from Webwidgets.Widgets.InputMod.DateInput import *
@@ -120,6 +120,6 @@ if __name__ == "Webwidgets":
     from Webwidgets.Widgets.InputMod.LocationInput import *
     from Webwidgets.Widgets.InputMod.AddressMod import *
 
-    from Webwidgets.Widgets.WindowMod import *
+    from Webwidgets.Widgets.ApplicationMod.WindowMod import *
     from Webwidgets.Widgets.RearrangeMod.MainMenu import *
-    from Webwidgets.Widgets.ApplicationWindow import *
+    from Webwidgets.Widgets.ApplicationMod.ApplicationWindow import *

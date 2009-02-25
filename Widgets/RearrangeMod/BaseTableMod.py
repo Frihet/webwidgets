@@ -30,7 +30,7 @@ import Webwidgets.Constants
 import Webwidgets.Utils
 import Webwidgets.FilterMod
 import Webwidgets.Widgets.Base
-import Webwidgets.Widgets.WindowMod
+import Webwidgets.Widgets.ApplicationMod.WindowMod
 import Webwidgets.Widgets.RowsMod
 
 class RenderedRowType(object): pass
@@ -363,7 +363,7 @@ class BaseTable(Webwidgets.Widgets.RowsMod.RowsComposite, Webwidgets.Widgets.Bas
         return self.ww_filter.html_output_cache
 
     def draw(self, output_options):
-        Webwidgets.Widgets.WindowMod.HtmlWindow.register_style_link(self, self.calculate_url({'transaction': output_options['transaction'],
+        Webwidgets.Widgets.ApplicationMod.WindowMod.HtmlWindow.register_style_link(self, self.calculate_url({'transaction': output_options['transaction'],
                                                      'widget_class': 'Webwidgets.BaseTable',
                                                      'location': ['Table.css']},
                                                     {}))

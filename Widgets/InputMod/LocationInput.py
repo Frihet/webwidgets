@@ -21,7 +21,7 @@
 import Webwidgets.Utils
 import Webwidgets.ObjectMod
 import Webwidgets.FilterMod
-import Webwidgets.Widgets.WindowMod
+import Webwidgets.Widgets.ApplicationMod.WindowMod
 import Webwidgets.Widgets.FormattingMod.BaseFormatting
 import Webwidgets.Widgets.FormattingMod.ListMod
 import Webwidgets.Widgets.InputMod.LocationInputLocations
@@ -121,7 +121,7 @@ class CountyInput(CountryInput):
     class Country(CountryInput.Country):
         class Field(CountryInput.Country.Field):
             def draw(self, output_options):
-                Webwidgets.Widgets.WindowMod.HtmlWindow.register_submit_action(self, self.path, 'change')
+                Webwidgets.Widgets.ApplicationMod.WindowMod.HtmlWindow.register_submit_action(self, self.path, 'change')
                 return CountryInput.Country.Field.draw(self, output_options)
 
             def value_changed(self, path, value):
@@ -159,7 +159,7 @@ class MunicipalityInput(CountyInput):
     class County(CountyInput.County):
         class Field(CountyInput.County.Field):
             def draw(self, output_options):
-                Webwidgets.Widgets.WindowMod.HtmlWindow.register_submit_action(self, self.path, 'change')
+                Webwidgets.Widgets.ApplicationMod.WindowMod.HtmlWindow.register_submit_action(self, self.path, 'change')
                 return CountyInput.County.Field.draw(self, output_options)
 
             def value_changed(self, path, value):

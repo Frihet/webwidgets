@@ -25,7 +25,7 @@
 import types, StringIO, cgi, sys, os, threading
 import Webwidgets.Utils
 import Webwidgets.Constants
-import Webwidgets.Widgets.WindowMod
+import Webwidgets.Widgets.ApplicationMod.WindowMod
 import Webwidgets.Widgets.FormattingMod.BaseFormatting
 import Webwidgets.Widgets.InputMod.BaseInput
 import Webwidgets.Widgets.RearrangeMod.DialogMod
@@ -36,7 +36,7 @@ class ModalProgressPage(Webwidgets.Widgets.FormattingMod.BaseFormatting.Progress
     
     def draw(self, output_options):
         if self.progress_position < self.scale_end:
-            Webwidgets.Widgets.WindowMod.HtmlWindow.register_header(
+            Webwidgets.Widgets.ApplicationMod.WindowMod.HtmlWindow.register_header(
                 self, 'Refresh',
                 '0;URL=%s' % (self.calculate_url({'transaction': output_options['transaction'],
                                                   'widget': Webwidgets.Utils.path_to_id(self.path)}),))

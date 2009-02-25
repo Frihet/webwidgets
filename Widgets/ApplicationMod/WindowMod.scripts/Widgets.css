@@ -426,7 +426,7 @@ select {
  height: 30px;
 }
 
-.Webwidgets-Widgets-LogIn-LogIn-LogIn,
+.Webwidgets-Widgets-ApplicationMod-LogIn-LogIn-LogIn,
 .Webwidgets-Widgets-RearrangeMod-DialogMod-AbstractDialog {
  position: absolute;
  left: 20%;
@@ -440,7 +440,7 @@ select {
  z-index: 1;
 }
 
-.Webwidgets-Widgets-LogIn-LogIn-LogIn-_-head,
+.Webwidgets-Widgets-ApplicationMod-LogIn-LogIn-LogIn-_-head,
 .Webwidgets-Widgets-RearrangeMod-DialogMod-AbstractDialog-_-head {
  position: absolute;
  top: 0;
@@ -449,7 +449,7 @@ select {
  right: 0;
 }
 
-.Webwidgets-Widgets-LogIn-LogIn-LogIn-_-body,
+.Webwidgets-Widgets-ApplicationMod-LogIn-LogIn-LogIn-_-body,
 .Webwidgets-Widgets-RearrangeMod-DialogMod-AbstractDialog-_-body {
  position: absolute;
  top: 30px;
@@ -458,7 +458,7 @@ select {
  right: 0;
 }
 
-.Webwidgets-Widgets-LogIn-LogIn-LogIn-_-foot,
+.Webwidgets-Widgets-ApplicationMod-LogIn-LogIn-LogIn-_-foot,
 .Webwidgets-Widgets-RearrangeMod-DialogMod-AbstractDialog-_-foot {
  position: absolute;
  height: 30px;

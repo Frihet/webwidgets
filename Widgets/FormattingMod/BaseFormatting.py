@@ -27,7 +27,7 @@ import types, StringIO, cgi, sys, os, re
 import Webwidgets.Utils
 import Webwidgets.Constants
 import Webwidgets.Widgets.Base
-import Webwidgets.Widgets.WindowMod
+import Webwidgets.Widgets.ApplicationMod.WindowMod
 import Webwidgets.Widgets.FormattingMod.GridLayoutModel
 
 class List(Webwidgets.Widgets.Base.StaticComposite):
@@ -51,7 +51,7 @@ class List(Webwidgets.Widgets.Base.StaticComposite):
 
 class ReplacedList(List):
     def draw(self, output_options):
-        Webwidgets.Widgets.WindowMod.HtmlWindow.register_replaced_content(
+        Webwidgets.Widgets.ApplicationMod.WindowMod.HtmlWindow.register_replaced_content(
             self,
             List.draw(self, output_options))
         return ''
@@ -298,7 +298,7 @@ class Media(Webwidgets.Widgets.Base.Widget):
     
     def draw_inline_text__css(self, output_options):
         if self.get_option('merge'):
-            Webwidgets.Widgets.WindowMod.HtmlWindow.register_style_link(self, self.calculate_output_url(output_options))
+            Webwidgets.Widgets.ApplicationMod.WindowMod.HtmlWindow.register_style_link(self, self.calculate_output_url(output_options))
             return self.draw_inline_default(output_options)
         else:
             return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>""" % {
@@ -312,7 +312,7 @@ class Media(Webwidgets.Widgets.Base.Widget):
 
     def draw_inline_application__x_javascript(self, output_options):
         if self.get_option('merge'):
-            Webwidgets.Widgets.WindowMod.HtmlWindow.register_script_link(self, self.calculate_output_url(output_options))
+            Webwidgets.Widgets.ApplicationMod.WindowMod.HtmlWindow.register_script_link(self, self.calculate_output_url(output_options))
             return self.draw_inline_default(output_options)
         else:
             return """<iframe src="%(location)s" title="%(name)s" %(width)s %(height)s></iframe>""" % {

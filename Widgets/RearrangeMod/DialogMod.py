@@ -29,7 +29,7 @@ import types
 import Webwidgets.Utils
 import Webwidgets.Constants
 import Webwidgets.Widgets.Base
-import Webwidgets.Widgets.WindowMod
+import Webwidgets.Widgets.ApplicationMod.WindowMod
 import Webwidgets.Widgets.InputMod.BaseInput
 import Webwidgets.Widgets.FormattingMod.BaseFormatting
 
@@ -97,7 +97,7 @@ class AbstractDialog(StaticDialog, Webwidgets.Widgets.Base.DirectoryServer):
     remove_on_close = False
 
     def draw(self, output_options):
-        Webwidgets.Widgets.WindowMod.HtmlWindow.register_script_link(
+        Webwidgets.Widgets.ApplicationMod.WindowMod.HtmlWindow.register_script_link(
             self, 
             self.calculate_url_to_directory_server(
                 'Webwidgets.Dialog',

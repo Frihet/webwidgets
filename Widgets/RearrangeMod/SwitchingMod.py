@@ -29,7 +29,7 @@ import types
 import Webwidgets.Utils
 import Webwidgets.Constants
 import Webwidgets.Widgets.Base
-import Webwidgets.Widgets.WindowMod
+import Webwidgets.Widgets.ApplicationMod.WindowMod
 import Webwidgets.Widgets.InputMod.BaseInput
 import Webwidgets.Widgets.FormattingMod.BaseFormatting
 
