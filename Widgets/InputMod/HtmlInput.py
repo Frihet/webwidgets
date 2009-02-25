@@ -20,11 +20,11 @@
 
 import time, os.path
 import Webwidgets.Utils
-import Webwidgets.Widgets.BaseInput
+import Webwidgets.Widgets.InputMod.BaseInput
 import Webwidgets.Widgets.Base
 import Webwidgets.Widgets.WindowMod
 
-class HtmlInput(Webwidgets.Widgets.BaseInput.StringInput, Webwidgets.Widgets.Base.DirectoryServer):
+class HtmlInput(Webwidgets.Widgets.InputMod.BaseInput.StringInput, Webwidgets.Widgets.Base.DirectoryServer):
     """
     Html Input Widget.
     """

@@ -20,11 +20,11 @@
 
 import datetime, time, os.path
 import Webwidgets.Utils
-import Webwidgets.Widgets.BaseInput
+import Webwidgets.Widgets.InputMod.BaseInput
 import Webwidgets.Widgets.Base
 import Webwidgets.Widgets.WindowMod
 
-class DateInput(Webwidgets.Widgets.BaseInput.StringInput, Webwidgets.Widgets.Base.DirectoryServer):
+class DateInput(Webwidgets.Widgets.InputMod.BaseInput.StringInput, Webwidgets.Widgets.Base.DirectoryServer):
     """
     Date Selector Widget.
     """

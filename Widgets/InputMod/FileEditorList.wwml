@@ -21,7 +21,7 @@
  xmlns="http://www.w3.org/TR/REC-html40"
  xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
  xmlns:h="http://www.w3.org/TR/REC-html40"
- bind="Webwidgets.Widgets.FileEditorListCallbacks">
+ bind="Webwidgets.Widgets.InputMod.FileEditorListCallbacks">
  >
 
  <w:Table

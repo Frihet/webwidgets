@@ -29,7 +29,7 @@ msgstr "Skjul"
 msgid "InfoGroup"
 msgstr ""
 
-msgid "Webwidgets.Widgets.FileEditorListCallbacks"
+msgid "Webwidgets.Widgets.InputMod.FileEditorListCallbacks"
 msgstr ""
 
 msgid "default"

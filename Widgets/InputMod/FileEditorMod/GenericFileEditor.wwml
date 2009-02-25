@@ -21,8 +21,8 @@
  xmlns="http://www.w3.org/TR/REC-html40"
  xmlns:w="http://freecode.no/xml/namespaces/wwml-1.0"
  xmlns:h="http://www.w3.org/TR/REC-html40"
- using="Webwidgets.Widgets.FileEditorMod"
- bind="Webwidgets.Widgets.FileEditorMod.GenericFileEditorCallbacks">
+ using="Webwidgets.Widgets.InputMod.FileEditorMod"
+ bind="Webwidgets.Widgets.InputMod.FileEditorMod.GenericFileEditorCallbacks">
  >
  <w:Html id="FileEditor" top_level="div" expanded=":false">
   <div class="top">

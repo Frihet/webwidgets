@@ -27,10 +27,10 @@ import Webwidgets.Utils
 import Webwidgets.Constants
 import Webwidgets.Widgets.WindowMod
 import Webwidgets.Widgets.Formatting
-import Webwidgets.Widgets.BaseInput
+import Webwidgets.Widgets.InputMod.BaseInput
 import Webwidgets.Widgets.Composite
 
-class ModalProgressPage(Webwidgets.Widgets.Formatting.ProgressMeter, Webwidgets.Widgets.BaseInput.PageLoadNotifier):
+class ModalProgressPage(Webwidgets.Widgets.Formatting.ProgressMeter, Webwidgets.Widgets.InputMod.BaseInput.PageLoadNotifier):
     frefresh_interval = 1
     title = "Please wait"
     
@@ -40,7 +40,7 @@ class ModalProgressPage(Webwidgets.Widgets.Formatting.ProgressMeter, Webwidgets.
                 self, 'Refresh',
                 '0;URL=%s' % (self.calculate_url({'transaction': output_options['transaction'],
                                                   'widget': Webwidgets.Utils.path_to_id(self.path)}),))
-        return Webwidgets.Widgets.BaseInput.PageLoadNotifier.draw(self, output_options)
+        return Webwidgets.Widgets.InputMod.BaseInput.PageLoadNotifier.draw(self, output_options)
 
     def page_load(self, path, mode):
         # Note: page_load is only sent when we have normal input

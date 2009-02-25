@@ -96,7 +96,7 @@ if __name__ == "Webwidgets":
 
     from Webwidgets.Widgets.Base import *
     from Webwidgets.Widgets.Formatting import *
-    from Webwidgets.Widgets.BaseInput import *
+    from Webwidgets.Widgets.InputMod.BaseInput import *
     from Webwidgets.Widgets.Composite import *
     from Webwidgets.Widgets.Progress import *
     from Webwidgets.Widgets.Tree import *
@@ -105,17 +105,18 @@ if __name__ == "Webwidgets":
     from Webwidgets.Widgets.BaseTableMod import *
     from Webwidgets.Widgets.TableMod import *
     from Webwidgets.Widgets.LogIn import *
-    from Webwidgets.Widgets.DateInput import *
-    from Webwidgets.Widgets.HtmlInput import *
 
-    from Webwidgets.Widgets.FileEditorMod.TextFileEditor import *
-    from Webwidgets.Widgets.FileEditorMod.CssFileEditor import *
-    from Webwidgets.Widgets.FileEditorMod.HtmlFileEditor import *
-    from Webwidgets.Widgets.FileEditorMod.GenericFileEditor import *
-    from Webwidgets.Widgets.FileEditorList import *
+    from Webwidgets.Widgets.InputMod.DateInput import *
+    from Webwidgets.Widgets.InputMod.HtmlInput import *
 
-    from Webwidgets.Widgets.LocationInput import *
-    from Webwidgets.Widgets.AddressMod import *
+    from Webwidgets.Widgets.InputMod.FileEditorMod.TextFileEditor import *
+    from Webwidgets.Widgets.InputMod.FileEditorMod.CssFileEditor import *
+    from Webwidgets.Widgets.InputMod.FileEditorMod.HtmlFileEditor import *
+    from Webwidgets.Widgets.InputMod.FileEditorMod.GenericFileEditor import *
+    from Webwidgets.Widgets.InputMod.FileEditorList import *
+
+    from Webwidgets.Widgets.InputMod.LocationInput import *
+    from Webwidgets.Widgets.InputMod.AddressMod import *
 
     from Webwidgets.Widgets.WindowMod import *
     from Webwidgets.Widgets.MainMenu import *

@@ -24,7 +24,7 @@ import Webwidgets.FilterMod
 import Webwidgets.Widgets.WindowMod
 import Webwidgets.Widgets.Formatting
 import Webwidgets.Widgets.ListMod
-import Webwidgets.Widgets.LocationInputLocations
+import Webwidgets.Widgets.InputMod.LocationInputLocations
 
 class GenericRegionPart(Webwidgets.ObjectMod.Object):
     class WwModel(Webwidgets.ObjectMod.Object):
@@ -33,14 +33,14 @@ class GenericRegionPart(Webwidgets.ObjectMod.Object):
         region_prefix = []
 
     def get_region_from_sym(self):
-        region = Webwidgets.Widgets.LocationInputLocations.world
+        region = Webwidgets.Widgets.InputMod.LocationInputLocations.world
         for prefix in self.ww_filter.region_prefix:
             if prefix not in region.sym_dict: return None
             region = region.sym_dict[prefix]
         return region
 
     def get_region_from_name(self):
-        region = Webwidgets.Widgets.LocationInputLocations.world
+        region = Webwidgets.Widgets.InputMod.LocationInputLocations.world
         for prefix in self.ww_filter.region_prefix:
             if prefix not in region.name_dict: return None
             region = region.name_dict[prefix]

@@ -869,7 +869,7 @@ msgstr ""
 msgid "Webwidgets.Widgets.FileEditorCallbacks"
 msgstr ""
 
-msgid "Webwidgets.Widgets.FileEditorListCallbacks"
+msgid "Webwidgets.Widgets.InputMod.FileEditorListCallbacks"
 msgstr ""
 
 msgid "Webwidgets.Widgets.InputCombinationCallbacks"

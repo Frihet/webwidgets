@@ -30,10 +30,10 @@ import Webwidgets.Utils
 import Webwidgets.Constants
 import Webwidgets.Widgets.Base
 import Webwidgets.Widgets.WindowMod
-import Webwidgets.Widgets.BaseInput
+import Webwidgets.Widgets.InputMod.BaseInput
 import Webwidgets.Widgets.Formatting
 
-class LanguageInput(Webwidgets.Widgets.BaseInput.ListInput):
+class LanguageInput(Webwidgets.Widgets.InputMod.BaseInput.ListInput):
     languages = {'en':u'English', 'sv':u'Svenska', 'no':u'Norsk'}
     
     def get_children(self):
@@ -100,7 +100,7 @@ class StaticDialog(InfoFrame):
                    %(Buttons)s
                   </div>""" % children
 
-    class Buttons(Webwidgets.Widgets.BaseInput.ButtonArray):
+    class Buttons(Webwidgets.Widgets.InputMod.BaseInput.ButtonArray):
         def selected(self, path, value):
             self.parent.notify('selected', value)
             raise StopIteration
@@ -370,7 +370,7 @@ class Hide(Webwidgets.Widgets.Base.StaticComposite):
     update at the expense of longer reloads
     """
 
-    class HideButton(Webwidgets.Widgets.BaseInput.ToggleButton):
+    class HideButton(Webwidgets.Widgets.InputMod.BaseInput.ToggleButton):
         true_title = "Hide"
         false_title = "Show"
 
