@@ -28,7 +28,7 @@ import Webwidgets.Constants
 import Webwidgets.Widgets.WindowMod
 import Webwidgets.Widgets.Formatting
 import Webwidgets.Widgets.InputMod.BaseInput
-import Webwidgets.Widgets.Composite
+import Webwidgets.Widgets.DialogMod
 
 class ModalProgressPage(Webwidgets.Widgets.Formatting.ProgressMeter, Webwidgets.Widgets.InputMod.BaseInput.PageLoadNotifier):
     frefresh_interval = 1
@@ -123,7 +123,7 @@ class ModalThreadProgressPage(ModalProgressPage):
     def run(self, *arg, **kw):
         raise NotImplementedError
 
-class ModalThreadProgressPageDialog(Webwidgets.Widgets.Composite.InfoDialog, ModalThreadProgressPage):
+class ModalThreadProgressPageDialog(Webwidgets.Widgets.DialogMod.InfoDialog, ModalThreadProgressPage):
     buttons = {}
     
     class Head(Webwidgets.Widgets.Formatting.Html):
@@ -133,7 +133,7 @@ class ModalThreadProgressPageDialog(Webwidgets.Widgets.Composite.InfoDialog, Mod
         html = "The operation is in progress. Please wait. If this page does not refresh automatically, if it does not, refresh the page manually."
 
     def __init__(self, *arg, **kw):
-        Webwidgets.Widgets.Composite.InfoDialog.__init__(self, *arg, **kw)
+        Webwidgets.Widgets.DialogMod.InfoDialog.__init__(self, *arg, **kw)
         ModalThreadProgressPage.__init__(self, *arg, **kw)
         self.start()
 
@@ -146,10 +146,10 @@ class ModalThreadProgressPageDialog(Webwidgets.Widgets.Composite.InfoDialog, Mod
         self.close()
 
     def draw(self, output_options):
-        return (  Webwidgets.Widgets.Composite.InfoDialog.draw(self, output_options)
+        return (  Webwidgets.Widgets.DialogMod.InfoDialog.draw(self, output_options)
                 + ModalThreadProgressPage.draw(self, output_options))
 
-    class Done(Webwidgets.Widgets.Composite.InfoDialog):
+    class Done(Webwidgets.Widgets.DialogMod.InfoDialog):
         class Head(Webwidgets.Widgets.Formatting.Html):
             html = "Done"
         class Body(Webwidgets.Widgets.Formatting.Html):

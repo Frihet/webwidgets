@@ -98,26 +98,26 @@ input.error,
 }
 
 /* Widget styling */
-.Webwidgets-Widgets-Composite-TabbedView {
+.Webwidgets-Widgets-SwitchingMod-TabbedView {
 }
 
-.Webwidgets-Widgets-Composite-TabbedView .page {
+.Webwidgets-Widgets-SwitchingMod-TabbedView .page {
  padding: 10px;
  border: 1px solid black;
 }
 
-.Webwidgets-Widgets-Composite-TabbedView ul.tabs {
+.Webwidgets-Widgets-SwitchingMod-TabbedView ul.tabs {
  list-style-type: none;
  padding: 0pt;
  margin-bottom: 0;
 }
-.Webwidgets-Widgets-Composite-TabbedView ul.tabs li {
+.Webwidgets-Widgets-SwitchingMod-TabbedView ul.tabs li {
  border-top: 1px solid black;
  border-left: 1px solid black;
  border-right: 1px solid black;
  display: inline;
 }
-.Webwidgets-Widgets-Composite-TabbedView ul.tabs li * {
+.Webwidgets-Widgets-SwitchingMod-TabbedView ul.tabs li * {
  font-size: 8pt;
  padding: 0px;
  margin: 0px;
@@ -401,33 +401,33 @@ select {
  color: #000000;
 }
 
-.Webwidgets-Widgets-Composite-InfoFrame {
+.Webwidgets-Widgets-DialogMod-InfoFrame {
  border: 1px solid black;
  color: #000000;
  background: #ffffff;
  margin: 5pt;
 }
 
-.Webwidgets-Widgets-Composite-InfoFrame-_-head {
+.Webwidgets-Widgets-DialogMod-InfoFrame-_-head {
  background: #f2bfff;
  border-bottom: 2px solid #dd55ff;
  padding: 2px;
  height: 26px;
 }
 
-.Webwidgets-Widgets-Composite-InfoFrame-_-body {
+.Webwidgets-Widgets-DialogMod-InfoFrame-_-body {
  padding: 10px;
  overflow-y: auto;
 }
 
-.Webwidgets-Widgets-Composite-InfoFrame-_-foot {
+.Webwidgets-Widgets-DialogMod-InfoFrame-_-foot {
  border-top: 2px solid #dd55ff;
  padding: 10px;
  height: 30px;
 }
 
 .Webwidgets-Widgets-LogIn-LogIn-LogIn,
-.Webwidgets-Widgets-Composite-AbstractDialog {
+.Webwidgets-Widgets-DialogMod-AbstractDialog {
  position: absolute;
  left: 20%;
  width: 60%;
@@ -436,12 +436,12 @@ select {
  margin: 0;
 }
 
-.Webwidgets-Widgets-Composite-AbstractDialog {
+.Webwidgets-Widgets-DialogMod-AbstractDialog {
  z-index: 1;
 }
 
 .Webwidgets-Widgets-LogIn-LogIn-LogIn-_-head,
-.Webwidgets-Widgets-Composite-AbstractDialog-_-head {
+.Webwidgets-Widgets-DialogMod-AbstractDialog-_-head {
  position: absolute;
  top: 0;
  height: 26px;
@@ -450,7 +450,7 @@ select {
 }
 
 .Webwidgets-Widgets-LogIn-LogIn-LogIn-_-body,
-.Webwidgets-Widgets-Composite-AbstractDialog-_-body {
+.Webwidgets-Widgets-DialogMod-AbstractDialog-_-body {
  position: absolute;
  top: 30px;
  bottom: 50px;
@@ -459,7 +459,7 @@ select {
 }
 
 .Webwidgets-Widgets-LogIn-LogIn-LogIn-_-foot,
-.Webwidgets-Widgets-Composite-AbstractDialog-_-foot {
+.Webwidgets-Widgets-DialogMod-AbstractDialog-_-foot {
  position: absolute;
  height: 30px;
  bottom: 0;
@@ -467,7 +467,7 @@ select {
  right: 0;
 }
 
-.Webwidgets-Widgets-Composite-AbstractInfoDialog {
+.Webwidgets-Widgets-DialogMod-AbstractInfoDialog {
  left: 37%;
  width: 25%;
  top: 37%;

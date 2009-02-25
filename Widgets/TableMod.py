@@ -31,7 +31,7 @@ import Webwidgets.Utils
 import Webwidgets.FilterMod
 import Webwidgets.Widgets.Base
 import Webwidgets.Widgets.BaseTableMod
-import Webwidgets.Widgets.Composite
+import Webwidgets.Widgets.DialogMod
 
 column_allowed_name_re = re.compile("^[a-z_]*$")
 
@@ -810,12 +810,12 @@ class EditableTable(Table):
                 elif function == "save":
                     row.ww_filter.save()
                 elif function == "delete":
-                    class Confirm(Webwidgets.Widgets.Composite.DeleteConfirmationDialog):
+                    class Confirm(Webwidgets.Widgets.DialogMod.DeleteConfirmationDialog):
                         def selected(self, path, value):
                             if value == '1':
                                 self.row.ww_filter.delete()
-                            Webwidgets.Widgets.Composite.DeleteConfirmationDialog.selected(self, path, value)
-                    Webwidgets.Widgets.Composite.DialogContainer.add_dialog_to_nearest(self, Confirm(self.session, self.win_id, row=row))
+                            Webwidgets.Widgets.DialogMod.DeleteConfirmationDialog.selected(self, path, value)
+                    Webwidgets.Widgets.DialogMod.DialogContainer.add_dialog_to_nearest(self, Confirm(self.session, self.win_id, row=row))
 
             def field_output_edit_function(self, path):
                 return ['']

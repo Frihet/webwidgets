@@ -97,7 +97,8 @@ if __name__ == "Webwidgets":
     from Webwidgets.Widgets.Base import *
     from Webwidgets.Widgets.Formatting import *
     from Webwidgets.Widgets.InputMod.BaseInput import *
-    from Webwidgets.Widgets.Composite import *
+    from Webwidgets.Widgets.DialogMod import *
+    from Webwidgets.Widgets.SwitchingMod import *
     from Webwidgets.Widgets.Progress import *
     from Webwidgets.Widgets.Tree import *
     from Webwidgets.Widgets.RowsMod import *
@@ -106,6 +107,7 @@ if __name__ == "Webwidgets":
     from Webwidgets.Widgets.TableMod import *
     from Webwidgets.Widgets.LogIn import *
 
+    from Webwidgets.Widgets.InputMod.LanguageMod import *
     from Webwidgets.Widgets.InputMod.DateInput import *
     from Webwidgets.Widgets.InputMod.HtmlInput import *
 
