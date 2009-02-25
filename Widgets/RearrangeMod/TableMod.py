@@ -30,8 +30,8 @@ import Webwidgets.Constants
 import Webwidgets.Utils
 import Webwidgets.FilterMod
 import Webwidgets.Widgets.Base
-import Webwidgets.Widgets.BaseTableMod
-import Webwidgets.Widgets.DialogMod
+import Webwidgets.Widgets.RearrangeMod.BaseTableMod
+import Webwidgets.Widgets.RearrangeMod.DialogMod
 
 column_allowed_name_re = re.compile("^[a-z_]*$")
 
@@ -69,7 +69,7 @@ def sort_to_order_by(sort, quote = "`"):
         return 'order by ' + ', '.join(order)
     return
 
-class SelectionCell(Webwidgets.Widgets.BaseTableMod.SpecialCell):
+class SelectionCell(Webwidgets.Widgets.RearrangeMod.BaseTableMod.SpecialCell):
     """Draws a checkbox that lets the user add/remove the current row
     from a list of selected rows."""
 
@@ -105,7 +105,7 @@ class SelectionCell(Webwidgets.Widgets.BaseTableMod.SpecialCell):
 
 SelectionCellInstance = SelectionCell()
 
-class Table(Webwidgets.Widgets.BaseTableMod.BaseTable, Webwidgets.Widgets.Base.MixedInput):
+class Table(Webwidgets.Widgets.RearrangeMod.BaseTableMod.BaseTable, Webwidgets.Widgets.Base.MixedInput):
     """Group By Ordering List is a special kind of table view that
     allows the user to sort the rows and simultaneously group the rows
     according to their content and the sorting.
@@ -130,7 +130,7 @@ class Table(Webwidgets.Widgets.BaseTableMod.BaseTable, Webwidgets.Widgets.Base.M
     next_title = u'Next page'
     last_title = u'Last page'
 
-    class WwModel(Webwidgets.Widgets.BaseTableMod.BaseTable.WwModel):
+    class WwModel(Webwidgets.Widgets.RearrangeMod.BaseTableMod.BaseTable.WwModel):
         argument_name = None
         functions = {}
         """{'column_name': {'function_name': 'title'}}"""
@@ -183,9 +183,9 @@ class Table(Webwidgets.Widgets.BaseTableMod.BaseTable, Webwidgets.Widgets.Base.M
             self.selection = list(self.selection)
             self.html_output_field_cache = []
 
-    class RowsFilters(Webwidgets.Widgets.BaseTableMod.BaseTable.RowsFilters):
+    class RowsFilters(Webwidgets.Widgets.RearrangeMod.BaseTableMod.BaseTable.RowsFilters):
         WwFilters = ["SelectionColFilter",
-                     "TableFunctionColFilter"] + Webwidgets.Widgets.BaseTableMod.BaseTable.RowsFilters.WwFilters + ["TableSortFilter"]
+                     "TableFunctionColFilter"] + Webwidgets.Widgets.RearrangeMod.BaseTableMod.BaseTable.RowsFilters.WwFilters + ["TableSortFilter"]
 
         class SelectionColFilter(Webwidgets.FilterMod.Filter):
             """This filter adds a C{selection_col} column with
@@ -212,7 +212,7 @@ class Table(Webwidgets.Widgets.BaseTableMod.BaseTable, Webwidgets.Widgets.Base.M
                     and self.functions
                     and not hasattr(row, 'ww_expanded')):
                     for name in self.functions.iterkeys():
-                        setattr(row, name, Webwidgets.Widgets.BaseTableMod.FunctionCellInstance)
+                        setattr(row, name, Webwidgets.Widgets.RearrangeMod.BaseTableMod.FunctionCellInstance)
                 return row
 
             def get_rows(self, output_options = {}, **kw):
@@ -574,7 +574,7 @@ class Table(Webwidgets.Widgets.BaseTableMod.BaseTable, Webwidgets.Widgets.Base.M
 
     def append_headings(self, rows, headings, output_options):
         rows[0:0] = [{'cells': headings_row,
-                      'type': Webwidgets.Widgets.BaseTableMod.RenderedRowTypeHeading}
+                      'type': Webwidgets.Widgets.RearrangeMod.BaseTableMod.RenderedRowTypeHeading}
                      for headings_row
                      in headings]
 
@@ -612,12 +612,12 @@ class Table(Webwidgets.Widgets.BaseTableMod.BaseTable, Webwidgets.Widgets.Base.M
 
     def draw_uncached(self, output_options):
         self.ww_filter.html_output_field_cache = []
-        return Webwidgets.Widgets.BaseTableMod.BaseTable.draw_uncached(self, output_options)
+        return Webwidgets.Widgets.RearrangeMod.BaseTableMod.BaseTable.draw_uncached(self, output_options)
 
     def draw_cached(self, output_options):
         for (arg, kw) in self.ww_filter.html_output_field_cache:
             Webwidgets.Widgets.Base.MixedInput.register_input(self, *arg, **kw)
-        return Webwidgets.Widgets.BaseTableMod.BaseTable.draw_cached(self, output_options)
+        return Webwidgets.Widgets.RearrangeMod.BaseTableMod.BaseTable.draw_cached(self, output_options)
 
 class ExpandableTable(Table):
     """This widget allows rows to contain a "subtree row" in
@@ -638,7 +638,7 @@ class ExpandableTable(Table):
             def get_rows(self, **kw):
                 res = []
                 for row in self.ww_filter.get_rows(**kw):
-                    row.ww_filter.expand_col = Webwidgets.Widgets.BaseTableMod.ExpandCellInstance
+                    row.ww_filter.expand_col = Webwidgets.Widgets.RearrangeMod.BaseTableMod.ExpandCellInstance
                     res.append(row)
 
                     if hasattr(row.ww_filter, 'ww_expansion') and getattr(row.ww_filter, 'ww_is_expanded', False):
@@ -718,7 +718,7 @@ class ExpansionTable(ExpandableTable):
         child_widget['ww_expanded'] = child.ww_expanded
         return child_widget['ww_expanded']
 
-class EditFunctionCell(Webwidgets.Widgets.BaseTableMod.FunctionCell):
+class EditFunctionCell(Webwidgets.Widgets.RearrangeMod.BaseTableMod.FunctionCell):
     """Draws a set of editing buttons for a row. The set of buttons
     drawn depends on if L{is_editing} returns C{True} for the row."""
 
@@ -810,12 +810,12 @@ class EditableTable(Table):
                 elif function == "save":
                     row.ww_filter.save()
                 elif function == "delete":
-                    class Confirm(Webwidgets.Widgets.DialogMod.DeleteConfirmationDialog):
+                    class Confirm(Webwidgets.Widgets.RearrangeMod.DialogMod.DeleteConfirmationDialog):
                         def selected(self, path, value):
                             if value == '1':
                                 self.row.ww_filter.delete()
-                            Webwidgets.Widgets.DialogMod.DeleteConfirmationDialog.selected(self, path, value)
-                    Webwidgets.Widgets.DialogMod.DialogContainer.add_dialog_to_nearest(self, Confirm(self.session, self.win_id, row=row))
+                            Webwidgets.Widgets.RearrangeMod.DialogMod.DeleteConfirmationDialog.selected(self, path, value)
+                    Webwidgets.Widgets.RearrangeMod.DialogMod.DialogContainer.add_dialog_to_nearest(self, Confirm(self.session, self.win_id, row=row))
 
             def field_output_edit_function(self, path):
                 return ['']

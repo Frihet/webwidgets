@@ -97,14 +97,14 @@ if __name__ == "Webwidgets":
     from Webwidgets.Widgets.Base import *
     from Webwidgets.Widgets.BaseFormatting import *
     from Webwidgets.Widgets.InputMod.BaseInput import *
-    from Webwidgets.Widgets.DialogMod import *
-    from Webwidgets.Widgets.SwitchingMod import *
+    from Webwidgets.Widgets.RearrangeMod.DialogMod import *
+    from Webwidgets.Widgets.RearrangeMod.SwitchingMod import *
     from Webwidgets.Widgets.Progress import *
     from Webwidgets.Widgets.Tree import *
     from Webwidgets.Widgets.RowsMod import *
     from Webwidgets.Widgets.ListMod import *
-    from Webwidgets.Widgets.BaseTableMod import *
-    from Webwidgets.Widgets.TableMod import *
+    from Webwidgets.Widgets.RearrangeMod.BaseTableMod import *
+    from Webwidgets.Widgets.RearrangeMod.TableMod import *
     from Webwidgets.Widgets.LogIn import *
 
     from Webwidgets.Widgets.InputMod.LanguageMod import *
@@ -121,5 +121,5 @@ if __name__ == "Webwidgets":
     from Webwidgets.Widgets.InputMod.AddressMod import *
 
     from Webwidgets.Widgets.WindowMod import *
-    from Webwidgets.Widgets.MainMenu import *
+    from Webwidgets.Widgets.RearrangeMod.MainMenu import *
     from Webwidgets.Widgets.ApplicationWindow import *

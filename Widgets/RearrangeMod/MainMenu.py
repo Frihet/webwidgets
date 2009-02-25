@@ -24,14 +24,14 @@
 
 import Webwidgets.Utils
 import Webwidgets.Constants
-import Webwidgets.Widgets.DialogMod
+import Webwidgets.Widgets.RearrangeMod.DialogMod
 import Webwidgets.Widgets.Base
 import Webwidgets.Widgets.WindowMod
 
-class MainMenu(Webwidgets.Widgets.Base.DirectoryServer, Webwidgets.Widgets.SwitchingMod.TabbedView):
+class MainMenu(Webwidgets.Widgets.Base.DirectoryServer, Webwidgets.Widgets.RearrangeMod.SwitchingMod.TabbedView):
     def draw_tab_entry(self, child_widget, info, output_options):
         if output_options.get('MainMenu.noscript_version', False):
-            return Webwidgets.Widgets.SwitchingMod.TabbedView.draw_tab_entry(self, child_widget, info, output_options)
+            return Webwidgets.Widgets.RearrangeMod.SwitchingMod.TabbedView.draw_tab_entry(self, child_widget, info, output_options)
         if info['children'] is None:
             return ["""
 var %(child_name)s_item = new dhtmlXMenuItemObject("%(child_id)s","%(caption)s","");
@@ -47,12 +47,12 @@ var %(child_name)s_menu = new dhtmlXMenuBarPanelObject(%(parent_name)s_menu,%(ch
             
     def draw_tabs_tablist(self, widget, tabs, output_options):
         if output_options.get('MainMenu.noscript_version', False):
-            return Webwidgets.Widgets.SwitchingMod.TabbedView.draw_tabs_tablist(self, widget, tabs, output_options)
+            return Webwidgets.Widgets.RearrangeMod.SwitchingMod.TabbedView.draw_tabs_tablist(self, widget, tabs, output_options)
         return '\n'.join(tabs)
 
     def draw_tabs_container(self, widget_id, tabs, output_options):
         if output_options.get('MainMenu.noscript_version', False):
-            return Webwidgets.Widgets.SwitchingMod.TabbedView.draw_tabs_container(self, widget_id, tabs, output_options)
+            return Webwidgets.Widgets.RearrangeMod.SwitchingMod.TabbedView.draw_tabs_container(self, widget_id, tabs, output_options)
         return """
                 <div id="%(widget_id)s-_-menu" class="menu"></div>
                 %(noscript_version)s
@@ -67,7 +67,7 @@ menu_bar_menu.setOnClickHandler(onButtonClick);
 %(tabs)s
 
                 </script>
-               """ % {'noscript_version': Webwidgets.Widgets.SwitchingMod.TabbedView.draw_tabs(self, Webwidgets.Utils.subclass_dict(output_options, {'MainMenu.noscript_version': True})),
+               """ % {'noscript_version': Webwidgets.Widgets.RearrangeMod.SwitchingMod.TabbedView.draw_tabs(self, Webwidgets.Utils.subclass_dict(output_options, {'MainMenu.noscript_version': True})),
                       'widget_id': widget_id,
                       'title': self._(self.title, output_options),
                       'tabs': tabs}
@@ -79,4 +79,4 @@ menu_bar_menu.setOnClickHandler(onButtonClick);
         Webwidgets.Widgets.WindowMod.HtmlWindow.register_script_link(self, calculate_url(['js', 'dhtmlXProtobar.js']))
         Webwidgets.Widgets.WindowMod.HtmlWindow.register_script_link(self, calculate_url(['js', 'dhtmlXMenuBar.js']))
         Webwidgets.Widgets.WindowMod.HtmlWindow.register_script_link(self, calculate_url(['js', 'dhtmlXCommon.js']))
-        return Webwidgets.Widgets.SwitchingMod.TabbedView.draw(self, Webwidgets.Utils.subclass_dict(output_options, {'MainMenu.noscript_version': False}))
+        return Webwidgets.Widgets.RearrangeMod.SwitchingMod.TabbedView.draw(self, Webwidgets.Utils.subclass_dict(output_options, {'MainMenu.noscript_version': False}))

@@ -28,7 +28,7 @@ import Webwidgets.Constants
 import Webwidgets.Widgets.WindowMod
 import Webwidgets.Widgets.BaseFormatting
 import Webwidgets.Widgets.InputMod.BaseInput
-import Webwidgets.Widgets.DialogMod
+import Webwidgets.Widgets.RearrangeMod.DialogMod
 
 class ModalProgressPage(Webwidgets.Widgets.BaseFormatting.ProgressMeter, Webwidgets.Widgets.InputMod.BaseInput.PageLoadNotifier):
     frefresh_interval = 1
@@ -123,7 +123,7 @@ class ModalThreadProgressPage(ModalProgressPage):
     def run(self, *arg, **kw):
         raise NotImplementedError
 
-class ModalThreadProgressPageDialog(Webwidgets.Widgets.DialogMod.InfoDialog, ModalThreadProgressPage):
+class ModalThreadProgressPageDialog(Webwidgets.Widgets.RearrangeMod.DialogMod.InfoDialog, ModalThreadProgressPage):
     buttons = {}
     
     class Head(Webwidgets.Widgets.BaseFormatting.Html):
@@ -133,7 +133,7 @@ class ModalThreadProgressPageDialog(Webwidgets.Widgets.DialogMod.InfoDialog, Mod
         html = "The operation is in progress. Please wait. If this page does not refresh automatically, if it does not, refresh the page manually."
 
     def __init__(self, *arg, **kw):
-        Webwidgets.Widgets.DialogMod.InfoDialog.__init__(self, *arg, **kw)
+        Webwidgets.Widgets.RearrangeMod.DialogMod.InfoDialog.__init__(self, *arg, **kw)
         ModalThreadProgressPage.__init__(self, *arg, **kw)
         self.start()
 
@@ -146,10 +146,10 @@ class ModalThreadProgressPageDialog(Webwidgets.Widgets.DialogMod.InfoDialog, Mod
         self.close()
 
     def draw(self, output_options):
-        return (  Webwidgets.Widgets.DialogMod.InfoDialog.draw(self, output_options)
+        return (  Webwidgets.Widgets.RearrangeMod.DialogMod.InfoDialog.draw(self, output_options)
                 + ModalThreadProgressPage.draw(self, output_options))
 
-    class Done(Webwidgets.Widgets.DialogMod.InfoDialog):
+    class Done(Webwidgets.Widgets.RearrangeMod.DialogMod.InfoDialog):
         class Head(Webwidgets.Widgets.BaseFormatting.Html):
             html = "Done"
         class Body(Webwidgets.Widgets.BaseFormatting.Html):
