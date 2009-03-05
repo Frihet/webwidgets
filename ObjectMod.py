@@ -66,6 +66,29 @@ class Type(type):
 
         return set_class_path(type.__new__(cls, name, bases, members))
 
+    @classmethod
+    def process_class_ordering(cls, name, bases, members, ordering_name):
+        subordinate_member = "ww_%s_subordinates" % (ordering_name,)
+        level_member = "_%s_level" % (ordering_name,)
+        
+        subordinates = set()
+        
+        if subordinate_member in members:
+            subordinates = subordinates.union(set(members[subordinate_member]))
+        for base in bases:
+            if hasattr(base, subordinate_member):
+                subordinates = subordinates.union(getattr(base, subordinate_member))
+
+        members[level_member] = max([0] + [getattr(sub, level_member)
+                                           for sub in subordinates]) + 1
+        
+        members[subordinate_member] = subordinates
+
+        if getattr(cls, 'debug_class_%s_ordering' % ordering_name, False):
+            print "Registering widget % ordering: %s" % (ordering_name, name)
+            print "    Subordinates:", ', '.join([sub.__name__ for sub in subordinates])
+            print "    Level:", members[level_member]
+
     def ww_update_classes(self):
         if not self.ww_class_data.get('no_classes_name', False):
             self.ww_classes[0] = Webwidgets.Utils.class_full_name(self)

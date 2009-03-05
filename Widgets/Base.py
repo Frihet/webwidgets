@@ -930,38 +930,10 @@ class StaticComposite(DictComposite):
 class Input(Widget):
     """Base class for all input widgets, providing input field registration"""
     class __metaclass__(Widget.__metaclass__):
-        debug_input_order = False
+        debug_class_input_ordering = False
 
         def __new__(cls, name, bases, members):
-            subordinates = set()
-            dominants = set()
-            if '__input_subordinates__' in members:
-                subordinates = subordinates.union(set(members['__input_subordinates__']))
-            if '__input_dominants__' in members:
-                dominants = dominants.union(set(members['__input_dominants__']))
-            for base in bases:
-                if hasattr(base, '__input_subordinates__'):
-                    subordinates = subordinates.union(base.__input_subordinates__)
-                if hasattr(base, '__input_dominants__'):
-                    dominants = dominants.union(base.__input_dominants__)
-            members['_input_level'] = max([0] + [sub._input_level
-                                                for sub in subordinates]) + 1
-            # FIXME: This does _not_ find descendants of dominants, so it does not work. At all.
-            def raise_dominants(dominants, input_level):
-                for dom in dominants:
-                    if dom._input_level <= input_level:
-                        dom._input_level = input_level + 1
-                        raise_dominants(dom.__input_dominants__, dom._input_level)
-            raise_dominants(dominants, members['_input_level'])
-            members['__input_subordinates__'] = subordinates
-            members['__input_dominants__'] = dominants
-
-            if cls.debug_input_order:
-                print "Registering input widget:", name
-                print "    Subordinates:", ', '.join([sub.__name__ for sub in subordinates])
-                print "    Dominants:", ', '.join([sub.__name__ for sub in dominants])
-                print "    Level:", members['_input_level']
-
+            cls.process_class_ordering(name, bases, members, 'input')
             return Widget.__metaclass__.__new__(cls, name, bases, members)
 
     @classmethod
@@ -987,13 +959,9 @@ class Input(Widget):
     """If true, input for this field is suppressed for one/current
     request. This member is reset after each request."""
 
-    __input_subordinates__ = ()
+    ww_input_subordinates = ()
     """Other input widgets that should handle simultaneous input from
     the user _before_ this widget."""
-
-    __input_dominants__ = ()
-    """Other input widgets that should handle simultaneous input from
-    the user _after_ this widget."""
 
     ww_bind_callback = "require"
 
@@ -1101,7 +1069,7 @@ class MixedInput(Input):
     """Base class for composiute input widgets that fires
     notifications and hold values."""
 
-    __input_subordinates__ = (ValueInput,)
+    ww_input_subordinates = (ValueInput,)
 
     def field_output(self, path):
         return ['']
@@ -1110,13 +1078,13 @@ class ActionInput(MixedInput):
     """Base class for all input widgets that only fires some
     notification and don't hold a value of some kind."""
 
-    __input_subordinates__ = (MixedInput,)
+    ww_input_subordinates = (MixedInput,)
 
 class SingleActionInput(ActionInput):
     """Base class for all input widgets that only fires a single
     notification with no parameters."""
 
-    __input_subordinates__ = (ValueInput,)
+    ww_input_subordinates = (ValueInput,)
 
     def field_input(self, path, string_value):
         if string_value != '':
@@ -1130,7 +1098,7 @@ class MultipleActionInput(ActionInput):
     """Base class for all input widgets that can fire any of a set of
     notifications."""
 
-    __input_subordinates__ = (ValueInput,)
+    ww_input_subordinates = (ValueInput,)
 
     def field_input(self, path, string_value):
         if string_value != '':

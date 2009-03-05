@@ -87,12 +87,12 @@ class CountryPartInput(RegionPartInput):
         region_prefix = []
 
 class CountyPartInput(RegionPartInput):
-    __input_subordinates__ = (CountryPartInput, )
+    ww_input_subordinates = (CountryPartInput, )
     class WwModel(RegionPartInput.WwModel):
         region_prefix = [""]
 
 class MunicipalityPartInput(RegionPartInput):
-    __input_subordinates__ = (RegionPartInput, )
+    ww_input_subordinates = (RegionPartInput, )
     class WwModel(RegionPartInput.WwModel):
         region_prefix = ["", ""]
 
