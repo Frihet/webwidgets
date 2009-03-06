@@ -58,7 +58,7 @@ class Mailer(object):
 
         self._close_connection(smtp)
 
-    def construct_mail(self, template, args):
+    def construct_mail(self, template, args, multipart = False):
         """Create mail body that can be sent with the mail
         method. template is a string with standard %(value)s format
         parameters and args is a dict with the values"""
@@ -75,6 +75,15 @@ class Mailer(object):
 
         body, enc = self._encode_value(body)
         msg = email.MIMEText.MIMEText(body, 'plain', enc)
+
+        if multipart:
+            alt = MIMEMultipart('alternative')
+            alt.attach(msg)
+
+            msg = MIMEMultipart('related')
+            msg.preamble = 'This is a multi-part message in MIME format.'
+            msg.attach(alt)
+
         for key, value in self._encode_arguments(headers).iteritems():
             msg[key] = value
 
