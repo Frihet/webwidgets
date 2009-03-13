@@ -213,7 +213,7 @@ class RowsPrintableFilter(Webwidgets.FilterMod.Filter):
 class RowsRowWrapperFilter(Webwidgets.FilterMod.Filter):
     """This filter wraps all rows in L{RowsComposite.RowsRowModelWrapper}. This adds
        a filtering chain on individual rows; to override cells in a
-       row (columns) you can add L{WwFilters} to the
+       row (columns) you can add L{Filter}s to the
        L{RowsComposite.RowsRowModelWrapper} class."""
     
     def get_rows(self, **kw):
@@ -253,7 +253,7 @@ class RowsComposite(Webwidgets.Widgets.Base.CachingComposite):
           in the path to the row.
 
         - The set of rows as well as the content of individual rows can be
-          filtered using L{WwFilters}.
+          filtered using L{Filter}s.
 
     """
 
@@ -286,7 +286,7 @@ class RowsComposite(Webwidgets.Widgets.Base.CachingComposite):
 
         non_memory_storage = False
 
-        """This base class along with the standard L{WwFilters} it
+        """This base class along with the standard L{Filter}s it
         provides supports two basic back-ends, selected by this
         variable:
 
@@ -347,14 +347,11 @@ class RowsComposite(Webwidgets.Widgets.Base.CachingComposite):
         kind of back-end - e.g. a database query, a redirect from
         another table etc.""" 
 
-        WwFilters = ["RowsSimpleModelFilter"]
         class RowsSimpleModelFilter(RowsSimpleModelFilter): pass
 
     class SourceErrorFilter(Webwidgets.FilterMod.Filter):
         """This filter is before the SourceFilter and is there to be
         able to catch errors in the data fetching SourceFilters."""
-
-        WwFilters = ['CatchErrorFilter']
 
         class CatchErrorFilter(Webwidgets.Filter):
             sort_error_msg = u'Unable to sort with specified order, resetting sort order'
@@ -372,29 +369,26 @@ class RowsComposite(Webwidgets.Widgets.Base.CachingComposite):
                     self.object.append_exception(self.sort_error_msg)
 
                 return result
-
+    SourceErrorFilter.add_class_in_ordering('filter', pre = [SourceFilters])
 
     class RowsFilters(Webwidgets.FilterMod.Filter):
         """This filter groups all filters that mangle rows in some way
         - wrapping them, adding extra rows, hiding rows etc."""
         
-        WwFilters = ["RowsRowWrapperFilter"]
         class RowsRowWrapperFilter(RowsRowWrapperFilter): pass
+    RowsFilters.add_class_in_ordering('filter', pre = [SourceErrorFilter])
 
     class OutputOptionsFilters(Webwidgets.FilterMod.Filter):
         """This filter groups all filters that generate options for
         L{get_rows} based on L{output_options}."""
-        
-        WwFilters = ["RowsPrintableFilter"]
         class RowsPrintableFilter(RowsPrintableFilter): pass
-
-    WwFilters = ["OutputOptionsFilters", "RowsFilters", "SourceErrorFilter", "SourceFilters"]
+    OutputOptionsFilters.add_class_in_ordering('filter', pre = [RowsFilters])
 
     class RowsRowModelWrapper(Webwidgets.FilterMod.PersistentWrapper):
         """This class is a wrapper that all rows are wrapped in by
         L{RowsRowWrapperFilter}. This adds a filtering chain on
         individual rows; to override cells in a row (columns) you can
-        add L{WwFilters} to this class."""
+        add L{Filter}s to this class."""
         
         def ww_wrapper_key(cls, table, ww_model, **attrs):
             return "%s-%s" % (id(table), id(ww_model))
@@ -410,7 +404,6 @@ class RowsComposite(Webwidgets.Widgets.Base.CachingComposite):
             else:
                 self.ww_row_id = getattr(ww_model, 'ww_row_id', id(ww_model))
 
-        WwFilters = ["RowFilters"]
         class RowFilters(Webwidgets.FilterMod.Filter):
             """This filter groups are ordinary filters for cells in
             the row."""

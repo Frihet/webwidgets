@@ -184,9 +184,6 @@ class Table(Webwidgets.Widgets.RearrangeMod.BaseTableMod.BaseTable, Webwidgets.W
             self.html_output_field_cache = []
 
     class RowsFilters(Webwidgets.Widgets.RearrangeMod.BaseTableMod.BaseTable.RowsFilters):
-        WwFilters = ["SelectionColFilter",
-                     "TableFunctionColFilter"] + Webwidgets.Widgets.RearrangeMod.BaseTableMod.BaseTable.RowsFilters.WwFilters + ["TableSortFilter"]
-
         class SelectionColFilter(Webwidgets.FilterMod.Filter):
             """This filter adds a C{selection_col} column with
             selection checkboxes that the user can use to add/remove
@@ -200,6 +197,8 @@ class Table(Webwidgets.Widgets.RearrangeMod.BaseTableMod.BaseTable, Webwidgets.W
                 return [self.mangle_row(row, output_options)
                         for row
                         in self.ww_filter.get_rows(output_options = output_options, **kw)]
+
+
 
         class TableFunctionColFilter(Webwidgets.FilterMod.Filter):
             """This filter adds columns with function buttons
@@ -250,6 +249,11 @@ class Table(Webwidgets.Widgets.RearrangeMod.BaseTableMod.BaseTable, Webwidgets.W
                 def __set__(self, instance, value):
                     instance.ww_filter.sort = value
             user_sort = UserSort()
+
+        TableFunctionColFilter.add_class_in_ordering('filter',
+                                                     pre = [SelectionColFilter],
+                                                     post = Webwidgets.Widgets.RearrangeMod.BaseTableMod.BaseTable.RowsFilters.ww_filter_first)
+        TableSortFilter.add_class_in_ordering('filter', pre = Webwidgets.Widgets.RearrangeMod.BaseTableMod.BaseTable.RowsFilters.ww_filter_last)
 
     def field_input(self, path, *string_values):
         try:
@@ -627,8 +631,6 @@ class ExpandableTable(Table):
     """
 
     class RowsFilters(Table.RowsFilters):
-        WwFilters = ["TableExpandableFilter"] + Table.RowsFilters.WwFilters
-
         class TableExpandableFilter(Webwidgets.FilterMod.Filter):
             """This filter provides the functionality of L{ExpandableTable}."""
 
@@ -684,7 +686,8 @@ class ExpandableTable(Table):
                         return self.ww_filter.get_row_by_id(row_id, **kwargs)
 
                 raise Exception("Invalid row-id %s (should have started with 'child_' or 'parent_')" % row_id)
-
+        TableExpandableFilter.add_class_in_ordering('filter', post = [Table.RowsFilters.SelectionColFilter])
+        
 class ExpansionTable(ExpandableTable):
     """This widget allows any row to be "expanded" by inserting an
     extra row containing an instance of the L{ExpansionViewer} widget
@@ -697,8 +700,6 @@ class ExpansionTable(ExpandableTable):
         beneath the rows of the table as expansion."""
 
     class RowsRowModelWrapper(ExpandableTable.RowsRowModelWrapper):
-        WwFilters = ["ExpansionFilter"] + ExpandableTable.RowsRowModelWrapper.WwFilters
-
         class ExpansionFilter(Webwidgets.Filter):
             def __init__(self, *arg, **kw):
                 Webwidgets.Filter.__init__(self, *arg, **kw)
@@ -709,6 +710,7 @@ class ExpansionTable(ExpandableTable):
                     'ww_expanded': self.table.ExpansionViewer(
                     self.table.session, self.table.win_id,
                     parent_row = self.object)}
+        ExpansionFilter.add_class_in_ordering('filter', post = ExpandableTable.RowsRowModelWrapper.ww_filter_first)
 
     def get_expansion_widget(self, row_id):
         table = self.ww_filter
@@ -780,15 +782,12 @@ class EditableTable(Table):
         edit_new_columns = {'ww_default': True}
 
     class RowsRowModelWrapper(Table.RowsRowModelWrapper):
-        WwFilters = ["EditingFilters"] + Table.RowsRowModelWrapper.WwFilters
         class EditingFilters(Webwidgets.FilterMod.Filter):
             """This filter groups filters managing input fields for
             the row."""
-
+        EditingFilters.add_class_in_ordering('filter', post = Table.RowsRowModelWrapper.ww_filter_first)
 
     class RowsFilters(Table.RowsFilters):
-        WwFilters = ["TableEditableFilter"] + Table.RowsFilters.WwFilters
-
         class TableEditableFilter(Webwidgets.FilterMod.Filter):
             """This filter provides a column called
             L{edit_function_col} with the editing buttons."""
@@ -849,4 +848,6 @@ class EditableTable(Table):
                 return (    self.ww_filter.edit_operations.get(path[0], False)
                         and self.session.AccessManager(Webwidgets.Constants.EDIT,
                                                        self.win_id, self.path + ['edit_group_function'] + path))
+
+        TableEditableFilter.add_class_in_ordering('filter', post = Table.RowsFilters.ww_filter_first)
 

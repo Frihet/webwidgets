@@ -23,7 +23,9 @@ import Webwidgets.Widgets.InputMod.LocationInput
 import Webwidgets.Widgets.InputMod.LocationInputLocations
 
 def redirect_value_to_address(name):
-    return [Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, active = "active", value = name)]
+    class RedirectValueToAddressClass(object):
+        RedirectValueToAddress = Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, active = "active", value = name)
+    return RedirectValueToAddressClass
     
 class AddressInput(object):
     class WwModel(object):
@@ -37,23 +39,26 @@ class AddressInput(object):
         country = ''
         
     class Co(object):
-        class Field(object): WwFilters = redirect_value_to_address('co')
+        class Field(redirect_value_to_address('co')): pass
     class Street(object):
-        class Field(object): WwFilters = redirect_value_to_address('street')
+        class Field(redirect_value_to_address('street')): pass
     class Zip(object):
-        class Field(object): WwFilters = redirect_value_to_address('zip')
+        class Field(redirect_value_to_address('zip')): pass
     class City(object):
-        class Field(object): WwFilters = redirect_value_to_address('city')
+        class Field(redirect_value_to_address('city')): pass
     class Region(object):
-        WwFilters = Webwidgets.Widgets.InputMod.LocationInput.MunicipalityInput.WwFilters + [
-            Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 1,
-                                                               active = "active",
-                                                               municipality = "municipality",
-                                                               county = "county",
-                                                               country = "country")]
+        RegionRedirect = Webwidgets.FilterMod.RedirectRenameFilter.redirect(
+            [], 1,
+            active = "active",
+            municipality = "municipality",
+            county = "county",
+            country = "country").add_class_in_ordering(
+            'filter', pre = Webwidgets.Widgets.InputMod.LocationInput.MunicipalityInput.ww_filter_last)
 
 def redirect_html_to_address(name):
-    return [Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, html = name)]
+    class RedirectHtmlToAddressClass(object):
+        RedirectHtmlToAddress = Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, html = name)
+    return RedirectHtmlToAddressClass
     
 class Address(object):
     class WwModel(object):
@@ -66,16 +71,16 @@ class Address(object):
         country = ''
         
     class Co(object):
-        class Field(object): WwFilters = redirect_html_to_address('co')
+        class Field(redirect_html_to_address('co')): pass
     class Street(object):
-        class Field(object): WwFilters = redirect_html_to_address('street')
+        class Field(redirect_html_to_address('street')): pass
     class Zip(object):
-        class Field(object): WwFilters = redirect_html_to_address('zip')
+        class Field(redirect_html_to_address('zip')): pass
     class City(object):
-        class Field(object): WwFilters = redirect_html_to_address('city')
+        class Field(redirect_html_to_address('city')): pass
     class Region(object):
-        WwFilters = Webwidgets.Widgets.InputMod.LocationInput.Municipality.WwFilters + [
-            Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 1,
+        RegionRedirect = Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 1,
                                                                municipality = "municipality",
                                                                county = "county",
-                                                               country = "country")]
+                                                               country = "country").add_class_in_ordering(
+            'filter', pre = Webwidgets.Widgets.InputMod.LocationInput.Municipality.ww_filter_last)

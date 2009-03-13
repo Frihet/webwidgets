@@ -928,14 +928,27 @@ class StaticComposite(DictComposite):
             self.children[name] = value(session, win_id)
 
 class Input(Widget):
+    ww_debug_input_ordering = False
+    ww_class_orderings = set.union(Widget.ww_class_orderings,
+                                   ('input',))
+            
+    ww_input_pre = ()
+    """Other input widgets that should handle simultaneous input from
+    the user _before_ this widget.
+
+    Note: If you make circles, you will cause an infinite loop. That's
+    usually what cirle means, so no news there :P
+    """
+
+    ww_input_post = ()
+    """Other input widgets that should handle simultaneous input from
+    the user _after_ this widget.
+
+    Note: If you make circles, you will cause an infinite loop. That's
+    usually what cirle means, so no news there :P
+    """
+
     """Base class for all input widgets, providing input field registration"""
-    class __metaclass__(Widget.__metaclass__):
-        debug_class_input_ordering = False
-
-        def __new__(cls, name, bases, members):
-            cls.process_class_ordering(name, bases, members, 'input')
-            return Widget.__metaclass__.__new__(cls, name, bases, members)
-
     @classmethod
     def input_order(cls, other):
         if isinstance(other, Input):
@@ -958,10 +971,6 @@ class Input(Widget):
     ignore_input_this_request = False
     """If true, input for this field is suppressed for one/current
     request. This member is reset after each request."""
-
-    ww_input_subordinates = ()
-    """Other input widgets that should handle simultaneous input from
-    the user _before_ this widget."""
 
     ww_bind_callback = "require"
 
@@ -1069,7 +1078,7 @@ class MixedInput(Input):
     """Base class for composiute input widgets that fires
     notifications and hold values."""
 
-    ww_input_subordinates = (ValueInput,)
+    ww_input_pre = (ValueInput,)
 
     def field_output(self, path):
         return ['']
@@ -1078,13 +1087,13 @@ class ActionInput(MixedInput):
     """Base class for all input widgets that only fires some
     notification and don't hold a value of some kind."""
 
-    ww_input_subordinates = (MixedInput,)
+    ww_input_pre = (MixedInput,)
 
 class SingleActionInput(ActionInput):
     """Base class for all input widgets that only fires a single
     notification with no parameters."""
 
-    ww_input_subordinates = (ValueInput,)
+#    ww_input_pre = (ValueInput,)
 
     def field_input(self, path, string_value):
         if string_value != '':
@@ -1098,7 +1107,7 @@ class MultipleActionInput(ActionInput):
     """Base class for all input widgets that can fire any of a set of
     notifications."""
 
-    ww_input_subordinates = (ValueInput,)
+#    ww_input_pre = (ValueInput,)
 
     def field_input(self, path, string_value):
         if string_value != '':

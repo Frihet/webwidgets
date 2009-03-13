@@ -23,9 +23,33 @@
 import Webwidgets.ObjectMod
 
 class Filter(Webwidgets.ObjectMod.Object):
-    # These getattr/hasattr/setattr are very similar to the ones of
-    # Object, except they work on self.ww_filter instead of on
-    # self.ww_model...
+    ww_class_orderings = set.union(Webwidgets.ObjectMod.Object.ww_class_orderings,
+                                   ('filter',))
+
+    """About filter ordering:
+
+    Filters are chained so that ww_filter on each points to the next
+    filter, the last one pointing on the widget itself.
+
+    The getattr/hasattr/setattr methods on filters defaults to
+    accessing the ww_filter attribute (the next filter), not ww_model
+    as Object's ones does."""
+
+    ww_filter_pre = ()
+    """List of filters that are to be placed before this filter in the
+    filter chain.
+
+    Note: If you make circles, you will cause an infinite loop. That's
+    usually what cirle means, so no news there :P
+    """
+
+    ww_filter_post = ()
+    """List of filters that are to be placed before this filter in the
+    filter chain.
+
+    Note: If you make circles, you will cause an infinite loop. That's
+    usually what cirle means, so no news there :P
+    """
 
     attr_cache={}
 
@@ -236,10 +260,12 @@ class RedirectRenameFilter(StandardFilter):
     """This is the combination of the RedirectFilter and RenameFilter
     - it first renames attributes and the redirects them to another widget."""
 
-    WwFilters = ["RenameFilter", "RedirectFilter"]
-    RenameFilter = RenameFilter
+    class RenameFilter(RenameFilter):
+        pass
+    
     class RedirectFilter(RedirectFilter):
         dont_redirect = ["name_map"] + RedirectFilter.dont_redirect
+    RedirectFilter.add_class_in_ordering('filter', pre = [RenameFilter])
 
     @classmethod
     def redirect(cls, *redirect_args, **name_map):

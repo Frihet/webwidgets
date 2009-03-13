@@ -51,12 +51,11 @@ class RowsListInput(Webwidgets.Widgets.Base.ValueInput, Webwidgets.Widgets.RowsM
         size = 0
         """Size of the widget."""
 
-    WwFilters = Webwidgets.Widgets.RowsMod.RowsComposite.WwFilters + ["ValueFilters"]
-
     class ValueFilters(Webwidgets.FilterMod.Filter):
         """This filter groups all filters that mangles the L{value} of
         the widget, that is, the item selection."""
-        WwFilters = []        
+    ValueFilters.add_class_in_ordering('filter', pre = Webwidgets.Widgets.RowsMod.RowsComposite.ww_filter_last)
+
 
     def only_one_row(self):
         # Check if there is exactly one row to select from
@@ -146,8 +145,6 @@ class RowsSingleValueListInput(RowsListInput):
         value = None
 
     class ValueFilters(RowsListInput.ValueFilters):
-        WwFilters = ["SingleValueFilter"] + RowsListInput.ValueFilters.WwFilters
-
         class SingleValueFilter(Webwidgets.FilterMod.Filter):
             """This filter makes L{value} contain either the currently
             selected list item (row), or C{None} if none is currently
@@ -167,5 +164,5 @@ class RowsSingleValueListInput(RowsListInput):
                         instance.ww_filter.value = None
                     else:
                         instance.ww_filter.value = value[0]
-
             value = Value()
+        SingleValueFilter.add_class_in_ordering('filter', post = RowsListInput.ValueFilters.ww_filter_first)

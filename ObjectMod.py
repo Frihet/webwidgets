@@ -64,34 +64,13 @@ class Type(type):
                     set_class_path(value, sub_path)
             return widget
 
-        return set_class_path(type.__new__(cls, name, bases, members))
+        self = type.__new__(cls, name, bases, members)
+        set_class_path(self)
 
-    @classmethod
-    def process_class_ordering(cls, name, bases, members, ordering_name):
-        subordinate_member = "ww_%s_subordinates" % (ordering_name,)
-        level_member = "_%s_level" % (ordering_name,)
+        self.process_class_orderings()
+        self.process_child_class_orderings()
         
-        subordinates = set()
-        
-        if subordinate_member in members:
-            subordinates = subordinates.union(set(members[subordinate_member]))
-        for base in bases:
-            if hasattr(base, subordinate_member):
-                subordinates = subordinates.union(getattr(base, subordinate_member))
-
-        members[level_member] = max([0] + [getattr(sub, level_member)
-                                           for sub in subordinates]) + 1
-        
-        members[subordinate_member] = subordinates
-
-        if getattr(cls, 'debug_class_%s_ordering' % ordering_name, False):
-            print "Registering widget % ordering: %s" % (ordering_name, name)
-            print "    Subordinates:", ', '.join([sub.__name__ for sub in subordinates])
-            print "    Level:", members[level_member]
-
-    def ww_update_classes(self):
-        if not self.ww_class_data.get('no_classes_name', False):
-            self.ww_classes[0] = Webwidgets.Utils.class_full_name(self)
+        return self
 
 class Required(object):
     """Required value, if set on a class the member must be set or
@@ -100,7 +79,7 @@ class Required(object):
 
 class Object(object):
     """Object is a more elaborate version of object, providing a few
-    extra utility methods, some extra"magic" class attributes -
+    extra utility methods, some extra 'magic' class attributes -
     L{ww_classes}, L{ww_class_order_nr} and L{ww_class_path} and
     model/model-filter handling."""
 
@@ -136,11 +115,15 @@ class Object(object):
     """If non-None and the model attribute is None, this class will be
     instantiated and the instance placed in the model attribute."""
 
-    WwFilters = []
-    """Filter is a set of classes that are to be instantiated and
-    chained together as filters for this object. Ech of these will
-    have its filter attribute set to the next one, except for the last
-    one, which will have it set to this very object."""
+    ww_class_orderings = set(())
+    """Set of orderings applied to this class. See ww_ORDERINGNAME_pre
+    and ww_ORDERINGNAME_post for each ordering for more information on
+    what it's used for."""
+
+    ww_child_class_orderings = set(('filter',))
+    """Set of orderings applied to member classes of this class. See
+    ww_ORDERINGNAME_pre and ww_ORDERINGNAME_post on members for each
+    ordering for more information on what it's used for."""
 
     def __init__(self, **attrs):
         """Creates a new object
@@ -176,18 +159,159 @@ class Object(object):
                 if attr is Required:
                     raise AttributeError('Required attribute %s missing' % (name, ))
 
-    def get_filter(cls, filter_class):
-        if isinstance(filter_class, (str, unicode)):
-            filter_class = getattr(cls, filter_class)
-        return filter_class
-    get_filter = classmethod(get_filter)
+    @classmethod
+    def process_class_ordering(cls, ordering_name):
+        pre_member = "ww_%s_pre" % (ordering_name,)
+        post_member = "ww_%s_post" % (ordering_name,)
+        level_member = "_%s_level" % (ordering_name,)
 
-    def setup_filter(self, name = 'ww_filter', ww_filter_classes = None, ww_filter = None, object = None):
-        if ww_filter is None: ww_filter = self.__dict__.get(name, self)
-        if object is None: object = self.__dict__.get('object', self)
-        if ww_filter_classes is None: ww_filter_classes = self.WwFilters
-        for filter_class in reversed(ww_filter_classes):
-            ww_filter = self.get_filter(filter_class)(ww_filter = ww_filter, object = object)
+        setattr(cls, pre_member, set(getattr(cls, pre_member, ())))
+        setattr(cls, post_member, set(getattr(cls, post_member, ())))
+
+        # Find intermediates between bases
+        bases = set(cls.__bases__)
+        intermediaries = set(bases)
+        max_level = max(getattr(base, level_member, 0) for base in bases)
+
+        def find_path_between_bases(node, path):
+            for successor in getattr(node, post_member, ()):
+                if successor in bases:
+                    intermediaries.update(path)
+                elif getattr(successor, level_member) <= max_level:
+                    find_path_between_bases(successor, set.union(path, set((successor,))))
+        for base in bases:
+            find_path_between_bases(base, set())
+
+
+        # Append inherited pre:s and post:s
+        bases = set(cls.__bases__)
+        for base in bases:
+            if ordering_name in getattr(base, 'ww_class_orderings', ()):
+                if type(getattr(base, pre_member)) is not set:
+                    raise TypeError("%s.%s.%s is a %s while it should be a set()" % (
+                        base.__module__, base.__name__, pre_member, type(getattr(base, pre_member))))
+                if type(getattr(base, post_member)) is not set:
+                    raise TypeError("%s.%s.%s is a %s while it should be a set()" % (
+                        base.__module__, base.__name__, pre_member, type(getattr(base, post_member))))
+                getattr(cls, pre_member).update(getattr(base, pre_member) - intermediaries)
+                getattr(cls, post_member).update(getattr(base, post_member) - intermediaries)
+        
+        # Update linked objects
+        for pre in getattr(cls, pre_member):
+            getattr(pre, post_member).add(cls)
+        for post in getattr(cls, post_member):
+            getattr(post, pre_member).add(cls)
+
+        # Update our level and levels downstream in the network
+        # Note: If you make circles, you will cause an infinite loop.
+        # That's usually what cirle means, so no news there :P
+        def update_node_level(node, level, done = None):
+#             print "NODE %s -> %s -> %s" % (', '.join(x.__name__ for x in getattr(node, pre_member)),
+#                                            node.__name__,
+#                                            ', '.join(x.__name__ for x in getattr(node, post_member)))
+            if done is None: done = []
+            if node in done:
+                def find_base_cause(node, successor):
+                    for base in node.__bases__:
+                        if successor in getattr(base, post_member, ()):
+                            return find_base_cause(base, successor) + [node]
+                    return [node]
+                loop = [node] + done[:done.index(node)+1]
+                loop.reverse()
+                raise Exception("Ordering circle encountered for %s ordering of classes:\n %s" % (
+                    ordering_name,
+                    '\n '.join('%s' % (' <- '.join('%s.%s' % (parent.__module__, parent.__name__)
+                                                   for parent in reversed(find_base_cause(loop_node, next_loop_node))),)
+                               for (loop_node, next_loop_node) in zip(loop, loop[1:] + loop[:1]))))
+            done.append(node)
+            setattr(node, level_member, level)
+            for post in getattr(node, post_member):
+                if getattr(post, level_member) <= level:
+                    update_node_level(post, level + 1, done)
+        update_node_level(
+            cls,
+            max([0] + [getattr(pre, level_member)
+                       for pre in getattr(cls, pre_member)]) + 1)
+
+        if getattr(cls, 'ww_debug_%s_ordering' % ordering_name, False):
+            print "Registering widget % ordering: %s" % (ordering_name, cls.__name__)
+            print "    Pre:", ', '.join([pre.__name__ for pre in getattr(cls, pre_member)])
+            print "    Post:", ', '.join([post.__name__ for post in getattr(cls, post_member)])
+            print "    Level:", getattr(cls, level_member)
+
+    @classmethod
+    def add_class_in_ordering(cls, ordering_name, pre = [], post = []):
+        pre_member = "ww_%s_pre" % (ordering_name,)
+        post_member = "ww_%s_post" % (ordering_name,)
+
+        setattr(cls, pre_member, set.union(getattr(cls, pre_member), pre))
+        setattr(cls, post_member, set.union(getattr(cls, post_member), post))
+        cls.process_class_ordering(ordering_name)
+        return cls
+
+    @classmethod
+    def process_child_class_ordering(cls, ordering_name):
+        #print "process_child_class_ordering %s for %s" % (ordering_name, cls)
+        first_member = "ww_%s_first" % (ordering_name,)
+        last_member = "ww_%s_last" % (ordering_name,)
+
+        # FIXME: Add all the first and last nodes of ordering is a forrest
+        total_order = cls.get_child_class_ordering(ordering_name)
+        first = set()
+        last = set()
+        if total_order:
+            first.add(total_order[0])
+            last.add(total_order[-1])
+        setattr(cls, first_member, first)
+        setattr(cls, last_member, last)
+
+    @classmethod
+    def get_child_class_ordering(cls, ordering_name):
+        """Gives you a full ordering of all children that are ordered
+        according to ordering_name."""
+        
+        level_member = "_%s_level" % (ordering_name,)
+
+        child_classes = [child_cls
+                         for child_cls in (getattr(cls, name, None) for name in dir(cls))
+                         if hasattr(child_cls, level_member)]
+        child_classes.sort(lambda a, b: cmp(getattr(a, level_member), getattr(b, level_member)))
+        return child_classes
+
+    @classmethod
+    def print_child_class_ordering(cls, ordering_name, indent = ''):
+        return indent + '%s.%s\n%s' % (cls.__module__, cls.__name__,
+                                       ''.join([child_cls.print_child_class_ordering(ordering_name, indent = indent + '  ')
+                                                for child_cls in cls.get_child_class_ordering(ordering_name)]))
+
+    @classmethod
+    def process_class_orderings(cls):
+        for ordering in cls.ww_class_orderings:
+            cls.process_class_ordering(ordering)
+    
+    @classmethod
+    def process_child_class_orderings(cls):
+        for ordering in cls.ww_child_class_orderings:
+            cls.process_child_class_ordering(ordering)
+
+    @classmethod
+    def print_filter_class_stack(cls, indent = ''):
+        return cls.print_child_class_ordering('filter')    
+
+    @classmethod
+    def ww_update_classes(cls):
+        if not cls.ww_class_data.get('no_classes_name', False):
+            cls.ww_classes[0] = Webwidgets.Utils.class_full_name(cls)
+
+    def setup_filter(self):
+        ww_filter = self.__dict__.get('ww_filter', self)
+        object = self.__dict__.get('object', self)
+        # Note the reversal of order. What this means is: Highest
+        # _filter_level first, that is, the last filter in the chain
+        # first. We build the chain backwards, feeding the last built
+        # one to the ww_filter attribute when building the next one
+        for filter_class in reversed(self.get_child_class_ordering('filter')):
+            ww_filter = filter_class(ww_filter = ww_filter, object = object)
         self.__dict__[name] = ww_filter
         self.__dict__["object"] = object
 
@@ -199,13 +323,6 @@ class Object(object):
             return False
         return self.object.ww_filter is self
     is_first_filter = property(is_first_filter)
-
-    def print_filter_class_stack(cls, ww_filter_classes = None, indent = ''):
-        if ww_filter_classes is None: ww_filter_classes = cls.WwFilters
-        return indent + '%s.%s\n%s' % (cls.__module__, cls.__name__,
-                                         ''.join([cls.get_filter(filter).print_filter_class_stack(indent = indent + '  ')
-                                                  for filter in ww_filter_classes]))
-    print_filter_class_stack = classmethod(print_filter_class_stack)
 
     def print_filter_instance_stack(self, name = 'ww_filter', attrs = []):
         ww_filter = getattr(self, name)

@@ -45,8 +45,6 @@ class GenericRegionPart(Webwidgets.ObjectMod.Object):
             if prefix not in region.name_dict: return None
             region = region.name_dict[prefix]
         return region
-    
-    WwFilters = ['RegionNameFilter']
 
     class RegionNameFilter(Webwidgets.FilterMod.Filter):
         class Value(object):
@@ -73,7 +71,6 @@ class GenericRegionPart(Webwidgets.ObjectMod.Object):
 
 class RegionPartInput(GenericRegionPart, Webwidgets.Widgets.FormattingMod.ListMod.RowsSingleValueListInput):
     class WwModel(GenericRegionPart.WwModel, Webwidgets.Widgets.FormattingMod.ListMod.RowsSingleValueListInput.WwModel): pass
-    WwFilters = Webwidgets.Widgets.FormattingMod.ListMod.RowsSingleValueListInput.WwFilters + GenericRegionPart.WwFilters
     
     def get_rows(self):
         if self.ww_model.store_symbol:
@@ -87,12 +84,12 @@ class CountryPartInput(RegionPartInput):
         region_prefix = []
 
 class CountyPartInput(RegionPartInput):
-    ww_input_subordinates = (CountryPartInput, )
+    ww_input_pre = (CountryPartInput, )
     class WwModel(RegionPartInput.WwModel):
         region_prefix = [""]
 
 class MunicipalityPartInput(RegionPartInput):
-    ww_input_subordinates = (RegionPartInput, )
+    ww_input_pre = (RegionPartInput, )
     class WwModel(RegionPartInput.WwModel):
         region_prefix = ["", ""]
 
@@ -110,7 +107,8 @@ class CountryInput(Webwidgets.Html):
         class Label(Webwidgets.Html): html = "Country"
         class Field(CountryPartInput):
             field_name = "country"
-            WwFilters = CountryPartInput.WwFilters + [Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, active = "active", value ='country')]
+            CountryRedirect = Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, active = "active", value ='country').add_class_in_ordering(
+                'filter', pre = CountryPartInput.ww_filter_last)
 
 class CountyInput(CountryInput):
     html = "%(County)s" + CountryInput.html
@@ -135,11 +133,12 @@ class CountyInput(CountryInput):
         class Label(Webwidgets.Html): html = "Region"
         class Field(CountyPartInput):
             field_name = "county"
-            WwFilters = CountyPartInput.WwFilters + [
-                Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, active = "active", value ='county'),
-                Webwidgets.FilterMod.MangleFilter.mangle(
-                    region_prefix = lambda self: [self.parent.parent.ww_filter.country])]
-
+            CountyRedirect = Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, active = "active", value ='county').add_class_in_ordering(
+                'filter', pre = CountryPartInput.ww_filter_last)
+            CountyMangle = Webwidgets.FilterMod.MangleFilter.mangle(
+                region_prefix = lambda self: [self.parent.parent.ww_filter.country]).add_class_in_ordering(
+                'filter', pre = [CountyRedirect])
+            
 class MunicipalityInput(CountyInput):
     html = "%(Municipality)s" + CountyInput.html
 
@@ -173,16 +172,20 @@ class MunicipalityInput(CountyInput):
         class Label(Webwidgets.Html): html = "Municipality"
         class Field(MunicipalityPartInput):
             field_name = "municipality"
-            WwFilters = MunicipalityPartInput.WwFilters + [
-                Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, active = "active", value ='municipality'),
-                Webwidgets.FilterMod.MangleFilter.mangle(
+
+            MunicipalityRedirect = Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, active = "active", value ='municipality').add_class_in_ordering(
+                'filter', pre = MunicipalityPartInput.ww_filter_last)
+            MunicipalityMangle = Webwidgets.FilterMod.MangleFilter.mangle(
                 region_prefix = lambda self: [self.parent.parent.ww_filter.country,
-                                              self.parent.parent.ww_filter.county])]
+                                              self.parent.parent.ww_filter.county]).add_class_in_ordering(
+                'filter', pre = [MunicipalityRedirect])
 
 class RegionPart(GenericRegionPart, Webwidgets.Widgets.FormattingMod.BaseFormatting.Html):
     class WwModel(GenericRegionPart.WwModel): pass
-    WwFilters = Webwidgets.Widgets.FormattingMod.BaseFormatting.Html.WwFilters + [Webwidgets.FilterMod.RenameFilter.rename(html = "value"),
-                                             Webwidgets.FilterMod.MapValueFilter.map_values(value = {'-': None})] + GenericRegionPart.WwFilters
+    RegionPartRename = Webwidgets.FilterMod.RenameFilter.rename(html = "value").add_class_in_ordering(
+        'filter', pre = Webwidgets.Widgets.FormattingMod.BaseFormatting.Html.ww_filter_last)
+    RegionPartMap = Webwidgets.FilterMod.MapValueFilter.map_values(value = {'-': None}).add_class_in_ordering(
+        'filter', pre = [RegionPartRename], post = GenericRegionPart.ww_filter_first)
 
 class CountryPart(RegionPart):
     class WwModel(RegionPart.WwModel):
@@ -207,7 +210,8 @@ class Country(Webwidgets.Html):
         class Label(Webwidgets.Html): html = "Country"
         class Field(CountryPart):
             field_name = "country"
-            WwFilters = CountryPart.WwFilters + [Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, value ='country')]
+            CountryRedirect = Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, value ='country').add_class_in_ordering(
+                'filter', pre = CountryPart.ww_filter_last)
 
 class County(Country):
     html = "%(County)s" + Country.html
@@ -219,10 +223,11 @@ class County(Country):
         class Label(Webwidgets.Html): html = "Region"
         class Field(CountyPart):
             field_name = "county"
-            WwFilters = CountyPart.WwFilters + [
-                Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, value ='county'),
-                Webwidgets.FilterMod.MangleFilter.mangle(
-                    region_prefix = lambda self: [self.parent.parent.ww_filter.country])]
+            CountyRedirect = Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, value ='county').add_class_in_ordering(
+                'filter', pre = CountyPart.ww_filter_last)
+            CountyMangle = Webwidgets.FilterMod.MangleFilter.mangle(
+                region_prefix = lambda self: [self.parent.parent.ww_filter.country]).add_class_in_ordering(
+                'filter', pre = [CountyRedirect])
 
 class Municipality(County):
     html = "%(Municipality)s" + County.html
@@ -234,8 +239,10 @@ class Municipality(County):
         class Label(Webwidgets.Html): html = "Municipality"
         class Field(MunicipalityPart):
             field_name = "municipality"
-            WwFilters = MunicipalityPart.WwFilters + [
-                Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, value = 'municipality'),
-                Webwidgets.FilterMod.MangleFilter.mangle(
+
+            MunicipalityRedirect = Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, value = 'municipality').add_class_in_ordering(
+                'filter', pre = MunicipalityPart.ww_filter_last)
+            MunicipalityMangle = Webwidgets.FilterMod.MangleFilter.mangle(
                 region_prefix = lambda self: [self.parent.parent.ww_filter.country,
-                                              self.parent.parent.ww_filter.county])]
+                                              self.parent.parent.ww_filter.county]).add_class_in_ordering(
+                'filter', pre = [MunicipalityRedirect])

@@ -183,12 +183,11 @@ class BaseTable(Webwidgets.Widgets.RowsMod.RowsComposite, Webwidgets.Widgets.Bas
         html_output_cache = None
 
     class SourceFilters(Webwidgets.Widgets.RowsMod.RowsComposite.SourceFilters):
-
-        WwFilters = ["HtmlCacheFilter"] + Webwidgets.Widgets.RowsMod.RowsComposite.SourceFilters.WwFilters
         class HtmlCacheFilter(Webwidgets.FilterMod.Filter):
             def reread(self):
                 self.html_output_cache = None
                 self.ww_filter.reread()
+        HtmlCacheFilter.add_class_in_ordering('filter', pre = Webwidgets.Widgets.RowsMod.RowsComposite.SourceFilters.ww_filter_last)
 
     empty_table_message = """There is no data in this table / no entries matched your search."""
 
@@ -196,12 +195,9 @@ class BaseTable(Webwidgets.Widgets.RowsMod.RowsComposite, Webwidgets.Widgets.Bas
         """This filter groups filters that mangle the virtual tree of
         rows (that has merged cells, according to the current sorting
         order)."""
-        
-        WwFilters = ["TableRowsToTreeFilter"]
         class TableRowsToTreeFilter(TableRowsToTreeFilter): pass
+    TreeFilters.add_class_in_ordering('filter', post = Webwidgets.Widgets.RowsMod.RowsComposite.ww_filter_first)
 
-    WwFilters = ["TreeFilters"] + Webwidgets.Widgets.RowsMod.RowsComposite.WwFilters
-    
     def get_active(self, path):
         """@return: Whether the widget is allowing the user to acces
         a given part of it or not.
