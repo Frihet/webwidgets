@@ -67,6 +67,11 @@ class Type(type):
         self = type.__new__(cls, name, bases, members)
         set_class_path(self)
 
+        self.ww_class_subclasses = Webwidgets.Utils.WeakSet()
+        for base in self.__bases__:
+            if hasattr(base, 'ww_class_subclasses'):
+                base.ww_class_subclasses.add(self)
+
         self.process_class_orderings()
         self.process_child_class_orderings()
         
@@ -240,6 +245,10 @@ class Object(object):
             cls,
             max([0] + [getattr(pre, metadata_member, {'level': 0})['level']
                        for pre in metadata['pre']]) + 1)
+
+        # Update sublcasses
+        for subclass in cls.ww_class_subclasses:
+            subclass.process_class_ordering(ordering_name)
 
         if getattr(cls, 'ww_debug_%s_ordering' % ordering_name, False):
             print "Registering widget % ordering: %s" % (ordering_name, cls.__name__)
