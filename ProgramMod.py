@@ -191,7 +191,17 @@ class Program(WebKit.Page.Page):
             if self.debug:
                 non_debugged_fn = fn
                 def debug_fn():
-                    return pdb.runcall(non_debugged_fn)
+                    try:
+                        return non_debugged_fn()
+                    except:
+                        # Uggly hack around a bug in pdb (it apparently depends on
+                        # and old sys-API)
+                        sys.last_traceback = sys.exc_info()[2]
+
+                        print "######################### The application has crashed ##########################"
+                        print "Exception: %s" % (sys.exc_info()[1],)
+                        pdb.pm()
+                        raise
                 fn = debug_fn
 
             return fn()
