@@ -163,57 +163,64 @@ class Object(object):
     def process_class_ordering(cls, ordering_name):
         pre_member = "ww_%s_pre" % (ordering_name,)
         post_member = "ww_%s_post" % (ordering_name,)
-        level_member = "_%s_level" % (ordering_name,)
+        metadata_member = "ww_%s_metadata" % (ordering_name,)
+        
+        metadata = {'pre': Webwidgets.Utils.WeakSet(),
+                    'post': Webwidgets.Utils.WeakSet(),
+                    'level': 0}
+        setattr(cls, metadata_member, metadata)
 
-        setattr(cls, pre_member, set(getattr(cls, pre_member, ())))
-        setattr(cls, post_member, set(getattr(cls, post_member, ())))
+        # Copy pres and posts from the suer-set attributes
+        metadata['pre'].update(getattr(cls, pre_member, ()))
+        metadata['post'].update(getattr(cls, post_member, ()))
 
         # Find intermediates between bases
         bases = set(cls.__bases__)
         intermediaries = set(bases)
-        max_level = max(getattr(base, level_member, 0) for base in bases)
+        max_level = max(getattr(base, metadata_member, {'level': 0})['level']
+                        for base in bases)
 
         def find_path_between_bases(node, path):
-            for successor in getattr(node, post_member, ()):
+            for successor in getattr(node, metadata_member, {'post': ()})['post']:
                 if successor in bases:
                     intermediaries.update(path)
-                elif getattr(successor, level_member) <= max_level:
+                elif getattr(successor, metadata_member)['level'] <= max_level:
                     find_path_between_bases(successor, set.union(path, set((successor,))))
         for base in bases:
             find_path_between_bases(base, set())
-
 
         # Append inherited pre:s and post:s
         bases = set(cls.__bases__)
         for base in bases:
             if ordering_name in getattr(base, 'ww_class_orderings', ()):
-                if type(getattr(base, pre_member)) is not set:
-                    raise TypeError("%s.%s.%s is a %s while it should be a set()" % (
-                        base.__module__, base.__name__, pre_member, type(getattr(base, pre_member))))
-                if type(getattr(base, post_member)) is not set:
-                    raise TypeError("%s.%s.%s is a %s while it should be a set()" % (
-                        base.__module__, base.__name__, pre_member, type(getattr(base, post_member))))
-                getattr(cls, pre_member).update(getattr(base, pre_member) - intermediaries)
-                getattr(cls, post_member).update(getattr(base, post_member) - intermediaries)
+                if not hasattr(base, metadata_member):
+                    raise TypeError("%s.%s:s %s oredring has not been initialized while initializing a subclass %s.%s" % (
+                        base.__module__, base.__name__, ordering_name, cls.__module__, cls.__name__))
+                base_metadata = getattr(base, metadata_member)
+                metadata['pre'].update(base_metadata['pre'] - intermediaries)
+                metadata['post'].update(base_metadata['post'] - intermediaries)
         
         # Update linked objects
-        for pre in getattr(cls, pre_member):
-            getattr(pre, post_member).add(cls)
-        for post in getattr(cls, post_member):
-            getattr(post, pre_member).add(cls)
+        for pre in metadata['pre']:
+            if not hasattr(pre, metadata_member):
+                raise TypeError("%s.%s:s %s oredring has not been initialized while initializing a successor %s.%s" % (
+                    pre.__module__, pre.__name__, ordering_name, cls.__module__, cls.__name__))
+            getattr(pre, metadata_member)['post'].add(cls)
+        for post in metadata['post']:
+            if not hasattr(post, metadata_member):
+                raise TypeError("%s.%s:s %s oredring has not been initialized while initializing a predesessor %s.%s" % (
+                    post.__module__, post.__name__, ordering_name, cls.__module__, cls.__name__))
+            getattr(post, metadata_member)['pre'].add(cls)
 
         # Update our level and levels downstream in the network
         # Note: If you make circles, you will cause an infinite loop.
         # That's usually what cirle means, so no news there :P
         def update_node_level(node, level, done = None):
-#             print "NODE %s -> %s -> %s" % (', '.join(x.__name__ for x in getattr(node, pre_member)),
-#                                            node.__name__,
-#                                            ', '.join(x.__name__ for x in getattr(node, post_member)))
             if done is None: done = []
             if node in done:
                 def find_base_cause(node, successor):
                     for base in node.__bases__:
-                        if successor in getattr(base, post_member, ()):
+                        if successor in getattr(base, metadata_member, {'post': ()})['post']:
                             return find_base_cause(base, successor) + [node]
                     return [node]
                 loop = [node] + done[:done.index(node)+1]
@@ -224,23 +231,24 @@ class Object(object):
                                                    for parent in reversed(find_base_cause(loop_node, next_loop_node))),)
                                for (loop_node, next_loop_node) in zip(loop, loop[1:] + loop[:1]))))
             done.append(node)
-            setattr(node, level_member, level)
+            node_metadata = getattr(node, metadata_member)
+            node_metadata['level'] = level
             for post in getattr(node, post_member):
-                if getattr(post, level_member) <= level:
+                if node_metadata['level'] <= level:
                     update_node_level(post, level + 1, done)
         update_node_level(
             cls,
-            max([0] + [getattr(pre, level_member)
-                       for pre in getattr(cls, pre_member)]) + 1)
+            max([0] + [getattr(pre, metadata_member, {'level': 0})['level']
+                       for pre in metadata['pre']]) + 1)
 
         if getattr(cls, 'ww_debug_%s_ordering' % ordering_name, False):
             print "Registering widget % ordering: %s" % (ordering_name, cls.__name__)
-            print "    Pre:", ', '.join([pre.__name__ for pre in getattr(cls, pre_member)])
-            print "    Post:", ', '.join([post.__name__ for post in getattr(cls, post_member)])
-            print "    Level:", getattr(cls, level_member)
+            print "    Pre:", ', '.join(pre.__name__ for pre in metadata['pre'])
+            print "    Post:", ', '.join(post.__name__ for post in metadata['post'])
+            print "    Level:", metadata['level']
 
     @classmethod
-    def add_class_in_ordering(cls, ordering_name, pre = [], post = []):
+    def add_class_in_ordering(cls, ordering_name, pre = set(), post = set()):
         pre_member = "ww_%s_pre" % (ordering_name,)
         post_member = "ww_%s_post" % (ordering_name,)
 
@@ -266,16 +274,21 @@ class Object(object):
         setattr(cls, last_member, last)
 
     @classmethod
+    def get_class_ordering_cmp(cls, ordering_name):
+        metadata_member = "ww_%s_metadata" % (ordering_name,)
+        return lambda a, b: cmp(getattr(a, metadata_member)['level'],
+                                getattr(b, metadata_member)['level'])
+
+    @classmethod
     def get_child_class_ordering(cls, ordering_name):
         """Gives you a full ordering of all children that are ordered
         according to ordering_name."""
-        
-        level_member = "_%s_level" % (ordering_name,)
 
+        metadata_member = "ww_%s_metadata" % (ordering_name,)
         child_classes = [child_cls
                          for child_cls in (getattr(cls, name, None) for name in dir(cls))
-                         if hasattr(child_cls, level_member)]
-        child_classes.sort(lambda a, b: cmp(getattr(a, level_member), getattr(b, level_member)))
+                         if hasattr(child_cls, metadata_member)]
+        child_classes.sort(cls.get_class_ordering_cmp(ordering_name))
         return child_classes
 
     @classmethod

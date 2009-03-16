@@ -30,6 +30,7 @@ from Obj import *
 from Dict import *
 from List import *
 from Iterator import *
+from Set import *
 from Widget.Path import *
 from Widget.CssClass import *
 from Module import *

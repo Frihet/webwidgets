@@ -932,7 +932,7 @@ class Input(Widget):
     ww_class_orderings = set.union(Widget.ww_class_orderings,
                                    ('input',))
             
-    ww_input_pre = ()
+    ww_input_pre = set()
     """Other input widgets that should handle simultaneous input from
     the user _before_ this widget.
 
@@ -940,7 +940,7 @@ class Input(Widget):
     usually what cirle means, so no news there :P
     """
 
-    ww_input_post = ()
+    ww_input_post = set()
     """Other input widgets that should handle simultaneous input from
     the user _after_ this widget.
 

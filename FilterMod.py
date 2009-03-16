@@ -35,7 +35,7 @@ class Filter(Webwidgets.ObjectMod.Object):
     accessing the ww_filter attribute (the next filter), not ww_model
     as Object's ones does."""
 
-    ww_filter_pre = ()
+    ww_filter_pre = set()
     """List of filters that are to be placed before this filter in the
     filter chain.
 
@@ -43,7 +43,7 @@ class Filter(Webwidgets.ObjectMod.Object):
     usually what cirle means, so no news there :P
     """
 
-    ww_filter_post = ()
+    ww_filter_post = set()
     """List of filters that are to be placed before this filter in the
     filter chain.
 
