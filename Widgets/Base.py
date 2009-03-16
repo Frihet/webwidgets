@@ -750,7 +750,7 @@ class Composite(Widget):
             result = [None, ''][invisible_as_empty]
 
         if result is not None and getattr(child, 'system_errors', []):
-            HtmlWindow.register_header(self, "Status", "500 Application exception cought")
+            Webwidgets.HtmlWindow.register_header(self, "Status", "500 Application exception cought")
             system_error_format = self._(self.system_error_format, output_options)
             system_error_log_id_format = self._(self.system_error_log_id_format, output_options)
             system_errors_log_ids_format = self._(self.system_errors_log_ids_format, output_options)
@@ -949,11 +949,12 @@ class Input(Widget):
     """
 
     """Base class for all input widgets, providing input field registration"""
+
     @classmethod
     def input_order(cls, other):
         if isinstance(other, Input):
             other = type(other)
-        return cmp(cls._input_level, other._input_level) or cmp(cls, other) or cmp(id(cls), id(other))
+        return cls.get_class_ordering_cmp('input')(cls, other)
 
     active = True
     """Enables the user to actually use this input field."""
