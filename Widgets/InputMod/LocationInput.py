@@ -71,6 +71,9 @@ class GenericRegionPart(Webwidgets.ObjectMod.Object):
 
 class RegionPartInput(GenericRegionPart, Webwidgets.Widgets.FormattingMod.ListMod.RowsSingleValueListInput):
     class WwModel(GenericRegionPart.WwModel, Webwidgets.Widgets.FormattingMod.ListMod.RowsSingleValueListInput.WwModel): pass
+
+    class RegionNameFilter(GenericRegionPart.RegionNameFilter):
+        ww_filter_pre = Webwidgets.Widgets.FormattingMod.ListMod.RowsSingleValueListInput.ww_filter_last
     
     def get_rows(self):
         if self.ww_model.store_symbol:

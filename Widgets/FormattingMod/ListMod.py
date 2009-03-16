@@ -54,7 +54,7 @@ class RowsListInput(Webwidgets.Widgets.Base.ValueInput, Webwidgets.Widgets.RowsM
     class ValueFilters(Webwidgets.FilterMod.Filter):
         """This filter groups all filters that mangles the L{value} of
         the widget, that is, the item selection."""
-    ValueFilters.add_class_in_ordering('filter', pre = Webwidgets.Widgets.RowsMod.RowsComposite.ww_filter_last)
+    ValueFilters.add_class_in_ordering('filter', post = Webwidgets.Widgets.RowsMod.RowsComposite.ww_filter_first)
 
 
     def only_one_row(self):
