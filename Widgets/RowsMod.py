@@ -369,20 +369,20 @@ class RowsComposite(Webwidgets.Widgets.Base.CachingComposite):
                     self.object.append_exception(self.sort_error_msg)
 
                 return result
-    SourceErrorFilter.add_class_in_ordering('filter', pre = [SourceFilters])
+    SourceErrorFilter.add_class_in_ordering('filter', post = [SourceFilters])
 
     class RowsFilters(Webwidgets.FilterMod.Filter):
         """This filter groups all filters that mangle rows in some way
         - wrapping them, adding extra rows, hiding rows etc."""
         
         class RowsRowWrapperFilter(RowsRowWrapperFilter): pass
-    RowsFilters.add_class_in_ordering('filter', pre = [SourceErrorFilter])
+    RowsFilters.add_class_in_ordering('filter', post = [SourceErrorFilter])
 
     class OutputOptionsFilters(Webwidgets.FilterMod.Filter):
         """This filter groups all filters that generate options for
         L{get_rows} based on L{output_options}."""
         class RowsPrintableFilter(RowsPrintableFilter): pass
-    OutputOptionsFilters.add_class_in_ordering('filter', pre = [RowsFilters])
+    OutputOptionsFilters.add_class_in_ordering('filter', post = [RowsFilters])
 
     class RowsRowModelWrapper(Webwidgets.FilterMod.PersistentWrapper):
         """This class is a wrapper that all rows are wrapped in by
