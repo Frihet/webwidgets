@@ -285,8 +285,10 @@ class Object(object):
     @classmethod
     def get_class_ordering_cmp(cls, ordering_name):
         metadata_member = "ww_%s_metadata" % (ordering_name,)
-        return lambda a, b: cmp(getattr(a, metadata_member)['level'],
-                                getattr(b, metadata_member)['level'])
+        return lambda a, b: (   cmp(getattr(a, metadata_member)['level'],
+                                   getattr(b, metadata_member)['level'])
+                             or cmp(a, b)
+                             or cmp(id(a), id(b)))
 
     @classmethod
     def get_child_class_ordering(cls, ordering_name):
@@ -334,7 +336,7 @@ class Object(object):
         # one to the ww_filter attribute when building the next one
         for filter_class in reversed(self.get_child_class_ordering('filter')):
             ww_filter = filter_class(ww_filter = ww_filter, object = object)
-        self.__dict__[name] = ww_filter
+        self.__dict__['ww_filter'] = ww_filter
         self.__dict__["object"] = object
 
     def is_first_filter(self):
