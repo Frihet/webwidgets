@@ -32,50 +32,35 @@ class Type(type):
 
     def __new__(cls, name, bases, members):
         members = dict(members)
-        ww_classes = []
+        cls._set_class_order_nr(members)
+        cls._mangle_class_data(members)
 
+        self = type.__new__(cls, name, bases, members)
+
+        self._init_classes()
+        self._init_class_subclasses()
+        self._set_class_path()
+        self.process_class_orderings()
+        self.process_child_class_orderings()
+        
+        return self
+
+
+    @classmethod
+    def _set_class_order_nr(cls, members):
+        members['ww_class_order_nr'] = cls.ww_class_order_nr.next()
+
+    @classmethod
+    def _mangle_class_data(cls, members):
         # This dictionary contains data specific to this class, that
         # can not be inherited.
         if 'ww_class_data' not in members:
             members['ww_class_data'] = {}
-        members['ww_class_data'] = {}
-
-
         for key in members.keys():
             if key.startswith('ww_class_data__'):
                 members['ww_class_data'][key[len('ww_class_data__'):]] = members[key]
                 del members[key]
 
-        members['ww_classes'] = []
-        if not members['ww_class_data'].get('no_classes_name', False):
-            members['ww_classes'].append(None) # Our own one is set later on
-        for base in bases:
-            if hasattr(base, 'ww_classes'):
-                members['ww_classes'].extend(base.ww_classes)
-
-        members['ww_class_order_nr'] = cls.ww_class_order_nr.next()
-
-        def set_class_path(widget, path = ()):
-            widget.ww_class_path = '.'.join(path)
-            widget.ww_update_classes()
-            sub_path = path + (widget.__name__,)
-            for key, value in widget.__dict__.iteritems():
-                if isinstance(value, cls):
-                    set_class_path(value, sub_path)
-            return widget
-
-        self = type.__new__(cls, name, bases, members)
-        set_class_path(self)
-
-        self.ww_class_subclasses = Webwidgets.Utils.WeakSet()
-        for base in self.__bases__:
-            if hasattr(base, 'ww_class_subclasses'):
-                base.ww_class_subclasses.add(self)
-
-        self.process_class_orderings()
-        self.process_child_class_orderings()
-        
-        return self
 
 class Required(object):
     """Required value, if set on a class the member must be set or
@@ -163,6 +148,37 @@ class Object(object):
 
                 if attr is Required:
                     raise AttributeError('Required attribute %s missing' % (name, ))
+
+    @classmethod
+    def _init_classes(cls):
+        cls.ww_classes = []
+        if not cls.ww_class_data.get('no_classes_name', False):
+            cls.ww_classes.append(None) # Our own one is set later on
+        for base in cls.__bases__:
+            if hasattr(base, 'ww_classes'):
+                cls.ww_classes.extend(base.ww_classes)
+
+    @classmethod
+    def ww_update_classes(cls):
+        if not cls.ww_class_data.get('no_classes_name', False):
+            cls.ww_classes[0] = Webwidgets.Utils.class_full_name(cls)
+
+    @classmethod
+    def _init_class_subclasses(cls):
+        cls.ww_class_subclasses = Webwidgets.Utils.WeakSet()
+        for base in cls.__bases__:
+            if hasattr(base, 'ww_class_subclasses'):
+                base.ww_class_subclasses.add(cls)
+
+    @classmethod
+    def _set_class_path(cls, path = ()):
+        cls.ww_class_path = '.'.join(path)
+        cls.ww_update_classes()
+        sub_path = path + (cls.__name__,)
+        for key, value in cls.__dict__.iteritems():
+            if hasattr(value, '_set_class_path'):
+                value._set_class_path(sub_path)
+        return cls
 
     @classmethod
     def process_class_ordering(cls, ordering_name):
@@ -321,11 +337,6 @@ class Object(object):
     @classmethod
     def print_filter_class_stack(cls, indent = ''):
         return cls.print_child_class_ordering('filter')    
-
-    @classmethod
-    def ww_update_classes(cls):
-        if not cls.ww_class_data.get('no_classes_name', False):
-            cls.ww_classes[0] = Webwidgets.Utils.class_full_name(cls)
 
     def setup_filter(self):
         ww_filter = self.__dict__.get('ww_filter', self)
