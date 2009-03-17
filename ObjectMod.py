@@ -254,7 +254,7 @@ class Object(object):
             done.append(node)
             node_metadata = getattr(node, metadata_member)
             node_metadata['level'] = level
-            for post in getattr(node, post_member):
+            for post in node_metadata['post']:
                 if node_metadata['level'] <= level:
                     update_node_level(post, level + 1, done)
         update_node_level(
@@ -302,7 +302,7 @@ class Object(object):
     def get_class_ordering_cmp(cls, ordering_name):
         metadata_member = "ww_%s_metadata" % (ordering_name,)
         return lambda a, b: (   cmp(getattr(a, metadata_member)['level'],
-                                   getattr(b, metadata_member)['level'])
+                                    getattr(b, metadata_member)['level'])
                              or cmp(a, b)
                              or cmp(id(a), id(b)))
 
