@@ -18,6 +18,7 @@ def print_class_info(cls):
                                       cls.__name__,
                                       ', '.join(pre.__name__ for pre in cls.ww_x_metadata['post_backlink']))
 
+print "Explicit pre-chaining:"
 class A(R): pass
 class B(R):
     ww_x_pre = set((A,))
@@ -29,6 +30,7 @@ print_class_info(B)
 print_class_info(C)
 print
 
+print "Member class implicit chaining:"
 class PA(PR):
     class CA(R): pass
     class CB(R): pass
@@ -39,7 +41,7 @@ print_class_info(PA.CB)
 print_class_info(PA.CC)
 print
 
-
+print "Member class implicit chaining with explicit reversal of chaining between two members:"
 class PB(PR):
     class CA(R): pass
     class CB(R): pass
@@ -52,6 +54,7 @@ print_class_info(PB.CC)
 print
 
 
+print "Member class implicit chaining with explicit reversal of chaining between two members by superclass:"
 class A(R): pass
 class B(R): pass
 B.add_class_in_ordering('x', post=[A])
@@ -66,6 +69,7 @@ print_class_info(PC.CC)
 print
 
 
+print "Member class implicit chaining with memberchip chaining inheritance from outer class subclassing:"
 class PD(PR):
     class CA(R): pass
     class CB(R): pass
@@ -83,7 +87,13 @@ print_class_info(PE.CX)
 print
 
 
+print "Multiple inheritance from chain with non-listed intermediate:"
 class A(R): pass
 class B(R): ww_x_pre = (A,)
 class C(R): ww_x_pre = (B,)
 class D(A, C): pass
+
+print_class_info(A)
+print_class_info(B)
+print_class_info(C)
+print_class_info(D)
