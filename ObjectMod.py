@@ -181,34 +181,43 @@ class Object(object):
         return cls
 
     @classmethod
-    def process_class_ordering(cls, ordering_name):
+    def _update_class_ordering_metadata(cls, ordering_name):
         pre_member = "ww_%s_pre" % (ordering_name,)
         post_member = "ww_%s_post" % (ordering_name,)
         metadata_member = "ww_%s_metadata" % (ordering_name,)
-        
-        metadata = {'pre': Webwidgets.Utils.WeakSet(),
-                    'post': Webwidgets.Utils.WeakSet(),
-                    'level': 0}
-        setattr(cls, metadata_member, metadata)
 
-        # Copy pres and posts from the suer-set attributes
+        if metadata_member not in cls.__dict__:
+            metadata = {'pre': Webwidgets.Utils.WeakSet(),
+                        'post': Webwidgets.Utils.WeakSet(),
+                        'pre_backlink': Webwidgets.Utils.WeakSet(),
+                        'post_backlink': Webwidgets.Utils.WeakSet(),
+                        'level': 0}
+            setattr(cls, metadata_member, metadata)
+        else:
+            metadata = getattr(cls, metadata_member)
+            metadata['pre'].clear()
+            metadata['post'].clear()
+            metadata['level'] = 0
+
+        # Copy pres and posts from the user-set attributes
         metadata['pre'].update(getattr(cls, pre_member, ()))
         metadata['post'].update(getattr(cls, post_member, ()))
 
         # Find intermediates between bases
-        bases = set(cls.__bases__)
-        intermediaries = set(bases)
-        max_level = max(getattr(base, metadata_member, {'level': 0})['level']
-                        for base in bases)
-
-        def find_path_between_bases(node, path):
-            for successor in getattr(node, metadata_member, {'post': ()})['post']:
+        def find_path_between_bases(node, intermediaries, max_level, path):
+            for successor in  set.union(set(getattr(node, metadata_member, {'post': ()})['post']),
+                                        getattr(node, metadata_member, {'post_backlink': ()})['post_backlink']):
                 if successor in bases:
                     intermediaries.update(path)
                 elif getattr(successor, metadata_member)['level'] <= max_level:
-                    find_path_between_bases(successor, set.union(path, set((successor,))))
+                    find_path_between_bases(successor, intermediaries, max_level, set.union(path, set((successor,))))
+
+        bases = set(cls.__bases__)
+        max_level = max(getattr(base, metadata_member, {'level': 0})['level']
+                        for base in bases)
+        intermediaries = set(bases)
         for base in bases:
-            find_path_between_bases(base, set())
+            find_path_between_bases(base, intermediaries, max_level, set())
 
         # Append inherited pre:s and post:s
         bases = set(cls.__bases__)
@@ -220,47 +229,83 @@ class Object(object):
                 base_metadata = getattr(base, metadata_member)
                 metadata['pre'].update(base_metadata['pre'] - intermediaries)
                 metadata['post'].update(base_metadata['post'] - intermediaries)
+                metadata['pre_backlink'].update(base_metadata['pre_backlink'] - intermediaries)
+                metadata['post_backlink'].update(base_metadata['post_backlink'] - intermediaries)
         
         # Update linked objects
         for pre in metadata['pre']:
             if not hasattr(pre, metadata_member):
                 raise TypeError("%s.%s:s %s oredring has not been initialized while initializing a successor %s.%s" % (
                     pre.__module__, pre.__name__, ordering_name, cls.__module__, cls.__name__))
-            getattr(pre, metadata_member)['post'].add(cls)
+            getattr(pre, metadata_member)['post_backlink'].add(cls)
         for post in metadata['post']:
             if not hasattr(post, metadata_member):
                 raise TypeError("%s.%s:s %s oredring has not been initialized while initializing a predesessor %s.%s" % (
                     post.__module__, post.__name__, ordering_name, cls.__module__, cls.__name__))
-            getattr(post, metadata_member)['pre'].add(cls)
+            getattr(post, metadata_member)['pre_backlink'].add(cls)
 
+    @classmethod
+    def _report_ordering_cicrle(cls, ordering_name, done):
+        metadata_member = "ww_%s_metadata" % (ordering_name,)
+
+        def find_base_cause(cls, other, direction = 'post'):
+            direction_backlink = direction + '_backlink'
+            for base in cls.__bases__:
+                if (   other in getattr(base, metadata_member, {direction: ()})[direction]
+                    or other in getattr(base, metadata_member, {direction_backlink: ()})[direction_backlink]):
+                    return [cls] + find_base_cause(base, other, direction)
+            return [cls]
+
+        loop = done[done.index(cls):]
+        raise Exception("""Ordering circle encountered for %s ordering of classes:
+Post-links:
+ %s
+Pre-links:
+ %s""" % (
+            ordering_name,
+            '\n '.join(' <- '.join('%s.%s%s' % (parent.__module__,
+                                                        parent.__name__,
+                                                        (    next_loop_cls in getattr(parent, metadata_member, {'post_backlink': ()})['post_backlink']
+                                                         and '(backlnk)'
+                                                         or  next_loop_cls in getattr(parent, metadata_member, {'post': ()})['post']
+                                                         and '(forlnk)'
+                                                         or  '(FAIL)'))
+                                           for parent in find_base_cause(loop_cls, next_loop_cls, 'post'))
+                       for (loop_cls, next_loop_cls) in zip(loop + loop[:1], loop[1:] + loop[:2])),
+            '\n '.join(' <- '.join('%s.%s%s' % (parent.__module__,
+                                                parent.__name__,
+                                                (    next_loop_cls in getattr(parent, metadata_member, {'post_backlink': ()})['post_backlink']
+                                                 and '(backlnk)'
+                                                 or  next_loop_cls in getattr(parent, metadata_member, {'post': ()})['post']
+                                                 and '(forlnk)'
+                                                 or  '(FAIL)'))
+                                   for parent in find_base_cause(loop_cls, next_loop_cls, 'post'))
+                       for (loop_cls, next_loop_cls) in zip(loop + loop[:1], loop[1:] + loop[:2]))))
+
+    @classmethod
+    def _update_class_level(cls, ordering_name, level = None, done = []):
+        metadata_member = "ww_%s_metadata" % (ordering_name,)
+
+        if level is None:
+            level = max([0] + [getattr(pre, metadata_member, {'level': 0})['level']
+                               for pre in Webwidgets.Utils.WeakSet.union(getattr(cls, metadata_member)['pre'],
+                                                                         getattr(cls, metadata_member)['pre_backlink'])]) + 1
+            
         # Update our level and levels downstream in the network
         # Note: If you make circles, you will cause an infinite loop.
         # That's usually what cirle means, so no news there :P
-        def update_node_level(node, level, done = None):
-            if done is None: done = []
-            if node in done:
-                def find_base_cause(node, successor):
-                    for base in node.__bases__:
-                        if successor in getattr(base, metadata_member, {'post': ()})['post']:
-                            return find_base_cause(base, successor) + [node]
-                    return [node]
-                loop = [node] + done[:done.index(node)+1]
-                loop.reverse()
-                raise Exception("Ordering circle encountered for %s ordering of classes:\n %s" % (
-                    ordering_name,
-                    '\n '.join('%s' % (' <- '.join('%s.%s' % (parent.__module__, parent.__name__)
-                                                   for parent in reversed(find_base_cause(loop_node, next_loop_node))),)
-                               for (loop_node, next_loop_node) in zip(loop, loop[1:] + loop[:1]))))
-            done.append(node)
-            node_metadata = getattr(node, metadata_member)
-            node_metadata['level'] = level
-            for post in node_metadata['post']:
-                if node_metadata['level'] <= level:
-                    update_node_level(post, level + 1, done)
-        update_node_level(
-            cls,
-            max([0] + [getattr(pre, metadata_member, {'level': 0})['level']
-                       for pre in metadata['pre']]) + 1)
+        if cls in done:
+            cls._report_ordering_cicrle(ordering_name, done)
+        cls_metadata = getattr(cls, metadata_member)
+        cls_metadata['level'] = level
+        for post in Webwidgets.Utils.WeakSet.union(cls_metadata['post'], cls_metadata['post_backlink']):
+            if cls_metadata['level'] <= level:
+                post._update_class_level(ordering_name, level + 1, done + [cls])
+  
+    @classmethod
+    def process_class_ordering(cls, ordering_name):
+        cls._update_class_ordering_metadata(ordering_name)
+        cls._update_class_level(ordering_name)
 
         # Update sublcasses
         for subclass in cls.ww_class_subclasses:
@@ -277,10 +322,27 @@ class Object(object):
         pre_member = "ww_%s_pre" % (ordering_name,)
         post_member = "ww_%s_post" % (ordering_name,)
 
-        setattr(cls, pre_member, set.union(getattr(cls, pre_member), pre))
-        setattr(cls, post_member, set.union(getattr(cls, post_member), post))
+        if pre:
+            setattr(cls, pre_member, set.union(getattr(cls, pre_member, set()), pre))
+        if post:
+            setattr(cls, post_member, set.union(getattr(cls, post_member, set()), post))
         cls.process_class_ordering(ordering_name)
         return cls
+
+
+    @classmethod
+    def process_child_class_auto_ordering(cls, ordering_name):
+        pass
+#         metadata_member = "ww_%s_metadata" % (ordering_name,)
+
+#         children = cls.get_child_class_ordering(ordering_name)
+#         children.sort(lambda a, b: cmp(a.ww_class_order_nr, b.ww_class_order_nr))
+
+#         children = [(child, getattr(child, metadata_member)['level']) for child in children]
+
+#         for ((child, level), (next_child, next_level)) in zip(children, children[1:]):
+#             if level <=  next_level:
+#                 child.add_class_in_ordering(ordering_name, post = [next_child])
 
     @classmethod
     def process_child_class_ordering(cls, ordering_name):
@@ -332,6 +394,7 @@ class Object(object):
     @classmethod
     def process_child_class_orderings(cls):
         for ordering in cls.ww_child_class_orderings:
+            cls.process_child_class_auto_ordering(ordering)
             cls.process_child_class_ordering(ordering)
 
     @classmethod

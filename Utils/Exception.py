@@ -29,6 +29,9 @@ log_exception_max_log=65534
 """Max number of logged exception files."""
 
 
+def raise_exc(e):
+    raise e
+
 def is_log_exceptions():
     return not not log_exception_path
 
