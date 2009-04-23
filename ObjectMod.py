@@ -297,7 +297,8 @@ Pre-links:
         cls_metadata = getattr(cls, metadata_member)
         cls_metadata['level'] = level
         for post in Webwidgets.Utils.WeakSet.union(cls_metadata['post'], cls_metadata['post_backlink']):
-            if cls_metadata['level'] <= level:
+            post_metadata = getattr(post, metadata_member)
+            if post_metadata['level'] <= level:
                 post._update_class_level(ordering_name, level + 1, done + [cls])
   
     @classmethod
