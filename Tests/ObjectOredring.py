@@ -97,3 +97,13 @@ print_class_info(A)
 print_class_info(B)
 print_class_info(C)
 print_class_info(D)
+print
+
+print "Parent multiple inheritance from chain with non-listed intermediate:"
+class PA(PR):
+    class A(R): pass
+    class B(R): pass
+class PB(PA): pass
+class PC(PB, PR): pass
+print_class_info(PC.A)
+print_class_info(PC.B)

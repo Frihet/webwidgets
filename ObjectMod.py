@@ -23,6 +23,8 @@
 import types, sys
 import Webwidgets.Utils, Webwidgets.Utils.Threads
 
+debug_child_class_auto_ordering = False
+
 class NoOldValue(object):
     """This class is used as a marker to signify that there was no old
     attribute set when doing setattr"""
@@ -331,17 +333,31 @@ Pre-links:
 
     @classmethod
     def process_child_class_auto_ordering(cls, ordering_name):
-        pass
-#         metadata_member = "ww_%s_metadata" % (ordering_name,)
+        metadata_member = "ww_%s_metadata" % (ordering_name,)
 
-#         children = cls.get_child_class_ordering(ordering_name)
-#         children.sort(lambda a, b: cmp(a.ww_class_order_nr, b.ww_class_order_nr))
+        children = cls.get_child_class_ordering(ordering_name)
+        children.sort(lambda a, b: cmp(a.ww_class_order_nr, b.ww_class_order_nr))
 
-#         children = [(child, getattr(child, metadata_member)['level']) for child in children]
+        children = [(child, getattr(child, metadata_member)['level']) for child in children]
 
-#         for ((child, level), (next_child, next_level)) in zip(children, children[1:]):
-#             if level <=  next_level:
-#                 child.add_class_in_ordering(ordering_name, post = [next_child])
+        child_names = [child.__name__ for (child, level) in children]
+
+        if debug_child_class_auto_ordering:
+            if "RowsFilters" in child_names or "SourceErrorFilter" in child_names:
+                print "---- " + cls.ww_classes[0]
+
+            if "RowsFilters" in child_names or "SourceErrorFilter" in child_names:
+                print "        %s: %s" %(children[0][0].ww_classes[0], children[0][1])
+            for ((child, level), (next_child, next_level)) in zip(children, children[1:]):
+                if level <=  next_level:
+                    if "RowsFilters" in child_names or "SourceErrorFilter" in child_names:
+                        print "            CONNECT (%s <= %s)" % (level,  next_level)
+                if "RowsFilters" in child_names or "SourceErrorFilter" in child_names:
+                    print "        %s: %s" % (next_child.ww_classes[0], next_level)
+
+        for ((child, level), (next_child, next_level)) in zip(children, children[1:]):
+            if level <=  next_level:
+                child.add_class_in_ordering(ordering_name, post = [next_child])
 
     @classmethod
     def process_child_class_ordering(cls, ordering_name):
