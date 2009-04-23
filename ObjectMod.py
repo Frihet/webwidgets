@@ -263,22 +263,20 @@ Post-links:
 Pre-links:
  %s""" % (
             ordering_name,
-            '\n '.join(' <- '.join('%s.%s%s' % (parent.__module__,
-                                                        parent.__name__,
-                                                        (    next_loop_cls in getattr(parent, metadata_member, {'post_backlink': ()})['post_backlink']
-                                                         and '(backlnk)'
-                                                         or  next_loop_cls in getattr(parent, metadata_member, {'post': ()})['post']
-                                                         and '(forlnk)'
-                                                         or  '(FAIL)'))
+            '\n '.join(' <- '.join('%s%s' % (parent.ww_classes[0],
+                                             (    next_loop_cls in getattr(parent, metadata_member, {'post_backlink': ()})['post_backlink']
+                                              and '(backlnk)'
+                                              or  next_loop_cls in getattr(parent, metadata_member, {'post': ()})['post']
+                                              and '(forlnk)'
+                                              or  '(FAIL)'))
                                            for parent in find_base_cause(loop_cls, next_loop_cls, 'post'))
                        for (loop_cls, next_loop_cls) in zip(loop + loop[:1], loop[1:] + loop[:2])),
-            '\n '.join(' <- '.join('%s.%s%s' % (parent.__module__,
-                                                parent.__name__,
-                                                (    next_loop_cls in getattr(parent, metadata_member, {'post_backlink': ()})['post_backlink']
-                                                 and '(backlnk)'
-                                                 or  next_loop_cls in getattr(parent, metadata_member, {'post': ()})['post']
-                                                 and '(forlnk)'
-                                                 or  '(FAIL)'))
+            '\n '.join(' <- '.join('%s%s' % (parent.ww_classes[0],
+                                             (    next_loop_cls in getattr(parent, metadata_member, {'post_backlink': ()})['post_backlink']
+                                              and '(backlnk)'
+                                              or  next_loop_cls in getattr(parent, metadata_member, {'post': ()})['post']
+                                              and '(forlnk)'
+                                              or  '(FAIL)'))
                                    for parent in find_base_cause(loop_cls, next_loop_cls, 'post'))
                        for (loop_cls, next_loop_cls) in zip(loop + loop[:1], loop[1:] + loop[:2]))))
 
