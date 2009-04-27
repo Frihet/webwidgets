@@ -378,10 +378,16 @@ Pre-links:
     @classmethod
     def get_class_ordering_cmp(cls, ordering_name):
         metadata_member = "ww_%s_metadata" % (ordering_name,)
-        return lambda a, b: (   cmp(getattr(a, metadata_member)['level'],
-                                    getattr(b, metadata_member)['level'])
-                             or cmp(a, b)
-                             or cmp(id(a), id(b)))
+        def class_ordering_cmp(a, b):
+            if isinstance(a, Object):
+                a = type(a)
+            if isinstance(b, Object):
+                b = type(b)
+            return (   cmp(getattr(a, metadata_member)['level'],
+                           getattr(b, metadata_member)['level'])
+                    or cmp(a, b)
+                    or cmp(id(a), id(b)))
+        return class_ordering_cmp
 
     @classmethod
     def get_child_class_ordering(cls, ordering_name):

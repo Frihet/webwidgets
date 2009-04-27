@@ -145,6 +145,25 @@ class Widget(Webwidgets.ObjectMod.Object):
     log_id_msg = u"""<div class="log-id">Log id for this exception is: %(log_id)s</div>"""
     """Error message displayed on widget error."""
 
+    ww_class_orderings = set.union(Webwidgets.ObjectMod.Object.ww_class_orderings,
+                                   ('display',))
+                
+    ww_display_pre = set()
+    """Other widgets that should be displayed prior to this widget in
+    lists and the like.
+
+    Note: If you make circles, you will cause an infinite loop. That's
+    usually what cirle means, so no news there :P
+    """
+
+    ww_display_post = set()
+    """Other widgets that should be displayed after this widget in
+    lists and the like.
+
+    Note: If you make circles, you will cause an infinite loop. That's
+    usually what cirle means, so no news there :P
+    """
+
     def __init__(self, session, win_id, **attrs):
         """Creates a new widget
 
@@ -922,13 +941,18 @@ class StaticComposite(DictComposite):
             if isinstance(value, type) and issubclass(value, Widget) and not value.__dict__.get('ww_explicit_load', False):
                 child_classes.append((name, value))
 
-        child_classes.sort(lambda x, y: cmp(x[1].ww_class_order_nr, y[1].ww_class_order_nr))
+        display_cmp = self.get_class_ordering_cmp('display')
+        child_classes.sort(lambda x, y: display_cmp(x[1], y[1]))
 
         for (name, value) in child_classes:
             self.children[name] = value(session, win_id)
 
+    ww_child_class_orderings = set.union(DictComposite.ww_child_class_orderings,
+                                         ('display',))
+
 class Input(Widget):
-    ww_debug_input_ordering = False
+    """Base class for all input widgets, providing input field registration"""
+
     ww_class_orderings = set.union(Widget.ww_class_orderings,
                                    ('input',))
             
@@ -947,15 +971,7 @@ class Input(Widget):
     Note: If you make circles, you will cause an infinite loop. That's
     usually what cirle means, so no news there :P
     """
-
-    """Base class for all input widgets, providing input field registration"""
-
-    @classmethod
-    def input_order(cls, other):
-        if isinstance(other, Input):
-            other = type(other)
-        return cls.get_class_ordering_cmp('input')(cls, other)
-
+    
     active = True
     """Enables the user to actually use this input field."""
 

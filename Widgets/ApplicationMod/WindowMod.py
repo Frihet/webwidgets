@@ -67,7 +67,7 @@ class Window(Webwidgets.Widgets.Base.Widget):
 
         sorted_fields = self.fields.items()
         sorted_fields.sort(lambda (name1, field1), (name2, field2):
-                          field1.input_order(field2))
+                          field1.get_class_ordering_cmp('input')(field1, field2))
 
         changed_fields = []
         for fieldname, field in sorted_fields:
@@ -116,7 +116,9 @@ class Window(Webwidgets.Widgets.Base.Widget):
 
         sorted_arguments = self.arguments.items()
         sorted_arguments.sort(lambda (name1, argument1), (name2, argument2):
-                             argument1['widget'].input_order(argument2['widget']))
+                              argument1['widget'].get_class_ordering_cmp(
+                                  'input')(argument1['widget'],
+                                           argument2['widget']))
 
         changed_arguments = []
         for argumentname, argument in sorted_arguments:
