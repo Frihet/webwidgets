@@ -128,9 +128,10 @@ class Widget(Webwidgets.ObjectMod.Object):
     """The (human readable) title for the widget, used for pages,
     items in lists etc. If None, the widget path is used."""
 
-    root = False
+    window = None
     parent = None
-    name = 'anonymous'
+    name = None
+    path = []
 
     system_errors = []
 
@@ -197,6 +198,12 @@ class Widget(Webwidgets.ObjectMod.Object):
             'name': 'anonymous',
             'parent': None})
         Webwidgets.ObjectMod.Object.__init__(self, **attrs)
+        
+    def _reparent(self, parent, name):
+        self.name = name
+        self.parent = parent
+        self.path = self.parent and self.parent.path is not None and self.parent.path + [self.name] or []
+        self.window = self.parent and self.parent.window
 
     class HtmlId(object):
         def __get__(self, instance, owner):
@@ -219,36 +226,6 @@ class Widget(Webwidgets.ObjectMod.Object):
                 return None
             return instance.draw_html_attributes(instance.path)
     html_attributes = HtmlAttributes()
-
-    #### fixme ####
-    # name = "Iterative definition of self.path"
-    # type = "optimization"
-    # description = "The path attribute could be set by the parent
-    # widget and be a normal variable instead of a property. This
-    # would probably speed things up a bit."
-    #### end ####
-    class Path(object):
-        def __get__(self, instance, owner):
-            """Returns the path of the widget within the widget tree."""
-            if instance is None:
-                return None
-            node = instance
-            path = []
-            while node.parent and not node.root:
-                path.append(node.name)
-                node = node.parent
-            if not node.root:
-                return None
-            path.reverse()
-            return path
-    path = Path()
-
-    class Window(object):
-        def __get__(self, instance, owner):
-            if not hasattr(instance, 'session'):
-                return None
-            return instance.session.windows.get(instance.win_id, None)
-    window = Window()
 
     def get_visible(self, path):
         return self.visible and self.session.AccessManager(Webwidgets.Constants.VIEW, self.win_id, path)
@@ -578,8 +555,7 @@ class BaseChildNodes(object):
                 if self.node is value:
                     raise Exception("Object's parent set to itself!", value)
 
-                value.parent = self.node
-                value.name = name
+                value._reparent(self.node, name)
 
 class BaseChildNodeDict(BaseChildNodes):
     def __setitem__(self, *arg, **kw):
@@ -741,6 +717,12 @@ class Composite(Widget):
     def __init__(self, session, win_id, **attrs):
         super(Composite, self).__init__(
             session, win_id, **attrs)
+
+    def _reparent(self, parent, name):
+        Widget._reparent(self, parent, name)
+        for childname, child in self.get_children():
+            if isinstance(child, Widget):
+                child._reparent(self, childname)
 
     def draw_child(self, path, child, output_options, invisible_as_empty = False):
         """Renders a child widget to HTML using its draw() method.
