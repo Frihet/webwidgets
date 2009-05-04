@@ -34,14 +34,15 @@ class Window(Webwidgets.Widgets.Base.Widget):
     languages = None
 
     def __init__(self, session, win_id, **attrs):
-        self.window = self
         self.fields = {}
         self.arguments = {}
         super(Window, self).__init__(session, win_id, **attrs)
 
-    def _reparent(self, parent, name):
+    def reparent_self(self, parent, name):
         self.name = name
         self.parent = parent
+        self.path = []
+        self.old_window = self.window
         self.window = self
 
     def output(self, output_options):

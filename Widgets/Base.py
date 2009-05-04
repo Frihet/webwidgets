@@ -199,12 +199,28 @@ class Widget(Webwidgets.ObjectMod.Object):
             'parent': None})
         Webwidgets.ObjectMod.Object.__init__(self, **attrs)
         
-    def _reparent(self, parent, name):
+    def reparent(self, parent, name):
+        self.reparent_self(parent, name)
+        self.reparent_children()
+        self.reparent_done()
+
+    def reparent_self(self, parent, name):
         self.name = name
         self.parent = parent
         self.path = self.parent and self.parent.path is not None and self.parent.path + [self.name] or []
+        self.old_window = self.window
         self.window = self.parent and self.parent.window
 
+    def reparent_children(self):
+        pass
+        
+    def reparent_done(self):
+        if self.old_window is not self.window:
+            self.reroot_done()
+            
+    def reroot_done(self):
+        pass
+        
     class HtmlId(object):
         def __get__(self, instance, owner):
             if instance is None or instance.parent is None:
@@ -555,7 +571,7 @@ class BaseChildNodes(object):
                 if self.node is value:
                     raise Exception("Object's parent set to itself!", value)
 
-                value._reparent(self.node, name)
+                value.reparent(self.node, name)
 
 class BaseChildNodeDict(BaseChildNodes):
     def __setitem__(self, *arg, **kw):
@@ -718,11 +734,10 @@ class Composite(Widget):
         super(Composite, self).__init__(
             session, win_id, **attrs)
 
-    def _reparent(self, parent, name):
-        Widget._reparent(self, parent, name)
+    def reparent_children(self):
         for childname, child in self.get_children():
             if isinstance(child, Widget):
-                child._reparent(self, childname)
+                child.reparent(self, childname)
 
     def draw_child(self, path, child, output_options, invisible_as_empty = False):
         """Renders a child widget to HTML using its draw() method.
