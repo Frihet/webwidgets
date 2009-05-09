@@ -123,6 +123,7 @@ if __name__ == "Webwidgets":
     from Webwidgets.Widgets.InputMod.LocationInput import *
     from Webwidgets.Widgets.InputMod.AddressMod import *
 
+    from Webwidgets.Widgets.DotGraphMod import *
     from Webwidgets.Widgets.Progress import *
 
     from Webwidgets.Widgets.ApplicationMod.LogIn import *
