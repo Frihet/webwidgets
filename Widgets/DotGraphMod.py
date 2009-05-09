@@ -23,11 +23,19 @@
 """Output formatting widgets.
 """
 
-import pydot
+import Webwidgets.Utils
+
+try:
+    import pydot
+except:
+    class pydot(object):
+        @classmethod
+        def Dot(*arg, **kw):
+            raise NotImplementedError("This widget requires the pydot Python module. Please ask the system administrator to install it.")
+
 import tempfile
 import os
 import cgi
-import Webwidgets.Utils
 import Webwidgets.Utils.FileHandling
 import Webwidgets.Constants
 import Webwidgets.Widgets.Base
@@ -50,7 +58,7 @@ class DotGraph(Webwidgets.Widgets.Base.MultipleActionInput):
 
     def _graph_name(self):
         return '_'.join(self.path + ['_', 'graph'])
-    
+
     def output(self, output_options):
         self.graph.set_name(self._graph_name())
         return {Webwidgets.Constants.OUTPUT: self.graph.create(format = output_options.get('format', 'png')),
