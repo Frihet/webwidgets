@@ -54,6 +54,9 @@ class DotGraph(Webwidgets.Widgets.Base.MultipleActionInput):
 
     def __init__(self, *arg, **kw):
         Webwidgets.Widgets.Base.Widget.__init__(self, *arg, **kw)
+        self.clear()
+
+    def clear(self):
         self.graph = pydot.Dot(**self.graph_args)
 
     def _graph_name(self):
@@ -67,11 +70,24 @@ class DotGraph(Webwidgets.Widgets.Base.MultipleActionInput):
     def draw(self, output_options):
         self.register_input(self.path, Webwidgets.Utils.path_to_id(self.path), False)
         self.graph.set_name(self._graph_name())
-        return """<img %(html_attributes)s src="%(location)s" usemap="#%(graphid)s" />%(cmapx)s""" % {
-            'html_attributes': self.draw_html_attributes(self.path),
-            'location': cgi.escape(self.calculate_output_url(output_options)),
-            'graphid': self._graph_name(),
-            'cmapx': self.graph.create(format = output_options.get('format', 'cmapx'))}
+        # iframe/object/embed IE workaround from http://www.graphviz.org/webdot/svgembed.html
+        # FXIME: Uncomment when we've found out a way to figure out width and height from Graphviz
+        return """
+<!-- iframe src='%(location_svgz)s' width='%(width)s' height='%(height)s' frameborder='0' marginwidth='0' marginheight='0'>
+ <object data='%(location_svgz)s' width='%(width)s' height='%(height)s' type='image/svg+xml'>
+  <embed src='%(location_svgz)s' type='image/svg+xml' coding='gzip' palette='foreground' -->
+   <img %(html_attributes)s src='%(location_png)s' usemap='#%(graphid)s' />
+   %(cmapx)s
+  <!-- /embed>
+ </object>
+</iframe -->
+        """ % {'html_attributes': self.draw_html_attributes(self.path),
+               'width': 'unknown',
+               'height': 'unknown',
+               'location_svgz': cgi.escape(self.calculate_output_url(Webwidgets.Utils.subclass_dict(output_options, {'format': 'svgz'}))),
+               'location_png': cgi.escape(self.calculate_output_url(Webwidgets.Utils.subclass_dict(output_options, {'format': 'png'}))),
+               'graphid': self._graph_name(),
+               'cmapx': self.graph.create(format = output_options.get('format', 'cmapx'))}
 
     def calculate_output_url(self, output_options, format = 'png'):
         return self.calculate_url({'transaction': output_options['transaction'],
