@@ -33,13 +33,17 @@ class Window(Webwidgets.Widgets.Base.Widget):
     headers = {'Status': '404 Page not implemented'}
     languages = None
 
-    root = True
-    path = []
-
     def __init__(self, session, win_id, **attrs):
-        super(Window, self).__init__(session, win_id, **attrs)
         self.fields = {}
         self.arguments = {}
+        super(Window, self).__init__(session, win_id, **attrs)
+
+    def reparent_self(self, parent, name):
+        self.name = name
+        self.parent = parent
+        self.path = []
+        self.old_window = self.window
+        self.window = self
 
     def output(self, output_options):
         result = {Webwidgets.Constants.OUTPUT: self.draw(output_options)}

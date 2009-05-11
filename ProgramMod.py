@@ -257,9 +257,10 @@ class Program(WebKit.Page.Page):
         debug_receive_notification = False
         debug_field_registrations = False
 
-        root = True
+        window = None
         parent = None
         name = None
+        path = None
 
         def __init__(self, Program):
             self.windows = Widgets.Base.ChildNodeDict(self)
