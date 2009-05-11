@@ -26,3 +26,18 @@ with open(os.path.splitext(__file__)[0] + '.mimetypes.txt') as mimetypes:
     for line in mimetypes:
         ext, mime_type = line[:-1].split(' ')
         extension_to_mime_type[ext] = mime_type
+
+extension_to_encoding = {}
+with open(os.path.splitext(__file__)[0] + '.encodings.txt') as encodings:
+    for line in encodings:
+        ext, encoding = line[:-1].split(' ')
+        extension_to_encoding[ext] = encoding
+
+def extension_to_headers(extension):
+    headers = {}
+    
+    headers['Content-type'] = extension_to_mime_type.get(extension, 'application/octet-stream')
+    if extension in extension_to_encoding:
+        headers['Content-Encoding'] = extension_to_encoding[extension]
+
+    return headers
