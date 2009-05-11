@@ -64,30 +64,34 @@ class DotGraph(Webwidgets.Widgets.Base.MultipleActionInput):
 
     def output(self, output_options):
         self.graph.set_name(self._graph_name())
-        return {Webwidgets.Constants.OUTPUT: self.graph.create(format = output_options.get('format', 'png')),
-                'Content-type': Webwidgets.Utils.FileHandling.extension_to_mime_type[output_options.get('format', 'png')]}
+        format = output_options.get('format', 'png')
+
+        res = Webwidgets.Utils.FileHandling.extension_to_headers(format)
+        res[Webwidgets.Constants.OUTPUT] = self.graph.create(format = format)
+        return  res
 
     def draw(self, output_options):
         self.register_input(self.path, Webwidgets.Utils.path_to_id(self.path), False)
         self.graph.set_name(self._graph_name())
         # iframe/object/embed IE workaround from http://www.graphviz.org/webdot/svgembed.html
-        # FXIME: Uncomment when we've found out a way to figure out width and height from Graphviz
+        # NOTE: Links gets the wrong target in SVG, so disable for now...
+#         return """
+# <iframe src='%(location_svgz)s' frameborder='0' marginwidth='0' marginheight='0'>
+#  <object data='%(location_svgz)s' type='image/svg+xml'>
+#   <embed src='%(location_svgz)s' type='image/svg+xml' coding='gzip' palette='foreground'>
+#    <img %(html_attributes)s src='%(location_png)s' usemap='#%(graphid)s' />
+#    %(cmapx)s
+#   </embed>
+#  </object>
+# </iframe>
         return """
-<!-- iframe src='%(location_svgz)s' width='%(width)s' height='%(height)s' frameborder='0' marginwidth='0' marginheight='0'>
- <object data='%(location_svgz)s' width='%(width)s' height='%(height)s' type='image/svg+xml'>
-  <embed src='%(location_svgz)s' type='image/svg+xml' coding='gzip' palette='foreground' -->
-   <img %(html_attributes)s src='%(location_png)s' usemap='#%(graphid)s' />
-   %(cmapx)s
-  <!-- /embed>
- </object>
-</iframe -->
+<img %(html_attributes)s src='%(location_png)s' usemap='#%(graphid)s' />
+%(cmapx)s 
         """ % {'html_attributes': self.draw_html_attributes(self.path),
-               'width': 'unknown',
-               'height': 'unknown',
-               'location_svgz': cgi.escape(self.calculate_output_url(Webwidgets.Utils.subclass_dict(output_options, {'format': 'svgz'}))),
-               'location_png': cgi.escape(self.calculate_output_url(Webwidgets.Utils.subclass_dict(output_options, {'format': 'png'}))),
+               'location_svgz': cgi.escape(self.calculate_output_url(output_options, 'svgz')),
+               'location_png': cgi.escape(self.calculate_output_url(output_options, 'png')),
                'graphid': self._graph_name(),
-               'cmapx': self.graph.create(format = output_options.get('format', 'cmapx'))}
+               'cmapx': self.graph.create(format = 'cmapx')}
 
     def calculate_output_url(self, output_options, format = 'png'):
         return self.calculate_url({'transaction': output_options['transaction'],
