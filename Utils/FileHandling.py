@@ -18,13 +18,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+from __future__ import with_statement
 import os.path
 
-extension_to_mime_type = {'html':'text/html',
-                          'xml':'text/xml',
-                          'js':'pplication/x-javascript',
-                          'css':'text/css',
-                          'gif':'image/gif',
-                          'png':'image/png',
-                          'jpg':'image/jpeg',
-                          }
+extension_to_mime_type = {}
+with open(os.path.splitext(__file__)[0] + '.mimetypes.txt') as mimetypes:
+    for line in mimetypes:
+        ext, mime_type = line[:-1].split(' ')
+        extension_to_mime_type[ext] = mime_type

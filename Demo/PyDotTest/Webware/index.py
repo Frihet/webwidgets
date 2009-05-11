@@ -1,8 +1,9 @@
+#! /bin/env python
 # -*- coding: UTF-8 -*-
 # vim: set fileencoding=UTF-8 :
 
 # Webwidgets web developement framework
-# Copyright (C) 2007 FreeCode AS, Egil Moeller <egil.moller@freecode.no>
+# Copyright (C) 2007 FreeCode AS, Egil Moeller <egil.moeller@freecode.no>
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,10 +19,21 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import __builtin__
 
-if not hasattr(__builtin__, 'set'):
-    import sets
-    __builtin__.set = sets.Set
+import Webwidgets
 
-import FixBrokenChdirInWebware
+Webwidgets.Program.Session.debug_fields = False
+Webwidgets.Program.Session.debug_field_input = False
+Webwidgets.Program.Session.debug_receive_notification = False
+Webwidgets.Program.Session.debug_arguments = False
+Webwidgets.Program.debug = True
+Webwidgets.Widgets.Base.debug_exceptions = True
+Webwidgets.Widgets.Base.log_exceptions = True
+Webwidgets.Wwml.debug_import = True
+
+import Webwidgets.Demo.PyDotTest.UI
+
+class index(Webwidgets.Program):
+    class Session(Webwidgets.Program.Session):
+        def new_window(self, win_id):
+            return Webwidgets.Demo.PyDotTest.UI.MyWindow(self, win_id)

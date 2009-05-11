@@ -378,10 +378,9 @@ class Program(WebKit.Page.Page):
                     new_arguments.update(value)
                 elif argumentname == '__location__':
                     new_location = value
-                else:
+                elif value != '':
                     new_arguments[argumentname] = value
             return new_location, new_arguments
-
 
         def replace_timings(self, req, output, output_item):
             if output.get('Content-Type', '').startswith('text/'):
@@ -530,7 +529,7 @@ class Program(WebKit.Page.Page):
             self.Notification(*arg, **kw).process()
 
         def calculate_url(self, output_options, arguments):
-            path = [self.program.request_base(output_options['transaction'])]
+            path = [self.program.request_base(Program.transaction())]
 
             if (   (    'widget_class' in output_options
                     and output_options['widget_class'] != Constants.DEFAULT_WIDGET_CLASS)
