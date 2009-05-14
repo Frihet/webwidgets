@@ -20,10 +20,136 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import Webwidgets.ObjectMod
+import types, sys
+import Webwidgets.Utils, Webwidgets.BaseObjectMod
 
-class Filter(Webwidgets.ObjectMod.Object):
-    ww_class_orderings = set.union(Webwidgets.ObjectMod.Object.ww_class_orderings,
+class NoOldValue(object):
+    """This class is used as a marker to signify that there was no old
+    attribute set when doing setattr"""
+
+class FilteredObject(Webwidgets.BaseObjectMod.OrderableObject):
+    """FilteredObject provides filter chaining for attribute access.
+    Filters provide a flexible approach to overriding specific
+    behaviour in in a base class."""
+
+    ww_child_class_orderings = set(('filter',))
+
+    ww_model = None
+    """If non-None, any attribute not found on this object will be
+    searched for on this object."""
+
+    WwModel = None
+    """If non-None and the model attribute is None, this class will be
+    instantiated and the instance placed in the model attribute."""
+
+    def __init__(self, **attrs):
+        Webwidgets.BaseObjectMod.OrderableObject.__init__(self, **attrs)
+
+        if self.ww_model is None and type(self).WwModel is not None:
+            self.__dict__['ww_model'] = self.WwModel()
+
+        self.setup_filter()
+
+    @classmethod
+    def print_filter_class_stack(cls, indent = ''):
+        return cls.print_child_class_ordering('filter')    
+
+    def setup_filter(self):
+        ww_filter = self.__dict__.get('ww_filter', self)
+        object = self.__dict__.get('object', self)
+        # Note the reversal of order. What this means is: Highest
+        # _filter_level first, that is, the last filter in the chain
+        # first. We build the chain backwards, feeding the last built
+        # one to the ww_filter attribute when building the next one
+        for filter_class in reversed(self.get_child_class_ordering('filter')):
+            ww_filter = filter_class(ww_filter = ww_filter, object = object)
+        self.__dict__['ww_filter'] = ww_filter
+        self.__dict__["object"] = object
+
+    def is_first_filter(self):
+        if not hasattr(self, 'object'):
+            # We haven't set anything up in __init__ yet, so pretend
+            # we're not first (we can't really know yet either way) so
+            # that no notifications are thrown anywhere random...
+            return False
+        return self.object.ww_filter is self
+    is_first_filter = property(is_first_filter)
+
+    def print_filter_instance_stack(self, name = 'ww_filter', attrs = []):
+        ww_filter = getattr(self, name)
+        ww_filters = []
+        while ww_filter is not self and ww_filter is not self.ww_model:
+            ww_filters.append(ww_filter)
+            ww_filter = ww_filter.ww_filter
+        return '\n'.join(["%s.%s @ %s %s" % (type(ww_filter).__module__, type(ww_filter).__name__, id(ww_filter),
+                                             ', '.join([str(getattr(ww_filter, attr, None)) for attr in attrs]))
+                          for ww_filter in ww_filters]) + '\n'
+
+    #### fixme ####
+    # name = "Inheriting properties from parent widget"
+    #
+    # description = """It would be usefull to have widgets inherit
+    # (read-only) attributes from their parent widgets. This would be
+    # especially usefull for database sessions and the like, where the
+    # session could be overridden for a part of an application and all
+    # of its sub-parts.
+    #
+    # This has been tested, but was found to be too slow (when an
+    # attribute is not found, it still had to traverse the whole tree
+    # to the root every time), and the code was removed."""
+    #### end ####
+
+    def __getattr__(self, name):
+        """Lookup order: self, self.ww_model"""
+        if self.ww_model is None:
+            raise AttributeError(self, name)
+        try:
+            return getattr(self.ww_model, name)
+        except:
+            e = sys.exc_info()[1]
+            e.args = (self,) + e.args
+            raise type(e), e, sys.exc_info()[2]
+
+    def __hasattr__(self, name):
+        """Lookup order: self, self.ww_model"""
+        model_has_name = (   self.ww_model is not None
+                          and hasattr(self.ww_model, name))
+        self_has_name = (   name in self.__dict__
+                         or hasattr(type(self), name))
+        return (   self_has_name
+                or model_has_name)
+
+    def _setattr_dispatch(self, name, value):
+        """Lookup order: self, self.ww_model"""
+        model_has_name = (   self.ww_model is not None
+                          and hasattr(self.ww_model, name))
+        self_has_name = (   name in self.__dict__
+                         or hasattr(type(self), name))
+        if (   not model_has_name
+            or self_has_name):
+            object.__setattr__(self, name, value)
+        else:
+            setattr(self.ww_model, name, value)
+
+    def __setattr__(self, name, value):
+        """Lookup order: self, self.ww_model"""
+        old_value = getattr(self, name, NoOldValue)
+
+        if value is not old_value:
+            self._setattr_dispatch(name, value)
+
+            # Don't compare Objects, e.g. widgets - might not allways
+            # work, and it's sort of meaningless anyway in this
+            # context.
+            if (    self.is_first_filter
+                and (   isinstance(value, FilteredObject)
+                     or isinstance(old_value, FilteredObject)
+                     or value != old_value)):
+                self.object.notify('%s_changed' % name, value)
+
+
+class Filter(FilteredObject):
+    ww_class_orderings = set.union(FilteredObject.ww_class_orderings,
                                    ('filter',))
 
     """About filter ordering:
@@ -406,16 +532,16 @@ class MangleFilter(StandardFilter):
         return cls.derive(**properties)
 
 
-class Wrapper(Webwidgets.ObjectMod.Object):
+class Wrapper(FilteredObject):
     def __init__(self, ww_model, **attrs):
         if hasattr(ww_model, 'ww_filter'):
             attrs['ww_filter'] = ww_model.ww_filter
-        Webwidgets.ObjectMod.Object.__init__(self, ww_model = ww_model, **attrs)
+        FilteredObject.__init__(self, ww_model = ww_model, **attrs)
 
 class PersistentWrapper(Wrapper):
+    @classmethod
     def ww_wrapper_key(cls, ww_model, **attrs):
         return str(id(ww_model))
-    ww_wrapper_key = classmethod(ww_wrapper_key)
 
     def __new__(cls, **attrs):
         if 'wrappers' not in cls.__dict__:
