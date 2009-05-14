@@ -406,6 +406,14 @@ class FilteredObject(OrderableObject):
     """If non-None and the model attribute is None, this class will be
     instantiated and the instance placed in the model attribute."""
 
+    assert_required_attributes = False
+    """This performs some extra code validation if set to True. Note:
+    When used with any slow attributes, e.g. properties, it adds
+    several seconds to log in time. This is partly because many object
+    properties may not be called before the parent is set, which is
+    done after object construction. This results in many ignored
+    exceptions."""
+
     def __init__(self, **attrs):
         """Creates a new object
         raise AttributeError(self, name)
@@ -423,14 +431,7 @@ class FilteredObject(OrderableObject):
         self.__dict__.update(attrs)
         self.setup_filter()
 
-        # This should perform some extra code validation, but it
-        # doesnt work, for two reasons.  Firstly, when used with any
-        # slow attributes, e.g. properties, it adds several seconds to
-        # log in time. Not good.  Secondly, many object properties may
-        # not be called before the parent is set, which is done after
-        # object construction. In other words, enabling this code will
-        # throw exceptions like it's going out of style.
-        if False:
+        if self.assert_required_attributes:
             for name in dir(self):
                 try:
                     attr = getattr(self, name, None)
