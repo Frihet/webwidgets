@@ -29,7 +29,7 @@ class NoOldValue(object):
     """This class is used as a marker to signify that there was no old
     attribute set when doing setattr"""
 
-class Type(type):
+class MetaInfoType(type):
     ww_class_order_nr = Webwidgets.Utils.Threads.Counter()
 
     def __new__(cls, name, bases, members):
@@ -42,9 +42,6 @@ class Type(type):
         self._init_classes()
         self._init_class_subclasses()
         self._set_class_path()
-        self.process_class_orderings()
-        self.process_child_class_orderings()
-        
         return self
 
 
@@ -69,13 +66,12 @@ class Required(object):
     overridden in a subclass or instance."""
     pass
 
-class Object(object):
-    """Object is a more elaborate version of object, providing a few
-    extra utility methods, some extra 'magic' class attributes -
-    L{ww_classes}, L{ww_class_order_nr} and L{ww_class_path} and
-    model/model-filter handling."""
+class MetaInfoObject(object):
+    """MetaInfoObject provides class meta-info, such as the module
+    path and ancestor class path to the class, a unique, sequential
+    class ordering aswell as a list ofthe names of all base classes."""
 
-    __metaclass__ = Type
+    __metaclass__ = MetaInfoType
 
     ww_class_data__no_classes_name = True
     """Do not include the name of this particular class in L{ww_classes}
@@ -98,58 +94,6 @@ class Object(object):
     scope, this is the empty string. For ww_classes created as members of
     some ther class, this is the ww_class_path and __name__ of that
     other class joined. The path is dot-separated."""
-
-    ww_model = None
-    """If non-None, any attribute not found on this object will be
-    searched for on this object."""
-
-    WwModel = None
-    """If non-None and the model attribute is None, this class will be
-    instantiated and the instance placed in the model attribute."""
-
-    ww_class_orderings = set(())
-    """Set of orderings applied to this class. See ww_ORDERINGNAME_pre
-    and ww_ORDERINGNAME_post for each ordering for more information on
-    what it's used for."""
-
-    ww_child_class_orderings = set(('filter',))
-    """Set of orderings applied to member classes of this class. See
-    ww_ORDERINGNAME_pre and ww_ORDERINGNAME_post on members for each
-    ordering for more information on what it's used for."""
-
-    def __init__(self, **attrs):
-        """Creates a new object
-        raise AttributeError(self, name)
-
-        @param ww_filter: The next filter when building a filter
-            tree/chain. None for the root node, next
-            filter in chain otherwise.
-        @param attrs: Any attributes to set for the object.
-        """
-        if 'ww_model' in attrs and attrs['ww_model'] is None:
-            del attrs['ww_model']
-        if 'ww_model' not in attrs and self.WwModel is not None:
-            attrs['ww_model'] = self.WwModel()
-        # FIXME: Does not attribute on ww_model as it should
-        self.__dict__.update(attrs)
-        self.setup_filter()
-
-        # This should perform some extra code validation, but it
-        # doesnt work, for two reasons.  Firstly, when used with any
-        # slow attributes, e.g. properties, it adds several seconds to
-        # log in time. Not good.  Secondly, many object properties may
-        # not be called before the parent is set, which is done after
-        # object construction. In other words, enabling this code will
-        # throw exceptions like it's going out of style.
-        if False:
-            for name in dir(self):
-                try:
-                    attr = getattr(self, name, None)
-                except:
-                    attr = None
-
-                if attr is Required:
-                    raise AttributeError('Required attribute %s missing' % (name, ))
 
     @classmethod
     def _init_classes(cls):
@@ -181,6 +125,29 @@ class Object(object):
             if hasattr(value, '_set_class_path'):
                 value._set_class_path(sub_path)
         return cls
+
+class OrderableType(MetaInfoType):
+    def __new__(cls, name, bases, members):
+        self = MetaInfoType.__new__(cls, name, bases, members)
+        self.process_class_orderings()
+        self.process_child_class_orderings()
+        return self
+
+class OrderableObject(MetaInfoObject):
+    """OrderableObject provides class ordering. Subclasses of this
+    class are be ordered in a partial order."""
+
+    __metaclass__ = OrderableType
+
+    ww_class_orderings = set(())
+    """Set of orderings applied to this class. See ww_ORDERINGNAME_pre
+    and ww_ORDERINGNAME_post for each ordering for more information on
+    what it's used for."""
+
+    ww_child_class_orderings = set(())
+    """Set of orderings applied to member classes of this class. See
+    ww_ORDERINGNAME_pre and ww_ORDERINGNAME_post on members for each
+    ordering for more information on what it's used for."""
 
     @classmethod
     def _update_class_ordering_metadata(cls, ordering_name):
@@ -418,6 +385,61 @@ Pre-links:
             cls.process_child_class_auto_ordering(ordering)
             cls.process_child_class_ordering(ordering)
 
+
+class FilteredType(OrderableType):
+    pass
+
+class FilteredObject(OrderableObject):
+    """FilteredObject provides filter chaining for attribute access.
+    Filters provide a flexible approach to overriding specific
+    behaviour in in a base class."""
+
+    __metaclass__ = FilteredType
+
+    ww_child_class_orderings = set(('filter',))
+
+    ww_model = None
+    """If non-None, any attribute not found on this object will be
+    searched for on this object."""
+
+    WwModel = None
+    """If non-None and the model attribute is None, this class will be
+    instantiated and the instance placed in the model attribute."""
+
+    def __init__(self, **attrs):
+        """Creates a new object
+        raise AttributeError(self, name)
+
+        @param ww_filter: The next filter when building a filter
+            tree/chain. None for the root node, next
+            filter in chain otherwise.
+        @param attrs: Any attributes to set for the object.
+        """
+        if 'ww_model' in attrs and attrs['ww_model'] is None:
+            del attrs['ww_model']
+        if 'ww_model' not in attrs and self.WwModel is not None:
+            attrs['ww_model'] = self.WwModel()
+        # FIXME: Does not attribute on ww_model as it should
+        self.__dict__.update(attrs)
+        self.setup_filter()
+
+        # This should perform some extra code validation, but it
+        # doesnt work, for two reasons.  Firstly, when used with any
+        # slow attributes, e.g. properties, it adds several seconds to
+        # log in time. Not good.  Secondly, many object properties may
+        # not be called before the parent is set, which is done after
+        # object construction. In other words, enabling this code will
+        # throw exceptions like it's going out of style.
+        if False:
+            for name in dir(self):
+                try:
+                    attr = getattr(self, name, None)
+                except:
+                    attr = None
+
+                if attr is Required:
+                    raise AttributeError('Required attribute %s missing' % (name, ))
+
     @classmethod
     def print_filter_class_stack(cls, indent = ''):
         return cls.print_child_class_ordering('filter')    
@@ -539,6 +561,14 @@ Pre-links:
 
     def __repr__(self):
         return str(self)
+
+
+class Type(FilteredType):
+    pass
+
+class Object(FilteredObject):
+    __metaclass__ = Type
+
 
 class Model(Object):
     pass
