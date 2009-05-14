@@ -406,14 +406,6 @@ class FilteredObject(OrderableObject):
     """If non-None and the model attribute is None, this class will be
     instantiated and the instance placed in the model attribute."""
 
-    assert_required_attributes = False
-    """This performs some extra code validation if set to True. Note:
-    When used with any slow attributes, e.g. properties, it adds
-    several seconds to log in time. This is partly because many object
-    properties may not be called before the parent is set, which is
-    done after object construction. This results in many ignored
-    exceptions."""
-
     def __init__(self, **attrs):
         """Creates a new object
         raise AttributeError(self, name)
@@ -430,16 +422,6 @@ class FilteredObject(OrderableObject):
         # FIXME: Does not attribute on ww_model as it should
         self.__dict__.update(attrs)
         self.setup_filter()
-
-        if self.assert_required_attributes:
-            for name in dir(self):
-                try:
-                    attr = getattr(self, name, None)
-                except:
-                    attr = None
-
-                if attr is Required:
-                    raise AttributeError('Required attribute %s missing' % (name, ))
 
     @classmethod
     def print_filter_class_stack(cls, indent = ''):
@@ -545,14 +527,33 @@ class FilteredObject(OrderableObject):
                      or value != old_value)):
                 self.object.notify('%s_changed' % name, value)
 
-    def notify(self, message, *args, **kw):
-        """See L{notify_kw}."""
-        self.notify_kw(message, args, kw)
+class Type(FilteredType):
+    pass
 
-    def notify_kw(self, message, args = (), kw = {}, path = None):
-        """To handle notifications for a kind of Object, override this
-        method in the subclass to do something usefull."""
-        pass
+class Object(FilteredObject):
+    __metaclass__ = Type
+
+    assert_required_attributes = False
+    """This performs some extra code validation if set to True. Note:
+    When used with any slow attributes, e.g. properties, it adds
+    several seconds to log in time. This is partly because many object
+    properties may not be called before the parent is set, which is
+    done after object construction. This results in many ignored
+    exceptions."""
+
+    def __init__(self, **attrs):
+        FilteredObject.__init__(self, **attrs)
+        if self.assert_required_attributes:
+            for name in dir(self):
+                try:
+                    attr = getattr(self, name, None)
+                except:
+                    attr = None
+
+                if attr is Required:
+                    raise AttributeError('Required attribute %s missing' % (name, ))
+
+
 
     def __unicode__(self):
         return object.__repr__(self)
@@ -564,12 +565,14 @@ class FilteredObject(OrderableObject):
         return str(self)
 
 
-class Type(FilteredType):
-    pass
+    def notify(self, message, *args, **kw):
+        """See L{notify_kw}."""
+        self.notify_kw(message, args, kw)
 
-class Object(FilteredObject):
-    __metaclass__ = Type
-
+    def notify_kw(self, message, args = (), kw = {}, path = None):
+        """To handle notifications for a kind of Object, override this
+        method in the subclass to do something usefull."""
+        pass
 
 class Model(Object):
     pass
