@@ -458,13 +458,6 @@ class FilteredObject(OrderableObject):
                                              ', '.join([str(getattr(ww_filter, attr, None)) for attr in attrs]))
                           for ww_filter in ww_filters]) + '\n'
 
-    def derive(cls, *clss, **members):
-        name = 'anonymous'
-        if 'name' in members:
-            name = members.pop('name')
-        return types.TypeType(name, (cls,) + clss, members)
-    derive = classmethod(derive)
-
     #### fixme ####
     # name = "Inheriting properties from parent widget"
     #
@@ -564,6 +557,12 @@ class Object(FilteredObject):
     def __repr__(self):
         return str(self)
 
+    def derive(cls, *clss, **members):
+        name = 'anonymous'
+        if 'name' in members:
+            name = members.pop('name')
+        return types.TypeType(name, (cls,) + clss, members)
+    derive = classmethod(derive)
 
     def notify(self, message, *args, **kw):
         """See L{notify_kw}."""
