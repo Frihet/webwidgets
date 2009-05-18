@@ -22,10 +22,10 @@
 import re, math, cgi, types, itertools
 import Webwidgets.Constants
 import Webwidgets.Utils
-import Webwidgets.FilterMod
+import Webwidgets.FilterMod.StandardFilters
 import Webwidgets.Widgets.Base
 
-class RowsSimpleModelFilter(Webwidgets.FilterMod.Filter):
+class RowsSimpleModelFilter(Webwidgets.FilterMod.Base.Filter):
     """This filter adds support for memmory mapped L{RowsComposite} -
     that is for when L{RowsComposite.WwModel.non_memory_storage} is
     set to C{False} and for row caching when set to C{True}. It also
@@ -41,7 +41,7 @@ class RowsSimpleModelFilter(Webwidgets.FilterMod.Filter):
     # API used by Table
     
     def __init__(self, *arg, **kw):
-        Webwidgets.FilterMod.Filter.__init__(self, *arg, **kw)
+        Webwidgets.FilterMod.Base.Filter.__init__(self, *arg, **kw)
         self.old_sort = None
         self.old_page = None
         self.old_expand = None
@@ -197,7 +197,7 @@ class RowsSimpleModelFilter(Webwidgets.FilterMod.Filter):
         self.old_expand = self.expand_version
         self.old_default_expand = self.default_expand
 
-class RowsPrintableFilter(Webwidgets.FilterMod.Filter):
+class RowsPrintableFilter(Webwidgets.FilterMod.Base.Filter):
     """This filter handles the 'printable_version' output option -
     when set, I{all} rows are returned, not just the current page."""
     # left = BaseTable
@@ -210,7 +210,7 @@ class RowsPrintableFilter(Webwidgets.FilterMod.Filter):
             kw['all'] = True
         return self.ww_filter.get_rows(**kw)
 
-class RowsRowWrapperFilter(Webwidgets.FilterMod.Filter):
+class RowsRowWrapperFilter(Webwidgets.FilterMod.Base.Filter):
     """This filter wraps all rows in L{RowsComposite.RowsRowModelWrapper}. This adds
        a filtering chain on individual rows; to override cells in a
        row (columns) you can add L{Filter}s to the
@@ -342,14 +342,14 @@ class RowsComposite(Webwidgets.Widgets.Base.CachingComposite):
 
     class RowsRowWidget(Webwidgets.Widgets.Base.CachingComposite): pass
 
-    class SourceFilters(Webwidgets.FilterMod.Filter):
+    class SourceFilters(Webwidgets.FilterMod.Base.Filter):
         """This filter groups all filters that provides rows from some
         kind of back-end - e.g. a database query, a redirect from
         another table etc.""" 
 
         class RowsSimpleModelFilter(RowsSimpleModelFilter): pass
 
-    class SourceErrorFilter(Webwidgets.FilterMod.Filter):
+    class SourceErrorFilter(Webwidgets.FilterMod.Base.Filter):
         """This filter is before the SourceFilter and is there to be
         able to catch errors in the data fetching SourceFilters."""
 
@@ -371,20 +371,20 @@ class RowsComposite(Webwidgets.Widgets.Base.CachingComposite):
                 return result
     SourceErrorFilter.add_class_in_ordering('filter', post = [SourceFilters])
 
-    class RowsFilters(Webwidgets.FilterMod.Filter):
+    class RowsFilters(Webwidgets.FilterMod.Base.Filter):
         """This filter groups all filters that mangle rows in some way
         - wrapping them, adding extra rows, hiding rows etc."""
         
         class RowsRowWrapperFilter(RowsRowWrapperFilter): pass
     RowsFilters.add_class_in_ordering('filter', post = [SourceErrorFilter])
 
-    class OutputOptionsFilters(Webwidgets.FilterMod.Filter):
+    class OutputOptionsFilters(Webwidgets.FilterMod.Base.Filter):
         """This filter groups all filters that generate options for
         L{get_rows} based on L{output_options}."""
         class RowsPrintableFilter(RowsPrintableFilter): pass
     OutputOptionsFilters.add_class_in_ordering('filter', post = [RowsFilters])
 
-    class RowsRowModelWrapper(Webwidgets.FilterMod.PersistentWrapper):
+    class RowsRowModelWrapper(Webwidgets.FilterMod.StandardFilters.PersistentWrapper):
         """This class is a wrapper that all rows are wrapped in by
         L{RowsRowWrapperFilter}. This adds a filtering chain on
         individual rows; to override cells in a row (columns) you can
@@ -395,7 +395,7 @@ class RowsComposite(Webwidgets.Widgets.Base.CachingComposite):
         ww_wrapper_key = classmethod(ww_wrapper_key)
 
         def ww_first_init(self, ww_model, *arg, **kw):
-            Webwidgets.FilterMod.PersistentWrapper.ww_first_init(self, ww_model = ww_model, *arg, **kw)
+            Webwidgets.FilterMod.StandardFilters.PersistentWrapper.ww_first_init(self, ww_model = ww_model, *arg, **kw)
             self.__dict__['items'] = {}
 
             # FIXME: Just remove this stuff I guess? Shouldn't be used...
@@ -404,7 +404,7 @@ class RowsComposite(Webwidgets.Widgets.Base.CachingComposite):
             else:
                 self.ww_row_id = getattr(ww_model, 'ww_row_id', id(ww_model))
 
-        class RowFilters(Webwidgets.FilterMod.Filter):
+        class RowFilters(Webwidgets.FilterMod.Base.Filter):
             """This filter groups are ordinary filters for cells in
             the row."""
 

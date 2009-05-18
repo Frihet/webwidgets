@@ -28,7 +28,7 @@ to their content and the sorting."""
 import re, math, cgi, types, itertools
 import Webwidgets.Constants
 import Webwidgets.Utils
-import Webwidgets.FilterMod
+import Webwidgets.FilterMod.StandardFilters
 import Webwidgets.Widgets.Base
 import Webwidgets.Widgets.ApplicationMod.WindowMod
 import Webwidgets.Widgets.RowsMod
@@ -121,7 +121,7 @@ class ExpandCell(FunctionCell):
 
 ExpandCellInstance = ExpandCell()
 
-class TableRowsToTreeFilter(Webwidgets.FilterMod.Filter):
+class TableRowsToTreeFilter(Webwidgets.FilterMod.Base.Filter):
     """This filter creates the virtual tree of the table content,
     where rows that merges a cell with a previous row, are children of
     that previous row""" 
@@ -183,7 +183,7 @@ class BaseTable(Webwidgets.Widgets.RowsMod.RowsComposite, Webwidgets.Widgets.Bas
         html_output_cache = None
 
     class SourceFilters(Webwidgets.Widgets.RowsMod.RowsComposite.SourceFilters):
-        class HtmlCacheFilter(Webwidgets.FilterMod.Filter):
+        class HtmlCacheFilter(Webwidgets.FilterMod.Base.Filter):
             def reread(self):
                 self.html_output_cache = None
                 self.ww_filter.reread()
@@ -191,7 +191,7 @@ class BaseTable(Webwidgets.Widgets.RowsMod.RowsComposite, Webwidgets.Widgets.Bas
 
     empty_table_message = """There is no data in this table / no entries matched your search."""
 
-    class TreeFilters(Webwidgets.FilterMod.Filter):
+    class TreeFilters(Webwidgets.FilterMod.Base.Filter):
         """This filter groups filters that mangle the virtual tree of
         rows (that has merged cells, according to the current sorting
         order)."""

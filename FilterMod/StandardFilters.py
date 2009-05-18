@@ -21,244 +21,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import types, sys
-import Webwidgets.Utils, Webwidgets.BaseObjectMod
+import Webwidgets.Utils, Webwidgets.BaseObjectMod, Webwidgets.FilterMod.Base
 
-class NoOldValue(object):
-    """This class is used as a marker to signify that there was no old
-    attribute set when doing setattr"""
-
-class FilteredObject(Webwidgets.BaseObjectMod.OrderableObject):
-    """FilteredObject provides filter chaining for attribute access.
-    Filters provide a flexible approach to overriding specific
-    behaviour in in a base class."""
-
-    ww_child_class_orderings = set(('filter',))
-
-    ww_model = None
-    """If non-None, any attribute not found on this object will be
-    searched for on this object."""
-
-    WwModel = None
-    """If non-None and the model attribute is None, this class will be
-    instantiated and the instance placed in the model attribute."""
-
-    def __init__(self, **attrs):
-        Webwidgets.BaseObjectMod.OrderableObject.__init__(self, **attrs)
-
-        if self.ww_model is None and type(self).WwModel is not None:
-            self.__dict__['ww_model'] = self.WwModel()
-
-        self.setup_filter()
-
-    @classmethod
-    def print_filter_class_stack(cls, indent = ''):
-        return cls.print_child_class_ordering('filter')    
-
-    def setup_filter(self):
-        ww_filter = self.__dict__.get('ww_filter', self)
-        object = self.__dict__.get('object', self)
-        # Note the reversal of order. What this means is: Highest
-        # _filter_level first, that is, the last filter in the chain
-        # first. We build the chain backwards, feeding the last built
-        # one to the ww_filter attribute when building the next one
-        for filter_class in reversed(self.get_child_class_ordering('filter')):
-            ww_filter = filter_class(ww_filter = ww_filter, object = object)
-        self.__dict__['ww_filter'] = ww_filter
-        self.__dict__["object"] = object
-
-    def is_first_filter(self):
-        if not hasattr(self, 'object'):
-            # We haven't set anything up in __init__ yet, so pretend
-            # we're not first (we can't really know yet either way) so
-            # that no notifications are thrown anywhere random...
-            return False
-        return self.object.ww_filter is self
-    is_first_filter = property(is_first_filter)
-
-    def print_filter_instance_stack(self, name = 'ww_filter', attrs = []):
-        ww_filter = getattr(self, name)
-        ww_filters = []
-        while ww_filter is not self and ww_filter is not self.ww_model:
-            ww_filters.append(ww_filter)
-            ww_filter = ww_filter.ww_filter
-        return '\n'.join(["%s.%s @ %s %s" % (type(ww_filter).__module__, type(ww_filter).__name__, id(ww_filter),
-                                             ', '.join([str(getattr(ww_filter, attr, None)) for attr in attrs]))
-                          for ww_filter in ww_filters]) + '\n'
-
-    #### fixme ####
-    # name = "Inheriting properties from parent widget"
-    #
-    # description = """It would be usefull to have widgets inherit
-    # (read-only) attributes from their parent widgets. This would be
-    # especially usefull for database sessions and the like, where the
-    # session could be overridden for a part of an application and all
-    # of its sub-parts.
-    #
-    # This has been tested, but was found to be too slow (when an
-    # attribute is not found, it still had to traverse the whole tree
-    # to the root every time), and the code was removed."""
-    #### end ####
-
-    def __getattr__(self, name):
-        """Lookup order: self, self.ww_model"""
-        if self.ww_model is None:
-            raise AttributeError(self, name)
-        try:
-            return getattr(self.ww_model, name)
-        except:
-            e = sys.exc_info()[1]
-            e.args = (self,) + e.args
-            raise type(e), e, sys.exc_info()[2]
-
-    def __hasattr__(self, name):
-        """Lookup order: self, self.ww_model"""
-        model_has_name = (   self.ww_model is not None
-                          and hasattr(self.ww_model, name))
-        self_has_name = (   name in self.__dict__
-                         or hasattr(type(self), name))
-        return (   self_has_name
-                or model_has_name)
-
-    def _setattr_dispatch(self, name, value):
-        """Lookup order: self, self.ww_model"""
-        model_has_name = (   self.ww_model is not None
-                          and hasattr(self.ww_model, name))
-        self_has_name = (   name in self.__dict__
-                         or hasattr(type(self), name))
-        if (   not model_has_name
-            or self_has_name):
-            object.__setattr__(self, name, value)
-        else:
-            setattr(self.ww_model, name, value)
-
-    def __setattr__(self, name, value):
-        """Lookup order: self, self.ww_model"""
-        old_value = getattr(self, name, NoOldValue)
-
-        if value is not old_value:
-            self._setattr_dispatch(name, value)
-
-            # Don't compare Objects, e.g. widgets - might not allways
-            # work, and it's sort of meaningless anyway in this
-            # context.
-            if (    self.is_first_filter
-                and (   isinstance(value, FilteredObject)
-                     or isinstance(old_value, FilteredObject)
-                     or value != old_value)):
-                self.object.notify('%s_changed' % name, value)
-
-
-class Filter(FilteredObject):
-    ww_class_orderings = set.union(FilteredObject.ww_class_orderings,
-                                   ('filter',))
-
-    """About filter ordering:
-
-    Filters are chained so that ww_filter on each points to the next
-    filter, the last one pointing on the widget itself.
-
-    The getattr/hasattr/setattr methods on filters defaults to
-    accessing the ww_filter attribute (the next filter), not ww_model
-    as Object's ones does."""
-
-    ww_filter_pre = set()
-    """List of filters that are to be placed before this filter in the
-    filter chain.
-
-    Note: If you make circles, you will cause an infinite loop. That's
-    usually what cirle means, so no news there :P
-    """
-
-    ww_filter_post = set()
-    """List of filters that are to be placed before this filter in the
-    filter chain.
-
-    Note: If you make circles, you will cause an infinite loop. That's
-    usually what cirle means, so no news there :P
-    """
-
-    attr_cache={}
-
-    def attr_cache_miss(self, filter, name):
-#        print "Cache miss in ", filter, name
-        cache = self.attr_cache
-        if name not in cache:
-            cache[name] = cache_row = {}
-        else:
-            cache_row = cache[name]
-            action = []
-            for (cache_filter, cache_value) in cache_row.iteritems():
-                if cache_value == filter:
-                    action.append(cache_filter)
-#                    print "move action pointer of field", name, "of element",cache_filter,"from", cache_value, "to", filter.ww_filter
-                    
-            for i in action:
-                cache_row[i] = filter.ww_filter
-            
-        cache_row[filter] = filter.ww_filter
-        
-
-    def attr_cache_get(self, filter, name):
-        cache = self.attr_cache
-        if name in cache:
-            cache_row = cache[name]
-            if filter in cache_row:
-#                print "Cache hit in ", filter, name
-                return (True, getattr(cache_row[filter], name))
-        
-        return (False, None)
-
-
-    def __getattr__(self, name):
-        """Lookup order: self, self.ww_filter"""
-
-        if not hasattr(self, 'object'):
-            raise AttributeError('Filter has no object')
-    
-        # TODO: enable caching again when bugs are fixxored
-        if False and hasattr(self.object, 'ww_filter'):
-            root = self.object.ww_filter
-
-            (status, value) = root.attr_cache_get(self, name)
-            if status:
-                return value
-
-            root.attr_cache_miss(self, name)
-            
-        return getattr(self.ww_filter, name)
-
-    def __hasattr__(self, name):
-        """Lookup order: self, self.ww_filter"""
-        ww_filter_has_name = hasattr(self.ww_filter, name)
-        self_has_name = (   name in self.__dict__
-                         or hasattr(type(self), name))
-        return (   self_has_name
-                or ww_filter_has_name)
-
-    def _setattr_dispatch(self, name, value):
-        """Lookup order: self, self.ww_filter"""
-        ww_filter_has_name = hasattr(self.ww_filter, name)
-        self_has_name = (   name in self.__dict__
-                         or hasattr(type(self), name))
-        if (  not ww_filter_has_name
-            or self_has_name):
-            object.__setattr__(self, name, value)
-        else:
-            setattr(self.ww_filter, name, value)
-
-    def __getitem__(self, index):
-        filter = self
-        for i in xrange(0, index):
-            filter = filter.ww_filter
-        return filter
-
-
-class StandardFilter(Filter):
-    """This class only groups all L{Filter} subclasses that provides
-    generic, reusable functionality (as opposed to widget-specific
-    filters)."""
-
-class RenameFilter(StandardFilter):
+class RenameFilter(Webwidgets.FilterMod.Base.StandardFilter):
     """This filter renames one or more attributes using a dictionary
     mapping in the name_map attribute."""
     def __getattr__(self, name):
@@ -277,7 +42,7 @@ class RenameFilter(StandardFilter):
                                                                 for (orig, new) in name_map.iteritems()]),),
                           name_map = name_map)
 
-class RetrieveFromFilter(StandardFilter):
+class RetrieveFromFilter(Webwidgets.FilterMod.Base.StandardFilter):
     do_retrieve = []
     dont_retrieve = ['retrieve_from']
     retrieve_from = "some_attribute"
@@ -314,7 +79,7 @@ class RetrieveFromFilter(StandardFilter):
                           propagate_none = propagate_none,
                           retrieve_from = retrieve_from, **arg)
 
-class RedirectFilter(StandardFilter):
+class RedirectFilter(Webwidgets.FilterMod.Base.StandardFilter):
     """This filter redirects model lookups and changes to (the
     ww_filter of) another widget."""
 
@@ -382,7 +147,7 @@ class RedirectFilter(StandardFilter):
                                                     for (key, value) in rest.iteritems()]),),
             **rest)
 
-class RedirectRenameFilter(StandardFilter):
+class RedirectRenameFilter(Webwidgets.FilterMod.Base.StandardFilter):
     """This is the combination of the RedirectFilter and RenameFilter
     - it first renames attributes and the redirects them to another widget."""
 
@@ -408,7 +173,7 @@ class RedirectRenameFilter(StandardFilter):
             RedirectFilter = cls.RedirectFilter.redirect(do_redirect = name_map.values(),
                                                          *redirect_args))
 
-class MapValueFilter(StandardFilter):
+class MapValueFilter(Webwidgets.FilterMod.Base.StandardFilter):
     """Allows variable values to be mapped arbitrarily to other values."""
     value_maps = {}
     """Dictionary with member variable names as keys, and two
@@ -439,7 +204,7 @@ class MapValueFilter(StandardFilter):
         return cls.derive(name = "MapValueFilter(%s)" % (', '.join(value_maps.keys()),),
                           value_maps = value_maps)
 
-class DebugFilter(StandardFilter):
+class DebugFilter(Webwidgets.FilterMod.Base.StandardFilter):
     debug_result = False
     debug_value = False
     debug_exception = True
@@ -449,7 +214,7 @@ class DebugFilter(StandardFilter):
 
     def __init__(self, *arg, **kw):
         self.__dict__['_collapsed'] = set()
-        StandardFilter.__init__(self, *arg, **kw)
+        Webwidgets.FilterMod.Base.StandardFilter.__init__(self, *arg, **kw)
 
     def _print_debug(self, name, **kw): #(name, value, res, exc):
         res = "%s: %s" % (type(self).__name__, name)
@@ -494,7 +259,7 @@ class DebugFilter(StandardFilter):
     def debug(cls, name, **kw):
         return cls.derive(name = name, **dict(("debug_" + name, value) for (name, value) in kw.iteritems()))
 
-class TeeFilter(StandardFilter):
+class TeeFilter(Webwidgets.FilterMod.Base.StandardFilter):
     def _get_tee_filter_prefixes(self, name):
         return self.tee_map.get(name, self.tee_map.get('__all__', ['']))
 
@@ -515,7 +280,7 @@ class TeeFilter(StandardFilter):
         return cls.derive(name = "TeeFilter(%s)" % (', '.join("%s=%s" % (name, value) for (name, value) in tee_map.iteritems()),),
                           tee_map = tee_map)
 
-class MangleFilter(StandardFilter):
+class MangleFilter(Webwidgets.FilterMod.Base.StandardFilter):
     """This is the most generic of the redirection/renaming filters.
     It allows the redirection/renaming to be done by arbitrary
     functions provided by the user."""
@@ -532,11 +297,11 @@ class MangleFilter(StandardFilter):
         return cls.derive(**properties)
 
 
-class Wrapper(FilteredObject):
+class Wrapper(Webwidgets.FilterMod.Base.FilteredObject):
     def __init__(self, ww_model, **attrs):
         if hasattr(ww_model, 'ww_filter'):
             attrs['ww_filter'] = ww_model.ww_filter
-        FilteredObject.__init__(self, ww_model = ww_model, **attrs)
+        Webwidgets.FilterMod.Base.FilteredObject.__init__(self, ww_model = ww_model, **attrs)
 
 class PersistentWrapper(Wrapper):
     @classmethod

@@ -19,7 +19,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import Webwidgets.Utils
-import Webwidgets.FilterMod
+import Webwidgets.FilterMod.StandardFilters
 import Webwidgets.Widgets.Base
 import Webwidgets.Widgets.RowsMod
 
@@ -51,7 +51,7 @@ class RowsListInput(Webwidgets.Widgets.Base.ValueInput, Webwidgets.Widgets.RowsM
         size = 0
         """Size of the widget."""
 
-    class ValueFilters(Webwidgets.FilterMod.Filter):
+    class ValueFilters(Webwidgets.FilterMod.Base.Filter):
         """This filter groups all filters that mangles the L{value} of
         the widget, that is, the item selection."""
     ValueFilters.add_class_in_ordering('filter', post = Webwidgets.Widgets.RowsMod.RowsComposite.ww_filter_first)
@@ -145,7 +145,7 @@ class RowsSingleValueListInput(RowsListInput):
         value = None
 
     class ValueFilters(RowsListInput.ValueFilters):
-        class SingleValueFilter(Webwidgets.FilterMod.Filter):
+        class SingleValueFilter(Webwidgets.FilterMod.Base.Filter):
             """This filter makes L{value} contain either the currently
             selected list item (row), or C{None} if none is currently
             selected."""

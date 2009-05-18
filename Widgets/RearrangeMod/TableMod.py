@@ -28,7 +28,7 @@ to their content and the sorting."""
 import re, math, cgi, types, itertools
 import Webwidgets.Constants
 import Webwidgets.Utils
-import Webwidgets.FilterMod
+import Webwidgets.FilterMod.StandardFilters
 import Webwidgets.Widgets.Base
 import Webwidgets.Widgets.RearrangeMod.BaseTableMod
 import Webwidgets.Widgets.RearrangeMod.DialogMod
@@ -184,7 +184,7 @@ class Table(Webwidgets.Widgets.RearrangeMod.BaseTableMod.BaseTable, Webwidgets.W
             self.html_output_field_cache = []
 
     class RowsFilters(Webwidgets.Widgets.RearrangeMod.BaseTableMod.BaseTable.RowsFilters):
-        class SelectionColFilter(Webwidgets.FilterMod.Filter):
+        class SelectionColFilter(Webwidgets.FilterMod.Base.Filter):
             """This filter adds a C{selection_col} column with
             selection checkboxes that the user can use to add/remove
             the current row from the L{selection} list."""
@@ -200,7 +200,7 @@ class Table(Webwidgets.Widgets.RearrangeMod.BaseTableMod.BaseTable, Webwidgets.W
 
 
 
-        class TableFunctionColFilter(Webwidgets.FilterMod.Filter):
+        class TableFunctionColFilter(Webwidgets.FilterMod.Base.Filter):
             """This filter adds columns with function buttons
             according to L{functions} that can be used to let the user
             perform operations on individual rows."""
@@ -231,7 +231,7 @@ class Table(Webwidgets.Widgets.RearrangeMod.BaseTableMod.BaseTable, Webwidgets.W
                 else:
                     return self.ww_filter.get_columns(output_options, only_sortable)
 
-        class TableSortFilter(Webwidgets.FilterMod.Filter):
+        class TableSortFilter(Webwidgets.FilterMod.Base.Filter):
             """This filter prepends L{pre_sort} and appends
             L{post_sort} to any sorting selected by the user,
             effectively overriding his/her choice for certain columns,
@@ -631,7 +631,7 @@ class ExpandableTable(Table):
     """
 
     class RowsFilters(Table.RowsFilters):
-        class TableExpandableFilter(Webwidgets.FilterMod.Filter):
+        class TableExpandableFilter(Webwidgets.FilterMod.Base.Filter):
             """This filter provides the functionality of L{ExpandableTable}."""
 
             # left = ExpandableTable right = Table
@@ -782,13 +782,13 @@ class EditableTable(Table):
         edit_new_columns = {'ww_default': True}
 
     class RowsRowModelWrapper(Table.RowsRowModelWrapper):
-        class EditingFilters(Webwidgets.FilterMod.Filter):
+        class EditingFilters(Webwidgets.FilterMod.Base.Filter):
             """This filter groups filters managing input fields for
             the row."""
         EditingFilters.add_class_in_ordering('filter', post = Table.RowsRowModelWrapper.ww_filter_first)
 
     class RowsFilters(Table.RowsFilters):
-        class TableEditableFilter(Webwidgets.FilterMod.Filter):
+        class TableEditableFilter(Webwidgets.FilterMod.Base.Filter):
             """This filter provides a column called
             L{edit_function_col} with the editing buttons."""
             def get_rows(self, **kw):

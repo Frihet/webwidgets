@@ -18,9 +18,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import Webwidgets.BaseObjectMod, Webwidgets.FilterMod
+import Webwidgets.BaseObjectMod, Webwidgets.FilterMod.StandardFilters
 
-class Object(Webwidgets.FilterMod.FilteredObject):
+class Object(Webwidgets.FilterMod.Base.FilteredObject):
     def notify(self, message, *args, **kw):
         """See L{notify_kw}."""
         self.notify_kw(message, args, kw)

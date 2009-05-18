@@ -89,7 +89,8 @@ if __name__ == "Webwidgets":
     from Webwidgets.Constants import *
 
     from Webwidgets.BaseObjectMod import *
-    from Webwidgets.FilterMod import *
+    from Webwidgets.FilterMod.Base import *
+    from Webwidgets.FilterMod.StandardFilters import *
     from Webwidgets.ObjectMod import *
 
     from Webwidgets.ProgramMod import *

@@ -18,13 +18,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import Webwidgets.FilterMod
+import Webwidgets.FilterMod.StandardFilters
 import Webwidgets.Widgets.InputMod.LocationInput
 import Webwidgets.Widgets.InputMod.LocationInputLocations
 
 def redirect_value_to_address(name):
     class RedirectValueToAddressClass(object):
-        RedirectValueToAddress = Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, active = "active", value = name)
+        RedirectValueToAddress = Webwidgets.FilterMod.StandardFilters.RedirectRenameFilter.redirect([], 2, active = "active", value = name)
     return RedirectValueToAddressClass
     
 class AddressInput(object):
@@ -47,7 +47,7 @@ class AddressInput(object):
     class City(object):
         class Field(redirect_value_to_address('city')): pass
     class Region(object):
-        RegionRedirect = Webwidgets.FilterMod.RedirectRenameFilter.redirect(
+        RegionRedirect = Webwidgets.FilterMod.StandardFilters.RedirectRenameFilter.redirect(
             [], 1,
             active = "active",
             municipality = "municipality",
@@ -57,7 +57,7 @@ class AddressInput(object):
 
 def redirect_html_to_address(name):
     class RedirectHtmlToAddressClass(object):
-        RedirectHtmlToAddress = Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 2, html = name)
+        RedirectHtmlToAddress = Webwidgets.FilterMod.StandardFilters.RedirectRenameFilter.redirect([], 2, html = name)
     return RedirectHtmlToAddressClass
     
 class Address(object):
@@ -79,7 +79,7 @@ class Address(object):
     class City(object):
         class Field(redirect_html_to_address('city')): pass
     class Region(object):
-        RegionRedirect = Webwidgets.FilterMod.RedirectRenameFilter.redirect([], 1,
+        RegionRedirect = Webwidgets.FilterMod.StandardFilters.RedirectRenameFilter.redirect([], 1,
                                                                municipality = "municipality",
                                                                county = "county",
                                                                country = "country").add_class_in_ordering(
