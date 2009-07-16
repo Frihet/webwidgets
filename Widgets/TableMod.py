@@ -151,6 +151,8 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
                        Webwidgets.Utils.OrderedDict([('group_functions', {'level': 1}),
                                                      ('printable_link',  {'level': 2,
                                                                           'title': 'Printable version'}),
+                                                     ('export_link',  {'level': 2,
+                                                                      'title': 'Export to csv'}),
                                                      ('order_functions', {'level': 1}),
                                                      ('rows_per_page', {'level': 1}),
                                                      ]),
@@ -420,6 +422,17 @@ class Table(BaseTableMod.BaseTable, Base.MixedInput):
         location = self.calculate_url({'transaction': output_options['transaction'],
                                        'widget': Webwidgets.Utils.path_to_id(self.path),
                                        'printable_version': 'yes'})
+        return (True, """<a class="printable" href="%(location)s">%(caption)s</a>""" % {
+            'caption': self._(config['title'], output_options),
+            'location': cgi.escape(location),
+            })
+
+
+    def draw_export_link(self, config, output_options):
+        location = self.calculate_url({'transaction': output_options['transaction'],
+                                       'widget': Webwidgets.Utils.path_to_id(self.path),
+                                       'printable_version': 'yes',
+                                       'format': 'csv'})
         return (True, """<a class="printable" href="%(location)s">%(caption)s</a>""" % {
             'caption': self._(config['title'], output_options),
             'location': cgi.escape(location),

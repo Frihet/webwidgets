@@ -25,7 +25,7 @@
 the user to sort the rows and simultaneously group the rows according
 to their content and the sorting."""
 
-import Webwidgets.Constants, Webwidgets.Utils, re, math, cgi, types, itertools
+import Webwidgets.Constants, Webwidgets.Utils, re, math, cgi, types, itertools, csv, tempfile
 import Base, RowsMod
 
 class RenderedRowType(object): pass
@@ -378,10 +378,38 @@ class BaseTable(RowsMod.RowsComposite, Base.DirectoryServer):
         else:
             return self.draw_uncached(output_options)
 
+    class ExportCsvDialect(csv.Dialect):
+        delimiter = ';'
+        quotechar = '"'
+        escapechar = None
+        doublequote = True
+        skipinitialspace = False
+        lineterminator = '\r\n'
+        quoting = csv.QUOTE_MINIMAL
+
     def output(self, output_options):
-        return {Webwidgets.Constants.OUTPUT: self.draw_printable_version(output_options),
-               'Content-type': 'text/html'
-               }
+        format = output_options.get('format', 'printable')
+        if format == 'printable':
+            return {Webwidgets.Constants.OUTPUT: self.draw_printable_version(output_options),
+                    'Content-type': 'text/html'
+                    }
+        elif format == 'csv':
+            visible_columns = self.visible_columns(output_options)
+            
+            res = tempfile.TemporaryFile()
+            writer = csv.writer(res, dialect=self.ExportCsvDialect)
+            writer.writerow([definition["title"] for definition in visible_columns.itervalues()])
+
+            for row in self.ww_filter.get_rows(output_options=output_options):
+                writer.writerow([getattr(row.ww_filter, column) for column in visible_columns.iterkeys()])
+
+            res.seek(0)
+            restext = res.read()
+            res.close()
+            
+            return {Webwidgets.Constants.OUTPUT: restext,
+                    'Content-type': 'text/csv'
+                    }
 
     def draw_printable_version(self, output_options):
         return self.session.windows[self.win_id].draw(output_options,
