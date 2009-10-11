@@ -136,7 +136,12 @@ class ModalThreadProgressPageDialog(Composite.InfoDialog, ModalThreadProgressPag
     def done(self, path):
         dialog = self.Done(self.session, self.win_id)
         if self.result is not None:
-            dialog['Body'].html = self.result
+            if isinstance(self.result, (str, unicode)):
+                dialog['Body'].html = self.result
+            elif isinstance(self.result, Base.Widget):
+                dialog['Body'] = self.result
+            else:
+                dialog.result = self.result
         Webwidgets.DialogContainer.add_dialog_to_nearest(
             self, dialog)
         self.close()
