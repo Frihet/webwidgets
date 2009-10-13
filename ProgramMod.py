@@ -88,8 +88,11 @@ def find_fn(window, fn_base_name, output_options, fallback = False):
 
     for name in (fn_name, fn_base_name):
         for obj in (widget, window):
-            if fallback and not hasattr(obj, name):
-                continue
+            if not hasattr(obj, name):
+                if fallback is True:
+                    continue
+                elif fallback is None:
+                    return None
             return getattr(obj, name)
 
 class Program(WebKit.Page.Page):
@@ -470,12 +473,13 @@ class Program(WebKit.Page.Page):
                     if req.method() == 'POST':
                         fields = decode_fields(normalize_fields(req.fields()))
 
-                    input_fn = find_fn(window, 'input', output_options, True)
+                    input_fn = find_fn(window, 'input', output_options, None)
                     output_fn = find_fn(window, 'output', output_options)
-
+                    
                 # Do input/output processing in the window/widget
-                with req.timings['input_process']:
-                    input_fn(fields, arguments, output_options)
+                if input_fn is not None:
+                    with req.timings['input_process']:
+                        input_fn(fields, arguments, output_options)
 
                 Utils.Cache.clear_cache(time="request_part")
             
