@@ -170,7 +170,8 @@ class Media(Base.Widget):
                         'inline':True,
                         'merge':False,
                         'invisible':False,
-                        'include_label':False},
+                        'include_label':False,
+                        'http_header:Cache-Control': 'public; max-age=3600'},
              'image/png':{'inline':True},
              'image/jpeg':{'inline':True},
              'image/gif':{'inline':True},
@@ -202,6 +203,16 @@ class Media(Base.Widget):
         if mime_type in self.types and option in self.types[mime_type]:
             return self.types[mime_type][option]
         return self.types['default'][option]
+
+    def get_options(self, prefix):
+        prefix += ':'
+        r_content = self.get_content()
+        mime_type = getattr(r_content, 'type', 'default')
+        keys = set(self.types['default'].keys())
+        if mime_type in self.types:
+            keys.update(self.types[mime_type].keys())
+        return dict((key[len(prefix):], self.get_option(key))
+                    for key in keys if key.startswith(prefix))
 
     def get_html_option(self, option, html_name = None):
         value = self.get_option(option)
@@ -240,9 +251,11 @@ class Media(Base.Widget):
                 content = (self.base.file.read().decode('utf-8') % self.get_renderer('base_include')(output_options)
                            ).encode('utf-8')
                 mime_type = self.base.type
-        return {Webwidgets.Constants.OUTPUT: content,
-                'Content-type': mime_type,
-                'Cache-Control': 'public; max-age=3600'}
+
+        res = {Webwidgets.Constants.OUTPUT: content,
+               'Content-type': mime_type}
+        res.update(self.get_options('http_header'))
+        return res
 
     def draw(self, output_options):
         if self.get_option('inline'):
